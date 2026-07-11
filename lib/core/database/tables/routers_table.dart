@@ -8,6 +8,7 @@ class Routers extends Table {
   TextColumn get host => text().withLength(min: 1, max: 255)();
   IntColumn get apiPort => integer().withDefault(const Constant(8728))();
   BoolColumn get useSsl => boolean().withDefault(const Constant(false))();
+  BoolColumn get requireVpn => boolean().withDefault(const Constant(true))();
   TextColumn get username => text().withLength(min: 1, max: 80)();
   TextColumn get identity => text().nullable()();
   TextColumn get version => text().nullable()();

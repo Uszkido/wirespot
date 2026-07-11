@@ -29,6 +29,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
   final _passwordController = TextEditingController();
 
   bool _useSsl = false;
+  bool _requireVpn = true;
   bool _isSaving = false;
   bool _didHydrate = false;
 
@@ -110,9 +111,11 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
             usernameController: _usernameController,
             passwordController: _passwordController,
             useSsl: _useSsl,
+            requireVpn: _requireVpn,
             isEditing: _isEditing,
             isSaving: _isSaving,
             onUseSslChanged: (value) => setState(() => _useSsl = value),
+            onRequireVpnChanged: (value) => setState(() => _requireVpn = value),
             onSave: () => _save(existingRouter),
           );
         },
@@ -130,6 +133,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
     _portController.text = router.apiPort.toString();
     _usernameController.text = router.username;
     _useSsl = router.useSsl;
+    _requireVpn = router.requireVpn;
     _didHydrate = true;
   }
 
@@ -164,6 +168,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
         host: _hostController.text.trim(),
         apiPort: int.parse(_portController.text.trim()),
         useSsl: _useSsl,
+        requireVpn: _requireVpn,
         username: _usernameController.text.trim(),
         identity: existingRouter?.identity,
         version: existingRouter?.version,
@@ -217,9 +222,11 @@ class _RouterFormBody extends StatelessWidget {
     required this.usernameController,
     required this.passwordController,
     required this.useSsl,
+    required this.requireVpn,
     required this.isEditing,
     required this.isSaving,
     required this.onUseSslChanged,
+    required this.onRequireVpnChanged,
     required this.onSave,
   });
 
@@ -230,9 +237,11 @@ class _RouterFormBody extends StatelessWidget {
   final TextEditingController usernameController;
   final TextEditingController passwordController;
   final bool useSsl;
+  final bool requireVpn;
   final bool isEditing;
   final bool isSaving;
   final ValueChanged<bool> onUseSslChanged;
+  final ValueChanged<bool> onRequireVpnChanged;
   final VoidCallback onSave;
 
   @override
@@ -265,7 +274,8 @@ class _RouterFormBody extends StatelessWidget {
                   validator: (value) =>
                       Validators.requiredText(value, label: 'Host'),
                   decoration: const InputDecoration(
-                    labelText: 'Host or VPN IP',
+                    labelText: 'Router IP or host',
+                    helperText: 'Use the VPN IP for remote routers or LAN IP on-site.',
                     prefixIcon: Icon(Icons.dns_outlined),
                   ),
                 ),
@@ -291,6 +301,24 @@ class _RouterFormBody extends StatelessWidget {
                     style: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                   secondary: const Icon(Icons.enhanced_encryption_outlined),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 12),
+                SwitchListTile(
+                  value: requireVpn,
+                  onChanged: onRequireVpnChanged,
+                  title: const Text('Require WireGuard VPN'),
+                  subtitle: Text(
+                    requireVpn
+                        ? 'Use this for remote or private VPN management.'
+                        : 'Local LAN mode: connect directly when on-site.',
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
+                  ),
+                  secondary: Icon(
+                    requireVpn
+                        ? Icons.vpn_lock_outlined
+                        : Icons.lan_outlined,
+                  ),
                   contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 12),

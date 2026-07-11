@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,92 +14,124 @@ import '../../../shared/widgets/section_header.dart';
 import '../domain/dashboard_snapshot.dart';
 import 'dashboard_providers.dart';
 
-class DashboardPage extends ConsumerWidget {
+class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends ConsumerState<DashboardPage> {
+  DateTime? _lastBackPressedAt;
+
+  @override
+  Widget build(BuildContext context) {
     final snapshot = ref.watch(dashboardSnapshotProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Row(
-          children: [
-            BrandLogo(size: 36),
-            SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(AppBranding.appName),
-                Text(
-                  AppBranding.companyName,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-                ),
-              ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          return;
+        }
+        _handleBackPressed();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Row(
+            children: [
+              BrandLogo(size: 36),
+              SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(AppBranding.appName),
+                  Text(
+                    AppBranding.companyName,
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              tooltip: 'Routers',
+              onPressed: () => context.go(AppRoutes.routers),
+              icon: const Icon(Icons.router_outlined),
+            ),
+            IconButton(
+              tooltip: 'Hotspot',
+              onPressed: () => context.go(AppRoutes.hotspot),
+              icon: const Icon(Icons.wifi_tethering),
+            ),
+            IconButton(
+              tooltip: 'Vouchers',
+              onPressed: () => context.go(AppRoutes.vouchers),
+              icon: const Icon(Icons.confirmation_number_outlined),
+            ),
+            IconButton(
+              tooltip: 'Reports',
+              onPressed: () => context.go(AppRoutes.reports),
+              icon: const Icon(Icons.bar_chart_outlined),
+            ),
+            IconButton(
+              tooltip: 'Refresh',
+              onPressed: () => ref.invalidate(dashboardSnapshotProvider),
+              icon: const Icon(Icons.refresh),
+            ),
+            IconButton(
+              tooltip: 'Settings',
+              onPressed: () => context.go(AppRoutes.settings),
+              icon: const Icon(Icons.settings_outlined),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Routers',
-            onPressed: () => context.go(AppRoutes.routers),
-            icon: const Icon(Icons.router_outlined),
+        body: snapshot.when(
+          data: (value) {
+            if (value == null) {
+              return EmptyState(
+                icon: Icons.router_outlined,
+                title: 'Add a router',
+                message: 'Connect a MikroTik router before viewing dashboard data.',
+                action: FilledButton.icon(
+                  onPressed: () => context.go(AppRoutes.newRouter),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add router'),
+                ),
+              );
+            }
+            return _DashboardContent(snapshot: value);
+          },
+          error: (error, stackTrace) => EmptyState(
+            icon: Icons.error_outline,
+            title: 'Dashboard unavailable',
+            message: error.toString(),
+            action: FilledButton.icon(
+              onPressed: () => ref.invalidate(dashboardSnapshotProvider),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
           ),
-          IconButton(
-            tooltip: 'Hotspot',
-            onPressed: () => context.go(AppRoutes.hotspot),
-            icon: const Icon(Icons.wifi_tethering),
-          ),
-          IconButton(
-            tooltip: 'Vouchers',
-            onPressed: () => context.go(AppRoutes.vouchers),
-            icon: const Icon(Icons.confirmation_number_outlined),
-          ),
-          IconButton(
-            tooltip: 'Reports',
-            onPressed: () => context.go(AppRoutes.reports),
-            icon: const Icon(Icons.bar_chart_outlined),
-          ),
-          IconButton(
-            tooltip: 'Refresh',
-            onPressed: () => ref.invalidate(dashboardSnapshotProvider),
-            icon: const Icon(Icons.refresh),
-          ),
-          IconButton(
-            tooltip: 'Settings',
-            onPressed: () => context.go(AppRoutes.settings),
-            icon: const Icon(Icons.settings_outlined),
-          ),
-        ],
-      ),
-      body: snapshot.when(
-        data: (value) {
-          if (value == null) {
-            return EmptyState(
-              icon: Icons.router_outlined,
-              title: 'Add a router',
-              message: 'Connect a MikroTik router before viewing dashboard data.',
-              action: FilledButton.icon(
-                onPressed: () => context.go(AppRoutes.newRouter),
-                icon: const Icon(Icons.add),
-                label: const Text('Add router'),
-              ),
-            );
-          }
-          return _DashboardContent(snapshot: value);
-        },
-        error: (error, stackTrace) => EmptyState(
-          icon: Icons.error_outline,
-          title: 'Dashboard unavailable',
-          message: error.toString(),
-          action: FilledButton.icon(
-            onPressed: () => ref.invalidate(dashboardSnapshotProvider),
-            icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
-          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
       ),
+    );
+  }
+
+  void _handleBackPressed() {
+    final now = DateTime.now();
+    final shouldExit = _lastBackPressedAt != null &&
+        now.difference(_lastBackPressedAt!) < const Duration(seconds: 2);
+
+    if (shouldExit) {
+      SystemNavigator.pop();
+      return;
+    }
+
+    _lastBackPressedAt = now;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Press back again to exit WireSpot.')),
     );
   }
 }
@@ -234,7 +267,7 @@ class _RouterHeader extends StatelessWidget {
               isOnline ? Icons.check_circle : Icons.warning_amber,
               size: 18,
             ),
-            label: Text(isOnline ? 'Online' : 'VPN/API offline'),
+            label: Text(isOnline ? 'Online' : 'API offline'),
           ),
         ],
       ),

@@ -134,6 +134,17 @@ Check RouterOS API service:
 /ip service print where name~"api"
 ```
 
+## Local LAN Versus WireGuard Mode
+
+Each router has a `requireVpn` flag:
+
+- `true`: WireSpot checks that WireGuard/VPN status is connected before RouterOS API commands.
+- `false`: WireSpot skips the VPN guard and connects directly to the router host/port.
+
+Default is `true` for safety. Existing routers are migrated to `true`.
+
+Use local mode only when the Android device is on the same trusted LAN as the MikroTik. Do not expose RouterOS API ports to the public internet.
+
 Enable API if needed:
 
 ```routeros
@@ -204,4 +215,3 @@ Generated Drift files are committed so the project can build immediately, but re
 - Use dedicated RouterOS credentials with limited permissions.
 - Rotate passwords if an operator device is lost.
 - Keep release signing keys outside the repository.
-

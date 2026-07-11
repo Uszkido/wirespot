@@ -84,7 +84,11 @@ class _RouterTile extends ConsumerWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
-          '${router.host}:${router.apiPort}${router.useSsl ? ' SSL' : ''}',
+          [
+            '${router.host}:${router.apiPort}',
+            if (router.useSsl) 'SSL',
+            router.requireVpn ? 'WireGuard required' : 'Local LAN',
+          ].join(' · '),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

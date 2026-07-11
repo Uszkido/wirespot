@@ -12,6 +12,7 @@ void main() {
 
     expect(router.apiPort, 8728);
     expect(router.useSsl, isFalse);
+    expect(router.requireVpn, isTrue);
     expect(router.isEnabled, isTrue);
   });
 }

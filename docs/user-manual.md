@@ -42,10 +42,27 @@ Common RouterOS API ports:
 3. Tap Add.
 4. Enter router name, host, API port, username, and password.
 5. Choose SSL if the router API service supports it.
-6. Save.
-7. Use Test Connection to confirm RouterOS API access.
+6. Choose the connection mode:
+   - Keep **Require WireGuard VPN** on for remote/private VPN routers.
+   - Turn it off for **Local LAN** use when your phone is on the same network as the MikroTik.
+7. Save.
+8. Use Test Connection to confirm RouterOS API access.
 
-If Test Connection fails, check VPN status first, then verify host, port, username, password, and RouterOS API service status.
+If Test Connection fails, check the selected connection mode first. VPN routers need WireGuard connected. Local LAN routers need the phone connected to the same network as the MikroTik. Then verify host, port, username, password, and RouterOS API service status.
+
+## Local On-Site Use Without VPN
+
+WireSpot can connect without VPN when the Android device is physically on-site and connected to the same LAN or Wi-Fi as the MikroTik.
+
+For local mode:
+
+1. Add or edit the router.
+2. Enter the local router IP, for example `192.168.88.1`.
+3. Turn off **Require WireGuard VPN**.
+4. Save.
+5. Test connection.
+
+Do not use local mode for public internet access. It is intended for same-site management only.
 
 ## Dashboard
 
@@ -74,6 +91,8 @@ Open Hotspot from the dashboard to manage:
 - Queues
 
 Available operations include creating users, creating profiles, disconnecting active sessions, deleting users, resetting counters, and removing hotspot records.
+
+WireSpot can help set up hotspot operations by creating the user profiles, users, IP bindings, and voucher batches used by a MikroTik hotspot. A full RouterOS hotspot server wizard, including DHCP/pool/interface setup, is planned as a later production-hardening step.
 
 ## Voucher Management
 
@@ -164,4 +183,3 @@ The current Android WireGuard bridge is a platform foundation. Full official Wir
 - Rotate credentials if a device is lost.
 - Back up settings and voucher history regularly.
 - Test voucher generation on a non-critical router before live deployment.
-

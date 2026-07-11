@@ -80,6 +80,21 @@ class $RoutersTable extends Routers
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _requireVpnMeta = const VerificationMeta(
+    'requireVpn',
+  );
+  @override
+  late final GeneratedColumn<bool> requireVpn = GeneratedColumn<bool>(
+    'require_vpn',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("require_vpn" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _usernameMeta = const VerificationMeta(
     'username',
   );
@@ -187,6 +202,7 @@ class $RoutersTable extends Routers
     host,
     apiPort,
     useSsl,
+    requireVpn,
     username,
     identity,
     version,
@@ -245,6 +261,15 @@ class $RoutersTable extends Routers
       context.handle(
         _useSslMeta,
         useSsl.isAcceptableOrUnknown(data['use_ssl']!, _useSslMeta),
+      );
+    }
+    if (data.containsKey('require_vpn')) {
+      context.handle(
+        _requireVpnMeta,
+        requireVpn.isAcceptableOrUnknown(
+          data['require_vpn']!,
+          _requireVpnMeta,
+        ),
       );
     }
     if (data.containsKey('username')) {
@@ -333,6 +358,10 @@ class $RoutersTable extends Routers
         DriftSqlType.bool,
         data['${effectivePrefix}use_ssl'],
       )!,
+      requireVpn: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}require_vpn'],
+      )!,
       username: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}username'],
@@ -381,6 +410,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
   final String host;
   final int apiPort;
   final bool useSsl;
+  final bool requireVpn;
   final String username;
   final String? identity;
   final String? version;
@@ -396,6 +426,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     required this.host,
     required this.apiPort,
     required this.useSsl,
+    required this.requireVpn,
     required this.username,
     this.identity,
     this.version,
@@ -416,6 +447,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     map['host'] = Variable<String>(host);
     map['api_port'] = Variable<int>(apiPort);
     map['use_ssl'] = Variable<bool>(useSsl);
+    map['require_vpn'] = Variable<bool>(requireVpn);
     map['username'] = Variable<String>(username);
     if (!nullToAbsent || identity != null) {
       map['identity'] = Variable<String>(identity);
@@ -445,6 +477,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       host: Value(host),
       apiPort: Value(apiPort),
       useSsl: Value(useSsl),
+      requireVpn: Value(requireVpn),
       username: Value(username),
       identity: identity == null && nullToAbsent
           ? const Value.absent()
@@ -476,6 +509,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       host: serializer.fromJson<String>(json['host']),
       apiPort: serializer.fromJson<int>(json['apiPort']),
       useSsl: serializer.fromJson<bool>(json['useSsl']),
+      requireVpn: serializer.fromJson<bool>(json['requireVpn']),
       username: serializer.fromJson<String>(json['username']),
       identity: serializer.fromJson<String?>(json['identity']),
       version: serializer.fromJson<String?>(json['version']),
@@ -496,6 +530,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       'host': serializer.toJson<String>(host),
       'apiPort': serializer.toJson<int>(apiPort),
       'useSsl': serializer.toJson<bool>(useSsl),
+      'requireVpn': serializer.toJson<bool>(requireVpn),
       'username': serializer.toJson<String>(username),
       'identity': serializer.toJson<String?>(identity),
       'version': serializer.toJson<String?>(version),
@@ -514,6 +549,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     String? host,
     int? apiPort,
     bool? useSsl,
+    bool? requireVpn,
     String? username,
     Value<String?> identity = const Value.absent(),
     Value<String?> version = const Value.absent(),
@@ -529,6 +565,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     host: host ?? this.host,
     apiPort: apiPort ?? this.apiPort,
     useSsl: useSsl ?? this.useSsl,
+    requireVpn: requireVpn ?? this.requireVpn,
     username: username ?? this.username,
     identity: identity.present ? identity.value : this.identity,
     version: version.present ? version.value : this.version,
@@ -548,6 +585,9 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       host: data.host.present ? data.host.value : this.host,
       apiPort: data.apiPort.present ? data.apiPort.value : this.apiPort,
       useSsl: data.useSsl.present ? data.useSsl.value : this.useSsl,
+      requireVpn: data.requireVpn.present
+          ? data.requireVpn.value
+          : this.requireVpn,
       username: data.username.present ? data.username.value : this.username,
       identity: data.identity.present ? data.identity.value : this.identity,
       version: data.version.present ? data.version.value : this.version,
@@ -570,6 +610,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
           ..write('host: $host, ')
           ..write('apiPort: $apiPort, ')
           ..write('useSsl: $useSsl, ')
+          ..write('requireVpn: $requireVpn, ')
           ..write('username: $username, ')
           ..write('identity: $identity, ')
           ..write('version: $version, ')
@@ -590,6 +631,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     host,
     apiPort,
     useSsl,
+    requireVpn,
     username,
     identity,
     version,
@@ -609,6 +651,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
           other.host == this.host &&
           other.apiPort == this.apiPort &&
           other.useSsl == this.useSsl &&
+          other.requireVpn == this.requireVpn &&
           other.username == this.username &&
           other.identity == this.identity &&
           other.version == this.version &&
@@ -626,6 +669,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
   final Value<String> host;
   final Value<int> apiPort;
   final Value<bool> useSsl;
+  final Value<bool> requireVpn;
   final Value<String> username;
   final Value<String?> identity;
   final Value<String?> version;
@@ -642,6 +686,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     this.host = const Value.absent(),
     this.apiPort = const Value.absent(),
     this.useSsl = const Value.absent(),
+    this.requireVpn = const Value.absent(),
     this.username = const Value.absent(),
     this.identity = const Value.absent(),
     this.version = const Value.absent(),
@@ -659,6 +704,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     required String host,
     this.apiPort = const Value.absent(),
     this.useSsl = const Value.absent(),
+    this.requireVpn = const Value.absent(),
     required String username,
     this.identity = const Value.absent(),
     this.version = const Value.absent(),
@@ -679,6 +725,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     Expression<String>? host,
     Expression<int>? apiPort,
     Expression<bool>? useSsl,
+    Expression<bool>? requireVpn,
     Expression<String>? username,
     Expression<String>? identity,
     Expression<String>? version,
@@ -696,6 +743,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
       if (host != null) 'host': host,
       if (apiPort != null) 'api_port': apiPort,
       if (useSsl != null) 'use_ssl': useSsl,
+      if (requireVpn != null) 'require_vpn': requireVpn,
       if (username != null) 'username': username,
       if (identity != null) 'identity': identity,
       if (version != null) 'version': version,
@@ -715,6 +763,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     Value<String>? host,
     Value<int>? apiPort,
     Value<bool>? useSsl,
+    Value<bool>? requireVpn,
     Value<String>? username,
     Value<String?>? identity,
     Value<String?>? version,
@@ -732,6 +781,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
       host: host ?? this.host,
       apiPort: apiPort ?? this.apiPort,
       useSsl: useSsl ?? this.useSsl,
+      requireVpn: requireVpn ?? this.requireVpn,
       username: username ?? this.username,
       identity: identity ?? this.identity,
       version: version ?? this.version,
@@ -764,6 +814,9 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     }
     if (useSsl.present) {
       map['use_ssl'] = Variable<bool>(useSsl.value);
+    }
+    if (requireVpn.present) {
+      map['require_vpn'] = Variable<bool>(requireVpn.value);
     }
     if (username.present) {
       map['username'] = Variable<String>(username.value);
@@ -804,6 +857,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
           ..write('host: $host, ')
           ..write('apiPort: $apiPort, ')
           ..write('useSsl: $useSsl, ')
+          ..write('requireVpn: $requireVpn, ')
           ..write('username: $username, ')
           ..write('identity: $identity, ')
           ..write('version: $version, ')
@@ -3712,6 +3766,7 @@ typedef $$RoutersTableCreateCompanionBuilder =
       required String host,
       Value<int> apiPort,
       Value<bool> useSsl,
+      Value<bool> requireVpn,
       required String username,
       Value<String?> identity,
       Value<String?> version,
@@ -3730,6 +3785,7 @@ typedef $$RoutersTableUpdateCompanionBuilder =
       Value<String> host,
       Value<int> apiPort,
       Value<bool> useSsl,
+      Value<bool> requireVpn,
       Value<String> username,
       Value<String?> identity,
       Value<String?> version,
@@ -3777,6 +3833,11 @@ class $$RoutersTableFilterComposer
 
   ColumnFilters<bool> get useSsl => $composableBuilder(
     column: $table.useSsl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get requireVpn => $composableBuilder(
+    column: $table.requireVpn,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3860,6 +3921,11 @@ class $$RoutersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get requireVpn => $composableBuilder(
+    column: $table.requireVpn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get username => $composableBuilder(
     column: $table.username,
     builder: (column) => ColumnOrderings(column),
@@ -3928,6 +3994,11 @@ class $$RoutersTableAnnotationComposer
   GeneratedColumn<bool> get useSsl =>
       $composableBuilder(column: $table.useSsl, builder: (column) => column);
 
+  GeneratedColumn<bool> get requireVpn => $composableBuilder(
+    column: $table.requireVpn,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get username =>
       $composableBuilder(column: $table.username, builder: (column) => column);
 
@@ -3992,6 +4063,7 @@ class $$RoutersTableTableManager
                 Value<String> host = const Value.absent(),
                 Value<int> apiPort = const Value.absent(),
                 Value<bool> useSsl = const Value.absent(),
+                Value<bool> requireVpn = const Value.absent(),
                 Value<String> username = const Value.absent(),
                 Value<String?> identity = const Value.absent(),
                 Value<String?> version = const Value.absent(),
@@ -4008,6 +4080,7 @@ class $$RoutersTableTableManager
                 host: host,
                 apiPort: apiPort,
                 useSsl: useSsl,
+                requireVpn: requireVpn,
                 username: username,
                 identity: identity,
                 version: version,
@@ -4026,6 +4099,7 @@ class $$RoutersTableTableManager
                 required String host,
                 Value<int> apiPort = const Value.absent(),
                 Value<bool> useSsl = const Value.absent(),
+                Value<bool> requireVpn = const Value.absent(),
                 required String username,
                 Value<String?> identity = const Value.absent(),
                 Value<String?> version = const Value.absent(),
@@ -4042,6 +4116,7 @@ class $$RoutersTableTableManager
                 host: host,
                 apiPort: apiPort,
                 useSsl: useSsl,
+                requireVpn: requireVpn,
                 username: username,
                 identity: identity,
                 version: version,

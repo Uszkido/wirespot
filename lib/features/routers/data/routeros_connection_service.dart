@@ -60,7 +60,9 @@ class RouterOsConnectionService implements RouterConnectionService {
     required Map<String, String> attributes,
     required List<String> queries,
   }) async {
-    await _ensureVpnIsConnected();
+    if (router.requireVpn) {
+      await _ensureVpnIsConnected();
+    }
     final credentials = await _credentialStore.read(router.id);
     if (credentials == null) {
       throw const RouterOsAuthenticationException(
