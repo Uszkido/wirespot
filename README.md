@@ -2,7 +2,7 @@
 
 WireSpot is a Flutter Android application for managing MikroTik RouterOS hotspot operations securely through WireGuard VPN.
 
-This codebase is original work. It does not copy Mikhmon, WireNex, or proprietary application code. Router communication will be implemented through public RouterOS API behavior in the next steps.
+This codebase is original work. It does not copy Mikhmon, WireNex, or proprietary application code. Router communication is implemented through public RouterOS API behavior and original app code.
 
 ## Branding
 
@@ -12,6 +12,26 @@ This codebase is original work. It does not copy Mikhmon, WireNex, or proprietar
 - Phone: +234(0)7038953065
 - Website: https://vexel-innovations.vercel.app/
 - Logo asset: assets/images/vexel_logo.png
+
+## Documentation
+
+- User manual: [docs/user-manual.md](docs/user-manual.md)
+- Technical diagnostics: [docs/technical-diagnostics.md](docs/technical-diagnostics.md)
+
+## Build
+
+Successful debug APK command:
+
+```powershell
+cd "C:\Users\HP\Documents\Codex\2026-07-10\you-are-an-expert-flutter-android"
+C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check build apk --debug --target-platform android-arm64
+```
+
+Debug APK path:
+
+```text
+build\app\outputs\flutter-apk\app-debug.apk
+```
 
 ## Step 1 Scope
 
@@ -147,6 +167,17 @@ This codebase is original work. It does not copy Mikhmon, WireNex, or proprietar
 - Sign-out control in Settings
 - PIN hash tests
 
+## Step 14 Scope
+
+- Flutter SDK extraction and local verification
+- Dependency resolution
+- Drift code generation
+- Analyzer cleanup
+- Test cleanup
+- Android SDK configuration
+- AndroidX/Gradle/AGP/Kotlin build configuration updates
+- Successful Android debug APK build for `android-arm64`
+
 ## Next Step
 
-Step 14 should add final Flutter SDK setup, dependency resolution, code generation, analysis, and test cleanup.
+Step 15 should continue production hardening: complete official WireGuard Android backend integration, Bluetooth printer discovery/connection, polished export file generation, and deeper RouterOS integration tests.
