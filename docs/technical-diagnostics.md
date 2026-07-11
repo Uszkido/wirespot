@@ -141,9 +141,54 @@ Each router has a `requireVpn` flag:
 - `true`: WireSpot checks that WireGuard/VPN status is connected before RouterOS API commands.
 - `false`: WireSpot skips the VPN guard and connects directly to the router host/port.
 
+## WireGuard Android Backend
+
+WireSpot uses the official WireGuard Android tunnel library through `com.wireguard.android:tunnel` and registers the WireGuard `GoBackend` VPN service in the Android manifest.
+
+If VPN connect does not work:
+
+1. Confirm Gradle downloaded `com.wireguard.android:tunnel`.
+2. Confirm Android VPN permission was approved.
+3. Import a valid WireGuard config with `[Interface]` and `[Peer]`.
+4. Keep the tunnel name within WireGuard's Android name rules.
+5. Check WireSpot VPN logs from the app diagnostics screen.
+
 Default is `true` for safety. Existing routers are migrated to `true`.
 
 Use local mode only when the Android device is on the same trusted LAN as the MikroTik. Do not expose RouterOS API ports to the public internet.
+
+## Bluetooth Printer Diagnostics
+
+WireSpot can list paired Bluetooth printers and print ESC/POS text receipts over RFCOMM/SPP.
+
+Checklist:
+
+1. Pair the thermal printer in Android Bluetooth settings first.
+2. Open WireSpot Settings.
+3. Tap Add printer.
+4. Tap Load paired printers.
+5. Approve Bluetooth permission if Android asks.
+6. Select the printer and save.
+
+If printing fails:
+
+- Confirm the printer is powered on.
+- Confirm it is paired in Android settings.
+- Confirm no other app is currently connected to the printer.
+- Try turning Bluetooth off and on.
+- Retry the print action after permission approval.
+
+Supported path:
+
+- Paired Bluetooth thermal printers.
+- ESC/POS text receipts.
+- Standard serial profile UUID `00001101-0000-1000-8000-00805F9B34FB`.
+
+Not yet implemented:
+
+- Bluetooth scan/discovery for unpaired devices.
+- Vendor-specific printer SDKs.
+- Bitmap QR/image printing.
 
 Enable API if needed:
 

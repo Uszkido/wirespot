@@ -16,18 +16,22 @@ class PlatformPrinterService implements PrinterService {
 
   @override
   Future<List<BluetoothPrinterDevice>> pairedBluetoothPrinters() async {
-    final result = await _channel.invokeListMethod<Map<Object?, Object?>>(
-      'pairedBluetoothPrinters',
-    );
-    return (result ?? const [])
-        .map(
-          (item) => BluetoothPrinterDevice(
-            name: item['name'] as String? ?? '',
-            address: item['address'] as String? ?? '',
-          ),
-        )
-        .where((printer) => printer.address.isNotEmpty)
-        .toList();
+    try {
+      final result = await _channel.invokeListMethod<Map<Object?, Object?>>(
+        'pairedBluetoothPrinters',
+      );
+      return (result ?? const [])
+          .map(
+            (item) => BluetoothPrinterDevice(
+              name: item['name'] as String? ?? '',
+              address: item['address'] as String? ?? '',
+            ),
+          )
+          .where((printer) => printer.address.isNotEmpty)
+          .toList();
+    } on PlatformException catch (error) {
+      throw PrinterException(error.message ?? 'Could not load Bluetooth printers.');
+    }
   }
 
   @override
@@ -40,17 +44,24 @@ class PlatformPrinterService implements PrinterService {
       receipt,
       paperWidth: paperWidth,
     );
-    final result = await _channel.invokeMapMethod<Object?, Object?>(
-      'printText',
-      {
-        'address': printer.address,
-        'text': text,
-        'paperWidth': paperWidth.name,
-      },
-    );
-    return PrintJobResult(
-      success: result?['success'] as bool? ?? false,
-      message: result?['message'] as String?,
-    );
+    try {
+      final result = await _channel.invokeMapMethod<Object?, Object?>(
+        'printText',
+        {
+          'address': printer.address,
+          'text': text,
+          'paperWidth': paperWidth.name,
+        },
+      );
+      return PrintJobResult(
+        success: result?['success'] as bool? ?? false,
+        message: result?['message'] as String?,
+      );
+    } on PlatformException catch (error) {
+      return PrintJobResult(
+        success: false,
+        message: error.message ?? 'Could not print receipt.',
+      );
+    }
   }
 }

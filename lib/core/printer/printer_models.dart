@@ -22,3 +22,12 @@ class PrintJobResult {
   final bool success;
   final String? message;
 }
+
+class PrinterException implements Exception {
+  const PrinterException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}

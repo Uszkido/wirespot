@@ -4,6 +4,29 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.1+2 - 2026-07-11
+
+Step 15 hardening build.
+
+### Added
+
+- Real Android Bluetooth paired-printer listing through the printer platform channel.
+- ESC/POS text receipt printing over Bluetooth RFCOMM/SPP for paired thermal printers.
+- Android Bluetooth runtime permission handling.
+- Settings dialog support for loading and selecting paired Bluetooth printers.
+- Android VPN permission launch when WireGuard connect is requested.
+- Official WireGuard Android tunnel dependency wiring through `com.wireguard.android:tunnel`.
+- Android WireGuard `GoBackend` connect, disconnect, status, log, and statistics integration.
+
+### Changed
+
+- Printer platform errors now return operator-readable messages to Flutter.
+- WireGuard Android layer now reports permission needs more clearly before backend connection.
+
+### Still In Progress
+
+- Official WireGuard tunnel backend is wired in. Final validation requires a real Android device, a valid WireGuard config, and first-time Gradle dependency resolution.
+
 ## 0.1.0+1 - 2026-07-11
 
 Initial active development build.
@@ -35,8 +58,7 @@ C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check build apk --d
 
 ### Known Limitations
 
-- Official WireGuard Android backend integration is still a production-hardening task.
-- Bluetooth printer discovery and vendor-specific ESC/POS handling need completion.
+- Real-device WireGuard tunnel validation and reconnect hardening are still production-hardening tasks.
+- Vendor-specific ESC/POS handling needs completion for printers that do not support standard SPP text mode.
 - Export actions are foundations and need polished file output flows.
 - Full RouterOS hotspot server setup wizard is planned for a later step.
-

@@ -1,16 +1,16 @@
 package com.wirespot.app.vpn
 
-import android.content.Context
+import android.app.Activity
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
 class WireGuardChannelHandler(
-    context: Context,
+    activity: Activity,
     private val binaryMessenger: BinaryMessenger,
 ) : MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
-    private val manager = WireGuardTunnelManager(context.applicationContext)
+    private val manager = WireGuardTunnelManager(activity)
     private var methodChannel: MethodChannel? = null
     private var eventChannel: EventChannel? = null
     private var eventSink: EventChannel.EventSink? = null
@@ -58,9 +58,6 @@ class WireGuardChannelHandler(
                 "logs" -> result.success(manager.logs())
                 else -> result.notImplemented()
             }
-        } catch (error: WireGuardBackendUnavailableException) {
-            emitStatus()
-            result.error("BACKEND_UNAVAILABLE", error.message, manager.statusMap())
         } catch (error: IllegalArgumentException) {
             result.error("INVALID_ARGUMENT", error.message, null)
         } catch (error: Exception) {

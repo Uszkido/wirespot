@@ -6,7 +6,7 @@ This codebase is original work. It does not copy Mikhmon, WireNex, or proprietar
 
 ## Version
 
-- Current app version: `0.1.0+1`
+- Current app version: `0.1.1+2`
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
 - License: [WireSpot Proprietary License](LICENSE)
 - Security policy: [SECURITY.md](SECURITY.md)
@@ -78,7 +78,7 @@ build\app\outputs\flutter-apk\app-debug.apk
 - WireGuard config parser with QR-text import support
 - VPN service abstraction and platform implementation
 - Android MethodChannel and EventChannel bridge
-- Android `VpnService` manifest registration
+- Official WireGuard Android tunnel dependency and `GoBackend` VPN service registration
 - Tunnel status, statistics, logs, connect, disconnect, and import calls
 - Secure storage for WireGuard configs
 - Auto-reconnect coordinator
@@ -140,7 +140,7 @@ build\app\outputs\flutter-apk\app-debug.apk
 - RouterOS profile selection field for generated vouchers
 - Share receipt platform channel foundation
 - Bluetooth printer service abstraction
-- Android printer platform-channel skeleton
+- Android Bluetooth printer discovery and ESC/POS RFCOMM/SPP printing
 - Vexel-branded ESC/POS text formatter foundation
 - Voucher print/share actions
 
@@ -189,4 +189,4 @@ build\app\outputs\flutter-apk\app-debug.apk
 
 ## Next Step
 
-Step 15 should continue production hardening: complete official WireGuard Android backend integration, Bluetooth printer discovery/connection, polished export file generation, and deeper RouterOS integration tests.
+Step 15 continues production hardening with official WireGuard Android backend wiring, Bluetooth printer discovery/connection, and updated diagnostics. Next work should focus on real-device tunnel validation, polished export file generation, QR bitmap printing, and deeper RouterOS integration tests.

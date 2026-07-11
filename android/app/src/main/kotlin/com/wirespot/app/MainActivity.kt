@@ -14,10 +14,11 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         wireGuardChannelHandler = WireGuardChannelHandler(
-            context = this,
+            activity = this,
             binaryMessenger = flutterEngine.dartExecutor.binaryMessenger,
         ).also { it.attach() }
         printerChannelHandler = PrinterChannelHandler(
+            activity = this,
             binaryMessenger = flutterEngine.dartExecutor.binaryMessenger,
         ).also { it.attach() }
         shareChannelHandler = ShareChannelHandler(

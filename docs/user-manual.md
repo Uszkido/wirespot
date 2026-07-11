@@ -150,7 +150,7 @@ Settings contains:
 
 ## Printing
 
-WireSpot includes a Bluetooth thermal printer abstraction for 58mm and 80mm receipts. Receipt text includes:
+WireSpot includes Bluetooth thermal printer support for paired ESC/POS printers using 58mm and 80mm receipts. Receipt text includes:
 
 - Business name
 - Voucher username/password
@@ -158,7 +158,17 @@ WireSpot includes a Bluetooth thermal printer abstraction for 58mm and 80mm rece
 - Validity/time
 - QR payload text foundation
 
-The Android platform channel is present. Production Bluetooth printer discovery and vendor-specific ESC/POS handling should be completed in a later implementation step.
+To add a printer:
+
+1. Pair the printer in Android Bluetooth settings.
+2. Open WireSpot Settings.
+3. Tap Add printer.
+4. Tap Load paired printers.
+5. Select the printer.
+6. Choose 58mm or 80mm.
+7. Save.
+
+Current printing supports paired Bluetooth ESC/POS text receipts. Bitmap QR/image printing and unpaired-device discovery are planned future improvements.
 
 ## WireGuard VPN
 
@@ -173,7 +183,7 @@ The app includes:
 - Auto-reconnect coordinator
 - VPN guard before RouterOS API communication
 
-The current Android WireGuard bridge is a platform foundation. Full official WireGuard backend integration is still a future production task.
+The Android build is wired to the official WireGuard tunnel backend. On first connect, Android may ask for VPN permission. Approve it, then tap connect again if the app reports that permission was required.
 
 ## Safe Operating Practice
 

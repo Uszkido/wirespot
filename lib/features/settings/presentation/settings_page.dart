@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/branding/app_branding.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/utils/id_generator.dart';
+import '../../../core/printer/printer_models.dart';
 import '../../../shared/widgets/brand_logo.dart';
 import '../../authentication/presentation/auth_controller.dart';
 import '../../../core/di/providers.dart';
@@ -254,6 +255,9 @@ class _PrinterCard extends ConsumerWidget {
     final nameController = TextEditingController();
     final addressController = TextEditingController();
     var width = 58;
+    var pairedPrinters = <BluetoothPrinterDevice>[];
+    var isLoadingPrinters = false;
+    String? printerLoadError;
     try {
       final printer = await showDialog<PrinterConfigEntity>(
         context: context,
@@ -272,6 +276,74 @@ class _PrinterCard extends ConsumerWidget {
                   controller: addressController,
                   decoration: const InputDecoration(labelText: 'Bluetooth address'),
                 ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: isLoadingPrinters
+                        ? null
+                        : () async {
+                            setState(() {
+                              isLoadingPrinters = true;
+                              printerLoadError = null;
+                            });
+                            try {
+                              final devices = await ref
+                                  .read(printerServiceProvider)
+                                  .pairedBluetoothPrinters();
+                              setState(() {
+                                pairedPrinters = devices;
+                              });
+                            } on Object catch (error) {
+                              setState(() {
+                                printerLoadError = error.toString();
+                              });
+                            } finally {
+                              setState(() => isLoadingPrinters = false);
+                            }
+                          },
+                    icon: isLoadingPrinters
+                        ? const SizedBox.square(
+                            dimension: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.bluetooth_searching),
+                    label: Text(
+                      isLoadingPrinters ? 'Loading printers...' : 'Load paired printers',
+                    ),
+                  ),
+                ),
+                if (printerLoadError != null)
+                  Text(
+                    printerLoadError!,
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                if (pairedPrinters.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<BluetoothPrinterDevice>(
+                    decoration: const InputDecoration(
+                      labelText: 'Paired printer',
+                      prefixIcon: Icon(Icons.print_outlined),
+                    ),
+                    items: [
+                      for (final printer in pairedPrinters)
+                        DropdownMenuItem(
+                          value: printer,
+                          child: Text(
+                            '${printer.name} (${printer.address})',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
+                    onChanged: (printer) {
+                      if (printer == null) {
+                        return;
+                      }
+                      nameController.text = printer.name;
+                      addressController.text = printer.address;
+                    },
+                  ),
+                ],
                 const SizedBox(height: 8),
                 SegmentedButton<int>(
                   segments: const [
