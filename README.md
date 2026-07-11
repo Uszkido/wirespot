@@ -4,6 +4,15 @@ WireSpot is a Flutter Android application for managing MikroTik RouterOS hotspot
 
 This codebase is original work. It does not copy Mikhmon, WireNex, or proprietary application code. Router communication is implemented through public RouterOS API behavior and original app code.
 
+## Version
+
+- Current app version: `0.1.0+1`
+- Release notes: [CHANGELOG.md](CHANGELOG.md)
+- License: [WireSpot Proprietary License](LICENSE)
+- Security policy: [SECURITY.md](SECURITY.md)
+- Contributing guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
 ## Branding
 
 - Product: WireSpot

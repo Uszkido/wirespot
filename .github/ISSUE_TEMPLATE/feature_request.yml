@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest an improvement for WireSpot.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What operator workflow or technical problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the feature or workflow.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Router setup
+        - RouterOS API
+        - WireGuard
+        - Hotspot
+        - Vouchers
+        - Reports
+        - Printing
+        - Settings
+        - Security
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
+

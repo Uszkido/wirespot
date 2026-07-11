@@ -1,0 +1,63 @@
+name: Bug report
+description: Report a reproducible WireSpot problem.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include real router passwords, VPN private keys, or customer data.
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      placeholder: "0.1.0+1"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Authentication
+        - Router connection
+        - RouterOS API
+        - WireGuard
+        - Hotspot
+        - Vouchers
+        - Reports
+        - Printing
+        - Settings
+        - Android build
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the problem clearly.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Tap...
+        3. See...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Remove secrets before posting.
+
