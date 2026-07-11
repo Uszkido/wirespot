@@ -38,52 +38,79 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       },
       child: Scaffold(
         appBar: AppBar(
+          titleSpacing: 12,
           title: const Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               BrandLogo(size: 36),
               SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(AppBranding.appName),
-                  Text(
-                    AppBranding.companyName,
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-                  ),
-                ],
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppBranding.appName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      AppBranding.companyName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
           actions: [
             IconButton(
-              tooltip: 'Routers',
-              onPressed: () => context.go(AppRoutes.routers),
-              icon: const Icon(Icons.router_outlined),
-            ),
-            IconButton(
-              tooltip: 'Hotspot',
-              onPressed: () => context.go(AppRoutes.hotspot),
-              icon: const Icon(Icons.wifi_tethering),
-            ),
-            IconButton(
-              tooltip: 'Vouchers',
-              onPressed: () => context.go(AppRoutes.vouchers),
-              icon: const Icon(Icons.confirmation_number_outlined),
-            ),
-            IconButton(
-              tooltip: 'Reports',
-              onPressed: () => context.go(AppRoutes.reports),
-              icon: const Icon(Icons.bar_chart_outlined),
-            ),
-            IconButton(
               tooltip: 'Refresh',
               onPressed: () => ref.invalidate(dashboardSnapshotProvider),
               icon: const Icon(Icons.refresh),
             ),
-            IconButton(
-              tooltip: 'Settings',
-              onPressed: () => context.go(AppRoutes.settings),
-              icon: const Icon(Icons.settings_outlined),
+            PopupMenuButton<String>(
+              tooltip: 'Open section',
+              icon: const Icon(Icons.more_vert),
+              onSelected: (route) => context.push(route),
+              itemBuilder: (context) => const [
+                PopupMenuItem(
+                  value: AppRoutes.routers,
+                  child: ListTile(
+                    leading: Icon(Icons.router_outlined),
+                    title: Text('Routers'),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: AppRoutes.hotspot,
+                  child: ListTile(
+                    leading: Icon(Icons.wifi_tethering),
+                    title: Text('Hotspot'),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: AppRoutes.vouchers,
+                  child: ListTile(
+                    leading: Icon(Icons.confirmation_number_outlined),
+                    title: Text('Vouchers'),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: AppRoutes.reports,
+                  child: ListTile(
+                    leading: Icon(Icons.bar_chart_outlined),
+                    title: Text('Reports'),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: AppRoutes.settings,
+                  child: ListTile(
+                    leading: Icon(Icons.settings_outlined),
+                    title: Text('Settings'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -95,7 +122,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 title: 'Add a router',
                 message: 'Connect a MikroTik router before viewing dashboard data.',
                 action: FilledButton.icon(
-                  onPressed: () => context.go(AppRoutes.newRouter),
+                  onPressed: () => context.push(AppRoutes.newRouter),
                   icon: const Icon(Icons.add),
                   label: const Text('Add router'),
                 ),

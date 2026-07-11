@@ -94,6 +94,7 @@ class _ReportFilters extends StatelessWidget {
           children: [
             DropdownButtonFormField<String>(
               initialValue: selectedValue,
+              isExpanded: true,
               decoration: const InputDecoration(
                 labelText: 'Router',
                 prefixIcon: Icon(Icons.router_outlined),
@@ -115,6 +116,7 @@ class _ReportFilters extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             SegmentedButton<ReportPeriod>(
+              showSelectedIcon: false,
               segments: const [
                 ButtonSegment(
                   value: ReportPeriod.daily,
@@ -273,7 +275,7 @@ class _SummaryTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: 170,
-      height: 104,
+      height: 132,
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -290,7 +292,11 @@ class _SummaryTile extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
               ),
-              Text(label),
+              Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ],
           ),
         ),

@@ -50,7 +50,7 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
               title: 'No router available',
               message: 'Add a router before generating vouchers.',
               action: FilledButton.icon(
-                onPressed: () => context.go(AppRoutes.newRouter),
+                onPressed: () => context.push(AppRoutes.newRouter),
                 icon: const Icon(Icons.add),
                 label: const Text('Add router'),
               ),

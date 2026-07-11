@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../core/api/routeros_models.dart';
 import '../../../core/di/providers.dart';
+import '../../routers/domain/entities/router_entity.dart';
 import '../domain/dashboard_snapshot.dart';
 
 final selectedRouterIdProvider = StateProvider<String?>((ref) => null);
@@ -30,17 +31,48 @@ final dashboardSnapshotProvider =
 
   RouterOsRouterSnapshot? snapshot;
   try {
-    snapshot = await ref.watch(routerConnectionServiceProvider).getSnapshot(router);
+    snapshot = await ref
+        .watch(routerConnectionServiceProvider)
+        .getSnapshot(router);
   } on Object {
     snapshot = null;
   }
 
+  final activeSessions = await _activeHotspotClientCount(ref, router);
+
   return DashboardSnapshot(
     router: router,
     routerSnapshot: snapshot,
+    onlineUsers: activeSessions,
+    activeSessions: activeSessions,
     todaySalesMinor: sales.fold<int>(
       0,
       (total, sale) => total + sale.amountMinor,
     ),
   );
 });
+
+Future<int> _activeHotspotClientCount(Ref ref, RouterEntity router) async {
+  try {
+    final sessions = await ref
+        .watch(hotspotServiceProvider)
+        .getActiveSessions(router);
+    if (sessions.isNotEmpty) {
+      return sessions.length;
+    }
+  } on Object {
+    // Fall through to the host table fallback below.
+  }
+
+  try {
+    final response = await ref.watch(routerConnectionServiceProvider).execute(
+          router,
+          '/ip/hotspot/host/print',
+        );
+    return response.records.where((record) {
+      return record['authorized'] == 'true' || record['bypassed'] == 'true';
+    }).length;
+  } on Object {
+    return 0;
+  }
+}

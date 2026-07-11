@@ -264,9 +264,10 @@ class _PrinterCard extends ConsumerWidget {
         builder: (context) => StatefulBuilder(
           builder: (context, setState) => AlertDialog(
             title: const Text('Add printer'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                 TextField(
                   controller: nameController,
                   decoration: const InputDecoration(labelText: 'Name'),
@@ -321,6 +322,7 @@ class _PrinterCard extends ConsumerWidget {
                 if (pairedPrinters.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   DropdownButtonFormField<BluetoothPrinterDevice>(
+                    isExpanded: true,
                     decoration: const InputDecoration(
                       labelText: 'Paired printer',
                       prefixIcon: Icon(Icons.print_outlined),
@@ -346,6 +348,7 @@ class _PrinterCard extends ConsumerWidget {
                 ],
                 const SizedBox(height: 8),
                 SegmentedButton<int>(
+                  showSelectedIcon: false,
                   segments: const [
                     ButtonSegment(value: 58, label: Text('58mm')),
                     ButtonSegment(value: 80, label: Text('80mm')),
@@ -353,7 +356,8 @@ class _PrinterCard extends ConsumerWidget {
                   selected: {width},
                   onSelectionChanged: (value) => setState(() => width = value.first),
                 ),
-              ],
+                ],
+              ),
             ),
             actions: [
               TextButton(

@@ -21,7 +21,7 @@ class RoutersPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add router',
-        onPressed: () => context.go(AppRoutes.newRouter),
+        onPressed: () => context.push(AppRoutes.newRouter),
         child: const Icon(Icons.add),
       ),
       body: routers.when(
@@ -32,7 +32,7 @@ class RoutersPage extends ConsumerWidget {
               title: 'No routers yet',
               message: 'Add your first MikroTik router to manage hotspot users.',
               action: FilledButton.icon(
-                onPressed: () => context.go(AppRoutes.newRouter),
+                onPressed: () => context.push(AppRoutes.newRouter),
                 icon: const Icon(Icons.add),
                 label: const Text('Add router'),
               ),
@@ -133,7 +133,7 @@ class _RouterTile extends ConsumerWidget {
         await _testConnection(context, ref);
         break;
       case _RouterAction.edit:
-        context.go(AppRoutes.editRouter(router.id));
+        context.push(AppRoutes.editRouter(router.id));
         break;
       case _RouterAction.delete:
         await _deleteRouter(context, ref);

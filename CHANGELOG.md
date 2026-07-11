@@ -4,6 +4,18 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.2+3 - 2026-07-11
+
+Phone-tested navigation and layout fix build.
+
+### Fixed
+
+- Dashboard section buttons now push pages so Android back/swipe returns to the dashboard instead of exiting the app.
+- Dashboard active-user count now reads hotspot active sessions and falls back to authorized hotspot hosts.
+- Dashboard app bar uses a compact section menu to avoid right-side overflow on narrow phones.
+- Report summary cards and settings printer dialog controls now have safer constraints for phone screens and larger text.
+- Router add/edit save and cancel return to the previous page when possible.
+
 ## 0.1.1+2 - 2026-07-11
 
 Step 15 hardening build.

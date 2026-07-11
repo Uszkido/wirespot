@@ -35,7 +35,7 @@ class HotspotPage extends ConsumerWidget {
               title: 'No router available',
               message: 'Add a router before managing hotspot users.',
               action: FilledButton.icon(
-                onPressed: () => context.go(AppRoutes.newRouter),
+                onPressed: () => context.push(AppRoutes.newRouter),
                 icon: const Icon(Icons.add),
                 label: const Text('Add router'),
               ),

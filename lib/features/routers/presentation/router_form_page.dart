@@ -85,7 +85,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
                 const Text('Router not found'),
                 const SizedBox(height: 16),
                 FilledButton.icon(
-                  onPressed: () => context.go(AppRoutes.routers),
+                  onPressed: () => _returnToRouters(),
                   icon: const Icon(Icons.arrow_back),
                   label: const Text('Back to routers'),
                 ),
@@ -117,6 +117,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
             onUseSslChanged: (value) => setState(() => _useSsl = value),
             onRequireVpnChanged: (value) => setState(() => _requireVpn = value),
             onSave: () => _save(existingRouter),
+            onCancel: _returnToRouters,
           );
         },
       ),
@@ -194,7 +195,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
         return;
       }
       _showMessage(_isEditing ? 'Router updated.' : 'Router added.');
-      context.go(AppRoutes.routers);
+      _returnToRouters();
     } on Object catch (error) {
       if (mounted) {
         _showMessage('Could not save router: $error');
@@ -210,6 +211,14 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
+  }
+
+  void _returnToRouters() {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    context.go(AppRoutes.routers);
   }
 }
 
@@ -228,6 +237,7 @@ class _RouterFormBody extends StatelessWidget {
     required this.onUseSslChanged,
     required this.onRequireVpnChanged,
     required this.onSave,
+    required this.onCancel,
   });
 
   final GlobalKey<FormState> formKey;
@@ -243,6 +253,7 @@ class _RouterFormBody extends StatelessWidget {
   final ValueChanged<bool> onUseSslChanged;
   final ValueChanged<bool> onRequireVpnChanged;
   final VoidCallback onSave;
+  final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -358,7 +369,7 @@ class _RouterFormBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 TextButton.icon(
-                  onPressed: isSaving ? null : () => context.go(AppRoutes.routers),
+                  onPressed: isSaving ? null : onCancel,
                   icon: const Icon(Icons.close),
                   label: const Text('Cancel'),
                 ),

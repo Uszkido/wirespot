@@ -19,7 +19,7 @@ class MetricCard extends StatelessWidget {
 
     return SizedBox(
       width: 160,
-      height: 116,
+      height: 132,
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -38,7 +38,7 @@ class MetricCard extends StatelessWidget {
               ),
               Text(
                 label,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
