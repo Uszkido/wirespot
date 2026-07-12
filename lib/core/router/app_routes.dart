@@ -10,8 +10,16 @@ class AppRoutes {
   static const vouchers = '/vouchers';
   static const reports = '/reports';
   static const settings = '/settings';
+  static const wireGuard = '/wireguard';
 
   static String editRouter(String routerId) {
     return '/routers/$routerId/edit';
+  }
+
+  static String wireGuardTunnel(String tunnelName) {
+    return Uri(
+      path: wireGuard,
+      queryParameters: {'tunnel': tunnelName},
+    ).toString();
   }
 }

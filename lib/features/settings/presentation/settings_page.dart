@@ -41,6 +41,8 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 16),
           const _SecurityCard(),
           const SizedBox(height: 16),
+          const _WireGuardSettingsCard(),
+          const SizedBox(height: 16),
           entitlement.when(
             data: (value) => _PremiumLicenseCard(entitlement: value),
             error: (error, stackTrace) =>
@@ -91,6 +93,23 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 16),
           const _BackupCard(),
         ],
+      ),
+    );
+  }
+}
+
+class _WireGuardSettingsCard extends StatelessWidget {
+  const _WireGuardSettingsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.vpn_key_outlined),
+        title: const Text('WireGuard VPN'),
+        subtitle: const Text('Import tunnels, connect, view status, and logs.'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push(AppRoutes.wireGuard),
       ),
     );
   }

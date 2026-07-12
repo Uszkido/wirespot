@@ -4,6 +4,16 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.9+10 - 2026-07-12
+
+WireGuard management screen build.
+
+### Added
+
+- WireGuard page for tunnel import, connect, disconnect, status, statistics, and logs.
+- WireGuard route linked from Settings.
+- Router action shortcut for routers that require WireGuard.
+
 ## 0.1.8+9 - 2026-07-12
 
 Hotspot setup analyzer cleanup build.

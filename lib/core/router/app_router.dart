@@ -11,6 +11,7 @@ import '../../features/routers/presentation/routers_page.dart';
 import '../../features/settings/presentation/settings_page.dart';
 import '../../features/splash/presentation/splash_page.dart';
 import '../../features/voucher/presentation/vouchers_page.dart';
+import '../../features/vpn/presentation/wireguard_page.dart';
 import 'app_routes.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -76,6 +77,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.settings,
         name: 'settings',
         builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.wireGuard,
+        name: 'wireguard',
+        builder: (context, state) => WireGuardPage(
+          initialTunnelName: state.uri.queryParameters['tunnel'],
+        ),
       ),
       GoRoute(
         path: AppRoutes.newRouter,

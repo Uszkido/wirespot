@@ -90,22 +90,30 @@ class _RouterTile extends ConsumerWidget {
         trailing: PopupMenuButton<_RouterAction>(
           tooltip: 'Router actions',
           onSelected: (action) => _handleAction(context, ref, action),
-          itemBuilder: (context) => const [
-            PopupMenuItem(
+          itemBuilder: (context) => [
+            const PopupMenuItem(
               value: _RouterAction.test,
               child: ListTile(
                 leading: Icon(Icons.network_check),
                 title: Text('Test connection'),
               ),
             ),
-            PopupMenuItem(
+            if (router.requireVpn)
+              const PopupMenuItem(
+                value: _RouterAction.wireGuard,
+                child: ListTile(
+                  leading: Icon(Icons.vpn_key_outlined),
+                  title: Text('WireGuard'),
+                ),
+              ),
+            const PopupMenuItem(
               value: _RouterAction.edit,
               child: ListTile(
                 leading: Icon(Icons.edit_outlined),
                 title: Text('Edit'),
               ),
             ),
-            PopupMenuItem(
+            const PopupMenuItem(
               value: _RouterAction.delete,
               child: ListTile(
                 leading: Icon(Icons.delete_outline),
@@ -129,6 +137,9 @@ class _RouterTile extends ConsumerWidget {
         break;
       case _RouterAction.edit:
         context.push(AppRoutes.editRouter(router.id));
+        break;
+      case _RouterAction.wireGuard:
+        context.push(AppRoutes.wireGuardTunnel(router.name));
         break;
       case _RouterAction.delete:
         await _deleteRouter(context, ref);
@@ -195,4 +206,4 @@ class _RouterTile extends ConsumerWidget {
   }
 }
 
-enum _RouterAction { test, edit, delete }
+enum _RouterAction { test, wireGuard, edit, delete }
