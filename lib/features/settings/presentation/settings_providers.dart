@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/di/providers.dart';
 import '../../../core/licensing/entitlement_snapshot.dart';
 import '../../scheduler/domain/entities/scheduled_task.dart';
+import '../../voucher/domain/entities/ticket_template.dart';
 import '../../voucher/domain/entities/voucher_encoding_settings.dart';
 import '../domain/entities/app_settings.dart';
 import '../domain/entities/printer_config_entity.dart';
@@ -29,3 +30,8 @@ final voucherEncodingSettingsProvider =
 final schedulerTasksProvider = FutureProvider.autoDispose<List<ScheduledTask>>(
   (ref) => ref.watch(schedulerSettingsServiceProvider).load(),
 );
+
+final selectedTicketTemplateProvider =
+    FutureProvider.autoDispose<TicketTemplate>(
+      (ref) => ref.watch(ticketTemplateSettingsServiceProvider).loadSelected(),
+    );

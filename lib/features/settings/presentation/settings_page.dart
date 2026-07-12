@@ -14,6 +14,7 @@ import '../../../shared/widgets/brand_logo.dart';
 import '../../authentication/presentation/auth_controller.dart';
 import '../../../core/di/providers.dart';
 import '../../scheduler/domain/entities/scheduled_task.dart';
+import '../../voucher/domain/entities/ticket_template.dart';
 import '../../voucher/domain/entities/voucher_encoding_settings.dart';
 import '../domain/entities/app_settings.dart';
 import '../domain/entities/printer_config_entity.dart';
@@ -28,6 +29,7 @@ class SettingsPage extends ConsumerWidget {
     final printers = ref.watch(printerConfigsProvider);
     final entitlement = ref.watch(entitlementSnapshotProvider);
     final encoding = ref.watch(voucherEncodingSettingsProvider);
+    final selectedTemplate = ref.watch(selectedTicketTemplateProvider);
     final schedulerTasks = ref.watch(schedulerTasksProvider);
 
     return Scaffold(
@@ -57,6 +59,16 @@ class SettingsPage extends ConsumerWidget {
             data: (value) => _VoucherEncodingCard(settings: value),
             error: (error, stackTrace) =>
                 Text('Could not load voucher encoding: $error'),
+            loading: () => const LinearProgressIndicator(),
+          ),
+          const SizedBox(height: 16),
+          selectedTemplate.when(
+            data: (value) => _TicketTemplateCard(
+              selected: value,
+              entitlement: entitlement.asData?.value,
+            ),
+            error: (error, stackTrace) =>
+                Text('Could not load ticket templates: $error'),
             loading: () => const LinearProgressIndicator(),
           ),
           const SizedBox(height: 16),
@@ -128,6 +140,77 @@ class _SchedulerCard extends ConsumerWidget {
                 subtitle: Text('Every ${task.intervalMinutes} minutes'),
                 contentPadding: EdgeInsets.zero,
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TicketTemplateCard extends ConsumerWidget {
+  const _TicketTemplateCard({required this.selected, required this.entitlement});
+
+  final TicketTemplate selected;
+  final EntitlementSnapshot? entitlement;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPremium =
+        entitlement?.allows(PremiumFeature.ticketTemplates) ?? false;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Ticket templates',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (!isPremium) const Chip(label: Text('Premium')),
+              ],
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<TicketTemplate>(
+              initialValue: selected,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: 'Receipt layout',
+                prefixIcon: Icon(Icons.confirmation_number_outlined),
+              ),
+              items: [
+                for (final template in TicketTemplate.defaults)
+                  DropdownMenuItem(
+                    value: template,
+                    child: Text(
+                      '${template.name} - ${template.paperWidthMm}mm',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: isPremium
+                  ? (template) async {
+                      if (template == null) {
+                        return;
+                      }
+                      await ref
+                          .read(ticketTemplateSettingsServiceProvider)
+                          .saveSelected(template);
+                      ref.invalidate(selectedTicketTemplateProvider);
+                    }
+                  : null,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              selected.description,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ],
         ),
       ),

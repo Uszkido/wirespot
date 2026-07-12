@@ -9,6 +9,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../routers/domain/entities/router_entity.dart';
 import '../../routers/presentation/router_providers.dart';
+import '../domain/entities/ticket_template.dart';
 import '../domain/entities/voucher_encoding_settings.dart';
 import '../domain/entities/voucher_entity.dart';
 import '../domain/entities/voucher_generation_request.dart';
@@ -518,18 +519,21 @@ class _VoucherTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final template =
+        ref.watch(voucherTicketTemplateProvider).asData?.value ??
+        TicketTemplate.defaults.first;
     final receipt = ref
         .read(voucherReceiptTemplateServiceProvider)
-        .build(voucher: voucher);
+        .build(voucher: voucher, template: template);
 
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.confirmation_number_outlined),
         title: Text(voucher.username),
         subtitle: Text(voucher.note ?? router.name),
-        trailing: Text(voucher.password == null ? '' : 'QR'),
+        trailing: Text(receipt.showQrCode ? 'QR' : ''),
         children: [
-          if (voucher.password != null)
+          if (receipt.showQrCode)
             Padding(
               padding: const EdgeInsets.all(16),
               child: QrImageView(
@@ -574,9 +578,12 @@ class _VoucherTile extends ConsumerWidget {
     WidgetRef ref,
     VoucherEntity voucher,
   ) async {
+    final template = await ref
+        .read(ticketTemplateSettingsServiceProvider)
+        .loadSelected();
     final receipt = ref
         .read(voucherReceiptTemplateServiceProvider)
-        .build(voucher: voucher);
+        .build(voucher: voucher, template: template);
     try {
       await ref.read(shareServiceProvider).shareVoucherReceipt(receipt);
     } on Object catch (error) {
@@ -593,9 +600,12 @@ class _VoucherTile extends ConsumerWidget {
     WidgetRef ref,
     VoucherEntity voucher,
   ) async {
+    final template = await ref
+        .read(ticketTemplateSettingsServiceProvider)
+        .loadSelected();
     final receipt = ref
         .read(voucherReceiptTemplateServiceProvider)
-        .build(voucher: voucher);
+        .build(voucher: voucher, template: template);
     try {
       final printers = await ref
           .read(printerServiceProvider)

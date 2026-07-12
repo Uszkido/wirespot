@@ -4,6 +4,20 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.4+5 - 2026-07-12
+
+Ticket template selection build.
+
+### Added
+
+- Premium-gated ticket template selector in Settings.
+- Settings-backed selected receipt template for voucher preview, sharing, and printing.
+- Receipt output now includes the selected template name and template footer.
+
+### Fixed
+
+- QR preview visibility now follows the selected template instead of requiring a voucher password.
+
 ## 0.1.3+4 - 2026-07-12
 
 Premium and advanced hotspot foundation build.

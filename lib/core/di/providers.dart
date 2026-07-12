@@ -14,6 +14,7 @@ import '../../features/settings/domain/services/backup_service.dart';
 import '../../features/voucher/domain/repositories/voucher_repository.dart';
 import '../../features/voucher/domain/services/voucher_encoding_settings_service.dart';
 import '../../features/voucher/domain/services/voucher_generation_service.dart';
+import '../../features/voucher/domain/services/ticket_template_settings_service.dart';
 import '../../features/voucher/domain/services/voucher_qr_service.dart';
 import '../../features/voucher/domain/services/voucher_receipt_template_service.dart';
 import '../database/app_database.dart';
@@ -68,6 +69,11 @@ final voucherGenerationServiceProvider = Provider<VoucherGenerationService>(
 final voucherEncodingSettingsServiceProvider =
     Provider<VoucherEncodingSettingsService>(
       (ref) => sl<VoucherEncodingSettingsService>(),
+    );
+
+final ticketTemplateSettingsServiceProvider =
+    Provider<TicketTemplateSettingsService>(
+      (ref) => sl<TicketTemplateSettingsService>(),
     );
 
 final voucherQrServiceProvider = Provider<VoucherQrService>(

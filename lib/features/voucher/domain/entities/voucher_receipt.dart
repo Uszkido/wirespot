@@ -8,6 +8,10 @@ class VoucherReceipt {
     required this.supportPhone,
     required this.website,
     required this.qrPayload,
+    this.templateName = '58mm Thermal',
+    this.showPrice = true,
+    this.showQrCode = true,
+    this.footer = 'Powered by Vexel Innovations',
   });
 
   final VoucherEntity voucher;
@@ -16,6 +20,10 @@ class VoucherReceipt {
   final String supportPhone;
   final String website;
   final String qrPayload;
+  final String templateName;
+  final bool showPrice;
+  final bool showQrCode;
+  final String footer;
 
   String toPlainText() {
     final price =
@@ -27,15 +35,17 @@ class VoucherReceipt {
     return [
       businessName,
       'Hotspot Voucher',
+      'Template: $templateName',
       'Username: ${voucher.username}',
       if (voucher.password != null) 'Password: ${voucher.password}',
       'Validity: $validity',
-      'Price: $price',
+      if (showPrice) 'Price: $price',
       'Generated: ${voucher.generatedAt.toIso8601String()}',
-      'QR: $qrPayload',
+      if (showQrCode) 'QR: $qrPayload',
       supportEmail,
       supportPhone,
       website,
+      footer,
     ].join('\n');
   }
 }

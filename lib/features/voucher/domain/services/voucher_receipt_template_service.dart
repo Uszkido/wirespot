@@ -1,6 +1,7 @@
 import '../../../../core/branding/app_branding.dart';
 import '../entities/voucher_entity.dart';
 import '../entities/voucher_receipt.dart';
+import '../entities/ticket_template.dart';
 import 'voucher_qr_service.dart';
 
 class VoucherReceiptTemplateService {
@@ -8,7 +9,14 @@ class VoucherReceiptTemplateService {
 
   final VoucherQrService _qrService;
 
-  VoucherReceipt build({required VoucherEntity voucher, String loginUrl = ''}) {
+  VoucherReceipt build({
+    required VoucherEntity voucher,
+    String loginUrl = '',
+    TicketTemplate template = const TicketTemplate(
+      id: 'thermal_58',
+      name: '58mm Thermal',
+    ),
+  }) {
     return VoucherReceipt(
       voucher: voucher,
       businessName: AppBranding.companyName,
@@ -19,6 +27,10 @@ class VoucherReceiptTemplateService {
         loginUrl: loginUrl,
         voucher: voucher,
       ),
+      templateName: template.name,
+      showPrice: template.showPrice,
+      showQrCode: template.showQrCode,
+      footer: template.footer,
     );
   }
 }
