@@ -651,6 +651,9 @@ Future<void> _showSetupHotspotDialog(
     if (input == null) {
       return;
     }
+    if (!context.mounted) {
+      return;
+    }
     final confirmed = await _showSetupPlanDialog(context, input);
     if (!confirmed) {
       return;

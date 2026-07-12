@@ -4,6 +4,14 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.8+9 - 2026-07-12
+
+Hotspot setup analyzer cleanup build.
+
+### Fixed
+
+- Added a mounted guard before opening the hotspot setup review dialog after an async gap.
+
 ## 0.1.7+8 - 2026-07-12
 
 Hotspot setup review build.
