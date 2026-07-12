@@ -4,6 +4,17 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.12+13 - 2026-07-12
+
+WireGuard QR import build.
+
+### Added
+
+- Camera permission declaration for WireGuard QR imports.
+- WireGuard QR scanner page backed by `mobile_scanner`.
+- Scan QR action on the WireGuard tunnel card.
+- Camera readiness guidance on the Permissions screen.
+
 ## 0.1.11+12 - 2026-07-12
 
 Android permission readiness build.

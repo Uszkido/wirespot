@@ -36,6 +36,13 @@ class PermissionReadinessPage extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           const _InfoCard(
+            icon: Icons.photo_camera_outlined,
+            title: 'Camera',
+            message:
+                'Camera permission is requested when scanning WireGuard QR configurations.',
+          ),
+          const SizedBox(height: 16),
+          const _InfoCard(
             icon: Icons.language_outlined,
             title: 'Network access',
             message:

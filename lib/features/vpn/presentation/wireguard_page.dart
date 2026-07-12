@@ -7,6 +7,7 @@ import '../../../core/vpn/vpn_statistics.dart';
 import '../../../core/vpn/vpn_status.dart';
 import '../../../core/vpn/wireguard_config.dart';
 import '../domain/entities/wireguard_settings.dart';
+import 'wireguard_qr_scan_page.dart';
 import 'wireguard_providers.dart';
 
 class WireGuardPage extends ConsumerStatefulWidget {
@@ -80,6 +81,7 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
               status: resolvedStatus,
               settings: settingsValue,
               onImport: _showImportDialog,
+              onScanQr: _scanQrConfig,
               onConnect: _connect,
               onDisconnect: _disconnect,
               onAutoReconnectChanged: (value) {
@@ -241,6 +243,31 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
     }
   }
 
+  Future<void> _scanQrConfig() async {
+    final qrText = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (context) => const WireGuardQrScanPage()),
+    );
+    if (!mounted) {
+      return;
+    }
+    if (qrText == null || qrText.trim().isEmpty) {
+      return;
+    }
+    final name = _tunnelNameController.text.trim().isEmpty
+        ? 'wirespot'
+        : _tunnelNameController.text.trim();
+    try {
+      final config = WireGuardConfig.parse(name: name, config: qrText);
+      await ref.read(wireGuardVpnServiceProvider).importConfig(config);
+      _tunnelNameController.text = config.name;
+      await _saveSettings(selectedTunnelName: config.name);
+      _refresh();
+      _showSnack('WireGuard QR config imported.');
+    } on Object catch (error) {
+      _showSnack('Could not import WireGuard QR: $error');
+    }
+  }
+
   Future<void> _setAutoReconnect(bool enabled) async {
     final tunnelName = _tunnelNameController.text.trim().isEmpty
         ? 'wirespot'
@@ -334,6 +361,7 @@ class _TunnelCard extends StatelessWidget {
     required this.status,
     required this.settings,
     required this.onImport,
+    required this.onScanQr,
     required this.onConnect,
     required this.onDisconnect,
     required this.onAutoReconnectChanged,
@@ -343,6 +371,7 @@ class _TunnelCard extends StatelessWidget {
   final VpnStatus? status;
   final WireGuardSettings? settings;
   final Future<void> Function() onImport;
+  final Future<void> Function() onScanQr;
   final Future<void> Function() onConnect;
   final Future<void> Function() onDisconnect;
   final ValueChanged<bool> onAutoReconnectChanged;
@@ -406,6 +435,13 @@ class _TunnelCard extends StatelessWidget {
                   },
                   icon: const Icon(Icons.file_upload_outlined),
                   label: const Text('Import'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    await onScanQr();
+                  },
+                  icon: const Icon(Icons.qr_code_scanner_outlined),
+                  label: const Text('Scan QR'),
                 ),
                 FilledButton.icon(
                   onPressed: () {
