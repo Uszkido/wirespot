@@ -73,7 +73,7 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const _VpnPermissionCard(),
+            _VpnPermissionCard(onRequestPermission: _requestVpnPermission),
             const SizedBox(height: 16),
             _TunnelCard(
               controller: _tunnelNameController,
@@ -146,6 +146,16 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
       _showSnack('WireGuard disconnect requested.');
     } on Object catch (error) {
       _showSnack('Could not disconnect WireGuard: $error');
+    }
+  }
+
+  Future<void> _requestVpnPermission() async {
+    try {
+      await ref.read(wireGuardVpnServiceProvider).requestPermission();
+      _refresh();
+      _showSnack('VPN permission screen opened if Android requires it.');
+    } on Object catch (error) {
+      _showSnack('Could not request VPN permission: $error');
     }
   }
 
@@ -276,7 +286,9 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
 }
 
 class _VpnPermissionCard extends StatelessWidget {
-  const _VpnPermissionCard();
+  const _VpnPermissionCard({required this.onRequestPermission});
+
+  final Future<void> Function() onRequestPermission;
 
   @override
   Widget build(BuildContext context) {
@@ -291,9 +303,22 @@ class _VpnPermissionCard extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                'Android requires VPN consent at runtime. Tap Connect, approve the Android VPN dialog, then tap Connect again if the tunnel does not start immediately.',
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Android requires VPN consent at runtime. This cannot be granted silently during installation.',
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      await onRequestPermission();
+                    },
+                    icon: const Icon(Icons.security_outlined),
+                    label: const Text('Grant VPN access'),
+                  ),
+                ],
               ),
             ),
           ],

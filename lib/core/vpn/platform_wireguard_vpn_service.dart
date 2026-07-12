@@ -62,6 +62,11 @@ class PlatformWireGuardVpnService implements WireGuardVpnService {
   }
 
   @override
+  Future<void> requestPermission() {
+    return _methodChannel.invokeMethod<void>('requestPermission');
+  }
+
+  @override
   Future<void> disconnect() {
     return _methodChannel.invokeMethod<void>('disconnect');
   }

@@ -4,6 +4,17 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.11+12 - 2026-07-12
+
+Android permission readiness build.
+
+### Added
+
+- Permission Readiness screen for VPN consent, Bluetooth printer access, and network permission guidance.
+- Direct Android WireGuard VPN permission request method through the platform channel.
+- Settings shortcut for permission readiness checks.
+- WireGuard page action for granting Android VPN access before connecting.
+
 ## 0.1.10+11 - 2026-07-12
 
 Trial licensing and operator access build.

@@ -1,19 +1,19 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/services.dart';
 
 import '../../../core/branding/app_branding.dart';
+import '../../../core/di/providers.dart';
 import '../../../core/licensing/entitlement_snapshot.dart';
 import '../../../core/licensing/premium_feature.dart';
+import '../../../core/printer/printer_models.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/utils/id_generator.dart';
-import '../../../core/printer/printer_models.dart';
 import '../../../shared/widgets/brand_logo.dart';
 import '../../authentication/presentation/auth_controller.dart';
-import '../../../core/di/providers.dart';
 import '../../scheduler/domain/entities/scheduled_task.dart';
 import '../../voucher/domain/entities/ticket_template.dart';
 import '../../voucher/domain/entities/voucher_encoding_settings.dart';
@@ -41,6 +41,8 @@ class SettingsPage extends ConsumerWidget {
           const _BrandCard(),
           const SizedBox(height: 16),
           const _SecurityCard(),
+          const SizedBox(height: 16),
+          const _PermissionSettingsCard(),
           const SizedBox(height: 16),
           const _WireGuardSettingsCard(),
           const SizedBox(height: 16),
@@ -94,6 +96,23 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 16),
           const _BackupCard(),
         ],
+      ),
+    );
+  }
+}
+
+class _PermissionSettingsCard extends StatelessWidget {
+  const _PermissionSettingsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.admin_panel_settings_outlined),
+        title: const Text('Permission readiness'),
+        subtitle: const Text('Request VPN consent and Bluetooth access.'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push(AppRoutes.permissions),
       ),
     );
   }

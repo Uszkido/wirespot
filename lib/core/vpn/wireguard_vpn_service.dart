@@ -12,6 +12,8 @@ abstract interface class WireGuardVpnService {
 
   Future<void> connect(String tunnelName);
 
+  Future<void> requestPermission();
+
   Future<void> disconnect();
 
   Future<VpnStatus> currentStatus();

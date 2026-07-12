@@ -69,6 +69,20 @@ class WireGuardTunnelManager(private val activity: Activity) {
         }
     }
 
+    fun requestPermission(): Map<String, Any?> {
+        val permissionIntent = VpnService.prepare(activity)
+        return if (permissionIntent != null) {
+            message = "Android VPN permission requested."
+            appendLog(message!!)
+            activity.startActivity(permissionIntent)
+            statusMap(extra = mapOf("permissionRequired" to true))
+        } else {
+            message = "Android VPN permission already granted."
+            appendLog(message!!)
+            statusMap(extra = mapOf("permissionRequired" to false))
+        }
+    }
+
     fun disconnect(): Map<String, Any?> {
         val tunnel = activeTunnel
         if (tunnel != null) {

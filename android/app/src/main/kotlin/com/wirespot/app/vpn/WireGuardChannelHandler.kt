@@ -48,6 +48,11 @@ class WireGuardChannelHandler(
                     emitStatus(status)
                     result.success(null)
                 }
+                "requestPermission" -> {
+                    val status = manager.requestPermission()
+                    emitStatus(status)
+                    result.success(null)
+                }
                 "disconnect" -> {
                     val status = manager.disconnect()
                     emitStatus(status)
