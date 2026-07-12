@@ -6,6 +6,7 @@ import '../../../core/utils/byte_format.dart';
 import '../../../core/vpn/vpn_statistics.dart';
 import '../../../core/vpn/vpn_status.dart';
 import '../../../core/vpn/wireguard_config.dart';
+import '../domain/entities/wireguard_settings.dart';
 import 'wireguard_providers.dart';
 
 class WireGuardPage extends ConsumerStatefulWidget {
@@ -19,6 +20,7 @@ class WireGuardPage extends ConsumerStatefulWidget {
 
 class _WireGuardPageState extends ConsumerState<WireGuardPage> {
   late final TextEditingController _tunnelNameController;
+  bool _didHydrateSettings = false;
 
   @override
   void initState() {
@@ -40,7 +42,20 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
     final statusFallback = ref.watch(wireGuardStatusProvider);
     final statistics = ref.watch(wireGuardStatisticsProvider);
     final logs = ref.watch(wireGuardLogsProvider);
+    final settings = ref.watch(wireGuardSettingsProvider);
     final resolvedStatus = status ?? statusFallback.asData?.value;
+    final settingsValue = settings.asData?.value;
+    if (!_didHydrateSettings && settingsValue != null) {
+      _didHydrateSettings = true;
+      if (widget.initialTunnelName == null) {
+        _tunnelNameController.text = settingsValue.selectedTunnelName;
+      }
+      if (settingsValue.autoReconnectEnabled) {
+        ref
+            .read(wireGuardAutoReconnectServiceProvider)
+            .start(tunnelName: settingsValue.selectedTunnelName);
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -58,12 +73,18 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            const _VpnPermissionCard(),
+            const SizedBox(height: 16),
             _TunnelCard(
               controller: _tunnelNameController,
               status: resolvedStatus,
+              settings: settingsValue,
               onImport: _showImportDialog,
               onConnect: _connect,
               onDisconnect: _disconnect,
+              onAutoReconnectChanged: (value) {
+                _setAutoReconnect(value);
+              },
             ),
             const SizedBox(height: 16),
             statistics.when(
@@ -99,7 +120,17 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
       return;
     }
     try {
+      final autoReconnectEnabled =
+          ref.read(wireGuardSettingsProvider).asData?.value
+              .autoReconnectEnabled ??
+          false;
       await ref.read(wireGuardVpnServiceProvider).connect(name);
+      await _saveSettings(selectedTunnelName: name);
+      if (autoReconnectEnabled) {
+        ref
+            .read(wireGuardAutoReconnectServiceProvider)
+            .start(tunnelName: name);
+      }
       _refresh();
       _showSnack('WireGuard connect requested.');
     } on Object catch (error) {
@@ -110,6 +141,7 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
   Future<void> _disconnect() async {
     try {
       await ref.read(wireGuardVpnServiceProvider).disconnect();
+      await ref.read(wireGuardAutoReconnectServiceProvider).stop();
       _refresh();
       _showSnack('WireGuard disconnect requested.');
     } on Object catch (error) {
@@ -188,6 +220,7 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
       }
       await ref.read(wireGuardVpnServiceProvider).importConfig(config);
       _tunnelNameController.text = config.name;
+      await _saveSettings(selectedTunnelName: config.name);
       _refresh();
       _showSnack('WireGuard tunnel imported.');
     } on Object catch (error) {
@@ -198,6 +231,42 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
     }
   }
 
+  Future<void> _setAutoReconnect(bool enabled) async {
+    final tunnelName = _tunnelNameController.text.trim().isEmpty
+        ? 'wirespot'
+        : _tunnelNameController.text.trim();
+    await _saveSettings(
+      selectedTunnelName: tunnelName,
+      autoReconnectEnabled: enabled,
+    );
+    if (enabled) {
+      ref
+          .read(wireGuardAutoReconnectServiceProvider)
+          .start(tunnelName: tunnelName);
+    } else {
+      await ref.read(wireGuardAutoReconnectServiceProvider).stop();
+    }
+    ref.invalidate(wireGuardSettingsProvider);
+  }
+
+  Future<void> _saveSettings({
+    String? selectedTunnelName,
+    bool? autoReconnectEnabled,
+  }) async {
+    final current =
+        ref.read(wireGuardSettingsProvider).asData?.value ??
+        const WireGuardSettings();
+    await ref
+        .read(wireGuardSettingsServiceProvider)
+        .save(
+          current.copyWith(
+            selectedTunnelName: selectedTunnelName,
+            autoReconnectEnabled: autoReconnectEnabled,
+          ),
+        );
+    ref.invalidate(wireGuardSettingsProvider);
+  }
+
   void _showSnack(String message) {
     if (!mounted) {
       return;
@@ -206,20 +275,52 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
   }
 }
 
+class _VpnPermissionCard extends StatelessWidget {
+  const _VpnPermissionCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.verified_user_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Android requires VPN consent at runtime. Tap Connect, approve the Android VPN dialog, then tap Connect again if the tunnel does not start immediately.',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _TunnelCard extends StatelessWidget {
   const _TunnelCard({
     required this.controller,
     required this.status,
+    required this.settings,
     required this.onImport,
     required this.onConnect,
     required this.onDisconnect,
+    required this.onAutoReconnectChanged,
   });
 
   final TextEditingController controller;
   final VpnStatus? status;
+  final WireGuardSettings? settings;
   final Future<void> Function() onImport;
   final Future<void> Function() onConnect;
   final Future<void> Function() onDisconnect;
+  final ValueChanged<bool> onAutoReconnectChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -262,6 +363,14 @@ class _TunnelCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
+            SwitchListTile(
+              value: settings?.autoReconnectEnabled ?? false,
+              onChanged: onAutoReconnectChanged,
+              title: const Text('Auto reconnect'),
+              subtitle: const Text('Reconnect this tunnel after VPN errors.'),
+              contentPadding: EdgeInsets.zero,
+            ),
+            const SizedBox(height: 4),
             Wrap(
               spacing: 8,
               runSpacing: 8,

@@ -16,6 +16,12 @@ class AppRoutes {
     return '/routers/$routerId/edit';
   }
 
+  static String hotspotTab(String tab) {
+    return Uri(path: hotspot, queryParameters: {'tab': tab}).toString();
+  }
+
+  static String get hotspotSessions => hotspotTab('sessions');
+
   static String wireGuardTunnel(String tunnelName) {
     return Uri(
       path: wireGuard,

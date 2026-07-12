@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/branding/app_branding.dart';
 import '../../../core/licensing/entitlement_snapshot.dart';
@@ -263,12 +264,31 @@ class _PremiumLicenseCard extends ConsumerWidget {
                     ),
                   ),
                 ),
-                Chip(label: Text(entitlement.isPremium ? 'Premium' : 'Free')),
+                Chip(label: Text(entitlement.statusLabel)),
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Use this while testing. Google Play Billing will replace the local license backend before store release.',
+            Text(
+              entitlement.hasAccess
+                  ? 'WireSpot includes a 7-day trial. After that, this device needs a license key.'
+                  : 'Trial ended. Enter a valid device license to continue using WireSpot.',
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.fingerprint),
+              title: const Text('Device license ID'),
+              subtitle: SelectableText(entitlement.deviceId),
+              trailing: IconButton(
+                tooltip: 'Copy device ID',
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: entitlement.deviceId));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Device ID copied.')),
+                  );
+                },
+                icon: const Icon(Icons.copy),
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -276,7 +296,7 @@ class _PremiumLicenseCard extends ConsumerWidget {
               decoration: const InputDecoration(
                 labelText: 'License key',
                 helperText:
-                    'Dev keys: WIRESPOT-DEV-PREMIUM or VEXEL-WIRESPOT-PREMIUM',
+                    'Device-bound license key or temporary dev license.',
               ),
             ),
             const SizedBox(height: 12),

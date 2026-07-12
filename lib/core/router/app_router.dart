@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../licensing/license_gate.dart';
 import '../../features/authentication/presentation/auth_controller.dart';
 import '../../features/authentication/presentation/login_page.dart';
 import '../../features/dashboard/presentation/dashboard_page.dart';
@@ -51,27 +52,33 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.dashboard,
         name: 'dashboard',
-        builder: (context, state) => const DashboardPage(),
+        builder: (context, state) =>
+            const LicenseGate(child: DashboardPage()),
       ),
       GoRoute(
         path: AppRoutes.routers,
         name: 'routers',
-        builder: (context, state) => const RoutersPage(),
+        builder: (context, state) => const LicenseGate(child: RoutersPage()),
       ),
       GoRoute(
         path: AppRoutes.hotspot,
         name: 'hotspot',
-        builder: (context, state) => const HotspotPage(),
+        builder: (context, state) {
+          final tab = state.uri.queryParameters['tab'];
+          return LicenseGate(
+            child: HotspotPage(initialTabIndex: tab == 'sessions' ? 2 : 0),
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.vouchers,
         name: 'vouchers',
-        builder: (context, state) => const VouchersPage(),
+        builder: (context, state) => const LicenseGate(child: VouchersPage()),
       ),
       GoRoute(
         path: AppRoutes.reports,
         name: 'reports',
-        builder: (context, state) => const ReportsPage(),
+        builder: (context, state) => const LicenseGate(child: ReportsPage()),
       ),
       GoRoute(
         path: AppRoutes.settings,
@@ -81,20 +88,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.wireGuard,
         name: 'wireguard',
-        builder: (context, state) => WireGuardPage(
-          initialTunnelName: state.uri.queryParameters['tunnel'],
+        builder: (context, state) => LicenseGate(
+          child: WireGuardPage(
+            initialTunnelName: state.uri.queryParameters['tunnel'],
+          ),
         ),
       ),
       GoRoute(
         path: AppRoutes.newRouter,
         name: 'new-router',
-        builder: (context, state) => const RouterFormPage(),
+        builder: (context, state) =>
+            const LicenseGate(child: RouterFormPage()),
       ),
       GoRoute(
         path: '/routers/:routerId/edit',
         name: 'edit-router',
         builder: (context, state) {
-          return RouterFormPage(routerId: state.pathParameters['routerId']);
+          return LicenseGate(
+            child: RouterFormPage(routerId: state.pathParameters['routerId']),
+          );
         },
       ),
     ],

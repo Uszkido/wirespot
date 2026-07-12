@@ -42,27 +42,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           title: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              BrandLogo(size: 36),
+              BrandLogo(size: 28),
               SizedBox(width: 10),
               Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppBranding.appName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      AppBranding.companyName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  AppBranding.appName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -195,6 +181,7 @@ class _DashboardContent extends ConsumerWidget {
                 icon: Icons.people_outline,
                 label: 'Online users',
                 value: snapshot.onlineUsers.toString(),
+                onTap: () => context.push(AppRoutes.hotspotSessions),
               ),
               MetricCard(
                 icon: Icons.receipt_long_outlined,

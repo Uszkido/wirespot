@@ -11,6 +11,7 @@ import '../../features/scheduler/domain/services/scheduler_settings_service.dart
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/services/app_settings_service.dart';
 import '../../features/settings/domain/services/backup_service.dart';
+import '../../features/vpn/domain/services/wireguard_settings_service.dart';
 import '../../features/voucher/domain/repositories/voucher_repository.dart';
 import '../../features/voucher/domain/services/voucher_encoding_settings_service.dart';
 import '../../features/voucher/domain/services/voucher_generation_service.dart';
@@ -45,6 +46,10 @@ final wireGuardAutoReconnectServiceProvider =
     Provider<WireGuardAutoReconnectService>(
       (ref) => sl<WireGuardAutoReconnectService>(),
     );
+
+final wireGuardSettingsServiceProvider = Provider<WireGuardSettingsService>(
+  (ref) => sl<WireGuardSettingsService>(),
+);
 
 final routerRepositoryProvider = Provider<RouterRepository>(
   (ref) => sl<RouterRepository>(),

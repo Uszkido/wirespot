@@ -20,6 +20,7 @@ import '../../features/settings/data/settings_local_repository.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/services/app_settings_service.dart';
 import '../../features/settings/domain/services/backup_service.dart';
+import '../../features/vpn/domain/services/wireguard_settings_service.dart';
 import '../../features/voucher/data/voucher_local_repository.dart';
 import '../../features/voucher/domain/repositories/voucher_repository.dart';
 import '../../features/voucher/domain/services/voucher_code_generator.dart';
@@ -144,6 +145,9 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<SchedulerSettingsService>(
       () => SchedulerSettingsService(sl<SettingsRepository>()),
+    )
+    ..registerLazySingleton<WireGuardSettingsService>(
+      () => WireGuardSettingsService(sl<SettingsRepository>()),
     )
     ..registerLazySingleton<EntitlementService>(
       () => EntitlementService(sl<SettingsRepository>()),

@@ -20,7 +20,9 @@ import '../domain/entities/hotspot_user_profile_entity.dart';
 import 'hotspot_providers.dart';
 
 class HotspotPage extends ConsumerWidget {
-  const HotspotPage({super.key});
+  const HotspotPage({this.initialTabIndex = 0, super.key});
+
+  final int initialTabIndex;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -49,7 +51,11 @@ class HotspotPage extends ConsumerWidget {
             orElse: () => items.first,
           );
 
-          return _HotspotRouterScope(routers: items, router: router);
+          return _HotspotRouterScope(
+            routers: items,
+            router: router,
+            initialTabIndex: initialTabIndex,
+          );
         },
         error: (error, stackTrace) => EmptyState(
           icon: Icons.error_outline,
@@ -63,15 +69,21 @@ class HotspotPage extends ConsumerWidget {
 }
 
 class _HotspotRouterScope extends ConsumerWidget {
-  const _HotspotRouterScope({required this.routers, required this.router});
+  const _HotspotRouterScope({
+    required this.routers,
+    required this.router,
+    required this.initialTabIndex,
+  });
 
   final List<RouterEntity> routers;
   final RouterEntity router;
+  final int initialTabIndex;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
       length: 6,
+      initialIndex: initialTabIndex.clamp(0, 5).toInt(),
       child: Column(
         children: [
           Padding(

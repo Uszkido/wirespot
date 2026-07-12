@@ -4,6 +4,23 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.10+11 - 2026-07-12
+
+Trial licensing and operator access build.
+
+### Added
+
+- 7-day app trial with full-app license gate after expiry.
+- Device-bound license ID and license status in Settings.
+- Local license generator script and license-generation documentation.
+- Dashboard online-users metric now opens Hotspot sessions directly.
+- WireGuard page now explains Android VPN consent requirements.
+- WireGuard selected-tunnel and auto-reconnect settings foundation.
+
+### Changed
+
+- Dashboard app bar branding is more restrained and professional.
+
 ## 0.1.9+10 - 2026-07-12
 
 WireGuard management screen build.
