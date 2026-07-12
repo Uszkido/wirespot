@@ -130,4 +130,34 @@ void main() {
       'comment': 'WireSpot hotspot1 nat',
     });
   });
+
+  test('HotspotSetupInput creates ordered setup plan', () {
+    const input = HotspotSetupInput(
+      serverName: 'hotspot1',
+      interfaceName: 'bridge',
+      serverProfileName: 'hsprof1',
+      provisionNetwork: true,
+      ipAddressWithPrefix: '10.5.50.1/24',
+      poolName: 'hs-pool',
+      poolRanges: '10.5.50.10-10.5.50.254',
+      dhcpServerName: 'hs-dhcp',
+      dhcpNetwork: '10.5.50.0/24',
+      dhcpGateway: '10.5.50.1',
+      enableNatMasquerade: true,
+      natSrcAddress: '10.5.50.0/24',
+    );
+
+    final plan = input.toPlan();
+
+    expect(plan.steps.map((step) => step.command), [
+      '/ip/address/add',
+      '/ip/pool/add',
+      '/ip/dhcp-server/network/add',
+      '/ip/dhcp-server/add',
+      '/ip/firewall/nat/add',
+      '/ip/hotspot/profile/add',
+      '/ip/hotspot/add',
+    ]);
+    expect(plan.toLines().first, 'Add missing interface IP address');
+  });
 }

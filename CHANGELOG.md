@@ -4,6 +4,16 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.7+8 - 2026-07-12
+
+Hotspot setup review build.
+
+### Added
+
+- Review step before applying hotspot setup changes.
+- Hotspot setup plan model that lists planned RouterOS command groups and attributes.
+- Unit coverage for setup plan ordering.
+
 ## 0.1.6+7 - 2026-07-12
 
 Advanced hotspot network provisioning build.

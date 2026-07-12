@@ -1,3 +1,5 @@
+import 'hotspot_setup_plan.dart';
+
 class HotspotSetupInput {
   const HotspotSetupInput({
     required this.serverName,
@@ -135,6 +137,77 @@ class HotspotSetupInput {
       if (_hasText(natOutInterface)) 'out-interface': natOutInterface!.trim(),
       'comment': _comment('nat'),
     };
+  }
+
+  HotspotSetupPlan toPlan() {
+    final steps = <HotspotSetupStep>[];
+    final addressAttributes = toAddressAttributes();
+    if (addressAttributes != null) {
+      steps.add(
+        HotspotSetupStep(
+          title: 'Add missing interface IP address',
+          command: '/ip/address/add',
+          attributes: addressAttributes,
+        ),
+      );
+    }
+    final poolAttributes = toPoolAttributes();
+    if (poolAttributes != null) {
+      steps.add(
+        HotspotSetupStep(
+          title: 'Add missing IP pool',
+          command: '/ip/pool/add',
+          attributes: poolAttributes,
+        ),
+      );
+    }
+    final dhcpNetworkAttributes = toDhcpNetworkAttributes();
+    if (dhcpNetworkAttributes != null) {
+      steps.add(
+        HotspotSetupStep(
+          title: 'Add missing DHCP network',
+          command: '/ip/dhcp-server/network/add',
+          attributes: dhcpNetworkAttributes,
+        ),
+      );
+    }
+    final dhcpServerAttributes = toDhcpServerAttributes();
+    if (dhcpServerAttributes != null) {
+      steps.add(
+        HotspotSetupStep(
+          title: 'Add missing DHCP server',
+          command: '/ip/dhcp-server/add',
+          attributes: dhcpServerAttributes,
+        ),
+      );
+    }
+    final natAttributes = toNatMasqueradeAttributes();
+    if (natAttributes != null) {
+      steps.add(
+        HotspotSetupStep(
+          title: 'Add missing NAT masquerade rule',
+          command: '/ip/firewall/nat/add',
+          attributes: natAttributes,
+        ),
+      );
+    }
+    steps
+      ..add(
+        HotspotSetupStep(
+          title: 'Create or reuse hotspot server profile',
+          command: '/ip/hotspot/profile/add',
+          attributes: toServerProfileAttributes(),
+        ),
+      )
+      ..add(
+        HotspotSetupStep(
+          title: 'Create or update hotspot server',
+          command: '/ip/hotspot/add',
+          attributes: toServerAttributes(),
+        ),
+      );
+
+    return HotspotSetupPlan(steps: steps);
   }
 
   List<String> _loginByModes() {

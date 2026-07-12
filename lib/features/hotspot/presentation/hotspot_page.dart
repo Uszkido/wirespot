@@ -651,6 +651,10 @@ Future<void> _showSetupHotspotDialog(
     if (input == null) {
       return;
     }
+    final confirmed = await _showSetupPlanDialog(context, input);
+    if (!confirmed) {
+      return;
+    }
     await ref.read(hotspotServiceProvider).setupHotspot(router, input);
     ref.invalidate(hotspotProfilesProvider(router));
     if (context.mounted) {
@@ -677,6 +681,67 @@ Future<void> _showSetupHotspotDialog(
     natSrcAddressController.dispose();
     natOutInterfaceController.dispose();
   }
+}
+
+Future<bool> _showSetupPlanDialog(
+  BuildContext context,
+  HotspotSetupInput input,
+) async {
+  final plan = input.toPlan();
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Review setup'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'WireSpot will check for existing records before adding these RouterOS settings.',
+              ),
+              const SizedBox(height: 12),
+              for (final step in plan.steps)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        step.title,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        step.command,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 4),
+                      for (final attribute in step.attributes.entries)
+                        Text('${attribute.key}: ${attribute.value}'),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Back'),
+        ),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).pop(true),
+          icon: const Icon(Icons.check_circle_outline),
+          label: const Text('Apply'),
+        ),
+      ],
+    ),
+  );
+  return result ?? false;
 }
 
 Future<void> _showCreateUserDialog(
