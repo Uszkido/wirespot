@@ -4,6 +4,17 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.6+7 - 2026-07-12
+
+Advanced hotspot network provisioning build.
+
+### Added
+
+- Optional LAN provisioning controls in the hotspot setup assistant.
+- RouterOS IP address, pool, DHCP network, DHCP server, and NAT masquerade command generation.
+- Idempotent RouterOS checks before adding network provisioning records.
+- Unit coverage for advanced hotspot provisioning attributes.
+
 ## 0.1.5+6 - 2026-07-12
 
 Hotspot setup assistant build.

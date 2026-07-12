@@ -23,6 +23,7 @@ class RouterOsHotspotService implements HotspotService {
     HotspotSetupInput input,
   ) async {
     _validateSetupInput(input);
+    await _provisionNetwork(router, input);
     final existingProfile = await _routerConnectionService.execute(
       router,
       '/ip/hotspot/profile/print',
@@ -55,6 +56,87 @@ class RouterOsHotspotService implements HotspotService {
         router,
         '/ip/hotspot/set',
         attributes: {'.id': serverId, ...input.toServerAttributes()},
+      );
+    }
+  }
+
+  Future<void> _provisionNetwork(
+    RouterEntity router,
+    HotspotSetupInput input,
+  ) async {
+    final addressAttributes = input.toAddressAttributes();
+    if (addressAttributes != null) {
+      await _addWhenMissing(
+        router,
+        printCommand: '/ip/address/print',
+        addCommand: '/ip/address/add',
+        queries: ['=address=${addressAttributes['address']}'],
+        attributes: addressAttributes,
+      );
+    }
+
+    final poolAttributes = input.toPoolAttributes();
+    if (poolAttributes != null) {
+      await _addWhenMissing(
+        router,
+        printCommand: '/ip/pool/print',
+        addCommand: '/ip/pool/add',
+        queries: ['=name=${poolAttributes['name']}'],
+        attributes: poolAttributes,
+      );
+    }
+
+    final dhcpNetworkAttributes = input.toDhcpNetworkAttributes();
+    if (dhcpNetworkAttributes != null) {
+      await _addWhenMissing(
+        router,
+        printCommand: '/ip/dhcp-server/network/print',
+        addCommand: '/ip/dhcp-server/network/add',
+        queries: ['=address=${dhcpNetworkAttributes['address']}'],
+        attributes: dhcpNetworkAttributes,
+      );
+    }
+
+    final dhcpServerAttributes = input.toDhcpServerAttributes();
+    if (dhcpServerAttributes != null) {
+      await _addWhenMissing(
+        router,
+        printCommand: '/ip/dhcp-server/print',
+        addCommand: '/ip/dhcp-server/add',
+        queries: ['=name=${dhcpServerAttributes['name']}'],
+        attributes: dhcpServerAttributes,
+      );
+    }
+
+    final natAttributes = input.toNatMasqueradeAttributes();
+    if (natAttributes != null) {
+      await _addWhenMissing(
+        router,
+        printCommand: '/ip/firewall/nat/print',
+        addCommand: '/ip/firewall/nat/add',
+        queries: ['=comment=${natAttributes['comment']}'],
+        attributes: natAttributes,
+      );
+    }
+  }
+
+  Future<void> _addWhenMissing(
+    RouterEntity router, {
+    required String printCommand,
+    required String addCommand,
+    required List<String> queries,
+    required Map<String, String> attributes,
+  }) async {
+    final existing = await _routerConnectionService.execute(
+      router,
+      printCommand,
+      queries: queries,
+    );
+    if (existing.isEmpty) {
+      await _routerConnectionService.execute(
+        router,
+        addCommand,
+        attributes: attributes,
       );
     }
   }

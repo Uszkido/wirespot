@@ -418,9 +418,22 @@ Future<void> _showSetupHotspotDialog(
   final serverNameController = TextEditingController(text: 'hotspot1');
   final interfaceController = TextEditingController(text: 'bridge');
   final serverProfileController = TextEditingController(text: 'hsprof1');
-  final hotspotAddressController = TextEditingController();
+  final hotspotAddressController = TextEditingController(text: '10.5.50.1');
   final dnsNameController = TextEditingController(text: 'hotspot.local');
-  final addressPoolController = TextEditingController();
+  final addressPoolController = TextEditingController(text: 'hs-pool');
+  final ipAddressController = TextEditingController(text: '10.5.50.1/24');
+  final poolNameController = TextEditingController(text: 'hs-pool');
+  final poolRangesController = TextEditingController(
+    text: '10.5.50.10-10.5.50.254',
+  );
+  final dhcpServerController = TextEditingController(text: 'hs-dhcp');
+  final dhcpNetworkController = TextEditingController(text: '10.5.50.0/24');
+  final dhcpGatewayController = TextEditingController(text: '10.5.50.1');
+  final dnsServersController = TextEditingController(text: '10.5.50.1');
+  final natSrcAddressController = TextEditingController(text: '10.5.50.0/24');
+  final natOutInterfaceController = TextEditingController();
+  var provisionNetwork = false;
+  var enableNatMasquerade = false;
   var loginByCookie = true;
   var loginByHttpPap = true;
   var loginByHttps = false;
@@ -480,9 +493,96 @@ Future<void> _showSetupHotspotDialog(
                   controller: addressPoolController,
                   decoration: const InputDecoration(
                     labelText: 'Address pool',
-                    helperText: 'Optional existing RouterOS pool.',
+                    helperText: 'Existing or generated RouterOS pool.',
                   ),
                 ),
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  value: provisionNetwork,
+                  onChanged: (value) =>
+                      setState(() => provisionNetwork = value),
+                  title: const Text('Provision LAN network'),
+                  subtitle: const Text(
+                    'Adds missing IP address, pool, DHCP, and optional NAT.',
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                if (provisionNetwork) ...[
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: ipAddressController,
+                    decoration: const InputDecoration(
+                      labelText: 'Interface IP',
+                      helperText: 'Example: 10.5.50.1/24',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: poolNameController,
+                    decoration: const InputDecoration(labelText: 'Pool name'),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: poolRangesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Pool ranges',
+                      helperText: 'Example: 10.5.50.10-10.5.50.254',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: dhcpServerController,
+                    decoration: const InputDecoration(
+                      labelText: 'DHCP server name',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: dhcpNetworkController,
+                    decoration: const InputDecoration(
+                      labelText: 'DHCP network',
+                      helperText: 'Example: 10.5.50.0/24',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: dhcpGatewayController,
+                    decoration: const InputDecoration(labelText: 'Gateway'),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: dnsServersController,
+                    decoration: const InputDecoration(
+                      labelText: 'DNS servers',
+                      helperText: 'Comma-separated RouterOS value.',
+                    ),
+                  ),
+                  SwitchListTile(
+                    value: enableNatMasquerade,
+                    onChanged: (value) =>
+                        setState(() => enableNatMasquerade = value),
+                    title: const Text('Add NAT masquerade'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  if (enableNatMasquerade) ...[
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: natSrcAddressController,
+                      decoration: const InputDecoration(
+                        labelText: 'NAT source',
+                        helperText: 'Example: 10.5.50.0/24',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: natOutInterfaceController,
+                      decoration: const InputDecoration(
+                        labelText: 'WAN interface',
+                        helperText: 'Optional, e.g. ether1',
+                      ),
+                    ),
+                  ],
+                ],
                 SwitchListTile(
                   value: loginByCookie,
                   onChanged: (value) => setState(() => loginByCookie = value),
@@ -524,6 +624,17 @@ Future<void> _showSetupHotspotDialog(
                   hotspotAddress: hotspotAddressController.text.trim(),
                   dnsName: dnsNameController.text.trim(),
                   addressPool: addressPoolController.text.trim(),
+                  provisionNetwork: provisionNetwork,
+                  ipAddressWithPrefix: ipAddressController.text.trim(),
+                  poolName: poolNameController.text.trim(),
+                  poolRanges: poolRangesController.text.trim(),
+                  dhcpServerName: dhcpServerController.text.trim(),
+                  dhcpNetwork: dhcpNetworkController.text.trim(),
+                  dhcpGateway: dhcpGatewayController.text.trim(),
+                  dnsServers: dnsServersController.text.trim(),
+                  enableNatMasquerade: enableNatMasquerade,
+                  natSrcAddress: natSrcAddressController.text.trim(),
+                  natOutInterface: natOutInterfaceController.text.trim(),
                   loginByCookie: loginByCookie,
                   loginByHttpPap: loginByHttpPap,
                   loginByHttps: loginByHttps,
@@ -556,6 +667,15 @@ Future<void> _showSetupHotspotDialog(
     hotspotAddressController.dispose();
     dnsNameController.dispose();
     addressPoolController.dispose();
+    ipAddressController.dispose();
+    poolNameController.dispose();
+    poolRangesController.dispose();
+    dhcpServerController.dispose();
+    dhcpNetworkController.dispose();
+    dhcpGatewayController.dispose();
+    dnsServersController.dispose();
+    natSrcAddressController.dispose();
+    natOutInterfaceController.dispose();
   }
 }
 

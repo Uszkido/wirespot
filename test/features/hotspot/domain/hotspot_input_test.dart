@@ -82,4 +82,52 @@ void main() {
       'disabled': 'no',
     });
   });
+
+  test('HotspotSetupInput maps optional network provisioning attributes', () {
+    const input = HotspotSetupInput(
+      serverName: 'hotspot1',
+      interfaceName: 'bridge',
+      serverProfileName: 'hsprof1',
+      provisionNetwork: true,
+      ipAddressWithPrefix: '10.5.50.1/24',
+      poolName: 'hs-pool',
+      poolRanges: '10.5.50.10-10.5.50.254',
+      dhcpServerName: 'hs-dhcp',
+      dhcpNetwork: '10.5.50.0/24',
+      dhcpGateway: '10.5.50.1',
+      dnsServers: '10.5.50.1,8.8.8.8',
+      enableNatMasquerade: true,
+      natSrcAddress: '10.5.50.0/24',
+      natOutInterface: 'ether1',
+    );
+
+    expect(input.toAddressAttributes(), {
+      'address': '10.5.50.1/24',
+      'interface': 'bridge',
+      'comment': 'WireSpot hotspot1 address',
+    });
+    expect(input.toPoolAttributes(), {
+      'name': 'hs-pool',
+      'ranges': '10.5.50.10-10.5.50.254',
+    });
+    expect(input.toDhcpServerAttributes(), {
+      'name': 'hs-dhcp',
+      'interface': 'bridge',
+      'address-pool': 'hs-pool',
+      'disabled': 'no',
+    });
+    expect(input.toDhcpNetworkAttributes(), {
+      'address': '10.5.50.0/24',
+      'gateway': '10.5.50.1',
+      'dns-server': '10.5.50.1,8.8.8.8',
+      'comment': 'WireSpot hotspot1 network',
+    });
+    expect(input.toNatMasqueradeAttributes(), {
+      'chain': 'srcnat',
+      'action': 'masquerade',
+      'src-address': '10.5.50.0/24',
+      'out-interface': 'ether1',
+      'comment': 'WireSpot hotspot1 nat',
+    });
+  });
 }
