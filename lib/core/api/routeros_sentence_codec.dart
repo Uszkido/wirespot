@@ -21,10 +21,7 @@ class RouterOsSentenceCodec {
       return [length];
     }
     if (length < 0x4000) {
-      return [
-        ((length >> 8) | 0x80) & 0xFF,
-        length & 0xFF,
-      ];
+      return [((length >> 8) | 0x80) & 0xFF, length & 0xFF];
     }
     if (length < 0x200000) {
       return [

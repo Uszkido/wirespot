@@ -8,12 +8,12 @@ final routersProvider = StreamProvider.autoDispose<List<RouterEntity>>((ref) {
   return ref.watch(routerRepositoryProvider).watchRouters();
 });
 
-final routerByIdProvider =
-    FutureProvider.autoDispose.family<RouterEntity?, String>((ref, routerId) {
-  return ref.watch(routerRepositoryProvider).getRouter(routerId);
-});
+final routerByIdProvider = FutureProvider.autoDispose
+    .family<RouterEntity?, String>((ref, routerId) {
+      return ref.watch(routerRepositoryProvider).getRouter(routerId);
+    });
 
 final routerGroupsProvider =
     FutureProvider.autoDispose<List<RouterGroupEntity>>((ref) {
-  return ref.watch(routerRepositoryProvider).getGroups();
-});
+      return ref.watch(routerRepositoryProvider).getGroups();
+    });

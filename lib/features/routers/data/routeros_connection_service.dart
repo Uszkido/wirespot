@@ -12,9 +12,9 @@ class RouterOsConnectionService implements RouterConnectionService {
     required RouterOsClientFactory clientFactory,
     required RouterCredentialStore credentialStore,
     required VpnStatusService vpnStatusService,
-  })  : _clientFactory = clientFactory,
-        _credentialStore = credentialStore,
-        _vpnStatusService = vpnStatusService;
+  }) : _clientFactory = clientFactory,
+       _credentialStore = credentialStore,
+       _vpnStatusService = vpnStatusService;
 
   final RouterOsClientFactory _clientFactory;
   final RouterCredentialStore _credentialStore;

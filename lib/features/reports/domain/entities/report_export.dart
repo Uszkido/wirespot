@@ -1,9 +1,6 @@
 import 'revenue_summary.dart';
 
-enum ReportExportFormat {
-  pdf,
-  excel,
-}
+enum ReportExportFormat { pdf, excel }
 
 class ReportExport {
   const ReportExport({
@@ -18,10 +15,7 @@ class ReportExport {
 }
 
 class ReportExportRequest {
-  const ReportExportRequest({
-    required this.summary,
-    required this.format,
-  });
+  const ReportExportRequest({required this.summary, required this.format});
 
   final RevenueSummary summary;
   final ReportExportFormat format;

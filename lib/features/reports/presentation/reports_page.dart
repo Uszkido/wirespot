@@ -44,7 +44,8 @@ class ReportsPage extends ConsumerWidget {
                 ref.read(selectedReportPeriodProvider.notifier).state = value;
               },
             ),
-            error: (error, stackTrace) => Text('Router filter unavailable: $error'),
+            error: (error, stackTrace) =>
+                Text('Router filter unavailable: $error'),
             loading: () => const LinearProgressIndicator(),
           ),
           const SizedBox(height: 16),
@@ -163,7 +164,8 @@ class _ReportContent extends ConsumerWidget {
             _SummaryTile(
               icon: Icons.payments_outlined,
               label: 'Revenue',
-              value: '${summary.currency} ${summary.totalMajor.toStringAsFixed(0)}',
+              value:
+                  '${summary.currency} ${summary.totalMajor.toStringAsFixed(0)}',
             ),
             _SummaryTile(
               icon: Icons.receipt_long_outlined,
@@ -177,11 +179,8 @@ class _ReportContent extends ConsumerWidget {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () => _showExport(
-                  context,
-                  ref,
-                  ReportExportFormat.excel,
-                ),
+                onPressed: () =>
+                    _showExport(context, ref, ReportExportFormat.excel),
                 icon: const Icon(Icons.table_chart_outlined),
                 label: const Text('Excel'),
               ),
@@ -189,11 +188,8 @@ class _ReportContent extends ConsumerWidget {
             const SizedBox(width: 12),
             Expanded(
               child: FilledButton.icon(
-                onPressed: () => _showExport(
-                  context,
-                  ref,
-                  ReportExportFormat.pdf,
-                ),
+                onPressed: () =>
+                    _showExport(context, ref, ReportExportFormat.pdf),
                 icon: const Icon(Icons.picture_as_pdf_outlined),
                 label: const Text('PDF'),
               ),
@@ -203,9 +199,9 @@ class _ReportContent extends ConsumerWidget {
         const SizedBox(height: 20),
         Text(
           'Sales',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 8),
         if (summary.sales.isEmpty)
@@ -235,18 +231,16 @@ class _ReportContent extends ConsumerWidget {
     WidgetRef ref,
     ReportExportFormat format,
   ) async {
-    final export = ref.read(reportExportServiceProvider).export(
-          ReportExportRequest(summary: summary, format: format),
-        );
+    final export = ref
+        .read(reportExportServiceProvider)
+        .export(ReportExportRequest(summary: summary, format: format));
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(export.fileName),
         content: SizedBox(
           width: double.maxFinite,
-          child: SingleChildScrollView(
-            child: SelectableText(export.content),
-          ),
+          child: SingleChildScrollView(child: SelectableText(export.content)),
         ),
         actions: [
           TextButton(
@@ -288,15 +282,11 @@ class _SummaryTile extends StatelessWidget {
                 value,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               ),
-              Text(
-                label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Text(label, maxLines: 2, overflow: TextOverflow.ellipsis),
             ],
           ),
         ),

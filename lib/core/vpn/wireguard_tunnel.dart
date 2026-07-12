@@ -10,9 +10,6 @@ class WireGuardTunnel {
   final DateTime? createdAt;
 
   Map<String, Object?> toPlatformMap() {
-    return {
-      'name': name,
-      'config': config,
-    };
+    return {'name': name, 'config': config};
   }
 }

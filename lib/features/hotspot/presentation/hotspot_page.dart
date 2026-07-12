@@ -62,10 +62,7 @@ class HotspotPage extends ConsumerWidget {
 }
 
 class _HotspotRouterScope extends ConsumerWidget {
-  const _HotspotRouterScope({
-    required this.routers,
-    required this.router,
-  });
+  const _HotspotRouterScope({required this.routers, required this.router});
 
   final List<RouterEntity> routers;
   final RouterEntity router;
@@ -86,13 +83,11 @@ class _HotspotRouterScope extends ConsumerWidget {
               ),
               items: [
                 for (final item in routers)
-                  DropdownMenuItem(
-                    value: item.id,
-                    child: Text(item.name),
-                  ),
+                  DropdownMenuItem(value: item.id, child: Text(item.name)),
               ],
               onChanged: (value) {
-                ref.read(selectedHotspotRouterIdProvider.notifier).state = value;
+                ref.read(selectedHotspotRouterIdProvider.notifier).state =
+                    value;
               },
             ),
           ),
@@ -156,10 +151,7 @@ class _UsersTab extends ConsumerWidget {
               value: _UserAction.resetCounters,
               child: Text('Reset counters'),
             ),
-            PopupMenuItem(
-              value: _UserAction.delete,
-              child: Text('Delete'),
-            ),
+            PopupMenuItem(value: _UserAction.delete, child: Text('Delete')),
           ],
         ),
       ),
@@ -384,10 +376,8 @@ class _AsyncListScaffold<T> extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
                 itemCount: items.length,
                 separatorBuilder: (context, index) => const Divider(height: 1),
-                itemBuilder: (context, index) => itemBuilder(
-                  context,
-                  items[index],
-                ),
+                itemBuilder: (context, index) =>
+                    itemBuilder(context, items[index]),
               ),
             );
           },
@@ -398,12 +388,7 @@ class _AsyncListScaffold<T> extends StatelessWidget {
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
         ),
-        if (action != null)
-          Positioned(
-            right: 16,
-            bottom: 16,
-            child: action!,
-          ),
+        if (action != null) Positioned(right: 16, bottom: 16, child: action!),
       ],
     );
   }
@@ -418,55 +403,130 @@ Future<void> _showCreateUserDialog(
   final passwordController = TextEditingController();
   final profileController = TextEditingController();
   final limitUptimeController = TextEditingController();
+  final priceController = TextEditingController();
+  final dataLimitMbController = TextEditingController();
+  var userMode = 'usernamePassword';
   try {
     final input = await showDialog<HotspotUserInput>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add hotspot user'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: usernameController,
-                decoration: const InputDecoration(labelText: 'Username'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Password'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: profileController,
-                decoration: const InputDecoration(labelText: 'Profile'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: limitUptimeController,
-                decoration: const InputDecoration(labelText: 'Limit uptime'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(
-              HotspotUserInput(
-                username: usernameController.text.trim(),
-                password: passwordController.text.trim(),
-                profile: profileController.text.trim(),
-                limitUptime: limitUptimeController.text.trim(),
-              ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Add hotspot user'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: userMode,
+                  decoration: const InputDecoration(labelText: 'Login mode'),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'usernamePassword',
+                      child: Text('Username + password'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'usernameOnly',
+                      child: Text('Username only'),
+                    ),
+                    DropdownMenuItem(value: 'pinOnly', child: Text('PIN only')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => userMode = value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: usernameController,
+                  keyboardType: userMode == 'pinOnly'
+                      ? TextInputType.number
+                      : TextInputType.text,
+                  decoration: InputDecoration(
+                    labelText: userMode == 'pinOnly' ? 'PIN' : 'Username',
+                  ),
+                ),
+                if (userMode == 'usernamePassword') ...[
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(labelText: 'Password'),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                TextField(
+                  controller: profileController,
+                  decoration: const InputDecoration(labelText: 'Profile'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: limitUptimeController,
+                  decoration: const InputDecoration(
+                    labelText: 'Time limit',
+                    helperText: 'RouterOS format, for example 1h, 3h, 1d',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: priceController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Price',
+                          prefixText: 'NGN ',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: dataLimitMbController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Data limit',
+                          suffixText: 'MB',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            child: const Text('Create'),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final dataLimitMb = int.tryParse(
+                  dataLimitMbController.text.trim(),
+                );
+                Navigator.of(context).pop(
+                  HotspotUserInput(
+                    username: usernameController.text.trim(),
+                    password: userMode == 'usernamePassword'
+                        ? passwordController.text.trim()
+                        : '',
+                    profile: profileController.text.trim(),
+                    limitUptime: limitUptimeController.text.trim(),
+                    limitBytesTotal: dataLimitMb == null
+                        ? null
+                        : dataLimitMb * 1024 * 1024,
+                    comment: priceController.text.trim().isEmpty
+                        ? null
+                        : 'Price NGN ${priceController.text.trim()}',
+                  ),
+                );
+              },
+              child: const Text('Create'),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -487,6 +547,8 @@ Future<void> _showCreateUserDialog(
     passwordController.dispose();
     profileController.dispose();
     limitUptimeController.dispose();
+    priceController.dispose();
+    dataLimitMbController.dispose();
   }
 }
 
@@ -497,30 +559,104 @@ Future<void> _showCreateProfileDialog(
 ) async {
   final nameController = TextEditingController();
   final rateLimitController = TextEditingController();
+  final uploadController = TextEditingController();
+  final downloadController = TextEditingController();
   final sessionTimeoutController = TextEditingController();
+  final idleTimeoutController = TextEditingController();
+  final keepaliveTimeoutController = TextEditingController();
+  final sharedUsersController = TextEditingController(text: '1');
+  final priceController = TextEditingController();
+  final dataLimitMbController = TextEditingController();
   try {
     final input = await showDialog<HotspotProfileInput>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Add profile'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: rateLimitController,
-              decoration: const InputDecoration(labelText: 'Rate limit'),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: sessionTimeoutController,
-              decoration: const InputDecoration(labelText: 'Session timeout'),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: rateLimitController,
+                decoration: const InputDecoration(
+                  labelText: 'Raw rate limit',
+                  helperText: 'Optional RouterOS format, e.g. 2M/5M',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: uploadController,
+                      decoration: const InputDecoration(labelText: 'Upload'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: downloadController,
+                      decoration: const InputDecoration(labelText: 'Download'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: priceController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Price',
+                        prefixText: 'NGN ',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: dataLimitMbController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Data',
+                        suffixText: 'MB',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: sessionTimeoutController,
+                decoration: const InputDecoration(labelText: 'Session timeout'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: idleTimeoutController,
+                decoration: const InputDecoration(labelText: 'Idle timeout'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: keepaliveTimeoutController,
+                decoration: const InputDecoration(
+                  labelText: 'Keepalive timeout',
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: sharedUsersController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Shared users'),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -528,13 +664,28 @@ Future<void> _showCreateProfileDialog(
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () => Navigator.of(context).pop(
-              HotspotProfileInput(
-                name: nameController.text.trim(),
-                rateLimit: rateLimitController.text.trim(),
-                sessionTimeout: sessionTimeoutController.text.trim(),
-              ),
-            ),
+            onPressed: () {
+              final priceMajor = int.tryParse(priceController.text.trim());
+              final dataLimitMb = int.tryParse(
+                dataLimitMbController.text.trim(),
+              );
+              Navigator.of(context).pop(
+                HotspotProfileInput(
+                  name: nameController.text.trim(),
+                  rateLimit: rateLimitController.text.trim(),
+                  uploadLimit: uploadController.text.trim(),
+                  downloadLimit: downloadController.text.trim(),
+                  sessionTimeout: sessionTimeoutController.text.trim(),
+                  idleTimeout: idleTimeoutController.text.trim(),
+                  keepaliveTimeout: keepaliveTimeoutController.text.trim(),
+                  sharedUsers: int.tryParse(sharedUsersController.text.trim()),
+                  priceMinor: priceMajor == null ? null : priceMajor * 100,
+                  dataLimitBytes: dataLimitMb == null
+                      ? null
+                      : dataLimitMb * 1024 * 1024,
+                ),
+              );
+            },
             child: const Text('Create'),
           ),
         ],
@@ -556,7 +707,14 @@ Future<void> _showCreateProfileDialog(
   } finally {
     nameController.dispose();
     rateLimitController.dispose();
+    uploadController.dispose();
+    downloadController.dispose();
     sessionTimeoutController.dispose();
+    idleTimeoutController.dispose();
+    keepaliveTimeoutController.dispose();
+    sharedUsersController.dispose();
+    priceController.dispose();
+    dataLimitMbController.dispose();
   }
 }
 
@@ -675,7 +833,9 @@ Future<void> _disconnectSession(
   HotspotActiveSessionEntity session,
 ) async {
   try {
-    await ref.read(hotspotServiceProvider).disconnectSession(router, session.id);
+    await ref
+        .read(hotspotServiceProvider)
+        .disconnectSession(router, session.id);
     ref.invalidate(hotspotActiveSessionsProvider(router));
     if (context.mounted) {
       _showSnack(context, 'Session disconnected.');
@@ -726,12 +886,7 @@ Future<void> _deleteBinding(
 }
 
 void _showSnack(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message)),
-  );
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 }
 
-enum _UserAction {
-  resetCounters,
-  delete,
-}
+enum _UserAction { resetCounters, delete }

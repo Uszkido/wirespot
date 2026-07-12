@@ -8,10 +8,7 @@ class VoucherReceiptTemplateService {
 
   final VoucherQrService _qrService;
 
-  VoucherReceipt build({
-    required VoucherEntity voucher,
-    String loginUrl = '',
-  }) {
+  VoucherReceipt build({required VoucherEntity voucher, String loginUrl = ''}) {
     return VoucherReceipt(
       voucher: voucher,
       businessName: AppBranding.companyName,

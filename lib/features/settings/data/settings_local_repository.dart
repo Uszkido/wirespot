@@ -11,15 +11,17 @@ class SettingsLocalRepository implements SettingsRepository {
 
   @override
   Future<String?> readSetting(String key) async {
-    final record = await (_database.select(_database.appSettings)
-          ..where((table) => table.key.equals(key)))
-        .getSingleOrNull();
+    final record = await (_database.select(
+      _database.appSettings,
+    )..where((table) => table.key.equals(key))).getSingleOrNull();
     return record?.value;
   }
 
   @override
   Future<void> writeSetting(String key, String value) {
-    return _database.into(_database.appSettings).insertOnConflictUpdate(
+    return _database
+        .into(_database.appSettings)
+        .insertOnConflictUpdate(
           AppSettingsCompanion.insert(
             key: key,
             value: value,
@@ -30,9 +32,9 @@ class SettingsLocalRepository implements SettingsRepository {
 
   @override
   Future<List<PrinterConfigEntity>> getPrinters() async {
-    final records = await (_database.select(_database.printerConfigs)
-          ..orderBy([(table) => OrderingTerm.asc(table.name)]))
-        .get();
+    final records = await (_database.select(
+      _database.printerConfigs,
+    )..orderBy([(table) => OrderingTerm.asc(table.name)])).get();
     return records.map(_mapPrinter).toList();
   }
 
@@ -41,11 +43,13 @@ class SettingsLocalRepository implements SettingsRepository {
     final now = DateTime.now();
     return _database.transaction(() async {
       if (printer.isDefault) {
-        await _database.update(_database.printerConfigs).write(
-              const PrinterConfigsCompanion(isDefault: Value(false)),
-            );
+        await _database
+            .update(_database.printerConfigs)
+            .write(const PrinterConfigsCompanion(isDefault: Value(false)));
       }
-      await _database.into(_database.printerConfigs).insertOnConflictUpdate(
+      await _database
+          .into(_database.printerConfigs)
+          .insertOnConflictUpdate(
             PrinterConfigsCompanion.insert(
               id: printer.id,
               name: printer.name,
@@ -60,9 +64,9 @@ class SettingsLocalRepository implements SettingsRepository {
 
   @override
   Future<void> deletePrinter(String id) {
-    return (_database.delete(_database.printerConfigs)
-          ..where((table) => table.id.equals(id)))
-        .go();
+    return (_database.delete(
+      _database.printerConfigs,
+    )..where((table) => table.id.equals(id))).go();
   }
 }
 

@@ -11,7 +11,9 @@ class ReportLocalRepository implements ReportRepository {
 
   @override
   Future<void> recordSale(SaleEntity sale) {
-    return _database.into(_database.sales).insertOnConflictUpdate(
+    return _database
+        .into(_database.sales)
+        .insertOnConflictUpdate(
           SalesCompanion.insert(
             id: sale.id,
             routerId: sale.routerId,

@@ -133,10 +133,7 @@ class RouterOsApiClient {
   }) async {
     await execute(
       '/login',
-      attributes: {
-        'name': username,
-        'password': password,
-      },
+      attributes: {'name': username, 'password': password},
     );
   }
 
@@ -144,10 +141,7 @@ class RouterOsApiClient {
     required String username,
     required String password,
   }) async {
-    final challenge = await execute(
-      '/login',
-      attributes: {'name': username},
-    );
+    final challenge = await execute('/login', attributes: {'name': username});
     final challengeHex = challenge.doneAttributes['ret'];
     if (challengeHex == null || challengeHex.isEmpty) {
       throw const RouterOsAuthenticationException(
@@ -158,20 +152,13 @@ class RouterOsApiClient {
     final digest = _legacyChallengeResponse(password, challengeHex);
     await execute(
       '/login',
-      attributes: {
-        'name': username,
-        'response': '00$digest',
-      },
+      attributes: {'name': username, 'response': '00$digest'},
     );
   }
 
   String _legacyChallengeResponse(String password, String challengeHex) {
     final challenge = _decodeHex(challengeHex);
-    final input = <int>[
-      0,
-      ...utf8.encode(password),
-      ...challenge,
-    ];
+    final input = <int>[0, ...utf8.encode(password), ...challenge];
     return md5.convert(input).toString();
   }
 
@@ -236,7 +223,9 @@ class RouterOsApiClient {
   Future<List<String>> _readSentence() async {
     final reader = _reader;
     if (reader == null) {
-      throw const RouterOsConnectionException('RouterOS socket reader is closed.');
+      throw const RouterOsConnectionException(
+        'RouterOS socket reader is closed.',
+      );
     }
 
     final words = <String>[];
@@ -269,7 +258,8 @@ class RouterOsApiClient {
   }
 
   RouterOsApiException _exceptionFromReply(RouterOsReply reply) {
-    final message = reply.attributes['message'] ??
+    final message =
+        reply.attributes['message'] ??
         reply.attributes['error'] ??
         'RouterOS command failed.';
     final category = reply.attributes['category'];
@@ -322,18 +312,13 @@ class _SocketByteReader {
     if ((first & 0xE0) == 0xC0) {
       final second = await readByte();
       final third = await readByte();
-      return ((first & 0x1F) << 16) +
-          (second << 8) +
-          third;
+      return ((first & 0x1F) << 16) + (second << 8) + third;
     }
     if ((first & 0xF0) == 0xE0) {
       final second = await readByte();
       final third = await readByte();
       final fourth = await readByte();
-      return ((first & 0x0F) << 24) +
-          (second << 16) +
-          (third << 8) +
-          fourth;
+      return ((first & 0x0F) << 24) + (second << 16) + (third << 8) + fourth;
     }
     final second = await readByte();
     final third = await readByte();

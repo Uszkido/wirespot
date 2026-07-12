@@ -23,17 +23,17 @@ class RouterLocalRepository implements RouterRepository {
 
   @override
   Future<List<RouterEntity>> getRouters() async {
-    final records = await (_database.select(_database.routers)
-          ..orderBy([(table) => OrderingTerm.asc(table.name)]))
-        .get();
+    final records = await (_database.select(
+      _database.routers,
+    )..orderBy([(table) => OrderingTerm.asc(table.name)])).get();
     return records.map(_mapRouter).toList();
   }
 
   @override
   Future<RouterEntity?> getRouter(String id) async {
-    final record = await (_database.select(_database.routers)
-          ..where((table) => table.id.equals(id)))
-        .getSingleOrNull();
+    final record = await (_database.select(
+      _database.routers,
+    )..where((table) => table.id.equals(id))).getSingleOrNull();
     return record == null ? null : _mapRouter(record);
   }
 
@@ -43,7 +43,9 @@ class RouterLocalRepository implements RouterRepository {
     RouterCredentials? credentials,
   }) async {
     final now = DateTime.now();
-    await _database.into(_database.routers).insertOnConflictUpdate(
+    await _database
+        .into(_database.routers)
+        .insertOnConflictUpdate(
           RoutersCompanion.insert(
             id: router.id,
             name: router.name,
@@ -70,16 +72,18 @@ class RouterLocalRepository implements RouterRepository {
 
   @override
   Future<void> deleteRouter(String id) async {
-    await (_database.delete(_database.routers)
-          ..where((table) => table.id.equals(id)))
-        .go();
+    await (_database.delete(
+      _database.routers,
+    )..where((table) => table.id.equals(id))).go();
     await _credentialStore.delete(id);
   }
 
   @override
   Future<void> saveGroup(RouterGroupEntity group) {
     final now = DateTime.now();
-    return _database.into(_database.routerGroups).insertOnConflictUpdate(
+    return _database
+        .into(_database.routerGroups)
+        .insertOnConflictUpdate(
           RouterGroupsCompanion.insert(
             id: group.id,
             name: group.name,
@@ -91,9 +95,9 @@ class RouterLocalRepository implements RouterRepository {
 
   @override
   Future<List<RouterGroupEntity>> getGroups() async {
-    final records = await (_database.select(_database.routerGroups)
-          ..orderBy([(table) => OrderingTerm.asc(table.name)]))
-        .get();
+    final records = await (_database.select(
+      _database.routerGroups,
+    )..orderBy([(table) => OrderingTerm.asc(table.name)])).get();
     return records.map(_mapGroup).toList();
   }
 }

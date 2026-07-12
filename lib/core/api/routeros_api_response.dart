@@ -11,10 +11,7 @@ class RouterOsApiResponse {
 }
 
 class RouterOsReply {
-  const RouterOsReply({
-    required this.type,
-    required this.attributes,
-  });
+  const RouterOsReply({required this.type, required this.attributes});
 
   final String type;
   final Map<String, String> attributes;

@@ -1,8 +1,4 @@
-enum AppThemePreference {
-  system,
-  light,
-  dark,
-}
+enum AppThemePreference { system, light, dark }
 
 class AppSettingsKeys {
   const AppSettingsKeys._();
@@ -35,8 +31,7 @@ class AppSettingsSnapshot {
     return AppSettingsSnapshot(
       themePreference: themePreference ?? this.themePreference,
       languageCode: languageCode ?? this.languageCode,
-      notificationsEnabled:
-          notificationsEnabled ?? this.notificationsEnabled,
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       businessName: businessName ?? this.businessName,
     );
   }

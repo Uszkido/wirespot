@@ -12,7 +12,8 @@ class ReportExportService {
     };
     return ReportExport(
       format: request.format,
-      fileName: 'wirespot-report-${DateTime.now().millisecondsSinceEpoch}.$extension',
+      fileName:
+          'wirespot-report-${DateTime.now().millisecondsSinceEpoch}.$extension',
       content: switch (request.format) {
         ReportExportFormat.pdf => _pdfText(request.summary),
         ReportExportFormat.excel => _csv(request.summary),

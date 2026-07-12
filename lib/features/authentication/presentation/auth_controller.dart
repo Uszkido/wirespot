@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../core/di/providers.dart';
 
-final authControllerProvider =
-    ChangeNotifierProvider<AuthController>((ref) {
+final authControllerProvider = ChangeNotifierProvider<AuthController>((ref) {
   return AuthController(ref)..bootstrap();
 });
 
@@ -45,7 +44,9 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<bool> signInWithBiometrics() async {
-    final ok = await _ref.read(authServiceProvider).authenticateWithBiometrics();
+    final ok = await _ref
+        .read(authServiceProvider)
+        .authenticateWithBiometrics();
     _isAuthenticated = ok;
     notifyListeners();
     return ok;

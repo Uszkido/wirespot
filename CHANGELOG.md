@@ -4,6 +4,21 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.3+4 - 2026-07-12
+
+Premium and advanced hotspot foundation build.
+
+### Added
+
+- Local premium entitlement service and dev license keys for Play Store billing preparation.
+- Premium gate foundation for batch vouchers and advanced voucher generation.
+- Voucher encoding settings for username/password mode, PIN-only mode, numeric/alphanumeric generation, prefix, and length ranges.
+- Advanced voucher generation controls for NGN price, data limit, profile, quantity, prefix, username length, and password length.
+- Ticket template domain model for 58mm, 80mm, and QR compact ticket layouts.
+- Scheduler settings foundation for active-session refresh, expired-user cleanup, voucher cleanup, daily sales summary, and database backup.
+- Advanced hotspot profile inputs for upload/download speed, shared users, session timeout, idle timeout, keepalive timeout, price, and data limit metadata.
+- Advanced hotspot user inputs for username/password, username-only, PIN-only, NGN price notes, time limit, profile, and data limit.
+
 ## 0.1.2+3 - 2026-07-11
 
 Phone-tested navigation and layout fix build.

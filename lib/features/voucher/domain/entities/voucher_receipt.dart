@@ -18,7 +18,8 @@ class VoucherReceipt {
   final String qrPayload;
 
   String toPlainText() {
-    final price = '${voucher.currency} ${(voucher.priceMinor / 100).toStringAsFixed(0)}';
+    final price =
+        '${voucher.currency} ${(voucher.priceMinor / 100).toStringAsFixed(0)}';
     final validity = voucher.validityMinutes == null
         ? 'Unlimited'
         : '${voucher.validityMinutes} minutes';

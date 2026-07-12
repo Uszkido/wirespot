@@ -11,7 +11,8 @@ class VoucherHistory extends Table {
   TextColumn get currency =>
       text().withLength(min: 3, max: 3).withDefault(const Constant('NGN'))();
   IntColumn get validityMinutes => integer().nullable()();
-  DateTimeColumn get generatedAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get generatedAt =>
+      dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get printedAt => dateTime().nullable()();
   DateTimeColumn get soldAt => dateTime().nullable()();
   TextColumn get note => text().nullable()();

@@ -2,6 +2,7 @@ import '../../../../core/utils/id_generator.dart';
 import '../../../hotspot/domain/entities/hotspot_user_input.dart';
 import '../../../hotspot/domain/services/hotspot_service.dart';
 import '../../../routers/domain/entities/router_entity.dart';
+import '../entities/voucher_encoding_settings.dart';
 import '../entities/voucher_entity.dart';
 import '../entities/voucher_generation_request.dart';
 import '../repositories/voucher_repository.dart';
@@ -12,9 +13,9 @@ class VoucherGenerationService {
     required VoucherRepository repository,
     required VoucherCodeGenerator codeGenerator,
     HotspotService? hotspotService,
-  })  : _repository = repository,
-        _codeGenerator = codeGenerator,
-        _hotspotService = hotspotService;
+  }) : _repository = repository,
+       _codeGenerator = codeGenerator,
+       _hotspotService = hotspotService;
 
   final VoucherRepository _repository;
   final VoucherCodeGenerator _codeGenerator;
@@ -25,7 +26,8 @@ class VoucherGenerationService {
     RouterEntity? router,
   }) async {
     _validate(request);
-    if (request.provisionOnRouter && (router == null || _hotspotService == null)) {
+    if (request.provisionOnRouter &&
+        (router == null || _hotspotService == null)) {
       throw ArgumentError(
         'RouterOS provisioning requires a router and hotspot service.',
       );
@@ -33,16 +35,15 @@ class VoucherGenerationService {
 
     final vouchers = <VoucherEntity>[];
     for (var index = 0; index < request.quantity; index++) {
+      final username = _username(request);
+      final password = _password(request);
       final voucher = VoucherEntity(
         id: IdGenerator.timestampId('voucher'),
         routerId: request.routerId,
         profileId: request.profileId,
-        username: _codeGenerator.username(
-          prefix: request.usernamePrefix,
-          length: request.usernameLength,
-        ),
-        password: _codeGenerator.password(length: request.passwordLength),
-        priceMinor: request.plan.priceMinor,
+        username: username,
+        password: password,
+        priceMinor: request.priceMinor ?? request.plan.priceMinor,
         currency: request.plan.currency,
         validityMinutes: request.plan.validityMinutes,
         generatedAt: DateTime.now(),
@@ -58,6 +59,7 @@ class VoucherGenerationService {
             profile: request.routerOsProfile,
             comment: 'WireSpot voucher ${voucher.id}',
             limitUptime: _routerOsDuration(request.plan.validityMinutes),
+            limitBytesTotal: request.limitBytesTotal,
           ),
         );
       }
@@ -74,6 +76,57 @@ class VoucherGenerationService {
     if (request.quantity < 1 || request.quantity > 500) {
       throw ArgumentError.value(request.quantity, 'quantity', 'Use 1 to 500');
     }
+    if (request.usernameLength <
+            request.encodingSettings.safeUsernameMinLength ||
+        request.usernameLength >
+            request.encodingSettings.safeUsernameMaxLength) {
+      throw ArgumentError.value(
+        request.usernameLength,
+        'usernameLength',
+        'Use the configured username length range',
+      );
+    }
+    if (request.encodingSettings.mode == VoucherCodeMode.usernamePassword &&
+        (request.passwordLength <
+                request.encodingSettings.safePasswordMinLength ||
+            request.passwordLength >
+                request.encodingSettings.safePasswordMaxLength)) {
+      throw ArgumentError.value(
+        request.passwordLength,
+        'passwordLength',
+        'Use the configured password length range',
+      );
+    }
+  }
+
+  String _username(VoucherGenerationRequest request) {
+    final settings = request.encodingSettings;
+    if (settings.mode == VoucherCodeMode.pinOnly) {
+      return _codeGenerator.code(
+        length: request.usernameLength,
+        characterSet: VoucherCharacterSet.numeric,
+        excludeConfusingCharacters: false,
+      );
+    }
+    return _codeGenerator.username(
+      prefix: request.usernamePrefix,
+      length: request.usernameLength,
+      characterSet: settings.characterSet,
+      excludeConfusingCharacters: settings.excludeConfusingCharacters,
+    );
+  }
+
+  String? _password(VoucherGenerationRequest request) {
+    final settings = request.encodingSettings;
+    if (settings.mode == VoucherCodeMode.usernameOnly ||
+        settings.mode == VoucherCodeMode.pinOnly) {
+      return null;
+    }
+    return _codeGenerator.password(
+      length: request.passwordLength,
+      characterSet: settings.characterSet,
+      excludeConfusingCharacters: settings.excludeConfusingCharacters,
+    );
   }
 
   String? _routerOsDuration(int? validityMinutes) {

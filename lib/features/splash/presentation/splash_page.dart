@@ -25,7 +25,9 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     _navigationTimer = Timer(const Duration(milliseconds: 700), () {
       if (mounted) {
         final auth = ref.read(authControllerProvider);
-        context.go(auth.isAuthenticated ? AppRoutes.dashboard : AppRoutes.login);
+        context.go(
+          auth.isAuthenticated ? AppRoutes.dashboard : AppRoutes.login,
+        );
       }
     });
   }
@@ -49,16 +51,16 @@ class _SplashPageState extends ConsumerState<SplashPage> {
             const SizedBox(height: 20),
             Text(
               AppBranding.appName,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             Text(
               '${AppBranding.companyName} hotspot operations',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),

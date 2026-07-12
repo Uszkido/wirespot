@@ -30,7 +30,9 @@ class PlatformPrinterService implements PrinterService {
           .where((printer) => printer.address.isNotEmpty)
           .toList();
     } on PlatformException catch (error) {
-      throw PrinterException(error.message ?? 'Could not load Bluetooth printers.');
+      throw PrinterException(
+        error.message ?? 'Could not load Bluetooth printers.',
+      );
     }
   }
 

@@ -13,10 +13,7 @@ class PinHashService {
     return base64UrlEncode(bytes);
   }
 
-  String hashPin({
-    required String pin,
-    required String salt,
-  }) {
+  String hashPin({required String pin, required String salt}) {
     final input = utf8.encode('$salt:$pin');
     return sha256.convert(input).toString();
   }

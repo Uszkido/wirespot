@@ -20,7 +20,7 @@ class HotspotUserInput {
   Map<String, String> toRouterOsAttributes() {
     return {
       'name': username,
-      'password': password,
+      if (password.isNotEmpty) 'password': password,
       if (profile != null && profile!.isNotEmpty) 'profile': profile!,
       if (server != null && server!.isNotEmpty) 'server': server!,
       if (comment != null && comment!.isNotEmpty) 'comment': comment!,

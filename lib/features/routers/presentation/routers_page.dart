@@ -16,9 +16,7 @@ class RoutersPage extends ConsumerWidget {
     final routers = ref.watch(routersProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Routers'),
-      ),
+      appBar: AppBar(title: const Text('Routers')),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add router',
         onPressed: () => context.push(AppRoutes.newRouter),
@@ -30,7 +28,8 @@ class RoutersPage extends ConsumerWidget {
             return EmptyState(
               icon: Icons.router_outlined,
               title: 'No routers yet',
-              message: 'Add your first MikroTik router to manage hotspot users.',
+              message:
+                  'Add your first MikroTik router to manage hotspot users.',
               action: FilledButton.icon(
                 onPressed: () => context.push(AppRoutes.newRouter),
                 icon: const Icon(Icons.add),
@@ -78,11 +77,7 @@ class _RouterTile extends ConsumerWidget {
           foregroundColor: colorScheme.onPrimaryContainer,
           child: const Icon(Icons.router_outlined),
         ),
-        title: Text(
-          router.name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: Text(router.name, maxLines: 1, overflow: TextOverflow.ellipsis),
         subtitle: Text(
           [
             '${router.host}:${router.apiPort}',
@@ -193,15 +188,11 @@ class _RouterTile extends ConsumerWidget {
     await ref.read(routerRepositoryProvider).deleteRouter(router.id);
     ref.invalidate(routersProvider);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Router deleted.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Router deleted.')));
     }
   }
 }
 
-enum _RouterAction {
-  test,
-  edit,
-  delete,
-}
+enum _RouterAction { test, edit, delete }

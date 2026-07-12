@@ -18,15 +18,15 @@ class RouterOsTrapException extends RouterOsApiException {
 
 class RouterOsConnectionException extends RouterOsApiException {
   const RouterOsConnectionException(super.message, {super.cause})
-      : super(category: 'connection');
+    : super(category: 'connection');
 }
 
 class RouterOsAuthenticationException extends RouterOsApiException {
   const RouterOsAuthenticationException(super.message, {super.cause})
-      : super(category: 'authentication');
+    : super(category: 'authentication');
 }
 
 class RouterOsVpnRequiredException extends RouterOsApiException {
   const RouterOsVpnRequiredException(super.message)
-      : super(category: 'vpn_required');
+    : super(category: 'vpn_required');
 }

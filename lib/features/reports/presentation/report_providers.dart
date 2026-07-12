@@ -11,12 +11,12 @@ final selectedReportPeriodProvider = StateProvider<ReportPeriod>(
   (ref) => ReportPeriod.daily,
 );
 
-final revenueSummaryProvider =
-    FutureProvider.autoDispose<RevenueSummary>((ref) {
+final revenueSummaryProvider = FutureProvider.autoDispose<RevenueSummary>((
+  ref,
+) {
   final routerId = ref.watch(selectedReportRouterIdProvider);
   final period = ref.watch(selectedReportPeriodProvider);
-  return ref.watch(reportSummaryServiceProvider).revenueSummary(
-        routerId: routerId,
-        period: period,
-      );
+  return ref
+      .watch(reportSummaryServiceProvider)
+      .revenueSummary(routerId: routerId, period: period);
 });

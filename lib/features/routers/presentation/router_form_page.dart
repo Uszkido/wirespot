@@ -97,9 +97,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Edit router' : 'Add router'),
-      ),
+      appBar: AppBar(title: Text(_isEditing ? 'Edit router' : 'Add router')),
       body: Builder(
         builder: (context) {
           _hydrate(existingRouter);
@@ -180,7 +178,9 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
         updatedAt: now,
       );
 
-      await ref.read(routerRepositoryProvider).saveRouter(
+      await ref
+          .read(routerRepositoryProvider)
+          .saveRouter(
             router,
             credentials: password.isEmpty
                 ? null
@@ -208,9 +208,9 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _returnToRouters() {
@@ -286,7 +286,8 @@ class _RouterFormBody extends StatelessWidget {
                       Validators.requiredText(value, label: 'Host'),
                   decoration: const InputDecoration(
                     labelText: 'Router IP or host',
-                    helperText: 'Use the VPN IP for remote routers or LAN IP on-site.',
+                    helperText:
+                        'Use the VPN IP for remote routers or LAN IP on-site.',
                     prefixIcon: Icon(Icons.dns_outlined),
                   ),
                 ),
@@ -326,9 +327,7 @@ class _RouterFormBody extends StatelessWidget {
                     style: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                   secondary: Icon(
-                    requireVpn
-                        ? Icons.vpn_lock_outlined
-                        : Icons.lan_outlined,
+                    requireVpn ? Icons.vpn_lock_outlined : Icons.lan_outlined,
                   ),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -351,8 +350,9 @@ class _RouterFormBody extends StatelessWidget {
                   onFieldSubmitted: (_) => onSave(),
                   decoration: InputDecoration(
                     labelText: isEditing ? 'Password' : 'Password required',
-                    helperText:
-                        isEditing ? 'Leave blank to keep current password.' : null,
+                    helperText: isEditing
+                        ? 'Leave blank to keep current password.'
+                        : null,
                     prefixIcon: const Icon(Icons.password_outlined),
                   ),
                 ),

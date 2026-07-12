@@ -15,9 +15,9 @@ class PlatformWireGuardVpnService implements WireGuardVpnService {
     required SecureStorageService secureStorage,
     MethodChannel? methodChannel,
     EventChannel? statusChannel,
-  })  : _secureStorage = secureStorage,
-        _methodChannel = methodChannel ?? const MethodChannel(_methodName),
-        _statusChannel = statusChannel ?? const EventChannel(_statusName);
+  }) : _secureStorage = secureStorage,
+       _methodChannel = methodChannel ?? const MethodChannel(_methodName),
+       _statusChannel = statusChannel ?? const EventChannel(_statusName);
 
   static const _methodName = 'com.wirespot.app/wireguard';
   static const _statusName = 'com.wirespot.app/wireguard_status';
@@ -32,10 +32,7 @@ class PlatformWireGuardVpnService implements WireGuardVpnService {
       SecureStorageKeys.wireGuardConfig(config.name),
       config.rawConfig,
     );
-    final tunnel = WireGuardTunnel(
-      name: config.name,
-      config: config.rawConfig,
-    );
+    final tunnel = WireGuardTunnel(name: config.name, config: config.rawConfig);
     await _methodChannel.invokeMethod<void>(
       'importConfig',
       tunnel.toPlatformMap(),
@@ -61,10 +58,7 @@ class PlatformWireGuardVpnService implements WireGuardVpnService {
         WireGuardTunnel(name: tunnelName, config: config).toPlatformMap(),
       );
     }
-    return _methodChannel.invokeMethod<void>(
-      'connect',
-      {'name': tunnelName},
-    );
+    return _methodChannel.invokeMethod<void>('connect', {'name': tunnelName});
   }
 
   @override

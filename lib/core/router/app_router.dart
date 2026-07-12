@@ -25,7 +25,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             : AppRoutes.splash;
       }
 
-      final isAuthRoute = state.matchedLocation == AppRoutes.login ||
+      final isAuthRoute =
+          state.matchedLocation == AppRoutes.login ||
           state.matchedLocation == AppRoutes.splash;
       if (!authController.isAuthenticated && !isAuthRoute) {
         return AppRoutes.login;
@@ -85,9 +86,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/routers/:routerId/edit',
         name: 'edit-router',
         builder: (context, state) {
-          return RouterFormPage(
-            routerId: state.pathParameters['routerId'],
-          );
+          return RouterFormPage(routerId: state.pathParameters['routerId']);
         },
       ),
     ],

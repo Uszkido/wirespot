@@ -14,12 +14,9 @@ class PlatformShareService implements ShareService {
 
   @override
   Future<void> shareVoucherReceipt(VoucherReceipt receipt) {
-    return _channel.invokeMethod<void>(
-      'shareText',
-      {
-        'subject': 'WireSpot voucher ${receipt.voucher.username}',
-        'text': receipt.toPlainText(),
-      },
-    );
+    return _channel.invokeMethod<void>('shareText', {
+      'subject': 'WireSpot voucher ${receipt.voucher.username}',
+      'text': receipt.toPlainText(),
+    });
   }
 }

@@ -72,8 +72,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       controller: _pinController,
                       obscureText: _obscurePin,
                       keyboardType: TextInputType.number,
-                      textInputAction:
-                          isSetup ? TextInputAction.next : TextInputAction.done,
+                      textInputAction: isSetup
+                          ? TextInputAction.next
+                          : TextInputAction.done,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       validator: _validatePin,
                       onFieldSubmitted: (_) {
@@ -104,7 +105,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         obscureText: _obscurePin,
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.done,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         validator: (value) {
                           if (value != _pinController.text) {
                             return 'PINs do not match';
@@ -120,7 +123,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ],
                     const SizedBox(height: 18),
                     FilledButton.icon(
-                      onPressed: _isBusy ? null : () => _submit(isSetup: isSetup),
+                      onPressed: _isBusy
+                          ? null
+                          : () => _submit(isSetup: isSetup),
                       icon: _isBusy
                           ? const SizedBox.square(
                               dimension: 18,
@@ -212,8 +217,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

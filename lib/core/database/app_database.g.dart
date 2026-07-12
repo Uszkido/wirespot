@@ -266,10 +266,7 @@ class $RoutersTable extends Routers
     if (data.containsKey('require_vpn')) {
       context.handle(
         _requireVpnMeta,
-        requireVpn.isAcceptableOrUnknown(
-          data['require_vpn']!,
-          _requireVpnMeta,
-        ),
+        requireVpn.isAcceptableOrUnknown(data['require_vpn']!, _requireVpnMeta),
       );
     }
     if (data.containsKey('username')) {

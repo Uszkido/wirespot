@@ -9,9 +9,9 @@ class AuthService {
     required SecureStorageService secureStorage,
     required PinHashService pinHashService,
     required BiometricAuthService biometricAuthService,
-  })  : _secureStorage = secureStorage,
-        _pinHashService = pinHashService,
-        _biometricAuthService = biometricAuthService;
+  }) : _secureStorage = secureStorage,
+       _pinHashService = pinHashService,
+       _biometricAuthService = biometricAuthService;
 
   final SecureStorageService _secureStorage;
   final PinHashService _pinHashService;
@@ -77,10 +77,12 @@ class AuthService {
 
   Future<AuthSession?> currentSession() async {
     final token = await _secureStorage.read(SecureStorageKeys.sessionToken);
-    final createdAtText =
-        await _secureStorage.read(SecureStorageKeys.sessionCreatedAt);
-    final createdAt =
-        createdAtText == null ? null : DateTime.tryParse(createdAtText);
+    final createdAtText = await _secureStorage.read(
+      SecureStorageKeys.sessionCreatedAt,
+    );
+    final createdAt = createdAtText == null
+        ? null
+        : DateTime.tryParse(createdAtText);
     if (token == null || createdAt == null) {
       return null;
     }

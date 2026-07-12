@@ -5,12 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/branding/app_branding.dart';
+import '../../../core/licensing/entitlement_snapshot.dart';
+import '../../../core/licensing/premium_feature.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/utils/id_generator.dart';
 import '../../../core/printer/printer_models.dart';
 import '../../../shared/widgets/brand_logo.dart';
 import '../../authentication/presentation/auth_controller.dart';
 import '../../../core/di/providers.dart';
+import '../../scheduler/domain/entities/scheduled_task.dart';
+import '../../voucher/domain/entities/voucher_encoding_settings.dart';
 import '../domain/entities/app_settings.dart';
 import '../domain/entities/printer_config_entity.dart';
 import 'settings_providers.dart';
@@ -22,6 +26,9 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(appSettingsProvider);
     final printers = ref.watch(printerConfigsProvider);
+    final entitlement = ref.watch(entitlementSnapshotProvider);
+    final encoding = ref.watch(voucherEncodingSettingsProvider);
+    final schedulerTasks = ref.watch(schedulerTasksProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -32,20 +39,333 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 16),
           const _SecurityCard(),
           const SizedBox(height: 16),
+          entitlement.when(
+            data: (value) => _PremiumLicenseCard(entitlement: value),
+            error: (error, stackTrace) =>
+                Text('Could not load license: $error'),
+            loading: () => const LinearProgressIndicator(),
+          ),
+          const SizedBox(height: 16),
           settings.when(
             data: (value) => _PreferencesCard(settings: value),
-            error: (error, stackTrace) => Text('Could not load settings: $error'),
+            error: (error, stackTrace) =>
+                Text('Could not load settings: $error'),
+            loading: () => const LinearProgressIndicator(),
+          ),
+          const SizedBox(height: 16),
+          encoding.when(
+            data: (value) => _VoucherEncodingCard(settings: value),
+            error: (error, stackTrace) =>
+                Text('Could not load voucher encoding: $error'),
+            loading: () => const LinearProgressIndicator(),
+          ),
+          const SizedBox(height: 16),
+          schedulerTasks.when(
+            data: (tasks) => _SchedulerCard(
+              tasks: tasks,
+              entitlement: entitlement.asData?.value,
+            ),
+            error: (error, stackTrace) =>
+                Text('Could not load scheduler: $error'),
             loading: () => const LinearProgressIndicator(),
           ),
           const SizedBox(height: 16),
           printers.when(
             data: (items) => _PrinterCard(printers: items),
-            error: (error, stackTrace) => Text('Could not load printers: $error'),
+            error: (error, stackTrace) =>
+                Text('Could not load printers: $error'),
             loading: () => const LinearProgressIndicator(),
           ),
           const SizedBox(height: 16),
           const _BackupCard(),
         ],
+      ),
+    );
+  }
+}
+
+class _SchedulerCard extends ConsumerWidget {
+  const _SchedulerCard({required this.tasks, required this.entitlement});
+
+  final List<ScheduledTask> tasks;
+  final EntitlementSnapshot? entitlement;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPremium = entitlement?.allows(PremiumFeature.scheduler) ?? false;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Scheduler',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (!isPremium) const Chip(label: Text('Premium')),
+              ],
+            ),
+            const SizedBox(height: 8),
+            for (final task in tasks)
+              SwitchListTile(
+                value: isPremium && task.enabled,
+                onChanged: isPremium
+                    ? (value) async {
+                        await ref
+                            .read(schedulerSettingsServiceProvider)
+                            .save(task.copyWith(enabled: value));
+                        ref.invalidate(schedulerTasksProvider);
+                      }
+                    : null,
+                title: Text(task.label),
+                subtitle: Text('Every ${task.intervalMinutes} minutes'),
+                contentPadding: EdgeInsets.zero,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PremiumLicenseCard extends ConsumerWidget {
+  const _PremiumLicenseCard({required this.entitlement});
+
+  final EntitlementSnapshot entitlement;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController(
+      text: entitlement.licenseKey ?? '',
+    );
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Premium license',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Chip(label: Text(entitlement.isPremium ? 'Premium' : 'Free')),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Use this while testing. Google Play Billing will replace the local license backend before store release.',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'License key',
+                helperText:
+                    'Dev keys: WIRESPOT-DEV-PREMIUM or VEXEL-WIRESPOT-PREMIUM',
+              ),
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: () async {
+                await ref
+                    .read(entitlementServiceProvider)
+                    .saveDevLicense(controller.text);
+                ref.invalidate(entitlementSnapshotProvider);
+              },
+              icon: const Icon(Icons.workspace_premium_outlined),
+              label: const Text('Apply license'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VoucherEncodingCard extends ConsumerWidget {
+  const _VoucherEncodingCard({required this.settings});
+
+  final VoucherEncodingSettings settings;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final prefixController = TextEditingController(
+      text: settings.defaultPrefix,
+    );
+    final usernameMinController = TextEditingController(
+      text: '${settings.usernameMinLength}',
+    );
+    final usernameMaxController = TextEditingController(
+      text: '${settings.usernameMaxLength}',
+    );
+    final passwordMinController = TextEditingController(
+      text: '${settings.passwordMinLength}',
+    );
+    final passwordMaxController = TextEditingController(
+      text: '${settings.passwordMaxLength}',
+    );
+    var mode = settings.mode;
+    var characterSet = settings.characterSet;
+    var excludeConfusing = settings.excludeConfusingCharacters;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: StatefulBuilder(
+          builder: (context, setState) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Voucher encoding',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<VoucherCodeMode>(
+                initialValue: mode,
+                decoration: const InputDecoration(
+                  labelText: 'Default code mode',
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: VoucherCodeMode.usernamePassword,
+                    child: Text('Username + password'),
+                  ),
+                  DropdownMenuItem(
+                    value: VoucherCodeMode.usernameOnly,
+                    child: Text('Username only'),
+                  ),
+                  DropdownMenuItem(
+                    value: VoucherCodeMode.pinOnly,
+                    child: Text('Username as PIN only'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => mode = value);
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<VoucherCharacterSet>(
+                initialValue: characterSet,
+                decoration: const InputDecoration(labelText: 'Characters'),
+                items: const [
+                  DropdownMenuItem(
+                    value: VoucherCharacterSet.numeric,
+                    child: Text('Numeric'),
+                  ),
+                  DropdownMenuItem(
+                    value: VoucherCharacterSet.alphabetic,
+                    child: Text('Alphabetic'),
+                  ),
+                  DropdownMenuItem(
+                    value: VoucherCharacterSet.alphanumeric,
+                    child: Text('Alphanumeric'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => characterSet = value);
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: prefixController,
+                decoration: const InputDecoration(labelText: 'Default prefix'),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: usernameMinController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'User min'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: usernameMaxController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'User max'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: passwordMinController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Pass min'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: passwordMaxController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Pass max'),
+                    ),
+                  ),
+                ],
+              ),
+              SwitchListTile(
+                value: excludeConfusing,
+                onChanged: (value) => setState(() => excludeConfusing = value),
+                title: const Text('Avoid confusing characters'),
+                subtitle: const Text(
+                  'Skips values like 0/O and 1/I where possible.',
+                ),
+                contentPadding: EdgeInsets.zero,
+              ),
+              FilledButton.icon(
+                onPressed: () async {
+                  await ref
+                      .read(voucherEncodingSettingsServiceProvider)
+                      .save(
+                        VoucherEncodingSettings(
+                          mode: mode,
+                          characterSet: characterSet,
+                          defaultPrefix: prefixController.text.trim(),
+                          usernameMinLength:
+                              int.tryParse(usernameMinController.text) ?? 4,
+                          usernameMaxLength:
+                              int.tryParse(usernameMaxController.text) ?? 10,
+                          passwordMinLength:
+                              int.tryParse(passwordMinController.text) ?? 4,
+                          passwordMaxLength:
+                              int.tryParse(passwordMaxController.text) ?? 10,
+                          excludeConfusingCharacters: excludeConfusing,
+                        ),
+                      );
+                  ref.invalidate(voucherEncodingSettingsProvider);
+                },
+                icon: const Icon(Icons.save_outlined),
+                label: const Text('Save encoding'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -64,9 +384,9 @@ class _SecurityCard extends ConsumerWidget {
           children: [
             Text(
               'Security',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             const Text('Local PIN and biometric unlock protect this device.'),
@@ -133,9 +453,9 @@ class _PreferencesCard extends ConsumerWidget {
           children: [
             Text(
               'Preferences',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<AppThemePreference>(
@@ -214,8 +534,8 @@ class _PrinterCard extends ConsumerWidget {
                   child: Text(
                     'Printers',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -233,7 +553,9 @@ class _PrinterCard extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.print_outlined),
                   title: Text(printer.name),
-                  subtitle: Text('${printer.address} - ${printer.paperWidthMm}mm'),
+                  subtitle: Text(
+                    '${printer.address} - ${printer.paperWidthMm}mm',
+                  ),
                   trailing: IconButton(
                     tooltip: 'Delete printer',
                     onPressed: () async {
@@ -268,94 +590,101 @@ class _PrinterCard extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: addressController,
-                  decoration: const InputDecoration(labelText: 'Bluetooth address'),
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    onPressed: isLoadingPrinters
-                        ? null
-                        : () async {
-                            setState(() {
-                              isLoadingPrinters = true;
-                              printerLoadError = null;
-                            });
-                            try {
-                              final devices = await ref
-                                  .read(printerServiceProvider)
-                                  .pairedBluetoothPrinters();
-                              setState(() {
-                                pairedPrinters = devices;
-                              });
-                            } on Object catch (error) {
-                              setState(() {
-                                printerLoadError = error.toString();
-                              });
-                            } finally {
-                              setState(() => isLoadingPrinters = false);
-                            }
-                          },
-                    icon: isLoadingPrinters
-                        ? const SizedBox.square(
-                            dimension: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.bluetooth_searching),
-                    label: Text(
-                      isLoadingPrinters ? 'Loading printers...' : 'Load paired printers',
-                    ),
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Name'),
                   ),
-                ),
-                if (printerLoadError != null)
-                  Text(
-                    printerLoadError!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
-                  ),
-                if (pairedPrinters.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<BluetoothPrinterDevice>(
-                    isExpanded: true,
+                  TextField(
+                    controller: addressController,
                     decoration: const InputDecoration(
-                      labelText: 'Paired printer',
-                      prefixIcon: Icon(Icons.print_outlined),
+                      labelText: 'Bluetooth address',
                     ),
-                    items: [
-                      for (final printer in pairedPrinters)
-                        DropdownMenuItem(
-                          value: printer,
-                          child: Text(
-                            '${printer.name} (${printer.address})',
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                    ],
-                    onChanged: (printer) {
-                      if (printer == null) {
-                        return;
-                      }
-                      nameController.text = printer.name;
-                      addressController.text = printer.address;
-                    },
                   ),
-                ],
-                const SizedBox(height: 8),
-                SegmentedButton<int>(
-                  showSelectedIcon: false,
-                  segments: const [
-                    ButtonSegment(value: 58, label: Text('58mm')),
-                    ButtonSegment(value: 80, label: Text('80mm')),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: isLoadingPrinters
+                          ? null
+                          : () async {
+                              setState(() {
+                                isLoadingPrinters = true;
+                                printerLoadError = null;
+                              });
+                              try {
+                                final devices = await ref
+                                    .read(printerServiceProvider)
+                                    .pairedBluetoothPrinters();
+                                setState(() {
+                                  pairedPrinters = devices;
+                                });
+                              } on Object catch (error) {
+                                setState(() {
+                                  printerLoadError = error.toString();
+                                });
+                              } finally {
+                                setState(() => isLoadingPrinters = false);
+                              }
+                            },
+                      icon: isLoadingPrinters
+                          ? const SizedBox.square(
+                              dimension: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.bluetooth_searching),
+                      label: Text(
+                        isLoadingPrinters
+                            ? 'Loading printers...'
+                            : 'Load paired printers',
+                      ),
+                    ),
+                  ),
+                  if (printerLoadError != null)
+                    Text(
+                      printerLoadError!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  if (pairedPrinters.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<BluetoothPrinterDevice>(
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Paired printer',
+                        prefixIcon: Icon(Icons.print_outlined),
+                      ),
+                      items: [
+                        for (final printer in pairedPrinters)
+                          DropdownMenuItem(
+                            value: printer,
+                            child: Text(
+                              '${printer.name} (${printer.address})',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
+                      onChanged: (printer) {
+                        if (printer == null) {
+                          return;
+                        }
+                        nameController.text = printer.name;
+                        addressController.text = printer.address;
+                      },
+                    ),
                   ],
-                  selected: {width},
-                  onSelectionChanged: (value) => setState(() => width = value.first),
-                ),
+                  const SizedBox(height: 8),
+                  SegmentedButton<int>(
+                    showSelectedIcon: false,
+                    segments: const [
+                      ButtonSegment(value: 58, label: Text('58mm')),
+                      ButtonSegment(value: 80, label: Text('80mm')),
+                    ],
+                    selected: {width},
+                    onSelectionChanged: (value) =>
+                        setState(() => width = value.first),
+                  ),
                 ],
               ),
             ),
@@ -405,12 +734,14 @@ class _BackupCard extends ConsumerWidget {
           children: [
             Text(
               'Backup and Restore',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
-            const Text('Create a JSON backup of settings and printer profiles.'),
+            const Text(
+              'Create a JSON backup of settings and printer profiles.',
+            ),
             const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: () => _showBackup(context, ref),

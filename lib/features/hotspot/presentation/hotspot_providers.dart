@@ -14,30 +14,30 @@ final selectedHotspotRouterIdProvider = StateProvider<String?>((ref) => null);
 
 final hotspotUsersProvider = FutureProvider.autoDispose
     .family<List<HotspotUserEntity>, RouterEntity>((ref, router) {
-  return ref.watch(hotspotServiceProvider).getUsers(router);
-});
+      return ref.watch(hotspotServiceProvider).getUsers(router);
+    });
 
 final hotspotProfilesProvider = FutureProvider.autoDispose
     .family<List<HotspotUserProfileEntity>, RouterEntity>((ref, router) {
-  return ref.watch(hotspotServiceProvider).getProfiles(router);
-});
+      return ref.watch(hotspotServiceProvider).getProfiles(router);
+    });
 
 final hotspotActiveSessionsProvider = FutureProvider.autoDispose
     .family<List<HotspotActiveSessionEntity>, RouterEntity>((ref, router) {
-  return ref.watch(hotspotServiceProvider).getActiveSessions(router);
-});
+      return ref.watch(hotspotServiceProvider).getActiveSessions(router);
+    });
 
 final hotspotCookiesProvider = FutureProvider.autoDispose
     .family<List<HotspotCookieEntity>, RouterEntity>((ref, router) {
-  return ref.watch(hotspotServiceProvider).getCookies(router);
-});
+      return ref.watch(hotspotServiceProvider).getCookies(router);
+    });
 
 final hotspotIpBindingsProvider = FutureProvider.autoDispose
     .family<List<HotspotIpBindingEntity>, RouterEntity>((ref, router) {
-  return ref.watch(hotspotServiceProvider).getIpBindings(router);
-});
+      return ref.watch(hotspotServiceProvider).getIpBindings(router);
+    });
 
 final hotspotQueuesProvider = FutureProvider.autoDispose
     .family<List<HotspotQueueEntity>, RouterEntity>((ref, router) {
-  return ref.watch(hotspotServiceProvider).getQueues(router);
-});
+      return ref.watch(hotspotServiceProvider).getQueues(router);
+    });

@@ -7,14 +7,17 @@ import '../../features/reports/domain/services/report_export_service.dart';
 import '../../features/reports/domain/services/report_summary_service.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
 import '../../features/routers/domain/services/router_connection_service.dart';
+import '../../features/scheduler/domain/services/scheduler_settings_service.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/services/app_settings_service.dart';
 import '../../features/settings/domain/services/backup_service.dart';
 import '../../features/voucher/domain/repositories/voucher_repository.dart';
+import '../../features/voucher/domain/services/voucher_encoding_settings_service.dart';
 import '../../features/voucher/domain/services/voucher_generation_service.dart';
 import '../../features/voucher/domain/services/voucher_qr_service.dart';
 import '../../features/voucher/domain/services/voucher_receipt_template_service.dart';
 import '../database/app_database.dart';
+import '../licensing/entitlement_service.dart';
 import '../printer/printer_service.dart';
 import '../share/share_service.dart';
 import '../vpn/wireguard_auto_reconnect_service.dart';
@@ -23,9 +26,7 @@ import 'service_locator.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) => sl<AppDatabase>());
 
-final authServiceProvider = Provider<AuthService>(
-  (ref) => sl<AuthService>(),
-);
+final authServiceProvider = Provider<AuthService>((ref) => sl<AuthService>());
 
 final printerServiceProvider = Provider<PrinterService>(
   (ref) => sl<PrinterService>(),
@@ -41,8 +42,8 @@ final wireGuardVpnServiceProvider = Provider<WireGuardVpnService>(
 
 final wireGuardAutoReconnectServiceProvider =
     Provider<WireGuardAutoReconnectService>(
-  (ref) => sl<WireGuardAutoReconnectService>(),
-);
+      (ref) => sl<WireGuardAutoReconnectService>(),
+    );
 
 final routerRepositoryProvider = Provider<RouterRepository>(
   (ref) => sl<RouterRepository>(),
@@ -64,14 +65,19 @@ final voucherGenerationServiceProvider = Provider<VoucherGenerationService>(
   (ref) => sl<VoucherGenerationService>(),
 );
 
+final voucherEncodingSettingsServiceProvider =
+    Provider<VoucherEncodingSettingsService>(
+      (ref) => sl<VoucherEncodingSettingsService>(),
+    );
+
 final voucherQrServiceProvider = Provider<VoucherQrService>(
   (ref) => sl<VoucherQrService>(),
 );
 
 final voucherReceiptTemplateServiceProvider =
     Provider<VoucherReceiptTemplateService>(
-  (ref) => sl<VoucherReceiptTemplateService>(),
-);
+      (ref) => sl<VoucherReceiptTemplateService>(),
+    );
 
 final reportRepositoryProvider = Provider<ReportRepository>(
   (ref) => sl<ReportRepository>(),
@@ -95,4 +101,12 @@ final appSettingsServiceProvider = Provider<AppSettingsService>(
 
 final backupServiceProvider = Provider<BackupService>(
   (ref) => sl<BackupService>(),
+);
+
+final schedulerSettingsServiceProvider = Provider<SchedulerSettingsService>(
+  (ref) => sl<SchedulerSettingsService>(),
+);
+
+final entitlementServiceProvider = Provider<EntitlementService>(
+  (ref) => sl<EntitlementService>(),
 );

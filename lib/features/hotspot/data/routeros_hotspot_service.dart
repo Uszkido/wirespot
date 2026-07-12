@@ -49,10 +49,7 @@ class RouterOsHotspotService implements HotspotService {
     await _routerConnectionService.execute(
       router,
       '/ip/hotspot/user/set',
-      attributes: {
-        '.id': userId,
-        ...input.toRouterOsAttributes(),
-      },
+      attributes: {'.id': userId, ...input.toRouterOsAttributes()},
     );
   }
 
@@ -77,7 +74,9 @@ class RouterOsHotspotService implements HotspotService {
   }
 
   @override
-  Future<List<HotspotUserProfileEntity>> getProfiles(RouterEntity router) async {
+  Future<List<HotspotUserProfileEntity>> getProfiles(
+    RouterEntity router,
+  ) async {
     final response = await _routerConnectionService.execute(
       router,
       '/ip/hotspot/user/profile/print',
@@ -112,10 +111,7 @@ class RouterOsHotspotService implements HotspotService {
     await _routerConnectionService.execute(
       router,
       '/ip/hotspot/user/profile/set',
-      attributes: {
-        '.id': profileId,
-        ...input.toRouterOsAttributes(),
-      },
+      attributes: {'.id': profileId, ...input.toRouterOsAttributes()},
     );
   }
 
@@ -176,7 +172,9 @@ class RouterOsHotspotService implements HotspotService {
   }
 
   @override
-  Future<List<HotspotIpBindingEntity>> getIpBindings(RouterEntity router) async {
+  Future<List<HotspotIpBindingEntity>> getIpBindings(
+    RouterEntity router,
+  ) async {
     final response = await _routerConnectionService.execute(
       router,
       '/ip/hotspot/ip-binding/print',
@@ -211,10 +209,7 @@ class RouterOsHotspotService implements HotspotService {
     await _routerConnectionService.execute(
       router,
       '/ip/hotspot/ip-binding/set',
-      attributes: {
-        '.id': bindingId,
-        ...input.toRouterOsAttributes(),
-      },
+      attributes: {'.id': bindingId, ...input.toRouterOsAttributes()},
     );
   }
 
@@ -244,9 +239,6 @@ class RouterOsHotspotService implements HotspotService {
     if (input.username.trim().isEmpty) {
       throw ArgumentError.value(input.username, 'username', 'Required');
     }
-    if (input.password.trim().isEmpty) {
-      throw ArgumentError.value(input.password, 'password', 'Required');
-    }
   }
 
   void _validateProfileInput(HotspotProfileInput input) {
@@ -256,7 +248,8 @@ class RouterOsHotspotService implements HotspotService {
   }
 
   void _validateIpBindingInput(HotspotIpBindingInput input) {
-    final hasAddress = input.address != null && input.address!.trim().isNotEmpty;
+    final hasAddress =
+        input.address != null && input.address!.trim().isNotEmpty;
     final hasMacAddress =
         input.macAddress != null && input.macAddress!.trim().isNotEmpty;
     if (!hasAddress && !hasMacAddress) {

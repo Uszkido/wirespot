@@ -15,6 +15,7 @@ import '../../features/routers/data/routeros_connection_service.dart';
 import '../../features/routers/data/router_local_repository.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
 import '../../features/routers/domain/services/router_connection_service.dart';
+import '../../features/scheduler/domain/services/scheduler_settings_service.dart';
 import '../../features/settings/data/settings_local_repository.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/services/app_settings_service.dart';
@@ -22,10 +23,12 @@ import '../../features/settings/domain/services/backup_service.dart';
 import '../../features/voucher/data/voucher_local_repository.dart';
 import '../../features/voucher/domain/repositories/voucher_repository.dart';
 import '../../features/voucher/domain/services/voucher_code_generator.dart';
+import '../../features/voucher/domain/services/voucher_encoding_settings_service.dart';
 import '../../features/voucher/domain/services/voucher_generation_service.dart';
 import '../../features/voucher/domain/services/voucher_qr_service.dart';
 import '../../features/voucher/domain/services/voucher_receipt_template_service.dart';
 import '../database/app_database.dart';
+import '../licensing/entitlement_service.dart';
 import '../network/http_client_factory.dart';
 import '../api/routeros_client_factory.dart';
 import '../printer/platform_printer_service.dart';
@@ -88,10 +91,8 @@ Future<void> configureDependencies() async {
       () => WireGuardAutoReconnectService(sl<WireGuardVpnService>()),
     )
     ..registerLazySingleton<RouterRepository>(
-      () => RouterLocalRepository(
-        sl<AppDatabase>(),
-        sl<RouterCredentialStore>(),
-      ),
+      () =>
+          RouterLocalRepository(sl<AppDatabase>(), sl<RouterCredentialStore>()),
     )
     ..registerLazySingleton<RouterConnectionService>(
       () => RouterOsConnectionService(
@@ -104,12 +105,12 @@ Future<void> configureDependencies() async {
       () => RouterOsHotspotService(sl<RouterConnectionService>()),
     )
     ..registerLazySingleton<VoucherRepository>(
-      () => VoucherLocalRepository(
-        sl<AppDatabase>(),
-        sl<VoucherSecretStore>(),
-      ),
+      () => VoucherLocalRepository(sl<AppDatabase>(), sl<VoucherSecretStore>()),
     )
     ..registerLazySingleton<VoucherCodeGenerator>(VoucherCodeGenerator.new)
+    ..registerLazySingleton<VoucherEncodingSettingsService>(
+      () => VoucherEncodingSettingsService(sl<SettingsRepository>()),
+    )
     ..registerLazySingleton<VoucherQrService>(VoucherQrService.new)
     ..registerLazySingleton<VoucherReceiptTemplateService>(
       () => VoucherReceiptTemplateService(sl<VoucherQrService>()),
@@ -136,5 +137,11 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<BackupService>(
       () => BackupService(sl<SettingsRepository>()),
+    )
+    ..registerLazySingleton<SchedulerSettingsService>(
+      () => SchedulerSettingsService(sl<SettingsRepository>()),
+    )
+    ..registerLazySingleton<EntitlementService>(
+      () => EntitlementService(sl<SettingsRepository>()),
     );
 }

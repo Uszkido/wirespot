@@ -14,7 +14,9 @@ class VoucherLocalRepository implements VoucherRepository {
 
   @override
   Future<void> saveVoucher(VoucherEntity voucher) async {
-    await _database.into(_database.voucherHistory).insertOnConflictUpdate(
+    await _database
+        .into(_database.voucherHistory)
+        .insertOnConflictUpdate(
           VoucherHistoryCompanion.insert(
             id: voucher.id,
             routerId: voucher.routerId,
@@ -64,7 +66,9 @@ class VoucherLocalRepository implements VoucherRepository {
   @override
   Future<void> saveProfile(HotspotProfileEntity profile) {
     final now = DateTime.now();
-    return _database.into(_database.hotspotProfiles).insertOnConflictUpdate(
+    return _database
+        .into(_database.hotspotProfiles)
+        .insertOnConflictUpdate(
           HotspotProfilesCompanion.insert(
             id: profile.id,
             routerId: profile.routerId,
@@ -80,10 +84,11 @@ class VoucherLocalRepository implements VoucherRepository {
 
   @override
   Future<List<HotspotProfileEntity>> getProfiles(String routerId) async {
-    final records = await (_database.select(_database.hotspotProfiles)
-          ..where((table) => table.routerId.equals(routerId))
-          ..orderBy([(table) => OrderingTerm.asc(table.name)]))
-        .get();
+    final records =
+        await (_database.select(_database.hotspotProfiles)
+              ..where((table) => table.routerId.equals(routerId))
+              ..orderBy([(table) => OrderingTerm.asc(table.name)]))
+            .get();
     return records.map(_mapProfile).toList();
   }
 

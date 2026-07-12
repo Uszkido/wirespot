@@ -1,4 +1,5 @@
 import 'voucher_plan.dart';
+import 'voucher_encoding_settings.dart';
 
 class VoucherGenerationRequest {
   const VoucherGenerationRequest({
@@ -8,8 +9,11 @@ class VoucherGenerationRequest {
     this.usernamePrefix = 'WS',
     this.usernameLength = 8,
     this.passwordLength = 6,
+    this.priceMinor,
+    this.encodingSettings = const VoucherEncodingSettings(),
     this.profileId,
     this.routerOsProfile,
+    this.limitBytesTotal,
     this.provisionOnRouter = false,
     this.note,
   });
@@ -20,8 +24,11 @@ class VoucherGenerationRequest {
   final String usernamePrefix;
   final int usernameLength;
   final int passwordLength;
+  final int? priceMinor;
+  final VoucherEncodingSettings encodingSettings;
   final String? profileId;
   final String? routerOsProfile;
+  final int? limitBytesTotal;
   final bool provisionOnRouter;
   final String? note;
 }

@@ -25,7 +25,9 @@ class WireGuardConfig {
       throw const FormatException('WireGuard config is missing [Interface].');
     }
 
-    final peers = parsed.peerValues.map(WireGuardPeerConfig.fromValues).toList();
+    final peers = parsed.peerValues
+        .map(WireGuardPeerConfig.fromValues)
+        .toList();
     if (peers.isEmpty) {
       throw const FormatException('WireGuard config must include a [Peer].');
     }
@@ -58,7 +60,9 @@ class WireGuardInterfaceConfig {
     final privateKey = values['PrivateKey'];
     final address = values['Address'];
     if (privateKey == null || privateKey.isEmpty) {
-      throw const FormatException('WireGuard interface private key is missing.');
+      throw const FormatException(
+        'WireGuard interface private key is missing.',
+      );
     }
     if (address == null || address.isEmpty) {
       throw const FormatException('WireGuard interface address is missing.');
@@ -139,8 +143,9 @@ _ParsedWireGuardSections _parseSections(String config) {
     }
 
     if (currentSection == 'Interface' || currentSection == 'Peer') {
-      currentValues[line.substring(0, separator).trim()] =
-          line.substring(separator + 1).trim();
+      currentValues[line.substring(0, separator).trim()] = line
+          .substring(separator + 1)
+          .trim();
     }
   }
 

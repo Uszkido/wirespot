@@ -57,7 +57,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       AppBranding.companyName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ],
                 ),
@@ -120,7 +123,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               return EmptyState(
                 icon: Icons.router_outlined,
                 title: 'Add a router',
-                message: 'Connect a MikroTik router before viewing dashboard data.',
+                message:
+                    'Connect a MikroTik router before viewing dashboard data.',
                 action: FilledButton.icon(
                   onPressed: () => context.push(AppRoutes.newRouter),
                   icon: const Icon(Icons.add),
@@ -148,7 +152,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   void _handleBackPressed() {
     final now = DateTime.now();
-    final shouldExit = _lastBackPressedAt != null &&
+    final shouldExit =
+        _lastBackPressedAt != null &&
         now.difference(_lastBackPressedAt!) < const Duration(seconds: 2);
 
     if (shouldExit) {
@@ -194,7 +199,8 @@ class _DashboardContent extends ConsumerWidget {
               MetricCard(
                 icon: Icons.receipt_long_outlined,
                 label: 'Today sales',
-                value: 'NGN ${(snapshot.todaySalesMinor / 100).toStringAsFixed(0)}',
+                value:
+                    'NGN ${(snapshot.todaySalesMinor / 100).toStringAsFixed(0)}',
               ),
               MetricCard(
                 icon: Icons.memory_outlined,
@@ -258,8 +264,9 @@ class _RouterHeader extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor:
-                isOnline ? colorScheme.primaryContainer : colorScheme.errorContainer,
+            backgroundColor: isOnline
+                ? colorScheme.primaryContainer
+                : colorScheme.errorContainer,
             foregroundColor: isOnline
                 ? colorScheme.onPrimaryContainer
                 : colorScheme.onErrorContainer,

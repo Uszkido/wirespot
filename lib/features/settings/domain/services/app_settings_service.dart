@@ -9,11 +9,15 @@ class AppSettingsService {
 
   Future<AppSettingsSnapshot> load() async {
     final theme = await _repository.readSetting(AppSettingsKeys.themeMode);
-    final language = await _repository.readSetting(AppSettingsKeys.languageCode);
-    final notifications =
-        await _repository.readSetting(AppSettingsKeys.notificationsEnabled);
-    final businessName =
-        await _repository.readSetting(AppSettingsKeys.businessName);
+    final language = await _repository.readSetting(
+      AppSettingsKeys.languageCode,
+    );
+    final notifications = await _repository.readSetting(
+      AppSettingsKeys.notificationsEnabled,
+    );
+    final businessName = await _repository.readSetting(
+      AppSettingsKeys.businessName,
+    );
 
     return AppSettingsSnapshot(
       themePreference: _themeFromString(theme),

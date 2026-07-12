@@ -8,10 +8,6 @@ class RouterOsClientFactory {
     required int port,
     required bool useSsl,
   }) {
-    return RouterOsApiClient(
-      host: host,
-      port: port,
-      useSsl: useSsl,
-    );
+    return RouterOsApiClient(host: host, port: port, useSsl: useSsl);
   }
 }
