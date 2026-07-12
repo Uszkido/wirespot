@@ -13,6 +13,7 @@ import '../domain/entities/hotspot_ip_binding_entity.dart';
 import '../domain/entities/hotspot_ip_binding_input.dart';
 import '../domain/entities/hotspot_profile_input.dart';
 import '../domain/entities/hotspot_queue_entity.dart';
+import '../domain/entities/hotspot_setup_input.dart';
 import '../domain/entities/hotspot_user_entity.dart';
 import '../domain/entities/hotspot_user_input.dart';
 import '../domain/entities/hotspot_user_profile_entity.dart';
@@ -75,20 +76,35 @@ class _HotspotRouterScope extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: DropdownButtonFormField<String>(
-              initialValue: router.id,
-              decoration: const InputDecoration(
-                labelText: 'Router',
-                prefixIcon: Icon(Icons.router_outlined),
-              ),
-              items: [
-                for (final item in routers)
-                  DropdownMenuItem(value: item.id, child: Text(item.name)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: router.id,
+                  decoration: const InputDecoration(
+                    labelText: 'Router',
+                    prefixIcon: Icon(Icons.router_outlined),
+                  ),
+                  items: [
+                    for (final item in routers)
+                      DropdownMenuItem(value: item.id, child: Text(item.name)),
+                  ],
+                  onChanged: (value) {
+                    ref.read(selectedHotspotRouterIdProvider.notifier).state =
+                        value;
+                  },
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        _showSetupHotspotDialog(context, ref, router),
+                    icon: const Icon(Icons.settings_input_antenna_outlined),
+                    label: const Text('Setup hotspot'),
+                  ),
+                ),
               ],
-              onChanged: (value) {
-                ref.read(selectedHotspotRouterIdProvider.notifier).state =
-                    value;
-              },
             ),
           ),
           const TabBar(
@@ -391,6 +407,155 @@ class _AsyncListScaffold<T> extends StatelessWidget {
         if (action != null) Positioned(right: 16, bottom: 16, child: action!),
       ],
     );
+  }
+}
+
+Future<void> _showSetupHotspotDialog(
+  BuildContext context,
+  WidgetRef ref,
+  RouterEntity router,
+) async {
+  final serverNameController = TextEditingController(text: 'hotspot1');
+  final interfaceController = TextEditingController(text: 'bridge');
+  final serverProfileController = TextEditingController(text: 'hsprof1');
+  final hotspotAddressController = TextEditingController();
+  final dnsNameController = TextEditingController(text: 'hotspot.local');
+  final addressPoolController = TextEditingController();
+  var loginByCookie = true;
+  var loginByHttpPap = true;
+  var loginByHttps = false;
+  var useRadius = false;
+
+  try {
+    final input = await showDialog<HotspotSetupInput>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Setup hotspot'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: serverNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Server name',
+                    helperText: 'Example: hotspot1',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: interfaceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Interface',
+                    helperText: 'Example: bridge, wlan1, ether2',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: serverProfileController,
+                  decoration: const InputDecoration(
+                    labelText: 'Server profile',
+                    helperText: 'Created if it does not already exist.',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: hotspotAddressController,
+                  decoration: const InputDecoration(
+                    labelText: 'Hotspot address',
+                    helperText: 'Optional, e.g. 10.5.50.1',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: dnsNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'DNS name',
+                    helperText: 'Optional captive portal name.',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: addressPoolController,
+                  decoration: const InputDecoration(
+                    labelText: 'Address pool',
+                    helperText: 'Optional existing RouterOS pool.',
+                  ),
+                ),
+                SwitchListTile(
+                  value: loginByCookie,
+                  onChanged: (value) => setState(() => loginByCookie = value),
+                  title: const Text('Cookie login'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                SwitchListTile(
+                  value: loginByHttpPap,
+                  onChanged: (value) => setState(() => loginByHttpPap = value),
+                  title: const Text('HTTP PAP login'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                SwitchListTile(
+                  value: loginByHttps,
+                  onChanged: (value) => setState(() => loginByHttps = value),
+                  title: const Text('HTTPS login'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                SwitchListTile(
+                  value: useRadius,
+                  onChanged: (value) => setState(() => useRadius = value),
+                  title: const Text('Use RADIUS'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(
+                HotspotSetupInput(
+                  serverName: serverNameController.text.trim(),
+                  interfaceName: interfaceController.text.trim(),
+                  serverProfileName: serverProfileController.text.trim(),
+                  hotspotAddress: hotspotAddressController.text.trim(),
+                  dnsName: dnsNameController.text.trim(),
+                  addressPool: addressPoolController.text.trim(),
+                  loginByCookie: loginByCookie,
+                  loginByHttpPap: loginByHttpPap,
+                  loginByHttps: loginByHttps,
+                  useRadius: useRadius,
+                ),
+              ),
+              child: const Text('Create'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (input == null) {
+      return;
+    }
+    await ref.read(hotspotServiceProvider).setupHotspot(router, input);
+    ref.invalidate(hotspotProfilesProvider(router));
+    if (context.mounted) {
+      _showSnack(context, 'Hotspot server setup completed.');
+    }
+  } on Object catch (error) {
+    if (context.mounted) {
+      _showSnack(context, 'Could not setup hotspot: $error');
+    }
+  } finally {
+    serverNameController.dispose();
+    interfaceController.dispose();
+    serverProfileController.dispose();
+    hotspotAddressController.dispose();
+    dnsNameController.dispose();
+    addressPoolController.dispose();
   }
 }
 

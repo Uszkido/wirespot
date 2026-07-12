@@ -6,6 +6,7 @@ import '../domain/entities/hotspot_ip_binding_entity.dart';
 import '../domain/entities/hotspot_ip_binding_input.dart';
 import '../domain/entities/hotspot_profile_input.dart';
 import '../domain/entities/hotspot_queue_entity.dart';
+import '../domain/entities/hotspot_setup_input.dart';
 import '../domain/entities/hotspot_user_entity.dart';
 import '../domain/entities/hotspot_user_input.dart';
 import '../domain/entities/hotspot_user_profile_entity.dart';
@@ -15,6 +16,48 @@ class RouterOsHotspotService implements HotspotService {
   const RouterOsHotspotService(this._routerConnectionService);
 
   final RouterConnectionService _routerConnectionService;
+
+  @override
+  Future<void> setupHotspot(
+    RouterEntity router,
+    HotspotSetupInput input,
+  ) async {
+    _validateSetupInput(input);
+    final existingProfile = await _routerConnectionService.execute(
+      router,
+      '/ip/hotspot/profile/print',
+      queries: ['=name=${input.serverProfileName.trim()}'],
+    );
+    if (existingProfile.isEmpty) {
+      await _routerConnectionService.execute(
+        router,
+        '/ip/hotspot/profile/add',
+        attributes: input.toServerProfileAttributes(),
+      );
+    }
+    final existingServer = await _routerConnectionService.execute(
+      router,
+      '/ip/hotspot/print',
+      queries: ['=name=${input.serverName.trim()}'],
+    );
+    if (existingServer.isEmpty) {
+      await _routerConnectionService.execute(
+        router,
+        '/ip/hotspot/add',
+        attributes: input.toServerAttributes(),
+      );
+    } else {
+      final serverId = existingServer.records.first['.id'];
+      if (serverId == null || serverId.trim().isEmpty) {
+        throw StateError('RouterOS returned a hotspot server without an id.');
+      }
+      await _routerConnectionService.execute(
+        router,
+        '/ip/hotspot/set',
+        attributes: {'.id': serverId, ...input.toServerAttributes()},
+      );
+    }
+  }
 
   @override
   Future<List<HotspotUserEntity>> getUsers(RouterEntity router) async {
@@ -244,6 +287,26 @@ class RouterOsHotspotService implements HotspotService {
   void _validateProfileInput(HotspotProfileInput input) {
     if (input.name.trim().isEmpty) {
       throw ArgumentError.value(input.name, 'name', 'Required');
+    }
+  }
+
+  void _validateSetupInput(HotspotSetupInput input) {
+    if (input.serverName.trim().isEmpty) {
+      throw ArgumentError.value(input.serverName, 'serverName', 'Required');
+    }
+    if (input.interfaceName.trim().isEmpty) {
+      throw ArgumentError.value(
+        input.interfaceName,
+        'interfaceName',
+        'Required',
+      );
+    }
+    if (input.serverProfileName.trim().isEmpty) {
+      throw ArgumentError.value(
+        input.serverProfileName,
+        'serverProfileName',
+        'Required',
+      );
     }
   }
 

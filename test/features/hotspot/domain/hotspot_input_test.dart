@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_ip_binding_input.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_profile_input.dart';
+import 'package:wirespot/features/hotspot/domain/entities/hotspot_setup_input.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_user_input.dart';
 
 void main() {
@@ -49,6 +50,36 @@ void main() {
       'mac-address': 'AA:BB:CC:DD:EE:FF',
       'type': 'bypassed',
       'comment': 'Admin device',
+    });
+  });
+
+  test('HotspotSetupInput maps server profile and server attributes', () {
+    const input = HotspotSetupInput(
+      serverName: 'hotspot1',
+      interfaceName: 'bridge',
+      serverProfileName: 'hsprof1',
+      hotspotAddress: '10.5.50.1',
+      dnsName: 'hotspot.local',
+      addressPool: 'hs-pool',
+      loginByCookie: true,
+      loginByHttpPap: true,
+      loginByHttps: false,
+      useRadius: false,
+    );
+
+    expect(input.toServerProfileAttributes(), {
+      'name': 'hsprof1',
+      'hotspot-address': '10.5.50.1',
+      'dns-name': 'hotspot.local',
+      'login-by': 'cookie,http-pap',
+      'use-radius': 'no',
+    });
+    expect(input.toServerAttributes(), {
+      'name': 'hotspot1',
+      'interface': 'bridge',
+      'profile': 'hsprof1',
+      'address-pool': 'hs-pool',
+      'disabled': 'no',
     });
   });
 }

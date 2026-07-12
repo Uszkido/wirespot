@@ -4,6 +4,17 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.5+6 - 2026-07-12
+
+Hotspot setup assistant build.
+
+### Added
+
+- Hotspot setup assistant entry point on the Hotspot screen.
+- RouterOS hotspot setup input model for server name, interface, server profile, DNS name, hotspot address, pool, login modes, and RADIUS.
+- RouterOS hotspot setup service flow that creates/reuses the hotspot server profile and adds or updates the hotspot server.
+- Unit coverage for hotspot setup RouterOS attribute mapping.
+
 ## 0.1.4+5 - 2026-07-12
 
 Ticket template selection build.
