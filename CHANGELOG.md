@@ -4,6 +4,17 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.15+16 - 2026-07-13
+
+Thermal receipt layout build.
+
+### Changed
+
+- Improved 58mm and 80mm thermal receipt text layout.
+- Added ESC/POS text alignment, bold, and header sizing commands.
+- Wrapped QR payloads and long contact lines for narrow receipt printers.
+- Expanded receipt formatter test coverage.
+
 ## 0.1.14+15 - 2026-07-13
 
 Ticket template editor build.
