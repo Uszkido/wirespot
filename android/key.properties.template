@@ -1,0 +1,7 @@
+# Copy this file to android/key.properties and fill in real local values.
+# Never commit android/key.properties or the keystore file.
+
+storePassword=REPLACE_WITH_STORE_PASSWORD
+keyPassword=REPLACE_WITH_KEY_PASSWORD
+keyAlias=wirespot
+storeFile=app/upload-keystore.jks

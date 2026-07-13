@@ -4,6 +4,17 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.20+21 - 2026-07-13
+
+Play Store release preparation build.
+
+### Added
+
+- Release signing configuration using local `android/key.properties`.
+- Safe signing properties template and ProGuard rules placeholder.
+- Privacy policy draft for Play Store publication.
+- Play Store release guide with AAB build and listing checklist.
+
 ## 0.1.19+20 - 2026-07-13
 
 Reports export polish build.
