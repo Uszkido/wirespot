@@ -4,6 +4,16 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.16+17 - 2026-07-13
+
+Native thermal QR build.
+
+### Added
+
+- ESC/POS native QR commands for voucher receipt printing.
+- Paper-width-aware QR sizing for 58mm and 80mm printers.
+- Text fallback payload below the native QR block.
+
 ## 0.1.15+16 - 2026-07-13
 
 Thermal receipt layout build.

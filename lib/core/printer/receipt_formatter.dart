@@ -12,6 +12,9 @@ class ReceiptFormatter {
   static const _boldOff = '$_esc\x45\x00';
   static const _doubleOn = '$_gs\x21\x11';
   static const _doubleOff = '$_gs\x21\x00';
+  static const _qrModel2 = '$_gs(k\x04\x001A2\x00';
+  static const _qrErrorCorrectionM = '$_gs(k\x03\x001E1';
+  static const _qrPrint = '$_gs(k\x03\x001Q0';
 
   static String formatVoucher(
     VoucherReceipt receipt, {
@@ -55,8 +58,9 @@ class ReceiptFormatter {
         _boldOn,
         _center('SCAN / LOGIN', width),
         _boldOff,
+        _nativeQr(receipt.qrPayload, paperWidth),
         _alignLeft,
-        ..._wrap(receipt.qrPayload, width),
+        ..._wrap('QR: ${receipt.qrPayload}', width),
       ],
       divider,
       _alignCenter,
@@ -70,6 +74,24 @@ class ReceiptFormatter {
       '',
       '',
     ].join('\n');
+  }
+
+  static String _nativeQr(String payload, PrinterPaperWidth paperWidth) {
+    final data = payload.trim();
+    if (data.isEmpty) {
+      return '';
+    }
+    final size = paperWidth == PrinterPaperWidth.mm80 ? 8 : 6;
+    final bytesLength = data.length + 3;
+    final pL = String.fromCharCode(bytesLength % 256);
+    final pH = String.fromCharCode(bytesLength ~/ 256);
+    return [
+      _qrModel2,
+      '$_gs(k\x03\x001C${String.fromCharCode(size)}',
+      _qrErrorCorrectionM,
+      '$_gs(k$pL${pH}1P0$data',
+      _qrPrint,
+    ].join();
   }
 
   static String _row(String label, String value, int width) {

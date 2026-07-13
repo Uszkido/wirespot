@@ -16,6 +16,8 @@ void main() {
     expect(text, contains('guest001'));
     expect(text, contains('SCAN / LOGIN'));
     expect(text, contains('\x1B\x61\x01'));
+    expect(text, contains('\x1D(k'));
+    expect(text, contains('1P0username=guest001&password=secret'));
   });
 
   test('wraps long QR payload for 58mm printers', () {
@@ -28,9 +30,19 @@ void main() {
 
     final printableLines = text
         .split('\n')
-        .where((line) => !line.startsWith('\x1B') && !line.startsWith('\x1D'));
+        .where((line) => !line.startsWith('\x1B') && !line.startsWith('\x1D'))
+        .where((line) => !line.contains('\x1D(k'));
 
     expect(printableLines.every((line) => line.length <= 32), isTrue);
+  });
+
+  test('uses larger native QR size for 80mm printers', () {
+    final text = ReceiptFormatter.formatVoucher(
+      _receipt(),
+      paperWidth: PrinterPaperWidth.mm80,
+    );
+
+    expect(text, contains('\x1D(k\x03\x001C\x08'));
   });
 
   test('uses wider dividers for 80mm printers', () {
