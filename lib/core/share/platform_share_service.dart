@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 
+import '../../features/reports/domain/entities/report_export.dart';
 import '../../features/voucher/domain/entities/voucher_receipt.dart';
 import 'share_service.dart';
 
@@ -17,6 +18,14 @@ class PlatformShareService implements ShareService {
     return _channel.invokeMethod<void>('shareText', {
       'subject': 'WireSpot voucher ${receipt.voucher.username}',
       'text': receipt.toPlainText(),
+    });
+  }
+
+  @override
+  Future<void> shareReportExport(ReportExport export) {
+    return _channel.invokeMethod<void>('shareText', {
+      'subject': export.fileName,
+      'text': export.content,
     });
   }
 }

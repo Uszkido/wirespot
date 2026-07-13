@@ -243,6 +243,11 @@ class _ReportContent extends ConsumerWidget {
           child: SingleChildScrollView(child: SelectableText(export.content)),
         ),
         actions: [
+          TextButton.icon(
+            onPressed: () => _shareExport(context, ref, export),
+            icon: const Icon(Icons.share_outlined),
+            label: const Text('Share'),
+          ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Close'),
@@ -250,6 +255,29 @@ class _ReportContent extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _shareExport(
+    BuildContext context,
+    WidgetRef ref,
+    ReportExport export,
+  ) async {
+    try {
+      await ref.read(shareServiceProvider).shareReportExport(export);
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Shared ${export.fileName}.')),
+      );
+    } on Object catch (error) {
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not share report: $error')),
+      );
+    }
   }
 }
 

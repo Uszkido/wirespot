@@ -11,11 +11,15 @@ class ScheduledTask {
     required this.type,
     required this.enabled,
     required this.intervalMinutes,
+    this.lastRunAt,
+    this.lastRunStatus = 'Never run',
   });
 
   final ScheduledTaskType type;
   final bool enabled;
   final int intervalMinutes;
+  final DateTime? lastRunAt;
+  final String lastRunStatus;
 
   String get label {
     return switch (type) {
@@ -27,11 +31,29 @@ class ScheduledTask {
     };
   }
 
-  ScheduledTask copyWith({bool? enabled, int? intervalMinutes}) {
+  bool isDue(DateTime now) {
+    if (!enabled) {
+      return false;
+    }
+    final previousRun = lastRunAt;
+    if (previousRun == null) {
+      return true;
+    }
+    return now.difference(previousRun).inMinutes >= intervalMinutes;
+  }
+
+  ScheduledTask copyWith({
+    bool? enabled,
+    int? intervalMinutes,
+    DateTime? lastRunAt,
+    String? lastRunStatus,
+  }) {
     return ScheduledTask(
       type: type,
       enabled: enabled ?? this.enabled,
       intervalMinutes: intervalMinutes ?? this.intervalMinutes,
+      lastRunAt: lastRunAt ?? this.lastRunAt,
+      lastRunStatus: lastRunStatus ?? this.lastRunStatus,
     );
   }
 

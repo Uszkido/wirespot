@@ -4,6 +4,29 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.19+20 - 2026-07-13
+
+Reports export polish build.
+
+### Changed
+
+- Improved report PDF text layout with branded summary and detailed sales sections.
+- Expanded CSV export columns with minor-unit and major-unit amounts.
+- Added report sharing through the Android share sheet.
+- Expanded report export tests.
+
+## 0.1.18+19 - 2026-07-13
+
+Scheduler execution engine build.
+
+### Added
+
+- In-app scheduler execution service that starts at app boot.
+- Due-task interval checks and last-run status recording.
+- Daily sales summary and database backup scheduler execution actions.
+- Scheduler last-run status display in Settings.
+- Scheduler execution service tests.
+
 ## 0.1.17+18 - 2026-07-13
 
 Thermal logo raster build.

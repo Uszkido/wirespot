@@ -15,6 +15,7 @@ import '../../features/routers/data/routeros_connection_service.dart';
 import '../../features/routers/data/router_local_repository.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
 import '../../features/routers/domain/services/router_connection_service.dart';
+import '../../features/scheduler/domain/services/scheduler_execution_service.dart';
 import '../../features/scheduler/domain/services/scheduler_settings_service.dart';
 import '../../features/settings/data/settings_local_repository.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
@@ -145,6 +146,13 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<SchedulerSettingsService>(
       () => SchedulerSettingsService(sl<SettingsRepository>()),
+    )
+    ..registerLazySingleton<SchedulerExecutionService>(
+      () => SchedulerExecutionService(
+        settingsService: sl<SchedulerSettingsService>(),
+        backupService: sl<BackupService>(),
+        reportSummaryService: sl<ReportSummaryService>(),
+      ),
     )
     ..registerLazySingleton<WireGuardSettingsService>(
       () => WireGuardSettingsService(sl<SettingsRepository>()),

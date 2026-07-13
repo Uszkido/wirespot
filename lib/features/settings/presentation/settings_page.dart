@@ -177,7 +177,10 @@ class _SchedulerCard extends ConsumerWidget {
                       }
                     : null,
                 title: Text(task.label),
-                subtitle: Text('Every ${task.intervalMinutes} minutes'),
+                subtitle: Text(
+                  'Every ${task.intervalMinutes} minutes\n'
+                  'Last run: ${_lastRunText(task)}',
+                ),
                 contentPadding: EdgeInsets.zero,
               ),
           ],
@@ -185,6 +188,18 @@ class _SchedulerCard extends ConsumerWidget {
       ),
     );
   }
+
+  String _lastRunText(ScheduledTask task) {
+    final ranAt = task.lastRunAt;
+    if (ranAt == null) {
+      return task.lastRunStatus;
+    }
+    return '${ranAt.year}-${_two(ranAt.month)}-${_two(ranAt.day)} '
+        '${_two(ranAt.hour)}:${_two(ranAt.minute)} - '
+        '${task.lastRunStatus}';
+  }
+
+  String _two(int value) => value.toString().padLeft(2, '0');
 }
 
 class _TicketTemplateCard extends ConsumerWidget {

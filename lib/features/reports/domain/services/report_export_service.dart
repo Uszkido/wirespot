@@ -22,30 +22,50 @@ class ReportExportService {
   }
 
   String _pdfText(RevenueSummary summary) {
+    final divider = ''.padLeft(48, '=');
     return [
+      divider,
       AppBranding.companyName,
       'WireSpot Revenue Report',
-      'From: ${summary.from.toIso8601String()}',
-      'To: ${summary.to.toIso8601String()}',
+      divider,
+      'Period',
+      'From: ${_dateTime(summary.from)}',
+      'To:   ${_dateTime(summary.to)}',
+      '',
+      'Summary',
       'Transactions: ${summary.transactionCount}',
       'Total: ${summary.currency} ${summary.totalMajor.toStringAsFixed(0)}',
+      divider,
+      'Sales',
+      if (summary.sales.isEmpty) 'No sales recorded in this period.',
+      for (final sale in summary.sales) ...[
+        '${_dateTime(sale.soldAt)}',
+        'Router: ${sale.routerId}',
+        if (sale.voucherId != null) 'Voucher: ${sale.voucherId}',
+        'Amount: ${sale.currency} ${(sale.amountMinor / 100).toStringAsFixed(0)}',
+        if (sale.paymentMethod != null) 'Payment: ${sale.paymentMethod}',
+        if (sale.note != null && sale.note!.isNotEmpty) 'Note: ${sale.note}',
+        ''.padLeft(48, '-'),
+      ],
       '',
-      for (final sale in summary.sales)
-        '${sale.soldAt.toIso8601String()} | ${sale.currency} ${(sale.amountMinor / 100).toStringAsFixed(0)} | ${sale.note ?? ''}',
+      AppBranding.supportEmail,
+      AppBranding.supportPhone,
+      AppBranding.website,
     ].join('\n');
   }
 
   String _csv(RevenueSummary summary) {
     return [
-      'sold_at,router_id,voucher_id,amount,currency,payment_method,note',
+      'sold_at,router_id,voucher_id,amount_minor,amount,currency,payment_method,note',
       for (final sale in summary.sales)
         [
-          sale.soldAt.toIso8601String(),
-          sale.routerId,
-          sale.voucherId ?? '',
+          _escapeCsv(sale.soldAt.toIso8601String()),
+          _escapeCsv(sale.routerId),
+          _escapeCsv(sale.voucherId ?? ''),
+          sale.amountMinor.toString(),
           (sale.amountMinor / 100).toStringAsFixed(0),
-          sale.currency,
-          sale.paymentMethod ?? '',
+          _escapeCsv(sale.currency),
+          _escapeCsv(sale.paymentMethod ?? ''),
           _escapeCsv(sale.note ?? ''),
         ].join(','),
     ].join('\n');
@@ -56,5 +76,11 @@ class ReportExportService {
       return value;
     }
     return '"${value.replaceAll('"', '""')}"';
+  }
+
+  String _dateTime(DateTime value) {
+    String two(int number) => number.toString().padLeft(2, '0');
+    return '${value.year}-${two(value.month)}-${two(value.day)} '
+        '${two(value.hour)}:${two(value.minute)}';
   }
 }
