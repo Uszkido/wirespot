@@ -53,8 +53,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.dashboard,
         name: 'dashboard',
-        builder: (context, state) =>
-            const LicenseGate(child: DashboardPage()),
+        builder: (context, state) => const LicenseGate(child: DashboardPage()),
       ),
       GoRoute(
         path: AppRoutes.routers,
@@ -104,8 +103,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.newRouter,
         name: 'new-router',
-        builder: (context, state) =>
-            const LicenseGate(child: RouterFormPage()),
+        builder: (context, state) => const LicenseGate(child: RouterFormPage()),
       ),
       GoRoute(
         path: '/routers/:routerId/edit',

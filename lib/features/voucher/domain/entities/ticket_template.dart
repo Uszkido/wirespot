@@ -64,8 +64,7 @@ class TicketTemplate {
       showLogo: json['showLogo'] as bool? ?? true,
       showQrCode: json['showQrCode'] as bool? ?? true,
       showPrice: json['showPrice'] as bool? ?? true,
-      footer:
-          json['footer'] as String? ?? 'Powered by Vexel Innovations',
+      footer: json['footer'] as String? ?? 'Powered by Vexel Innovations',
     );
   }
 

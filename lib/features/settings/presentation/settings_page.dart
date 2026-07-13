@@ -7,8 +7,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/branding/app_branding.dart';
 import '../../../core/di/providers.dart';
+import '../../../core/licensing/billing_plan.dart';
 import '../../../core/licensing/entitlement_snapshot.dart';
 import '../../../core/licensing/premium_feature.dart';
+import '../../../core/localization/app_text.dart';
 import '../../../core/printer/printer_models.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/utils/id_generator.dart';
@@ -28,6 +30,7 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(appSettingsProvider);
+    final text = AppText(settings.asData?.value.languageCode ?? 'en');
     final printers = ref.watch(printerConfigsProvider);
     final entitlement = ref.watch(entitlementSnapshotProvider);
     final encoding = ref.watch(voucherEncodingSettingsProvider);
@@ -35,7 +38,7 @@ class SettingsPage extends ConsumerWidget {
     final schedulerTasks = ref.watch(schedulerTasksProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(text.settings)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -203,7 +206,10 @@ class _SchedulerCard extends ConsumerWidget {
 }
 
 class _TicketTemplateCard extends ConsumerWidget {
-  const _TicketTemplateCard({required this.selected, required this.entitlement});
+  const _TicketTemplateCard({
+    required this.selected,
+    required this.entitlement,
+  });
 
   final TicketTemplate selected;
   final EntitlementSnapshot? entitlement;
@@ -403,7 +409,9 @@ class _TicketTemplateCard extends ConsumerWidget {
       if (template == null) {
         return;
       }
-      await ref.read(ticketTemplateSettingsServiceProvider).saveCustom(template);
+      await ref
+          .read(ticketTemplateSettingsServiceProvider)
+          .saveCustom(template);
       if (!context.mounted) {
         return;
       }
@@ -424,6 +432,8 @@ class _PremiumLicenseCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appSettingsProvider).asData?.value;
+    final text = AppText(settings?.languageCode ?? 'en');
     final controller = TextEditingController(
       text: entitlement.licenseKey ?? '',
     );
@@ -437,7 +447,7 @@ class _PremiumLicenseCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Premium license',
+                    text.premiumLicense,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -448,10 +458,32 @@ class _PremiumLicenseCard extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              entitlement.hasAccess
-                  ? 'WireSpot includes a 7-day trial. After that, this device needs a license key.'
+              entitlement.isPremium
+                  ? 'This device has active WireSpot access. Trial limits no longer apply.'
+                  : entitlement.isTrialActive
+                  ? 'WireSpot includes a 7-day trial. Add a license anytime to keep access after the trial.'
                   : 'Trial ended. Enter a valid device license to continue using WireSpot.',
             ),
+            const SizedBox(height: 12),
+            _LicenseStatusRow(
+              label: text.activePlan,
+              value: entitlement.planLabel,
+            ),
+            _LicenseStatusRow(
+              label: text.trialStatus,
+              value: entitlement.isTrialActive
+                  ? '${entitlement.trialDaysRemaining} days left'
+                  : 'Ended',
+            ),
+            _LicenseStatusRow(
+              label: text.licenseSource,
+              value: entitlement.source.label,
+            ),
+            if (entitlement.entitlementEndsAt != null)
+              _LicenseStatusRow(
+                label: 'Renewal/expiry',
+                value: _date(entitlement.entitlementEndsAt!),
+              ),
             const SizedBox(height: 12),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -485,11 +517,125 @@ class _PremiumLicenseCard extends ConsumerWidget {
                     .read(entitlementServiceProvider)
                     .saveDevLicense(controller.text);
                 ref.invalidate(entitlementSnapshotProvider);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('License saved. Status will refresh now.'),
+                    ),
+                  );
+                }
               },
               icon: const Icon(Icons.workspace_premium_outlined),
               label: const Text('Apply license'),
             ),
+            const SizedBox(height: 16),
+            Text(
+              'Subscription plans',
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            for (final plan in BillingPlan.values.where(
+              (plan) => plan != BillingPlan.trial,
+            ))
+              _BillingPlanTile(plan: plan),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => _showBillingMessage(context),
+                  icon: const Icon(Icons.shopping_bag_outlined),
+                  label: const Text('Buy with Google Play'),
+                ),
+                TextButton.icon(
+                  onPressed: () => _showBillingMessage(context),
+                  icon: const Icon(Icons.restore_outlined),
+                  label: const Text('Restore purchases'),
+                ),
+              ],
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showBillingMessage(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Google Play Billing will be enabled in the Play Store release build.',
+        ),
+      ),
+    );
+  }
+
+  String _date(DateTime value) {
+    return '${value.year}-${value.month.toString().padLeft(2, '0')}-'
+        '${value.day.toString().padLeft(2, '0')}';
+  }
+}
+
+class _LicenseStatusRow extends StatelessWidget {
+  const _LicenseStatusRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Expanded(child: Text(label)),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BillingPlanTile extends StatelessWidget {
+  const _BillingPlanTile({required this.plan});
+
+  final BillingPlan plan;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).colorScheme.outline),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: ListTile(
+          dense: true,
+          leading: const Icon(Icons.workspace_premium_outlined),
+          title: Text(plan.title),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(plan.description),
+              const SizedBox(height: 4),
+              Text(
+                plan.monthlyPriceGuide,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -677,6 +823,8 @@ class _SecurityCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appSettingsProvider).asData?.value;
+    final text = AppText(settings?.languageCode ?? 'en');
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -684,7 +832,7 @@ class _SecurityCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Security',
+              text.security,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -714,27 +862,118 @@ class _BrandCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
+    final colorScheme = Theme.of(context).colorScheme;
+    return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Row(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            BrandLogo(size: 64, borderRadius: 12),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(AppBranding.appName),
-                  Text(AppBranding.companyName),
-                  Text(AppBranding.supportEmail),
-                  Text(AppBranding.supportPhone),
-                ],
+            Row(
+              children: [
+                const BrandLogo(size: 56, borderRadius: 12),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppBranding.appName,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        'by ${AppBranding.companyName}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Padding(
+                padding: EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _SupportLine(
+                      icon: Icons.mail_outline,
+                      label: 'Email',
+                      value: AppBranding.supportEmail,
+                    ),
+                    SizedBox(height: 8),
+                    _SupportLine(
+                      icon: Icons.phone_outlined,
+                      label: 'Phone',
+                      value: AppBranding.supportPhone,
+                    ),
+                    SizedBox(height: 8),
+                    _SupportLine(
+                      icon: Icons.language_outlined,
+                      label: 'Website',
+                      value: AppBranding.website,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SupportLine extends StatelessWidget {
+  const _SupportLine({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 18),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 58,
+          child: Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ),
+        Expanded(
+          child: SelectableText(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+        IconButton(
+          tooltip: 'Copy $label',
+          onPressed: () {
+            Clipboard.setData(ClipboardData(text: value));
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('$label copied.')));
+          },
+          icon: const Icon(Icons.copy, size: 18),
+        ),
+      ],
     );
   }
 }
@@ -746,6 +985,7 @@ class _PreferencesCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final text = AppText(settings.languageCode);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -753,7 +993,7 @@ class _PreferencesCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Preferences',
+              text.preferences,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -761,7 +1001,7 @@ class _PreferencesCard extends ConsumerWidget {
             const SizedBox(height: 12),
             DropdownButtonFormField<AppThemePreference>(
               initialValue: settings.themePreference,
-              decoration: const InputDecoration(labelText: 'Theme'),
+              decoration: InputDecoration(labelText: text.theme),
               items: const [
                 DropdownMenuItem(
                   value: AppThemePreference.system,
@@ -785,14 +1025,38 @@ class _PreferencesCard extends ConsumerWidget {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: settings.languageCode,
-              decoration: const InputDecoration(labelText: 'Language'),
-              items: const [
-                DropdownMenuItem(value: 'en', child: Text('English')),
-                DropdownMenuItem(value: 'fr', child: Text('French')),
+              decoration: InputDecoration(labelText: text.language),
+              items: [
+                for (final language in AppSettingsOptions.languages)
+                  DropdownMenuItem(
+                    value: language.code,
+                    child: Text('${language.name} - ${language.nativeName}'),
+                  ),
               ],
               onChanged: (value) {
                 if (value != null) {
                   _save(ref, settings.copyWith(languageCode: value));
+                }
+              },
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              initialValue: settings.currencyCode,
+              isExpanded: true,
+              decoration: InputDecoration(labelText: text.defaultCurrency),
+              items: [
+                for (final currency in AppSettingsOptions.currencies)
+                  DropdownMenuItem(
+                    value: currency.code,
+                    child: Text(
+                      currency.label,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  _save(ref, settings.copyWith(currencyCode: value));
                 }
               },
             ),
@@ -801,7 +1065,7 @@ class _PreferencesCard extends ConsumerWidget {
               onChanged: (value) {
                 _save(ref, settings.copyWith(notificationsEnabled: value));
               },
-              title: const Text('Notifications'),
+              title: Text(text.notifications),
               contentPadding: EdgeInsets.zero,
             ),
           ],

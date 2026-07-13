@@ -7,10 +7,7 @@ void main() {
     final salt = service.generateSalt();
     final hash = service.hashPin(pin: '1234', salt: salt);
 
-    expect(
-      service.verify(pin: '1234', salt: salt, expectedHash: hash),
-      isTrue,
-    );
+    expect(service.verify(pin: '1234', salt: salt, expectedHash: hash), isTrue);
     expect(
       service.verify(pin: '4321', salt: salt, expectedHash: hash),
       isFalse,

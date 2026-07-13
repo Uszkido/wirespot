@@ -88,10 +88,7 @@ class HotspotSetupInput {
     if (!provisionNetwork || !_hasText(poolName) || !_hasText(poolRanges)) {
       return null;
     }
-    return {
-      'name': poolName!.trim(),
-      'ranges': poolRanges!.trim(),
-    };
+    return {'name': poolName!.trim(), 'ranges': poolRanges!.trim()};
   }
 
   Map<String, String>? toDhcpServerAttributes() {
@@ -111,9 +108,7 @@ class HotspotSetupInput {
   }
 
   Map<String, String>? toDhcpNetworkAttributes() {
-    if (!provisionNetwork ||
-        !_hasText(dhcpNetwork) ||
-        !_hasText(dhcpGateway)) {
+    if (!provisionNetwork || !_hasText(dhcpNetwork) || !_hasText(dhcpGateway)) {
       return null;
     }
     return {
@@ -125,9 +120,7 @@ class HotspotSetupInput {
   }
 
   Map<String, String>? toNatMasqueradeAttributes() {
-    if (!provisionNetwork ||
-        !enableNatMasquerade ||
-        !_hasText(natSrcAddress)) {
+    if (!provisionNetwork || !enableNatMasquerade || !_hasText(natSrcAddress)) {
       return null;
     }
     return {

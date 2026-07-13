@@ -25,10 +25,7 @@ void main() {
     );
 
     final export = service.export(
-      ReportExportRequest(
-        summary: summary,
-        format: ReportExportFormat.excel,
-      ),
+      ReportExportRequest(summary: summary, format: ReportExportFormat.excel),
     );
 
     expect(export.fileName, endsWith('.csv'));

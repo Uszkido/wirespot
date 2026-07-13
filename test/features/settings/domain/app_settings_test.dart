@@ -7,6 +7,7 @@ void main() {
     const settings = AppSettingsSnapshot(
       themePreference: AppThemePreference.system,
       languageCode: 'en',
+      currencyCode: 'NGN',
       notificationsEnabled: true,
       businessName: AppBranding.companyName,
     );
@@ -18,6 +19,7 @@ void main() {
 
     expect(next.themePreference, AppThemePreference.dark);
     expect(next.languageCode, 'en');
+    expect(next.currencyCode, 'NGN');
     expect(next.notificationsEnabled, isFalse);
   });
 }

@@ -20,10 +20,13 @@ void main() {
 
     final results = await service.runDueTasks(now: DateTime(2026, 7, 13, 12));
 
-    expect(results.map((result) => result.type), containsAll([
-      ScheduledTaskType.dailySalesSummary,
-      ScheduledTaskType.databaseBackup,
-    ]));
+    expect(
+      results.map((result) => result.type),
+      containsAll([
+        ScheduledTaskType.dailySalesSummary,
+        ScheduledTaskType.databaseBackup,
+      ]),
+    );
     expect(
       settings.values['scheduler.dailySalesSummary.lastRunStatus'],
       contains('Daily sales: 1 transactions'),
@@ -38,8 +41,13 @@ void main() {
     final settings = _FakeSettingsRepository()
       ..values['scheduler.dailySalesSummary.enabled'] = 'true'
       ..values['scheduler.dailySalesSummary.intervalMinutes'] = '60'
-      ..values['scheduler.dailySalesSummary.lastRunAt'] =
-          DateTime(2026, 7, 13, 11, 30).toIso8601String();
+      ..values['scheduler.dailySalesSummary.lastRunAt'] = DateTime(
+        2026,
+        7,
+        13,
+        11,
+        30,
+      ).toIso8601String();
     final service = _service(settings);
 
     final results = await service.runDueTasks(now: DateTime(2026, 7, 13, 12));

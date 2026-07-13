@@ -6,7 +6,7 @@ This codebase is original work. It does not copy Mikhmon, WireNex, or proprietar
 
 ## Version
 
-- Current app version: `0.1.20+21`
+- Current app version: `0.1.22+23`
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
 - License: [WireSpot Proprietary License](LICENSE)
 - Security policy: [SECURITY.md](SECURITY.md)
@@ -26,8 +26,10 @@ This codebase is original work. It does not copy Mikhmon, WireNex, or proprietar
 
 - User manual: [docs/user-manual.md](docs/user-manual.md)
 - Technical diagnostics: [docs/technical-diagnostics.md](docs/technical-diagnostics.md)
+- Payment and licensing plan: [docs/payment-and-licensing.md](docs/payment-and-licensing.md)
 - Privacy policy draft: [docs/privacy-policy.md](docs/privacy-policy.md)
 - Play Store release guide: [docs/play-store-release.md](docs/play-store-release.md)
+- Workstation transfer guide: [docs/workstation-transfer.md](docs/workstation-transfer.md)
 
 ## Build
 

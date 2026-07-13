@@ -128,15 +128,16 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
     }
     try {
       final autoReconnectEnabled =
-          ref.read(wireGuardSettingsProvider).asData?.value
+          ref
+              .read(wireGuardSettingsProvider)
+              .asData
+              ?.value
               .autoReconnectEnabled ??
           false;
       await ref.read(wireGuardVpnServiceProvider).connect(name);
       await _saveSettings(selectedTunnelName: name);
       if (autoReconnectEnabled) {
-        ref
-            .read(wireGuardAutoReconnectServiceProvider)
-            .start(tunnelName: name);
+        ref.read(wireGuardAutoReconnectServiceProvider).start(tunnelName: name);
       }
       _refresh();
       _showSnack('WireGuard connect requested.');
@@ -220,9 +221,9 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
                     ),
                   );
                 } on FormatException catch (error) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(error.message)),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(error.message)));
                 }
               },
               icon: const Icon(Icons.file_upload_outlined),
@@ -313,7 +314,9 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -600,10 +603,7 @@ class _ErrorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(message),
-      ),
+      child: Padding(padding: const EdgeInsets.all(16), child: Text(message)),
     );
   }
 }

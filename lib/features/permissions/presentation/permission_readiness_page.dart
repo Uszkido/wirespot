@@ -59,7 +59,9 @@ class PermissionReadinessPage extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('VPN permission screen opened if Android requires it.'),
+            content: Text(
+              'VPN permission screen opened if Android requires it.',
+            ),
           ),
         );
       }

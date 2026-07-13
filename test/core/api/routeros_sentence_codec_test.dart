@@ -16,7 +16,9 @@ void main() {
 
   test('round trips RouterOS length boundaries', () {
     for (final length in [0, 1, 127, 128, 16383, 16384, 2097151]) {
-      final encoded = Uint8List.fromList(RouterOsSentenceCodec.encodeLength(length));
+      final encoded = Uint8List.fromList(
+        RouterOsSentenceCodec.encodeLength(length),
+      );
       expect(RouterOsSentenceCodec.decodeLength(encoded), length);
     }
   });

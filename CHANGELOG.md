@@ -4,6 +4,36 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.22+23 - 2026-07-13
+
+Settings, language, currency, and support polish build.
+
+### Added
+
+- Root app wiring for saved theme and language preferences.
+- Hausa language option beside English and French for WireSpot-controlled labels.
+- Default currency setting with NGN and common African/global currencies.
+- More organized Vexel Innovations support card with copyable contact rows.
+- Workstation transfer guide for moving the project to another PC.
+
+### Changed
+
+- License card now makes active licensed access clear even during the trial period.
+- Applying a license now shows an immediate refresh confirmation.
+
+## 0.1.21+22 - 2026-07-13
+
+Payment and licensing foundation build.
+
+### Added
+
+- Subscription plan catalog for trial, monthly, yearly, and lifetime device plans.
+- Entitlement source tracking for trial, device license, Google Play, server license, and development access.
+- Expiring billing entitlement support for future Play Billing and server validation.
+- License settings UI with active plan/source details and subscription plan list.
+- Payment and licensing strategy documentation with Play Console product IDs.
+- Unit coverage for active and expired billing entitlements.
+
 ## 0.1.20+21 - 2026-07-13
 
 Play Store release preparation build.

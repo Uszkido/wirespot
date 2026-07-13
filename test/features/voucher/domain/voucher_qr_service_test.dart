@@ -20,6 +20,9 @@ void main() {
       voucher: voucher,
     );
 
-    expect(payload, 'http://hotspot/login?username=guest%201&password=pass%2F1');
+    expect(
+      payload,
+      'http://hotspot/login?username=guest%201&password=pass%2F1',
+    );
   });
 }

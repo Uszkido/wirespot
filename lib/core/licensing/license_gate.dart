@@ -57,17 +57,15 @@ class LicenseGate extends ConsumerWidget {
           ),
         );
       },
-      error: (error, stackTrace) => Scaffold(
-        body: Center(child: Text('Could not load license: $error')),
-      ),
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      error: (error, stackTrace) =>
+          Scaffold(body: Center(child: Text('Could not load license: $error'))),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
     );
   }
 }
 
 final _entitlementGateProvider =
     FutureProvider.autoDispose<EntitlementSnapshot>((ref) {
-  return ref.watch(entitlementServiceProvider).load();
-});
+      return ref.watch(entitlementServiceProvider).load();
+    });

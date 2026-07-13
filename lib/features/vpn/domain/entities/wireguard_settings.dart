@@ -13,8 +13,7 @@ class WireGuardSettings {
   }) {
     return WireGuardSettings(
       selectedTunnelName: selectedTunnelName ?? this.selectedTunnelName,
-      autoReconnectEnabled:
-          autoReconnectEnabled ?? this.autoReconnectEnabled,
+      autoReconnectEnabled: autoReconnectEnabled ?? this.autoReconnectEnabled,
     );
   }
 }

@@ -1,13 +1,15 @@
 name: wirespot
 description: Secure MikroTik RouterOS hotspot management over WireGuard VPN.
 publish_to: "none"
-version: 0.1.20+21
+version: 0.1.22+23
 
 environment:
   sdk: ">=3.8.0 <4.0.0"
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^3.0.0

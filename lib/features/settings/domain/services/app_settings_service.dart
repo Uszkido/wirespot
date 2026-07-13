@@ -12,6 +12,9 @@ class AppSettingsService {
     final language = await _repository.readSetting(
       AppSettingsKeys.languageCode,
     );
+    final currency = await _repository.readSetting(
+      AppSettingsKeys.currencyCode,
+    );
     final notifications = await _repository.readSetting(
       AppSettingsKeys.notificationsEnabled,
     );
@@ -21,7 +24,8 @@ class AppSettingsService {
 
     return AppSettingsSnapshot(
       themePreference: _themeFromString(theme),
-      languageCode: language ?? 'en',
+      languageCode: _supportedLanguage(language),
+      currencyCode: _supportedCurrency(currency),
       notificationsEnabled: notifications != 'false',
       businessName: businessName ?? AppBranding.companyName,
     );
@@ -35,6 +39,10 @@ class AppSettingsService {
     await _repository.writeSetting(
       AppSettingsKeys.languageCode,
       settings.languageCode,
+    );
+    await _repository.writeSetting(
+      AppSettingsKeys.currencyCode,
+      settings.currencyCode,
     );
     await _repository.writeSetting(
       AppSettingsKeys.notificationsEnabled,
@@ -51,5 +59,21 @@ class AppSettingsService {
       (theme) => theme.name == value,
       orElse: () => AppThemePreference.system,
     );
+  }
+
+  String _supportedLanguage(String? value) {
+    final code = value ?? 'en';
+    return AppSettingsOptions.languages.any((language) => language.code == code)
+        ? code
+        : 'en';
+  }
+
+  String _supportedCurrency(String? value) {
+    final code = value ?? 'NGN';
+    return AppSettingsOptions.currencies.any(
+          (currency) => currency.code == code,
+        )
+        ? code
+        : 'NGN';
   }
 }

@@ -47,15 +47,13 @@ class PlatformPrinterService implements PrinterService {
       paperWidth: paperWidth,
     );
     try {
-      final result = await _channel.invokeMapMethod<Object?, Object?>(
-        'printText',
-        {
-          'address': printer.address,
-          'text': text,
-          'paperWidth': paperWidth.name,
-          'logoAsset': receipt.showLogo ? 'assets/images/vexel_logo.png' : '',
-        },
-      );
+      final result = await _channel
+          .invokeMapMethod<Object?, Object?>('printText', {
+            'address': printer.address,
+            'text': text,
+            'paperWidth': paperWidth.name,
+            'logoAsset': receipt.showLogo ? 'assets/images/vexel_logo.png' : '',
+          });
       return PrintJobResult(
         success: result?['success'] as bool? ?? false,
         message: result?['message'] as String?,
