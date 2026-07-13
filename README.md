@@ -6,7 +6,7 @@ This codebase is original work. It does not copy Mikhmon, WireNex, or proprietar
 
 ## Version
 
-- Current app version: `0.1.16+17`
+- Current app version: `0.1.17+18`
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
 - License: [WireSpot Proprietary License](LICENSE)
 - Security policy: [SECURITY.md](SECURITY.md)

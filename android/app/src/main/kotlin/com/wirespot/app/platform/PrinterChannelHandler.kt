@@ -7,11 +7,14 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.io.IOException
+import java.io.OutputStream
 import java.nio.charset.Charset
 import java.util.UUID
 
@@ -68,6 +71,8 @@ class PrinterChannelHandler(
     private fun printText(call: MethodCall, result: MethodChannel.Result) {
         val address = call.argument<String>("address").orEmpty()
         val text = call.argument<String>("text").orEmpty()
+        val logoAsset = call.argument<String>("logoAsset").orEmpty()
+        val paperWidth = call.argument<String>("paperWidth").orEmpty()
         if (address.isBlank()) {
             result.error("INVALID_PRINTER", "Bluetooth printer address is required.", null)
             return
@@ -95,7 +100,7 @@ class PrinterChannelHandler(
             Thread {
                 try {
                     adapter.cancelDiscovery()
-                    writeEscPosText(device, text)
+                    writeEscPosText(device, text, logoAsset, paperWidth)
                     activity.runOnUiThread {
                         result.success(
                             mapOf(
@@ -152,17 +157,91 @@ class PrinterChannelHandler(
         return false
     }
 
-    private fun writeEscPosText(device: BluetoothDevice, text: String) {
+    private fun writeEscPosText(
+        device: BluetoothDevice,
+        text: String,
+        logoAsset: String,
+        paperWidth: String,
+    ) {
         val socket = device.createRfcommSocketToServiceRecord(SPP_UUID)
         socket.use { activeSocket ->
             activeSocket.connect()
             val output = activeSocket.outputStream
             output.write(byteArrayOf(0x1B, 0x40)) // Initialize printer.
+            writeLogo(output, logoAsset, paperWidth)
             output.write(text.toByteArray(ESC_POS_CHARSET))
             output.write(byteArrayOf(0x0A, 0x0A, 0x0A))
             output.write(byteArrayOf(0x1D, 0x56, 0x00)) // Partial cut where supported.
             output.flush()
         }
+    }
+
+    private fun writeLogo(output: OutputStream, logoAsset: String, paperWidth: String) {
+        if (logoAsset.isBlank()) {
+            return
+        }
+        try {
+            val assetPath = "flutter_assets/$logoAsset"
+            val bitmap = activity.assets.open(assetPath).use { stream ->
+                BitmapFactory.decodeStream(stream)
+            } ?: return
+            val maxWidth = if (paperWidth == "mm80") 384 else 256
+            val scaled = scaleBitmap(bitmap, maxWidth)
+            output.write(byteArrayOf(0x1B, 0x61, 0x01)) // Center.
+            output.write(rasterCommand(scaled, printLightPixels = true))
+            output.write(byteArrayOf(0x0A, 0x1B, 0x61, 0x00)) // Line feed, left.
+        } catch (_: IOException) {
+            // Logo printing is best-effort; the text receipt should still print.
+        } catch (_: IllegalArgumentException) {
+            // Some printers reject large raster blocks. Continue with text.
+        }
+    }
+
+    private fun scaleBitmap(bitmap: Bitmap, maxWidth: Int): Bitmap {
+        if (bitmap.width <= maxWidth) {
+            return bitmap
+        }
+        val ratio = maxWidth.toFloat() / bitmap.width.toFloat()
+        val targetHeight = (bitmap.height * ratio).toInt().coerceAtLeast(1)
+        return Bitmap.createScaledBitmap(bitmap, maxWidth, targetHeight, true)
+    }
+
+    private fun rasterCommand(bitmap: Bitmap, printLightPixels: Boolean): ByteArray {
+        val widthBytes = (bitmap.width + 7) / 8
+        val height = bitmap.height
+        val data = ByteArray(widthBytes * height)
+        for (y in 0 until height) {
+            for (x in 0 until bitmap.width) {
+                val pixel = bitmap.getPixel(x, y)
+                val red = pixel shr 16 and 0xFF
+                val green = pixel shr 8 and 0xFF
+                val blue = pixel and 0xFF
+                val luminance = (red * 299 + green * 587 + blue * 114) / 1000
+                val shouldPrint = if (printLightPixels) {
+                    luminance > 150
+                } else {
+                    luminance < 128
+                }
+                if (shouldPrint) {
+                    val index = y * widthBytes + x / 8
+                    data[index] = (data[index].toInt() or (0x80 shr (x % 8))).toByte()
+                }
+            }
+        }
+        val xL = widthBytes and 0xFF
+        val xH = widthBytes shr 8 and 0xFF
+        val yL = height and 0xFF
+        val yH = height shr 8 and 0xFF
+        return byteArrayOf(
+            0x1D,
+            0x76,
+            0x30,
+            0x00,
+            xL.toByte(),
+            xH.toByte(),
+            yL.toByte(),
+            yH.toByte(),
+        ) + data
     }
 
     companion object {

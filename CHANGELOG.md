@@ -4,6 +4,17 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.17+18 - 2026-07-13
+
+Thermal logo raster build.
+
+### Added
+
+- Android ESC/POS raster logo printing from the Vexel logo asset.
+- Paper-width-aware logo scaling before voucher receipt text.
+- Best-effort logo printing fallback so receipts still print if raster output fails.
+- Platform printer test coverage for logo asset handoff.
+
 ## 0.1.16+17 - 2026-07-13
 
 Native thermal QR build.
