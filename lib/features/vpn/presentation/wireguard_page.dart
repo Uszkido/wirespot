@@ -48,14 +48,19 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
     final settingsValue = settings.asData?.value;
     if (!_didHydrateSettings && settingsValue != null) {
       _didHydrateSettings = true;
-      if (widget.initialTunnelName == null) {
-        _tunnelNameController.text = settingsValue.selectedTunnelName;
-      }
-      if (settingsValue.autoReconnectEnabled) {
-        ref
-            .read(wireGuardAutoReconnectServiceProvider)
-            .start(tunnelName: settingsValue.selectedTunnelName);
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        if (widget.initialTunnelName == null) {
+          _tunnelNameController.text = settingsValue.selectedTunnelName;
+        }
+        if (settingsValue.autoReconnectEnabled) {
+          ref
+              .read(wireGuardAutoReconnectServiceProvider)
+              .start(tunnelName: settingsValue.selectedTunnelName);
+        }
+      });
     }
 
     return Scaffold(

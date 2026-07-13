@@ -32,6 +32,12 @@ class WireGuardChannelHandler(
         eventSink = null
     }
 
+    fun onVpnPermissionResult(resultCode: Int) {
+        manager.onPermissionResult(resultCode)?.let { status ->
+            emitStatus(status)
+        }
+    }
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         try {
             when (call.method) {

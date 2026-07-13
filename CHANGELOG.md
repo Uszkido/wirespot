@@ -4,6 +4,16 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.13+14 - 2026-07-13
+
+WireGuard permission hotfix build.
+
+### Fixed
+
+- Android VPN permission approval now returns to WireSpot and resumes the pending tunnel connection.
+- WireGuard auto-reconnect settings are hydrated after the Flutter frame instead of during build.
+- WireGuard VPN service now has an explicit label for Android VPN settings.
+
 ## 0.1.12+13 - 2026-07-12
 
 WireGuard QR import build.

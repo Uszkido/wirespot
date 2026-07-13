@@ -16,6 +16,7 @@ class WireGuardTunnelManager(private val activity: Activity) {
     private var state = WireGuardTunnelState.DISCONNECTED
     private var activeTunnelName: String? = preferences.getString(KEY_ACTIVE_TUNNEL, null)
     private var activeTunnel: WireSpotTunnel? = null
+    private var pendingPermissionTunnelName: String? = null
     private var message: String? = null
 
     fun importConfig(name: String, config: String) {
@@ -46,7 +47,8 @@ class WireGuardTunnelManager(private val activity: Activity) {
             state = WireGuardTunnelState.DISCONNECTED
             message = "Android VPN permission is required before connecting."
             appendLog(message!!)
-            activity.startActivity(permissionIntent)
+            pendingPermissionTunnelName = tunnelName
+            activity.startActivityForResult(permissionIntent, VPN_PERMISSION_REQUEST_CODE)
             return statusMap(extra = mapOf("permissionRequired" to true))
         }
 
@@ -74,11 +76,31 @@ class WireGuardTunnelManager(private val activity: Activity) {
         return if (permissionIntent != null) {
             message = "Android VPN permission requested."
             appendLog(message!!)
-            activity.startActivity(permissionIntent)
+            activity.startActivityForResult(permissionIntent, VPN_PERMISSION_REQUEST_CODE)
             statusMap(extra = mapOf("permissionRequired" to true))
         } else {
             message = "Android VPN permission already granted."
             appendLog(message!!)
+            statusMap(extra = mapOf("permissionRequired" to false))
+        }
+    }
+
+    fun onPermissionResult(resultCode: Int): Map<String, Any?>? {
+        if (resultCode != Activity.RESULT_OK) {
+            pendingPermissionTunnelName = null
+            state = WireGuardTunnelState.DISCONNECTED
+            message = "Android VPN permission was not granted."
+            appendLog(message!!)
+            return statusMap(extra = mapOf("permissionRequired" to true))
+        }
+
+        val tunnelName = pendingPermissionTunnelName
+        pendingPermissionTunnelName = null
+        message = "Android VPN permission granted."
+        appendLog(message!!)
+        return if (tunnelName != null) {
+            connect(tunnelName)
+        } else {
             statusMap(extra = mapOf("permissionRequired" to false))
         }
     }
@@ -167,6 +189,7 @@ class WireGuardTunnelManager(private val activity: Activity) {
     }
 
     companion object {
+        const val VPN_PERMISSION_REQUEST_CODE = 7012
         private const val PREFERENCES_NAME = "wirespot_wireguard"
         private const val KEY_ACTIVE_TUNNEL = "active_tunnel"
         private const val MAX_LOG_LINES = 200
