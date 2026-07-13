@@ -17,6 +17,7 @@ import '../../authentication/presentation/auth_controller.dart';
 import '../../scheduler/domain/entities/scheduled_task.dart';
 import '../../voucher/domain/entities/ticket_template.dart';
 import '../../voucher/domain/entities/voucher_encoding_settings.dart';
+import '../../voucher/presentation/voucher_providers.dart';
 import '../domain/entities/app_settings.dart';
 import '../domain/entities/printer_config_entity.dart';
 import 'settings_providers.dart';
@@ -250,10 +251,154 @@ class _TicketTemplateCard extends ConsumerWidget {
               selected.description,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: isPremium
+                      ? () => _showTemplateEditor(context, ref, selected)
+                      : null,
+                  icon: const Icon(Icons.tune_outlined),
+                  label: const Text('Edit layout'),
+                ),
+                Chip(label: Text('${selected.paperWidthMm}mm')),
+                if (selected.showLogo) const Chip(label: Text('Logo')),
+                if (selected.showQrCode) const Chip(label: Text('QR')),
+                if (selected.showPrice) const Chip(label: Text('Price')),
+              ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _showTemplateEditor(
+    BuildContext context,
+    WidgetRef ref,
+    TicketTemplate selected,
+  ) async {
+    final nameController = TextEditingController(text: selected.name);
+    final footerController = TextEditingController(text: selected.footer);
+    var paperWidthMm = selected.paperWidthMm;
+    var showLogo = selected.showLogo;
+    var showQrCode = selected.showQrCode;
+    var showPrice = selected.showPrice;
+
+    try {
+      final template = await showDialog<TicketTemplate>(
+        context: context,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: const Text('Edit ticket layout'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Template name',
+                      prefixIcon: Icon(Icons.badge_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SegmentedButton<int>(
+                    segments: const [
+                      ButtonSegment(
+                        value: 58,
+                        label: Text('58mm'),
+                        icon: Icon(Icons.receipt_long_outlined),
+                      ),
+                      ButtonSegment(
+                        value: 80,
+                        label: Text('80mm'),
+                        icon: Icon(Icons.table_rows_outlined),
+                      ),
+                    ],
+                    selected: {paperWidthMm},
+                    onSelectionChanged: (value) {
+                      setState(() => paperWidthMm = value.first);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  SwitchListTile(
+                    value: showLogo,
+                    onChanged: (value) => setState(() => showLogo = value),
+                    title: const Text('Show logo marker'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  SwitchListTile(
+                    value: showQrCode,
+                    onChanged: (value) => setState(() => showQrCode = value),
+                    title: const Text('Show QR code'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  SwitchListTile(
+                    value: showPrice,
+                    onChanged: (value) => setState(() => showPrice = value),
+                    title: const Text('Show price'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: footerController,
+                    minLines: 2,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: 'Footer',
+                      prefixIcon: Icon(Icons.notes_outlined),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+              FilledButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop(
+                    selected.copyWith(
+                      name: nameController.text.trim().isEmpty
+                          ? selected.name
+                          : nameController.text.trim(),
+                      paperWidthMm: paperWidthMm,
+                      showLogo: showLogo,
+                      showQrCode: showQrCode,
+                      showPrice: showPrice,
+                      footer: footerController.text.trim().isEmpty
+                          ? selected.footer
+                          : footerController.text.trim(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.save_outlined),
+                label: const Text('Save'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (template == null) {
+        return;
+      }
+      await ref.read(ticketTemplateSettingsServiceProvider).saveCustom(template);
+      if (!context.mounted) {
+        return;
+      }
+      ref
+        ..invalidate(selectedTicketTemplateProvider)
+        ..invalidate(voucherTicketTemplateProvider);
+    } finally {
+      nameController.dispose();
+      footerController.dispose();
+    }
   }
 }
 

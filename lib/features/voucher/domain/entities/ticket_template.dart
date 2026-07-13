@@ -19,6 +19,56 @@ class TicketTemplate {
   final bool showPrice;
   final String footer;
 
+  TicketTemplate copyWith({
+    String? id,
+    String? name,
+    String? description,
+    int? paperWidthMm,
+    bool? showLogo,
+    bool? showQrCode,
+    bool? showPrice,
+    String? footer,
+  }) {
+    return TicketTemplate(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      paperWidthMm: paperWidthMm ?? this.paperWidthMm,
+      showLogo: showLogo ?? this.showLogo,
+      showQrCode: showQrCode ?? this.showQrCode,
+      showPrice: showPrice ?? this.showPrice,
+      footer: footer ?? this.footer,
+    );
+  }
+
+  Map<String, Object?> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'paperWidthMm': paperWidthMm,
+      'showLogo': showLogo,
+      'showQrCode': showQrCode,
+      'showPrice': showPrice,
+      'footer': footer,
+    };
+  }
+
+  factory TicketTemplate.fromJson(Map<String, Object?> json) {
+    final paperWidth = json['paperWidthMm'] as int? ?? 58;
+    return TicketTemplate(
+      id: json['id'] as String? ?? defaults.first.id,
+      name: json['name'] as String? ?? defaults.first.name,
+      description: json['description'] as String? ?? '',
+      paperWidthMm: paperWidth == 80 ? 80 : 58,
+      showLogo: json['showLogo'] as bool? ?? true,
+      showQrCode: json['showQrCode'] as bool? ?? true,
+      showPrice: json['showPrice'] as bool? ?? true,
+      footer:
+          json['footer'] as String? ?? 'Powered by Vexel Innovations',
+    );
+  }
+
   static const defaults = [
     TicketTemplate(
       id: 'thermal_58',
@@ -45,4 +95,12 @@ class TicketTemplate {
       orElse: () => defaults.first,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TicketTemplate && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

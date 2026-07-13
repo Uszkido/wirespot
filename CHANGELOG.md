@@ -4,6 +4,16 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.14+15 - 2026-07-13
+
+Ticket template editor build.
+
+### Added
+
+- Editable ticket template layout controls in Settings.
+- Saved custom ticket template fields for paper width, logo marker, QR, price, and footer.
+- Ticket template serialization coverage.
+
 ## 0.1.13+14 - 2026-07-13
 
 WireGuard permission hotfix build.

@@ -9,6 +9,7 @@ class VoucherReceipt {
     required this.website,
     required this.qrPayload,
     this.templateName = '58mm Thermal',
+    this.showLogo = true,
     this.showPrice = true,
     this.showQrCode = true,
     this.footer = 'Powered by Vexel Innovations',
@@ -21,6 +22,7 @@ class VoucherReceipt {
   final String website;
   final String qrPayload;
   final String templateName;
+  final bool showLogo;
   final bool showPrice;
   final bool showQrCode;
   final String footer;
@@ -33,6 +35,7 @@ class VoucherReceipt {
         : '${voucher.validityMinutes} minutes';
 
     return [
+      if (showLogo) 'Vexel Innovations Logo',
       businessName,
       'Hotspot Voucher',
       'Template: $templateName',

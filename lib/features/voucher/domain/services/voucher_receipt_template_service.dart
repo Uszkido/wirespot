@@ -28,6 +28,7 @@ class VoucherReceiptTemplateService {
         voucher: voucher,
       ),
       templateName: template.name,
+      showLogo: template.showLogo,
       showPrice: template.showPrice,
       showQrCode: template.showQrCode,
       footer: template.footer,
