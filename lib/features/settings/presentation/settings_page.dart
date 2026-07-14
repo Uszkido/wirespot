@@ -21,6 +21,7 @@ import '../../voucher/domain/entities/ticket_template.dart';
 import '../../voucher/domain/entities/voucher_encoding_settings.dart';
 import '../../voucher/presentation/voucher_providers.dart';
 import '../domain/entities/app_settings.dart';
+import '../domain/entities/backup_payload.dart';
 import '../domain/entities/printer_config_entity.dart';
 import 'settings_providers.dart';
 
@@ -61,6 +62,16 @@ class SettingsPage extends ConsumerWidget {
             data: (value) => _PreferencesCard(settings: value),
             error: (error, stackTrace) =>
                 Text('Could not load settings: $error'),
+            loading: () => const LinearProgressIndicator(),
+          ),
+          const SizedBox(height: 16),
+          settings.when(
+            data: (value) => _CoBrandingCard(
+              settings: value,
+              entitlement: entitlement.asData?.value,
+            ),
+            error: (error, stackTrace) =>
+                Text('Could not load co-branding: $error'),
             loading: () => const LinearProgressIndicator(),
           ),
           const SizedBox(height: 16),
@@ -541,33 +552,23 @@ class _PremiumLicenseCard extends ConsumerWidget {
             ))
               _BillingPlanTile(plan: plan),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () => _showBillingMessage(context),
-                  icon: const Icon(Icons.shopping_bag_outlined),
-                  label: const Text('Buy with Google Play'),
-                ),
-                TextButton.icon(
-                  onPressed: () => _showBillingMessage(context),
-                  icon: const Icon(Icons.restore_outlined),
-                  label: const Text('Restore purchases'),
-                ),
-              ],
+            OutlinedButton.icon(
+              onPressed: () {
+                final request = [
+                  'WireSpot license request',
+                  'Device ID: ${entitlement.deviceId}',
+                  'Plan: ${BillingPlan.proMonthly.title}',
+                  'Contact: ${AppBranding.supportEmail}',
+                ].join('\n');
+                Clipboard.setData(ClipboardData(text: request));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('License request copied.')),
+                );
+              },
+              icon: const Icon(Icons.content_copy_outlined),
+              label: const Text('Copy license request'),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  void _showBillingMessage(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Google Play Billing will be enabled in the Play Store release build.',
         ),
       ),
     );
@@ -1080,6 +1081,114 @@ class _PreferencesCard extends ConsumerWidget {
   }
 }
 
+class _CoBrandingCard extends ConsumerWidget {
+  const _CoBrandingCard({required this.settings, required this.entitlement});
+
+  final AppSettingsSnapshot settings;
+  final EntitlementSnapshot? entitlement;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPremium = entitlement?.allows(PremiumFeature.coBranding) ?? false;
+    var businessName = settings.businessName;
+    var businessEmail = settings.businessEmail;
+    var businessPhone = settings.businessPhone;
+    var businessWebsite = settings.businessWebsite;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Professional co-branding',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (!isPremium) const Chip(label: Text('Premium')),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Show the operator brand on receipts and reports while keeping '
+              'WireSpot powered by Vexel Innovations.',
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              enabled: isPremium,
+              initialValue: businessName,
+              onChanged: (value) => businessName = value,
+              decoration: const InputDecoration(
+                labelText: 'Business name',
+                prefixIcon: Icon(Icons.storefront_outlined),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              enabled: isPremium,
+              initialValue: businessEmail,
+              onChanged: (value) => businessEmail = value,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                labelText: 'Business email',
+                prefixIcon: Icon(Icons.mail_outline),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              enabled: isPremium,
+              initialValue: businessPhone,
+              onChanged: (value) => businessPhone = value,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                labelText: 'Business phone',
+                prefixIcon: Icon(Icons.phone_outlined),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              enabled: isPremium,
+              initialValue: businessWebsite,
+              onChanged: (value) => businessWebsite = value,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                labelText: 'Business website',
+                prefixIcon: Icon(Icons.language_outlined),
+              ),
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: isPremium
+                  ? () async {
+                      await ref
+                          .read(appSettingsServiceProvider)
+                          .save(
+                            settings.copyWith(
+                              businessName: businessName.trim(),
+                              businessEmail: businessEmail.trim(),
+                              businessPhone: businessPhone.trim(),
+                              businessWebsite: businessWebsite.trim(),
+                            ),
+                          );
+                      ref.invalidate(appSettingsProvider);
+                    }
+                  : null,
+              icon: const Icon(Icons.save_outlined),
+              label: const Text('Save co-branding'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _PrinterCard extends ConsumerWidget {
   const _PrinterCard({required this.printers});
 
@@ -1315,7 +1424,7 @@ class _BackupCard extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
-              onPressed: null,
+              onPressed: () => _restoreBackup(context, ref),
               icon: const Icon(Icons.restore_outlined),
               label: const Text('Restore backup'),
             ),
@@ -1347,5 +1456,80 @@ class _BackupCard extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _restoreBackup(BuildContext context, WidgetRef ref) async {
+    final controller = TextEditingController();
+    try {
+      String? errorText;
+      final payload = await showDialog<BackupPayload>(
+        context: context,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Restore backup'),
+              content: TextField(
+                controller: controller,
+                minLines: 8,
+                maxLines: 12,
+                decoration: InputDecoration(
+                  labelText: 'Backup JSON',
+                  alignLabelWithHint: true,
+                  errorText: errorText,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton.icon(
+                  onPressed: () {
+                    try {
+                      final decoded = jsonDecode(controller.text);
+                      if (decoded is! Map) {
+                        throw const FormatException(
+                          'Backup JSON must be an object.',
+                        );
+                      }
+                      Navigator.of(context).pop(
+                        BackupPayload.fromJson({
+                          for (final entry in decoded.entries)
+                            entry.key.toString(): entry.value,
+                        }),
+                      );
+                    } on Object catch (error) {
+                      setState(() => errorText = error.toString());
+                    }
+                  },
+                  icon: const Icon(Icons.restore_outlined),
+                  label: const Text('Restore'),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+      if (payload == null) {
+        return;
+      }
+      await ref.read(backupServiceProvider).restoreBackup(payload);
+      ref
+        ..invalidate(appSettingsProvider)
+        ..invalidate(printerConfigsProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Backup restored.')));
+      }
+    } on Object catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not restore backup: $error')),
+        );
+      }
+    } finally {
+      controller.dispose();
+    }
   }
 }

@@ -6,7 +6,7 @@ This codebase is original work. It does not copy Mikhmon, WireNex, or proprietar
 
 ## Version
 
-- Current app version: `0.1.22+23`
+- Current app version: `0.1.23+24`
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
 - License: [WireSpot Proprietary License](LICENSE)
 - Security policy: [SECURITY.md](SECURITY.md)
@@ -25,6 +25,8 @@ This codebase is original work. It does not copy Mikhmon, WireNex, or proprietar
 ## Documentation
 
 - User manual: [docs/user-manual.md](docs/user-manual.md)
+- WireSpot pitch: [docs/wirespot-pitch.md](docs/wirespot-pitch.md)
+- Complete operator guide: [docs/complete-operator-guide.md](docs/complete-operator-guide.md)
 - Technical diagnostics: [docs/technical-diagnostics.md](docs/technical-diagnostics.md)
 - Payment and licensing plan: [docs/payment-and-licensing.md](docs/payment-and-licensing.md)
 - Privacy policy draft: [docs/privacy-policy.md](docs/privacy-policy.md)
@@ -134,7 +136,7 @@ build\app\outputs\flutter-apk\app-debug.apk
 - Batch voucher generation service
 - Secure voucher password storage through the voucher repository
 - QR login payload service
-- Vexel-branded receipt template foundation
+- Vexel-branded receipt template
 - Voucher generation and history screen
 - Dashboard navigation to voucher management
 
@@ -142,17 +144,17 @@ build\app\outputs\flutter-apk\app-debug.apk
 
 - Optional RouterOS hotspot user provisioning during voucher generation
 - RouterOS profile selection field for generated vouchers
-- Share receipt platform channel foundation
+- Share receipt platform channel
 - Bluetooth printer service abstraction
 - Android Bluetooth printer discovery and ESC/POS RFCOMM/SPP printing
-- Vexel-branded ESC/POS text formatter foundation
+- Vexel-branded ESC/POS text formatter
 - Voucher print/share actions
 
 ## Step 11 Scope
 
 - Daily, weekly, and monthly report date ranges
 - Revenue summary service
-- Report export model and CSV/PDF-text export foundation
+- Report export model and CSV/PDF-text export
 - Reports screen with router and period filters
 - Revenue and transaction summary cards
 - Sales list
@@ -165,9 +167,9 @@ build\app\outputs\flutter-apk\app-debug.apk
 - Theme, language, notification, and business-name settings model
 - Printer settings UI
 - Default printer handling
-- Backup JSON payload foundation
+- Backup JSON payload
 - Backup preview UI
-- Restore placeholder
+- JSON restore flow
 - Dashboard navigation to settings
 
 ## Step 13 Scope

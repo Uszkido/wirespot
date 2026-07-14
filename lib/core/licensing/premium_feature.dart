@@ -8,6 +8,7 @@ enum PremiumFeature {
   scheduler,
   advancedProfiles,
   advancedVoucherEncoding,
+  coBranding,
 }
 
 extension PremiumFeatureLabel on PremiumFeature {
@@ -22,6 +23,7 @@ extension PremiumFeatureLabel on PremiumFeature {
       PremiumFeature.scheduler => 'Scheduler',
       PremiumFeature.advancedProfiles => 'Advanced profiles',
       PremiumFeature.advancedVoucherEncoding => 'Advanced voucher encoding',
+      PremiumFeature.coBranding => 'Professional co-branding',
     };
   }
 }

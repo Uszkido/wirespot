@@ -231,9 +231,16 @@ class _ReportContent extends ConsumerWidget {
     WidgetRef ref,
     ReportExportFormat format,
   ) async {
+    final settings = await ref.read(appSettingsServiceProvider).load();
+    if (!context.mounted) {
+      return;
+    }
     final export = ref
         .read(reportExportServiceProvider)
-        .export(ReportExportRequest(summary: summary, format: format));
+        .export(
+          ReportExportRequest(summary: summary, format: format),
+          settings: settings,
+        );
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(

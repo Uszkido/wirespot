@@ -9,6 +9,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../routers/domain/entities/router_entity.dart';
 import '../../routers/presentation/router_providers.dart';
+import '../../settings/presentation/settings_providers.dart';
 import '../domain/entities/ticket_template.dart';
 import '../domain/entities/voucher_encoding_settings.dart';
 import '../domain/entities/voucher_entity.dart';
@@ -522,9 +523,10 @@ class _VoucherTile extends ConsumerWidget {
     final template =
         ref.watch(voucherTicketTemplateProvider).asData?.value ??
         TicketTemplate.defaults.first;
+    final settings = ref.watch(appSettingsProvider).asData?.value;
     final receipt = ref
         .read(voucherReceiptTemplateServiceProvider)
-        .build(voucher: voucher, template: template);
+        .build(voucher: voucher, settings: settings, template: template);
 
     return Card(
       child: ExpansionTile(
@@ -581,9 +583,10 @@ class _VoucherTile extends ConsumerWidget {
     final template = await ref
         .read(ticketTemplateSettingsServiceProvider)
         .loadSelected();
+    final settings = await ref.read(appSettingsServiceProvider).load();
     final receipt = ref
         .read(voucherReceiptTemplateServiceProvider)
-        .build(voucher: voucher, template: template);
+        .build(voucher: voucher, settings: settings, template: template);
     try {
       await ref.read(shareServiceProvider).shareVoucherReceipt(receipt);
     } on Object catch (error) {
@@ -603,9 +606,10 @@ class _VoucherTile extends ConsumerWidget {
     final template = await ref
         .read(ticketTemplateSettingsServiceProvider)
         .loadSelected();
+    final settings = await ref.read(appSettingsServiceProvider).load();
     final receipt = ref
         .read(voucherReceiptTemplateServiceProvider)
-        .build(voucher: voucher, template: template);
+        .build(voucher: voucher, settings: settings, template: template);
     try {
       final printers = await ref
           .read(printerServiceProvider)

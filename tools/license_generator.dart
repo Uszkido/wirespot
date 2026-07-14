@@ -1,17 +1,20 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 
 void main(List<String> args) {
   if (args.isEmpty) {
-    print('Usage: dart run tools/license_generator.dart DEVICE_ID [...]');
+    stdout.writeln(
+      'Usage: dart run tools/license_generator.dart DEVICE_ID [...]',
+    );
     return;
   }
 
   for (final deviceId in args) {
     final normalized = deviceId.trim().toUpperCase();
     if (normalized.length < 8) {
-      print('$deviceId: invalid device ID');
+      stdout.writeln('$deviceId: invalid device ID');
       continue;
     }
     final digest = sha256
@@ -20,6 +23,6 @@ void main(List<String> args) {
         .toUpperCase();
     final license =
         'WS-${normalized.substring(0, 8)}-${digest.substring(0, 16)}';
-    print('$normalized => $license');
+    stdout.writeln('$normalized => $license');
   }
 }

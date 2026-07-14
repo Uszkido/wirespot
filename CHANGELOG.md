@@ -4,6 +4,28 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.23+24 - 2026-07-14
+
+Professional co-branding and complete documentation build.
+
+### Added
+
+- Professional co-branding settings for operator business name, email, phone,
+  and website.
+- Co-branded voucher receipt preview, share, and print output.
+- Active JSON backup restore flow for settings and printer profiles.
+- WireSpot pitch document for product/business presentation.
+- Complete operator guide covering setup, licensing, daily operation,
+  troubleshooting, and release preparation.
+- Unit coverage for co-branded receipt output.
+
+### Changed
+
+- License screen now uses an active license-request copy action instead of
+  inactive Play Billing placeholder buttons.
+- License generator tool now avoids analyzer `print` warnings.
+- Report export cleanup removes unnecessary string interpolation.
+
 ## 0.1.22+23 - 2026-07-13
 
 Settings, language, currency, and support polish build.

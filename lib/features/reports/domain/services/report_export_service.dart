@@ -1,11 +1,15 @@
 import '../../../../core/branding/app_branding.dart';
+import '../../../settings/domain/entities/app_settings.dart';
 import '../entities/report_export.dart';
 import '../entities/revenue_summary.dart';
 
 class ReportExportService {
   const ReportExportService();
 
-  ReportExport export(ReportExportRequest request) {
+  ReportExport export(
+    ReportExportRequest request, {
+    AppSettingsSnapshot? settings,
+  }) {
     final extension = switch (request.format) {
       ReportExportFormat.pdf => 'pdf.txt',
       ReportExportFormat.excel => 'csv',
@@ -15,18 +19,23 @@ class ReportExportService {
       fileName:
           'wirespot-report-${DateTime.now().millisecondsSinceEpoch}.$extension',
       content: switch (request.format) {
-        ReportExportFormat.pdf => _pdfText(request.summary),
+        ReportExportFormat.pdf => _pdfText(request.summary, settings),
         ReportExportFormat.excel => _csv(request.summary),
       },
     );
   }
 
-  String _pdfText(RevenueSummary summary) {
+  String _pdfText(RevenueSummary summary, AppSettingsSnapshot? settings) {
     final divider = ''.padLeft(48, '=');
+    final businessName = settings?.businessName ?? AppBranding.companyName;
+    final supportEmail = settings?.businessEmail ?? AppBranding.supportEmail;
+    final supportPhone = settings?.businessPhone ?? AppBranding.supportPhone;
+    final website = settings?.businessWebsite ?? AppBranding.website;
     return [
       divider,
-      AppBranding.companyName,
+      businessName,
       'WireSpot Revenue Report',
+      'Powered by ${AppBranding.companyName}',
       divider,
       'Period',
       'From: ${_dateTime(summary.from)}',
@@ -39,7 +48,7 @@ class ReportExportService {
       'Sales',
       if (summary.sales.isEmpty) 'No sales recorded in this period.',
       for (final sale in summary.sales) ...[
-        '${_dateTime(sale.soldAt)}',
+        _dateTime(sale.soldAt),
         'Router: ${sale.routerId}',
         if (sale.voucherId != null) 'Voucher: ${sale.voucherId}',
         'Amount: ${sale.currency} ${(sale.amountMinor / 100).toStringAsFixed(0)}',
@@ -48,9 +57,9 @@ class ReportExportService {
         ''.padLeft(48, '-'),
       ],
       '',
-      AppBranding.supportEmail,
-      AppBranding.supportPhone,
-      AppBranding.website,
+      supportEmail,
+      supportPhone,
+      website,
     ].join('\n');
   }
 

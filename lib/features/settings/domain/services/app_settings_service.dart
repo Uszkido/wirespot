@@ -21,6 +21,15 @@ class AppSettingsService {
     final businessName = await _repository.readSetting(
       AppSettingsKeys.businessName,
     );
+    final businessEmail = await _repository.readSetting(
+      AppSettingsKeys.businessEmail,
+    );
+    final businessPhone = await _repository.readSetting(
+      AppSettingsKeys.businessPhone,
+    );
+    final businessWebsite = await _repository.readSetting(
+      AppSettingsKeys.businessWebsite,
+    );
 
     return AppSettingsSnapshot(
       themePreference: _themeFromString(theme),
@@ -28,6 +37,9 @@ class AppSettingsService {
       currencyCode: _supportedCurrency(currency),
       notificationsEnabled: notifications != 'false',
       businessName: businessName ?? AppBranding.companyName,
+      businessEmail: businessEmail ?? AppBranding.supportEmail,
+      businessPhone: businessPhone ?? AppBranding.supportPhone,
+      businessWebsite: businessWebsite ?? AppBranding.website,
     );
   }
 
@@ -51,6 +63,18 @@ class AppSettingsService {
     await _repository.writeSetting(
       AppSettingsKeys.businessName,
       settings.businessName,
+    );
+    await _repository.writeSetting(
+      AppSettingsKeys.businessEmail,
+      settings.businessEmail,
+    );
+    await _repository.writeSetting(
+      AppSettingsKeys.businessPhone,
+      settings.businessPhone,
+    );
+    await _repository.writeSetting(
+      AppSettingsKeys.businessWebsite,
+      settings.businessWebsite,
     );
   }
 

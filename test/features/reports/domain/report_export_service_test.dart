@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wirespot/features/settings/domain/entities/app_settings.dart';
 import 'package:wirespot/features/reports/domain/entities/report_export.dart';
 import 'package:wirespot/features/reports/domain/entities/revenue_summary.dart';
 import 'package:wirespot/features/reports/domain/entities/sale_entity.dart';
@@ -64,5 +65,34 @@ void main() {
     expect(export.content, contains('Summary'));
     expect(export.content, contains('Router: router-1'));
     expect(export.content, contains('Payment: cash'));
+  });
+
+  test('exports co-branded PDF text content', () {
+    const service = ReportExportService();
+    final summary = RevenueSummary(
+      sales: const [],
+      totalMinor: 0,
+      currency: 'NGN',
+      from: DateTime(2026),
+      to: DateTime(2026, 1, 2),
+    );
+
+    final export = service.export(
+      ReportExportRequest(summary: summary, format: ReportExportFormat.pdf),
+      settings: const AppSettingsSnapshot(
+        themePreference: AppThemePreference.system,
+        languageCode: 'en',
+        currencyCode: 'NGN',
+        notificationsEnabled: true,
+        businessName: 'North Campus WiFi',
+        businessEmail: 'support@north.example',
+        businessPhone: '+2347000000000',
+        businessWebsite: 'https://north.example',
+      ),
+    );
+
+    expect(export.content, contains('North Campus WiFi'));
+    expect(export.content, contains('Powered by Vexel Innovations'));
+    expect(export.content, contains('support@north.example'));
   });
 }

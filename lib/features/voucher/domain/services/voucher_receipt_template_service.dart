@@ -1,4 +1,5 @@
 import '../../../../core/branding/app_branding.dart';
+import '../../../settings/domain/entities/app_settings.dart';
 import '../entities/voucher_entity.dart';
 import '../entities/voucher_receipt.dart';
 import '../entities/ticket_template.dart';
@@ -12,6 +13,7 @@ class VoucherReceiptTemplateService {
   VoucherReceipt build({
     required VoucherEntity voucher,
     String loginUrl = '',
+    AppSettingsSnapshot? settings,
     TicketTemplate template = const TicketTemplate(
       id: 'thermal_58',
       name: '58mm Thermal',
@@ -19,10 +21,10 @@ class VoucherReceiptTemplateService {
   }) {
     return VoucherReceipt(
       voucher: voucher,
-      businessName: AppBranding.companyName,
-      supportEmail: AppBranding.supportEmail,
-      supportPhone: AppBranding.supportPhone,
-      website: AppBranding.website,
+      businessName: settings?.businessName ?? AppBranding.companyName,
+      supportEmail: settings?.businessEmail ?? AppBranding.supportEmail,
+      supportPhone: settings?.businessPhone ?? AppBranding.supportPhone,
+      website: settings?.businessWebsite ?? AppBranding.website,
       qrPayload: _qrService.hotspotLoginPayload(
         loginUrl: loginUrl,
         voucher: voucher,

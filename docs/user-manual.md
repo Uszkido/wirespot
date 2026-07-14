@@ -145,7 +145,7 @@ Settings contains:
 - Business name
 - Printer configuration
 - Backup preview
-- Restore placeholder
+- JSON restore flow
 - Sign out
 
 ## Printing

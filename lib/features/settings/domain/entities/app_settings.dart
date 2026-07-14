@@ -8,6 +8,9 @@ class AppSettingsKeys {
   static const currencyCode = 'currency_code';
   static const notificationsEnabled = 'notifications_enabled';
   static const businessName = 'business_name';
+  static const businessEmail = 'business_email';
+  static const businessPhone = 'business_phone';
+  static const businessWebsite = 'business_website';
 }
 
 class SupportedLanguage {
@@ -80,6 +83,9 @@ class AppSettingsSnapshot {
     required this.currencyCode,
     required this.notificationsEnabled,
     required this.businessName,
+    required this.businessEmail,
+    required this.businessPhone,
+    required this.businessWebsite,
   });
 
   final AppThemePreference themePreference;
@@ -87,6 +93,9 @@ class AppSettingsSnapshot {
   final String currencyCode;
   final bool notificationsEnabled;
   final String businessName;
+  final String businessEmail;
+  final String businessPhone;
+  final String businessWebsite;
 
   AppSettingsSnapshot copyWith({
     AppThemePreference? themePreference,
@@ -94,6 +103,9 @@ class AppSettingsSnapshot {
     String? currencyCode,
     bool? notificationsEnabled,
     String? businessName,
+    String? businessEmail,
+    String? businessPhone,
+    String? businessWebsite,
   }) {
     return AppSettingsSnapshot(
       themePreference: themePreference ?? this.themePreference,
@@ -101,6 +113,9 @@ class AppSettingsSnapshot {
       currencyCode: currencyCode ?? this.currencyCode,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       businessName: businessName ?? this.businessName,
+      businessEmail: businessEmail ?? this.businessEmail,
+      businessPhone: businessPhone ?? this.businessPhone,
+      businessWebsite: businessWebsite ?? this.businessWebsite,
     );
   }
 }

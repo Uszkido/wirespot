@@ -10,6 +10,9 @@ void main() {
       currencyCode: 'NGN',
       notificationsEnabled: true,
       businessName: AppBranding.companyName,
+      businessEmail: AppBranding.supportEmail,
+      businessPhone: AppBranding.supportPhone,
+      businessWebsite: AppBranding.website,
     );
 
     final next = settings.copyWith(
@@ -21,5 +24,6 @@ void main() {
     expect(next.languageCode, 'en');
     expect(next.currencyCode, 'NGN');
     expect(next.notificationsEnabled, isFalse);
+    expect(next.businessEmail, AppBranding.supportEmail);
   });
 }
