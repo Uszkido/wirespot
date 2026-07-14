@@ -1,14 +1,46 @@
 # WireSpot Play Store Release Guide
 
-## Current Release Target
+This guide describes the release path for publishing WireSpot to Google Play.
+It covers signing, release builds, Play Console setup, billing readiness, and
+manual validation.
 
-- Package name: `com.wirespot.app`
-- Current version: see `VERSION`
-- Release artifact: Android App Bundle (`.aab`)
+## Release Target
+
+| Item | Value |
+| --- | --- |
+| App name | WireSpot |
+| Android package | `com.wirespot.app` |
+| Company | Vexel Innovations |
+| Release artifact | Android App Bundle (`.aab`) |
+| Current version | See `VERSION` |
+| Support email | Vexelvision@gmail.com |
+| Website | https://vexel-innovations.vercel.app/ |
+
+## Release Readiness Summary
+
+Prepared in the repository:
+
+- release signing configuration path
+- `android/key.properties.template`
+- ProGuard rules file
+- privacy policy draft
+- payment and licensing strategy
+- Play Store release checklist
+
+Required before production:
+
+- create upload keystore
+- keep keystore backed up securely
+- configure `android/key.properties`
+- build release AAB
+- create Play Console listing
+- configure subscriptions/products
+- run internal testing
+- validate WireGuard, RouterOS, printing, reports, and licensing on real phones
 
 ## 1. Create Upload Keystore
 
-Run this locally and keep the passwords private:
+Run locally from the project root:
 
 ```powershell
 cd "C:\Users\HP\Documents\Codex\2026-07-10\you-are-an-expert-flutter-android"
@@ -23,17 +55,57 @@ keytool -genkeypair `
   -alias wirespot
 ```
 
-Copy `android/key.properties.template` to `android/key.properties` and fill in the passwords.
+Back up the generated keystore immediately.
 
-## 2. Build Release AAB
+Never commit:
+
+```text
+android/app/upload-keystore.jks
+android/key.properties
+```
+
+## 2. Configure Signing Properties
+
+Copy:
+
+```text
+android/key.properties.template
+```
+
+to:
+
+```text
+android/key.properties
+```
+
+Fill in:
+
+```properties
+storePassword=...
+keyPassword=...
+keyAlias=wirespot
+storeFile=app/upload-keystore.jks
+```
+
+Keep the passwords private.
+
+## 3. Pre-release Checks
+
+Run:
 
 ```powershell
-cd "C:\Users\HP\Documents\Codex\2026-07-10\you-are-an-expert-flutter-android"
-
 C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check clean
 C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check pub get
+C:\tmp\wirespot_flutter\flutter\bin\dart.bat format lib test tools
 C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check analyze
 C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check test
+```
+
+The release should not proceed unless analysis and tests pass.
+
+## 4. Build Release AAB
+
+```powershell
 C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check build appbundle --release
 ```
 
@@ -43,35 +115,87 @@ Output:
 build\app\outputs\bundle\release\app-release.aab
 ```
 
-## 3. Play Console Checklist
+## 5. Play Console Listing
 
-- App name: WireSpot
-- Developer/company: Vexel Innovations
-- Support email: Vexelvision@gmail.com
-- Support phone: +234(0)7038953065
-- Website: https://vexel-innovations.vercel.app/
-- Privacy policy: publish `docs/privacy-policy.md` content on a public URL.
-- App category: Tools or Business
-- Content rating: complete Play Console questionnaire truthfully.
-- Data Safety: declare local storage, camera for QR scanning, Bluetooth for printers, network access for router communication, and VPN functionality.
-- Screenshots: dashboard, router setup, hotspot users, voucher generation, WireGuard, reports, settings.
-- Testing track: start with Internal testing before Production.
+Recommended listing values:
 
-## 4. Manual Release Validation
+| Field | Value |
+| --- | --- |
+| App name | WireSpot |
+| Developer | Vexel Innovations |
+| Category | Tools or Business |
+| Support email | Vexelvision@gmail.com |
+| Support phone | +234(0)7038953065 |
+| Website | https://vexel-innovations.vercel.app/ |
+| Privacy policy | Public URL based on `docs/privacy-policy.md` |
 
-- Install release build on a real Android phone.
-- Add a MikroTik router over local LAN.
-- Test WireGuard permission and tunnel connection.
-- Confirm RouterOS status loads.
-- Confirm hotspot active users load.
-- Generate a voucher.
-- Print and share a voucher receipt.
-- Export and share a report.
-- Confirm license/trial screen behavior.
+## 6. Data Safety Notes
 
-## 5. Important Notes
+Declare truthfully in Play Console:
 
-- Never commit `android/key.properties`.
-- Never commit `android/app/upload-keystore.jks`.
-- Keep Play App Signing enabled in Play Console.
-- Production licensing should use Play Billing or server validation before public paid release.
+- local app settings and router records
+- camera access for WireGuard QR scanning
+- Bluetooth access for thermal printers
+- network access for RouterOS communication
+- VPN functionality for private router access
+- generated/exported reports and voucher receipts
+- future billing or license validation network calls
+
+## 7. Screenshot Plan
+
+Capture real screenshots for:
+
+- dashboard
+- router add/test connection
+- WireGuard tunnel screen
+- hotspot users/sessions
+- voucher generation
+- co-branded voucher receipt
+- reports
+- settings/license/co-branding
+- permission readiness
+
+Use realistic demo data and avoid exposing real router credentials.
+
+## 8. Billing Setup
+
+Create subscription products from:
+
+- `wirespot_small_monthly`
+- `wirespot_pro_monthly`
+- `wirespot_pro_yearly`
+
+For direct/offline installs, use:
+
+- `wirespot_lifetime_device`
+
+Production billing should validate purchase tokens through a backend before
+granting long-term entitlement.
+
+## 9. Internal Testing Checklist
+
+Before production rollout:
+
+- install from Play internal testing
+- complete first launch and PIN setup
+- add local MikroTik router
+- test RouterOS API connection
+- import and connect WireGuard tunnel
+- load dashboard health data
+- load hotspot users and active sessions
+- generate voucher
+- print/share voucher receipt
+- export/share report
+- test backup and restore
+- test trial/license screens
+- verify app survives restart
+- verify no sensitive test data appears in screenshots
+
+## 10. Release Safety
+
+- Keep Play App Signing enabled.
+- Back up the upload keystore in at least two secure places.
+- Never commit signing files.
+- Tag each production release in Git.
+- Keep changelog updated.
+- Test on more than one Android device before public rollout.

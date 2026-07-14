@@ -1,10 +1,10 @@
-# WireSpot Pitch
+# WireSpot Product Pitch
 
 ## One-line Summary
 
 WireSpot is a modern Android hotspot management app for MikroTik RouterOS,
-designed for operators who need secure router access, voucher sales, user
-control, reporting, printing, and remote management through WireGuard.
+designed for operators who need secure router access, voucher sales, active
+user control, reports, thermal printing, and remote support through WireGuard.
 
 ## The Problem
 
@@ -73,9 +73,9 @@ Recommended product IDs:
 ## Current Development Status
 
 WireSpot already includes the main Android application, RouterOS integration,
-hotspot workflows, voucher generation, reporting, settings, local licensing,
-WireGuard backend wiring, Bluetooth printing, documentation, and Play Store
-preparation files.
+dashboard metrics, active user loading, hotspot workflows, voucher generation,
+reporting, settings, local licensing, WireGuard backend wiring, Bluetooth
+printing, co-branding, documentation, and Play Store preparation files.
 
 Remaining production hardening includes:
 
@@ -85,6 +85,21 @@ Remaining production hardening includes:
 - Server-side license validation.
 - Release signing and Play Store internal testing.
 - More UI flow and RouterOS command tests.
+
+## Go-to-market Positioning
+
+WireSpot should launch as a professional operator tool rather than a casual
+utility. The recommended first market is MikroTik hotspot operators who already
+sell Wi-Fi access through vouchers and need a cleaner Android workflow for
+daily management.
+
+The strongest launch message:
+
+- secure remote access through WireGuard
+- router and hotspot control from Android
+- voucher generation and receipts
+- operator co-branding
+- 7-day trial, then licensed premium access
 
 ## Brand
 

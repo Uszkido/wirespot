@@ -1,6 +1,8 @@
 # WireSpot User Manual
 
-WireSpot is an Android hotspot operations app for MikroTik RouterOS routers. It is designed for operators who manage hotspot users, vouchers, reports, and router health while connecting securely through WireGuard VPN.
+WireSpot is an Android hotspot operations app for MikroTik RouterOS routers.
+It helps operators manage routers, hotspot users, vouchers, receipts, reports,
+and secure remote access from one mobile workflow.
 
 ## Branding And Support
 
@@ -10,7 +12,7 @@ WireSpot is an Android hotspot operations app for MikroTik RouterOS routers. It 
 - Phone: +234(0)7038953065
 - Website: https://vexel-innovations.vercel.app/
 
-## First Launch
+## 1. First Launch
 
 1. Install the APK on an Android device.
 2. Open WireSpot.
@@ -20,7 +22,7 @@ WireSpot is an Android hotspot operations app for MikroTik RouterOS routers. It 
 
 The PIN is stored as a salted hash. Router passwords and voucher passwords are stored through the secure storage layer, not plain text database fields.
 
-## Recommended Router Setup
+## 2. Recommended Router Setup
 
 Before using RouterOS features:
 
@@ -35,7 +37,7 @@ Common RouterOS API ports:
 - Plain API: `8728`
 - SSL API: `8729`
 
-## Add A Router
+## 3. Add A Router
 
 1. Go to Dashboard.
 2. Open Routers.
@@ -50,7 +52,7 @@ Common RouterOS API ports:
 
 If Test Connection fails, check the selected connection mode first. VPN routers need WireGuard connected. Local LAN routers need the phone connected to the same network as the MikroTik. Then verify host, port, username, password, and RouterOS API service status.
 
-## Local On-Site Use Without VPN
+## 4. Local On-Site Use Without VPN
 
 WireSpot can connect without VPN when the Android device is physically on-site and connected to the same LAN or Wi-Fi as the MikroTik.
 
@@ -64,7 +66,7 @@ For local mode:
 
 Do not use local mode for public internet access. It is intended for same-site management only.
 
-## Dashboard
+## 5. Dashboard
 
 The dashboard shows the selected router's operating snapshot:
 
@@ -79,7 +81,10 @@ The dashboard shows the selected router's operating snapshot:
 
 If no router is configured, add a router before expecting live metrics.
 
-## Hotspot Management
+Tap the **Online users** dashboard card to open the active hotspot user view
+for the selected router.
+
+## 6. Hotspot Management
 
 Open Hotspot from the dashboard to manage:
 
@@ -92,9 +97,11 @@ Open Hotspot from the dashboard to manage:
 
 Available operations include creating users, creating profiles, disconnecting active sessions, deleting users, resetting counters, and removing hotspot records.
 
-WireSpot can help set up hotspot operations by creating the user profiles, users, IP bindings, and voucher batches used by a MikroTik hotspot. A full RouterOS hotspot server wizard, including DHCP/pool/interface setup, is planned as a later production-hardening step.
+WireSpot can help set up common hotspot operations by preparing profiles,
+users, IP bindings, and voucher batches used by a MikroTik hotspot. Always
+review generated setup plans before applying them to a live router.
 
-## Voucher Management
+## 7. Voucher Management
 
 Open Vouchers to generate hotspot access vouchers.
 
@@ -119,11 +126,11 @@ Voucher generation supports:
 - QR payload generation
 - Receipt preview
 - Share action
-- Print action boundary
+- Bluetooth print action
 - Optional RouterOS provisioning
 - Voucher history
 
-## Reports
+## 8. Reports
 
 Open Reports to view and export:
 
@@ -133,22 +140,27 @@ Open Reports to view and export:
 - Sales count
 - Voucher history summaries
 
-Export actions currently provide CSV and PDF-text foundations suitable for future polished file export.
+Export actions provide share-ready CSV/PDF report output for operator records.
 
-## Settings
+## 9. Settings
 
 Settings contains:
 
 - Theme preference
-- Language preference
+- Language preference: English, French, and Hausa labels
 - Notification preference
 - Business name
+- Currency preference
+- License activation
+- Permission readiness
+- Professional co-branding
+- Voucher encoding
 - Printer configuration
 - Backup preview
 - JSON restore flow
 - Sign out
 
-## Printing
+## 10. Printing
 
 WireSpot includes Bluetooth thermal printer support for paired ESC/POS printers using 58mm and 80mm receipts. Receipt text includes:
 
@@ -156,7 +168,7 @@ WireSpot includes Bluetooth thermal printer support for paired ESC/POS printers 
 - Voucher username/password
 - Price
 - Validity/time
-- QR payload text foundation
+- QR payload
 
 To add a printer:
 
@@ -168,9 +180,11 @@ To add a printer:
 6. Choose 58mm or 80mm.
 7. Save.
 
-Current printing supports paired Bluetooth ESC/POS text receipts. Bitmap QR/image printing and unpaired-device discovery are planned future improvements.
+Use paired Bluetooth ESC/POS printers for best results. Test each printer model
+before live customer use because some low-cost printers implement ESC/POS
+commands differently.
 
-## WireGuard VPN
+## 11. WireGuard VPN
 
 WireSpot expects secure RouterOS access over WireGuard.
 
@@ -183,9 +197,42 @@ The app includes:
 - Auto-reconnect coordinator
 - VPN guard before RouterOS API communication
 
-The Android build is wired to the official WireGuard tunnel backend. On first connect, Android may ask for VPN permission. Approve it, then tap connect again if the app reports that permission was required.
+The Android build is wired to the official WireGuard tunnel backend. On first
+connect, Android may ask for VPN permission. Approve it, then connect again if
+the app reports that permission was required.
 
-## Safe Operating Practice
+If the Android permission dialog does not appear, open Settings > Permission
+readiness and request VPN consent from there.
+
+## 12. Licensing
+
+WireSpot includes a 7-day full-access trial. After the trial, the app requires
+an active license.
+
+For local device-bound licensing:
+
+1. Open Settings.
+2. Copy the Device License ID.
+3. Generate a license key with the local generator.
+4. Paste the key into WireSpot.
+5. Tap Apply license.
+
+Each generated local license is bound to the Device License ID used during
+generation.
+
+## 13. Professional Co-branding
+
+Professional users can configure operator-facing business details in Settings:
+
+- Business name
+- Business email
+- Business phone
+- Business website
+
+Receipts and reports can show the operator business identity while keeping
+WireSpot identified as powered by Vexel Innovations.
+
+## 14. Safe Operating Practice
 
 - Do not expose RouterOS API ports to the public internet.
 - Use WireGuard or another private management network.

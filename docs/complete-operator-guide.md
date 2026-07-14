@@ -50,10 +50,10 @@ router IP from the same network.
 
 ## 4. Installing the APK
 
-Build or copy the debug APK:
+Build or copy the latest debug APK:
 
 ```text
-outputs\WireSpot-0.1.22+23-settings-license-polish-debug.apk
+outputs\WireSpot-0.1.23+24-cobranding-docs-debug.apk
 ```
 
 Transfer it to the phone and install it. Android may ask you to allow installs
@@ -331,7 +331,11 @@ License does not activate:
 
 ## 23. Current Production Readiness
 
-WireSpot is suitable for continued field testing. The core app, RouterOS
-integration, voucher workflows, and APK build are working, but full production
-release still requires final Play Billing, release signing, more real-device
-WireGuard checks, printer model testing, and Play Store internal testing.
+WireSpot is suitable for continued field testing with real MikroTik routers.
+The core Android app, RouterOS integration, dashboard metrics, hotspot
+workflows, voucher generation, licensing foundation, co-branding, printing
+path, reports, and debug APK build are working.
+
+Production release readiness still requires release signing, Google Play
+Billing validation, Play Store internal testing, broader Android device
+coverage, and printer model validation.

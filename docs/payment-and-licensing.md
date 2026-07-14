@@ -1,57 +1,131 @@
-# WireSpot Payment and Licensing Plan
+# WireSpot Payment And Licensing Strategy
 
-WireSpot will use a 7-day full-access trial. After the trial ends, the app
-requires an active entitlement before hotspot tools, routers, reports,
-printing, scheduler, and WireGuard management remain usable.
+This document defines the commercial licensing plan for WireSpot and the path
+from local device licenses to production Play Store billing.
 
-## Recommended Products
+## Licensing Goals
 
-Use Google Play subscriptions for Play Store installs:
+WireSpot licensing should be:
 
-| Product ID | Plan | Suggested price |
-| --- | --- | --- |
-| `wirespot_small_monthly` | Small monthly | NGN 3,000 - 5,000 |
-| `wirespot_pro_monthly` | Pro monthly | NGN 8,000 - 12,000 |
-| `wirespot_pro_yearly` | Pro yearly | NGN 80,000 - 120,000/year |
+- simple for hotspot operators
+- fair for small and professional users
+- secure enough for paid distribution
+- compatible with Play Store rules
+- usable for offline/direct enterprise installs
+- easy to support from Vexel Innovations
 
-Use device-bound offline licenses for direct installs, enterprise customers,
-and operators that cannot use Play Store billing:
+## Access Model
 
-| Product ID | Plan | Suggested price |
-| --- | --- | --- |
-| `wirespot_lifetime_device` | Lifetime device | NGN 150,000 - 250,000 |
+WireSpot uses a full-access trial followed by paid access.
 
-## Entitlement Sources
+| Stage | Access |
+| --- | --- |
+| Trial | 7 days of full app access |
+| Licensed | Full access for an active plan |
+| Expired/unlicensed | App requires license renewal or activation |
 
-The app now tracks where access came from:
+## Product Tiers
 
-- Trial: first 7 days on the device.
-- Device license: generated from the WireSpot device ID.
-- Google Play: future Play Billing purchase or subscription restore.
-- Server license: future Vexel license server validation.
-- Development: local test override keys only.
+| Product ID | Plan | Suggested Price | Best For |
+| --- | --- | --- | --- |
+| `wirespot_small_monthly` | Small monthly | NGN 3,000 - 5,000 | Small hotspot shops, one-site users |
+| `wirespot_pro_monthly` | Pro monthly | NGN 8,000 - 12,000 | Active operators, technicians, multi-router users |
+| `wirespot_pro_yearly` | Pro yearly | NGN 80,000 - 120,000/year | Serious operators and small ISPs |
+| `wirespot_lifetime_device` | Lifetime device | NGN 150,000 - 250,000 | Offline/direct install customers |
 
-## Play Billing Implementation Checklist
+## Premium Feature Positioning
 
-1. Create the subscription products in Google Play Console using the product
-   IDs above.
+Premium/Pro access should include:
+
+- multiple router operations
+- WireGuard remote management
+- batch vouchers
+- advanced voucher encoding
+- ticket templates
+- professional co-branding
+- Bluetooth thermal printing
+- reports export
+- scheduler tools
+- advanced profile/user controls
+
+## Current Active Licensing Features
+
+The app currently supports:
+
+- 7-day trial tracking
+- device license ID
+- local device-bound license generation
+- license key entry in Settings
+- entitlement source tracking
+- license request copy action
+
+## Production Play Billing Path
+
+For Play Store distribution, paid digital access should use Google Play Billing.
+
+Implementation checklist:
+
+1. Create Play Console subscription products with the product IDs above.
 2. Add the official Flutter `in_app_purchase` package.
 3. Query products on the license screen.
-4. Start purchase flow from the selected plan.
-5. Verify purchases with a backend before granting long-term access.
-6. Call `EntitlementService.savePlayBillingEntitlement` only after a purchase
-   token is verified.
+4. Start purchase from the selected plan.
+5. Verify purchase token with a backend.
+6. Save verified entitlement with plan and expiry.
 7. Restore purchases on startup and from Settings.
+8. Handle grace periods, account hold, cancellation, and expiry.
 
 ## Server Validation Recommendation
 
-For production, do not trust purchase state from the phone alone. Send the
-purchase token, package name, product ID, device ID, and account ID to a Vexel
-server. The server should validate the purchase with Google Play Developer API,
-then return a signed entitlement expiry.
+Do not trust phone-side purchase state alone for production.
 
-## Offline License Generation
+Recommended validation request:
 
-Offline licenses remain useful for direct APK installs and enterprise deals.
-Each generated key is bound to one WireSpot device ID, so the customer must
-send their device license ID from Settings before a key is generated.
+```text
+packageName
+productId
+purchaseToken
+deviceId
+accountId or customer reference
+appVersion
+```
+
+The Vexel server should:
+
+1. Verify the purchase with Google Play Developer API.
+2. Confirm the product belongs to WireSpot.
+3. Bind entitlement to customer/device policy.
+4. Return signed entitlement status and expiry.
+5. Reject expired, refunded, or invalid purchases.
+
+## Offline License Path
+
+Offline/device licenses remain useful for:
+
+- customers outside Play Billing availability
+- direct APK enterprise installs
+- lifetime device deals
+- pilots and demos
+
+Each offline license should be bound to one device ID and recorded privately by
+Vexel Innovations.
+
+## Support And Renewal Flow
+
+Recommended support flow:
+
+1. Customer opens Settings.
+2. Customer copies license request.
+3. Customer sends request to Vexel Innovations.
+4. Vexel confirms payment or subscription.
+5. Vexel issues key or verifies Play Billing entitlement.
+6. Customer applies license or restores purchase.
+
+## Contact
+
+Vexel Innovations
+
+Email: Vexelvision@gmail.com
+
+Phone: +234(0)7038953065
+
+Website: https://vexel-innovations.vercel.app/
