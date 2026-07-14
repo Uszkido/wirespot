@@ -34,6 +34,7 @@ class VoucherReceiptTemplateService {
       showPrice: template.showPrice,
       showQrCode: template.showQrCode,
       footer: template.footer,
+      logoPath: settings?.businessLogoPath ?? '',
     );
   }
 }

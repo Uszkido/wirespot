@@ -51,6 +51,7 @@ void main() {
         businessEmail: 'support@north.example',
         businessPhone: '+2347000000000',
         businessWebsite: 'https://north.example',
+        businessLogoPath: '/storage/emulated/0/Download/north-logo.png',
       ),
     );
     final text = receipt.toPlainText();
@@ -59,5 +60,6 @@ void main() {
     expect(text, contains('support@north.example'));
     expect(text, contains('Powered by Vexel Innovations'));
     expect(text, isNot(contains(AppBranding.supportEmail)));
+    expect(receipt.logoPath, contains('north-logo.png'));
   });
 }

@@ -20,6 +20,7 @@ class BackupService {
       AppSettingsKeys.businessEmail,
       AppSettingsKeys.businessPhone,
       AppSettingsKeys.businessWebsite,
+      AppSettingsKeys.businessLogoPath,
     ]) {
       final value = await _repository.readSetting(key);
       if (value != null) {

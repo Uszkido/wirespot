@@ -38,6 +38,7 @@ void main() {
 
     final arguments = Map<Object?, Object?>.from(calls.single.arguments as Map);
     expect(arguments['logoAsset'], 'assets/images/vexel_logo.png');
+    expect(arguments['logoFile'], isEmpty);
   });
 
   test('omits logo asset when receipt hides logo', () async {
@@ -53,6 +54,7 @@ void main() {
 
     final arguments = Map<Object?, Object?>.from(calls.single.arguments as Map);
     expect(arguments['logoAsset'], isEmpty);
+    expect(arguments['logoFile'], isEmpty);
   });
 }
 

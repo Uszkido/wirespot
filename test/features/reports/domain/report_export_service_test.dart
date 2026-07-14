@@ -88,6 +88,7 @@ void main() {
         businessEmail: 'support@north.example',
         businessPhone: '+2347000000000',
         businessWebsite: 'https://north.example',
+        businessLogoPath: '',
       ),
     );
 

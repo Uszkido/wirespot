@@ -57,10 +57,10 @@ C:\tmp\wirespot_flutter\flutter\bin\dart.bat run tools\license_generator.dart 12
 Example output:
 
 ```text
-1234567890ABCDEF => WS-12345678-XXXXXXXXXXXXXXXX
+1234567890ABCDEF => VEXEL-1234-913D
 ```
 
-Use the generated `WS-...` value as the license key in WireSpot Settings.
+Use the generated `VEXEL-...` value as the license key in WireSpot Settings.
 
 ## Batch Generation
 

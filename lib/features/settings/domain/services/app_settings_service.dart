@@ -30,6 +30,9 @@ class AppSettingsService {
     final businessWebsite = await _repository.readSetting(
       AppSettingsKeys.businessWebsite,
     );
+    final businessLogoPath = await _repository.readSetting(
+      AppSettingsKeys.businessLogoPath,
+    );
 
     return AppSettingsSnapshot(
       themePreference: _themeFromString(theme),
@@ -40,6 +43,7 @@ class AppSettingsService {
       businessEmail: businessEmail ?? AppBranding.supportEmail,
       businessPhone: businessPhone ?? AppBranding.supportPhone,
       businessWebsite: businessWebsite ?? AppBranding.website,
+      businessLogoPath: businessLogoPath ?? '',
     );
   }
 
@@ -75,6 +79,10 @@ class AppSettingsService {
     await _repository.writeSetting(
       AppSettingsKeys.businessWebsite,
       settings.businessWebsite,
+    );
+    await _repository.writeSetting(
+      AppSettingsKeys.businessLogoPath,
+      settings.businessLogoPath,
     );
   }
 

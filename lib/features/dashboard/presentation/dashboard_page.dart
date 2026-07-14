@@ -441,18 +441,90 @@ class _BrandingPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _DashboardPanel(
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return _DashboardPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(child: BrandLogo(size: 72, borderRadius: 12)),
-          SizedBox(height: 12),
-          _HealthRow(label: 'Company', value: AppBranding.companyName),
-          _HealthRow(label: 'Email', value: AppBranding.supportEmail),
-          _HealthRow(label: 'Phone', value: AppBranding.supportPhone),
-          _HealthRow(label: 'Website', value: AppBranding.website),
+          Row(
+            children: [
+              const BrandLogo(size: 52, borderRadius: 10),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppBranding.companyName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      'Official WireSpot support',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: const [
+              _SupportAction(
+                icon: Icons.mail_outline,
+                label: 'Email',
+                value: AppBranding.supportEmail,
+              ),
+              _SupportAction(
+                icon: Icons.phone_outlined,
+                label: 'Phone',
+                value: AppBranding.supportPhone,
+              ),
+              _SupportAction(
+                icon: Icons.language_outlined,
+                label: 'Website',
+                value: AppBranding.website,
+              ),
+            ],
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _SupportAction extends StatelessWidget {
+  const _SupportAction({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      avatar: Icon(icon, size: 18),
+      label: Text(label),
+      onPressed: () {
+        Clipboard.setData(ClipboardData(text: value));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$label copied.')));
+      },
     );
   }
 }

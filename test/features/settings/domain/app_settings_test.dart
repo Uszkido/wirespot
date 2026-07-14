@@ -13,6 +13,7 @@ void main() {
       businessEmail: AppBranding.supportEmail,
       businessPhone: AppBranding.supportPhone,
       businessWebsite: AppBranding.website,
+      businessLogoPath: '',
     );
 
     final next = settings.copyWith(
@@ -25,5 +26,6 @@ void main() {
     expect(next.currencyCode, 'NGN');
     expect(next.notificationsEnabled, isFalse);
     expect(next.businessEmail, AppBranding.supportEmail);
+    expect(next.businessLogoPath, isEmpty);
   });
 }

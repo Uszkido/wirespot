@@ -11,6 +11,7 @@ class AppSettingsKeys {
   static const businessEmail = 'business_email';
   static const businessPhone = 'business_phone';
   static const businessWebsite = 'business_website';
+  static const businessLogoPath = 'business_logo_path';
 }
 
 class SupportedLanguage {
@@ -86,6 +87,7 @@ class AppSettingsSnapshot {
     required this.businessEmail,
     required this.businessPhone,
     required this.businessWebsite,
+    required this.businessLogoPath,
   });
 
   final AppThemePreference themePreference;
@@ -96,6 +98,7 @@ class AppSettingsSnapshot {
   final String businessEmail;
   final String businessPhone;
   final String businessWebsite;
+  final String businessLogoPath;
 
   AppSettingsSnapshot copyWith({
     AppThemePreference? themePreference,
@@ -106,6 +109,7 @@ class AppSettingsSnapshot {
     String? businessEmail,
     String? businessPhone,
     String? businessWebsite,
+    String? businessLogoPath,
   }) {
     return AppSettingsSnapshot(
       themePreference: themePreference ?? this.themePreference,
@@ -116,6 +120,7 @@ class AppSettingsSnapshot {
       businessEmail: businessEmail ?? this.businessEmail,
       businessPhone: businessPhone ?? this.businessPhone,
       businessWebsite: businessWebsite ?? this.businessWebsite,
+      businessLogoPath: businessLogoPath ?? this.businessLogoPath,
     );
   }
 }

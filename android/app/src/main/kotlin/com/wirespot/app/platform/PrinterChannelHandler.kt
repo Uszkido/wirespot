@@ -13,6 +13,7 @@ import android.os.Build
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
 import java.io.IOException
 import java.io.OutputStream
 import java.nio.charset.Charset
@@ -72,6 +73,7 @@ class PrinterChannelHandler(
         val address = call.argument<String>("address").orEmpty()
         val text = call.argument<String>("text").orEmpty()
         val logoAsset = call.argument<String>("logoAsset").orEmpty()
+        val logoFile = call.argument<String>("logoFile").orEmpty()
         val paperWidth = call.argument<String>("paperWidth").orEmpty()
         if (address.isBlank()) {
             result.error("INVALID_PRINTER", "Bluetooth printer address is required.", null)
@@ -100,7 +102,7 @@ class PrinterChannelHandler(
             Thread {
                 try {
                     adapter.cancelDiscovery()
-                    writeEscPosText(device, text, logoAsset, paperWidth)
+                    writeEscPosText(device, text, logoAsset, logoFile, paperWidth)
                     activity.runOnUiThread {
                         result.success(
                             mapOf(
@@ -161,6 +163,7 @@ class PrinterChannelHandler(
         device: BluetoothDevice,
         text: String,
         logoAsset: String,
+        logoFile: String,
         paperWidth: String,
     ) {
         val socket = device.createRfcommSocketToServiceRecord(SPP_UUID)
@@ -168,7 +171,7 @@ class PrinterChannelHandler(
             activeSocket.connect()
             val output = activeSocket.outputStream
             output.write(byteArrayOf(0x1B, 0x40)) // Initialize printer.
-            writeLogo(output, logoAsset, paperWidth)
+            writeLogo(output, logoAsset, logoFile, paperWidth)
             output.write(text.toByteArray(ESC_POS_CHARSET))
             output.write(byteArrayOf(0x0A, 0x0A, 0x0A))
             output.write(byteArrayOf(0x1D, 0x56, 0x00)) // Partial cut where supported.
@@ -176,14 +179,23 @@ class PrinterChannelHandler(
         }
     }
 
-    private fun writeLogo(output: OutputStream, logoAsset: String, paperWidth: String) {
-        if (logoAsset.isBlank()) {
+    private fun writeLogo(
+        output: OutputStream,
+        logoAsset: String,
+        logoFile: String,
+        paperWidth: String,
+    ) {
+        if (logoAsset.isBlank() && logoFile.isBlank()) {
             return
         }
         try {
-            val assetPath = "flutter_assets/$logoAsset"
-            val bitmap = activity.assets.open(assetPath).use { stream ->
-                BitmapFactory.decodeStream(stream)
+            val bitmap = if (logoFile.isNotBlank() && File(logoFile).exists()) {
+                BitmapFactory.decodeFile(logoFile)
+            } else {
+                val assetPath = "flutter_assets/$logoAsset"
+                activity.assets.open(assetPath).use { stream ->
+                    BitmapFactory.decodeStream(stream)
+                }
             } ?: return
             val maxWidth = if (paperWidth == "mm80") 384 else 256
             val scaled = scaleBitmap(bitmap, maxWidth)

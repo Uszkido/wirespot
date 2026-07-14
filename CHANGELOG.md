@@ -4,6 +4,22 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.24+25 - 2026-07-14
+
+Branding, license, and dashboard support polish build.
+
+### Added
+
+- Business branding and logo settings moved near the top of Settings.
+- Operator logo file path preview for co-branded receipts and reports.
+- Operator logo path passed through voucher receipt printing with Vexel logo fallback.
+
+### Changed
+
+- Device-bound local licenses now use shorter `VEXEL-XXXX-XXXX` keys.
+- Existing legacy `WS-...` device licenses remain valid.
+- Dashboard support panel now uses professional copy actions instead of a cramped table layout.
+
 ## 0.1.23+24 - 2026-07-14
 
 Professional co-branding and complete documentation build.

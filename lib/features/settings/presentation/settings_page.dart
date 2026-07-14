@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,6 +46,16 @@ class SettingsPage extends ConsumerWidget {
         children: [
           const _BrandCard(),
           const SizedBox(height: 16),
+          settings.when(
+            data: (value) => _CoBrandingCard(
+              settings: value,
+              entitlement: entitlement.asData?.value,
+            ),
+            error: (error, stackTrace) =>
+                Text('Could not load business branding: $error'),
+            loading: () => const LinearProgressIndicator(),
+          ),
+          const SizedBox(height: 16),
           const _SecurityCard(),
           const SizedBox(height: 16),
           const _PermissionSettingsCard(),
@@ -62,16 +73,6 @@ class SettingsPage extends ConsumerWidget {
             data: (value) => _PreferencesCard(settings: value),
             error: (error, stackTrace) =>
                 Text('Could not load settings: $error'),
-            loading: () => const LinearProgressIndicator(),
-          ),
-          const SizedBox(height: 16),
-          settings.when(
-            data: (value) => _CoBrandingCard(
-              settings: value,
-              entitlement: entitlement.asData?.value,
-            ),
-            error: (error, stackTrace) =>
-                Text('Could not load co-branding: $error'),
             loading: () => const LinearProgressIndicator(),
           ),
           const SizedBox(height: 16),
@@ -1094,6 +1095,7 @@ class _CoBrandingCard extends ConsumerWidget {
     var businessEmail = settings.businessEmail;
     var businessPhone = settings.businessPhone;
     var businessWebsite = settings.businessWebsite;
+    var businessLogoPath = settings.businessLogoPath;
 
     return Card(
       child: Padding(
@@ -1105,7 +1107,7 @@ class _CoBrandingCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Professional co-branding',
+                    'Business branding and logo',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -1116,8 +1118,62 @@ class _CoBrandingCard extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Show the operator brand on receipts and reports while keeping '
-              'WireSpot powered by Vexel Innovations.',
+              'Upload or enter the operator identity used on receipts and '
+              'reports. WireSpot remains powered by Vexel Innovations.',
+            ),
+            const SizedBox(height: 12),
+            _BusinessLogoPreview(path: businessLogoPath),
+            const SizedBox(height: 12),
+            TextFormField(
+              enabled: isPremium,
+              initialValue: businessLogoPath,
+              onChanged: (value) => businessLogoPath = value,
+              keyboardType: TextInputType.text,
+              decoration: const InputDecoration(
+                labelText: 'Business logo file path',
+                helperText: 'Paste a local PNG/JPG path copied from the phone.',
+                prefixIcon: Icon(Icons.image_outlined),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: isPremium
+                      ? () async {
+                          final clipboard = await Clipboard.getData(
+                            Clipboard.kTextPlain,
+                          );
+                          businessLogoPath = clipboard?.text?.trim() ?? '';
+                          await ref
+                              .read(appSettingsServiceProvider)
+                              .save(
+                                settings.copyWith(
+                                  businessLogoPath: businessLogoPath,
+                                ),
+                              );
+                          ref.invalidate(appSettingsProvider);
+                        }
+                      : null,
+                  icon: const Icon(Icons.content_paste_outlined),
+                  label: const Text('Paste logo path'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: isPremium
+                      ? () async {
+                          businessLogoPath = '';
+                          await ref
+                              .read(appSettingsServiceProvider)
+                              .save(settings.copyWith(businessLogoPath: ''));
+                          ref.invalidate(appSettingsProvider);
+                        }
+                      : null,
+                  icon: const Icon(Icons.clear_outlined),
+                  label: const Text('Clear logo'),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -1174,6 +1230,7 @@ class _CoBrandingCard extends ConsumerWidget {
                               businessEmail: businessEmail.trim(),
                               businessPhone: businessPhone.trim(),
                               businessWebsite: businessWebsite.trim(),
+                              businessLogoPath: businessLogoPath.trim(),
                             ),
                           );
                       ref.invalidate(appSettingsProvider);
@@ -1185,6 +1242,46 @@ class _CoBrandingCard extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _BusinessLogoPreview extends StatelessWidget {
+  const _BusinessLogoPreview({required this.path});
+
+  final String path;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final trimmed = path.trim();
+    final exists = trimmed.isNotEmpty && File(trimmed).existsSync();
+
+    return Container(
+      height: 96,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: exists
+          ? Image.file(File(trimmed), fit: BoxFit.contain)
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.image_outlined, color: colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  trimmed.isEmpty
+                      ? 'No business logo selected'
+                      : 'Logo file not found',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

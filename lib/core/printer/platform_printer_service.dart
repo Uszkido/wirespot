@@ -53,6 +53,7 @@ class PlatformPrinterService implements PrinterService {
             'text': text,
             'paperWidth': paperWidth.name,
             'logoAsset': receipt.showLogo ? 'assets/images/vexel_logo.png' : '',
+            'logoFile': receipt.showLogo ? receipt.logoPath : '',
           });
       return PrintJobResult(
         success: result?['success'] as bool? ?? false,

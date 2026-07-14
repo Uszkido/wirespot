@@ -41,6 +41,15 @@ void main() {
       '1234567890abcdef',
     );
 
+    expect(license, startsWith('VEXEL-1234-'));
+    expect(license, hasLength(15));
+  });
+
+  test('legacy WS device licenses remain valid', () {
+    final license = EntitlementService.generateLegacyDeviceLicense(
+      '1234567890abcdef',
+    );
+
     expect(license, startsWith('WS-12345678-'));
     expect(license, hasLength(28));
   });

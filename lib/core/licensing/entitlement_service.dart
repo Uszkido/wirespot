@@ -1,7 +1,3 @@
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
-
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import 'billing_plan.dart';
 import 'entitlement_snapshot.dart';
@@ -105,7 +101,11 @@ class EntitlementService {
 
   bool _isRecognizedLicense(String? licenseKey, String deviceId) {
     final normalized = licenseKey?.trim().toUpperCase();
-    if (normalized == generateDeviceLicense(deviceId)) {
+    if (normalized == null || normalized.isEmpty) {
+      return false;
+    }
+    if (normalized == generateDeviceLicense(deviceId) ||
+        _isLegacyDeviceLicense(normalized, deviceId)) {
       return true;
     }
     return normalized == 'WIRESPOT-DEV-PREMIUM' ||
@@ -124,7 +124,8 @@ class EntitlementService {
     if (normalized == null || normalized.isEmpty) {
       return EntitlementSource.none;
     }
-    if (normalized == generateDeviceLicense(deviceId)) {
+    if (normalized == generateDeviceLicense(deviceId) ||
+        _isLegacyDeviceLicense(normalized, deviceId)) {
       return EntitlementSource.deviceLicense;
     }
     if (_isRecognizedLicense(normalized, deviceId)) {
@@ -182,11 +183,27 @@ class EntitlementService {
     if (normalizedDevice.length < 8) {
       throw ArgumentError.value(deviceId, 'deviceId', 'Use at least 8 chars');
     }
-    final digest = sha256
-        .convert(utf8.encode('wirespot-v1:$normalizedDevice'))
-        .toString()
-        .toUpperCase();
+    final digest = _licenseDigest(normalizedDevice);
+    return 'VEXEL-${normalizedDevice.substring(0, 4)}-'
+        '${digest.substring(0, 4)}';
+  }
+
+  static String generateLegacyDeviceLicense(String deviceId) {
+    final normalizedDevice = deviceId.trim().toUpperCase();
+    if (normalizedDevice.length < 8) {
+      throw ArgumentError.value(deviceId, 'deviceId', 'Use at least 8 chars');
+    }
+    final digest = _licenseDigest(normalizedDevice);
     return 'WS-${normalizedDevice.substring(0, 8)}-${digest.substring(0, 16)}';
+  }
+
+  static bool _isLegacyDeviceLicense(String licenseKey, String deviceId) {
+    final normalizedDevice = deviceId.trim().toUpperCase();
+    if (normalizedDevice.length < 8) {
+      return false;
+    }
+    return licenseKey.startsWith('WS-${normalizedDevice.substring(0, 8)}-') &&
+        licenseKey.length == 28;
   }
 
   Future<DateTime> _trialStartedAt(DateTime now) async {
@@ -207,14 +224,24 @@ class EntitlementService {
     if (stored != null && stored.trim().length >= 8) {
       return stored.trim().toUpperCase();
     }
-    final seed = '${now.microsecondsSinceEpoch}${now.millisecond}';
-    final id = sha256
-        .convert(utf8.encode(seed))
-        .toString()
-        .substring(0, 16)
-        .toUpperCase();
+    final seed = now.microsecondsSinceEpoch.toRadixString(16).toUpperCase();
+    final id = seed.padLeft(16, '0').substring(0, 16);
     await _settingsRepository.writeSetting(deviceIdSetting, id);
     return id;
+  }
+
+  static String _licenseDigest(String deviceId) {
+    var hash = 0x811C9DC5;
+    final input = 'wirespot-v2:$deviceId';
+    for (final codeUnit in input.codeUnits) {
+      hash ^= codeUnit;
+      hash = (hash * 0x01000193) & 0xFFFFFFFF;
+    }
+    final first = hash.toRadixString(16).padLeft(8, '0');
+    final second = ((hash ^ 0xA5A5A5A5) & 0xFFFFFFFF)
+        .toRadixString(16)
+        .padLeft(8, '0');
+    return '$first$second'.toUpperCase();
   }
 }
 

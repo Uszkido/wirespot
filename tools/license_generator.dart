@@ -1,7 +1,4 @@
-import 'dart:convert';
 import 'dart:io';
-
-import 'package:crypto/crypto.dart';
 
 void main(List<String> args) {
   if (args.isEmpty) {
@@ -17,12 +14,24 @@ void main(List<String> args) {
       stdout.writeln('$deviceId: invalid device ID');
       continue;
     }
-    final digest = sha256
-        .convert(utf8.encode('wirespot-v1:$normalized'))
-        .toString()
-        .toUpperCase();
+    final digest = _licenseDigest(normalized);
     final license =
-        'WS-${normalized.substring(0, 8)}-${digest.substring(0, 16)}';
+        'VEXEL-${normalized.substring(0, 4)}-'
+        '${digest.substring(0, 4)}';
     stdout.writeln('$normalized => $license');
   }
+}
+
+String _licenseDigest(String deviceId) {
+  var hash = 0x811C9DC5;
+  final input = 'wirespot-v2:$deviceId';
+  for (final codeUnit in input.codeUnits) {
+    hash ^= codeUnit;
+    hash = (hash * 0x01000193) & 0xFFFFFFFF;
+  }
+  final first = hash.toRadixString(16).padLeft(8, '0');
+  final second = ((hash ^ 0xA5A5A5A5) & 0xFFFFFFFF)
+      .toRadixString(16)
+      .padLeft(8, '0');
+  return '$first$second'.toUpperCase();
 }

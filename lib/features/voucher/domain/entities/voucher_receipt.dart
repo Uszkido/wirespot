@@ -13,6 +13,7 @@ class VoucherReceipt {
     this.showPrice = true,
     this.showQrCode = true,
     this.footer = 'Powered by Vexel Innovations',
+    this.logoPath = '',
   });
 
   final VoucherEntity voucher;
@@ -26,6 +27,7 @@ class VoucherReceipt {
   final bool showPrice;
   final bool showQrCode;
   final String footer;
+  final String logoPath;
 
   String toPlainText() {
     final price =
