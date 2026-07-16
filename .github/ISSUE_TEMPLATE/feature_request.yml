@@ -3,6 +3,10 @@ description: Suggest an improvement for WireSpot.
 title: "[Feature]: "
 labels: ["enhancement"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Focus requests on real hotspot operator workflows, RouterOS management, secure access, vouchers, reports, printing, licensing, or Play Store readiness.
   - type: textarea
     id: problem
     attributes:
@@ -24,18 +28,35 @@ body:
       options:
         - Router setup
         - RouterOS API
-        - WireGuard
-        - Hotspot
-        - Vouchers
-        - Reports
-        - Printing
-        - Settings
+        - WireGuard / VPN
+        - Hotspot users / profiles / sessions
+        - Vouchers / QR / receipts
+        - Bluetooth printing
+        - Reports / export
+        - Settings / language / currency
+        - Licensing / Play Billing
+        - Co-branding
+        - Scheduler
         - Security
         - Documentation
     validations:
       required: true
+  - type: dropdown
+    id: plan
+    attributes:
+      label: Suggested product tier
+      options:
+        - Core app
+        - Premium
+        - Professional / co-branding
+        - Enterprise / server validated
+        - Not sure
+  - type: textarea
+    id: routeros
+    attributes:
+      label: RouterOS impact
+      description: Mention any RouterOS commands, permissions, or hotspot behavior that may be affected.
   - type: textarea
     id: notes
     attributes:
       label: Additional notes
-

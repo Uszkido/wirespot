@@ -1,31 +1,68 @@
-WireSpot Proprietary License
+WireSpot Proprietary Software License
 
 Copyright (c) 2026 Vexel Innovations.
 
 All rights reserved.
 
-This software, including its source code, documentation, branding, assets, and
-compiled application packages, is the property of Vexel Innovations unless a
-separate written agreement says otherwise.
+This software, including source code, compiled application packages,
+documentation, branding, icons, images, product names, configuration templates,
+and related materials, is proprietary to Vexel Innovations unless a separate
+written agreement states otherwise.
 
-Permission is granted to authorized Vexel Innovations maintainers,
-contractors, and collaborators to use, inspect, test, modify, and distribute
-this software only for WireSpot development, deployment, support, and business
-operations approved by Vexel Innovations.
+## Authorized Use
 
-You may not copy, sell, sublicense, publish, rebrand, redistribute, or use this
-software to create a competing product without prior written permission from
-Vexel Innovations.
+Vexel Innovations grants authorized maintainers, contractors, testers, and
+collaborators permission to access, inspect, run, test, modify, and build this
+software only for approved WireSpot development, deployment, support,
+evaluation, and business operations.
 
-This project intentionally does not copy Mikhmon, WireNex, or proprietary
-third-party application code. RouterOS integration must be implemented through
-public RouterOS API behavior and original WireSpot code.
+## Restrictions
+
+Without prior written permission from Vexel Innovations, you may not:
+
+- Sell, sublicense, publish, lease, rent, or redistribute this software.
+- Rebrand WireSpot or distribute modified builds as your own product.
+- Use this software to create a competing product.
+- Remove Vexel Innovations copyright, license, branding, or attribution notices.
+- Publish private source code, private build artifacts, signing keys, license
+  keys, or server-side licensing material.
+- Copy proprietary code, UI, templates, or assets from Mikhmon, WireNex, or any
+  third-party application into WireSpot.
+
+## Original Implementation Notice
+
+WireSpot must be implemented from original code and public RouterOS API
+behavior. References to MikroTik RouterOS, WireGuard, Android, Flutter, and
+third-party libraries are for integration purposes only and do not transfer
+ownership of those external projects.
+
+## Contributions
+
+By contributing to this repository, you agree that your contribution may be
+used, modified, documented, shipped, licensed, commercialized, or otherwise
+included by Vexel Innovations as part of WireSpot and related Vexel Innovations
+products or services.
+
+## No Warranty
 
 THE SOFTWARE IS PROVIDED "AS IS" FOR AUTHORIZED USE ONLY. VEXEL INNOVATIONS
-DISCLAIMS ALL WARRANTIES TO THE MAXIMUM EXTENT PERMITTED BY LAW.
+DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, SECURITY,
+AVAILABILITY, AND ERROR-FREE OPERATION, TO THE MAXIMUM EXTENT PERMITTED BY LAW.
 
-Contact:
+## Limitation Of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, VEXEL INNOVATIONS SHALL NOT BE LIABLE
+FOR LOST PROFITS, LOST DATA, LOST BUSINESS, ROUTER MISCONFIGURATION, NETWORK
+OUTAGES, CUSTOMER DISPUTES, PAYMENT LOSSES, OR ANY INDIRECT, INCIDENTAL,
+SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM USE OF THIS SOFTWARE.
+
+## Contact
+
 Vexel Innovations
+
 Email: Vexelvision@gmail.com
+
 Phone: +234(0)7038953065
+
 Website: https://vexel-innovations.vercel.app/

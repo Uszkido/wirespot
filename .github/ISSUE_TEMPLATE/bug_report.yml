@@ -6,32 +6,56 @@ body:
   - type: markdown
     attributes:
       value: |
-        Do not include real router passwords, VPN private keys, or customer data.
+        Do not include real router passwords, WireGuard private keys, Android signing keys, license secrets, or customer data.
+        Security-sensitive issues must be reported privately using SECURITY.md.
   - type: input
     id: version
     attributes:
-      label: App version
-      placeholder: "0.1.0+1"
+      label: WireSpot version
+      placeholder: "0.1.24+25"
     validations:
       required: true
+  - type: input
+    id: android
+    attributes:
+      label: Android device and version
+      placeholder: "Samsung A15, Android 14"
+    validations:
+      required: true
+  - type: input
+    id: routeros
+    attributes:
+      label: RouterOS version and router board
+      placeholder: "RouterOS 7.19.6, L009UiGS-2HaxD"
   - type: dropdown
     id: area
     attributes:
       label: Area
       options:
-        - Authentication
+        - Authentication / PIN / biometric
         - Router connection
         - RouterOS API
-        - WireGuard
-        - Hotspot
-        - Vouchers
-        - Reports
-        - Printing
-        - Settings
+        - WireGuard / VPN
+        - Hotspot users / profiles / sessions
+        - Vouchers / QR / receipts
+        - Bluetooth printing
+        - Reports / export
+        - Settings / language / currency
+        - Licensing / trial / activation
+        - Co-branding
         - Android build
         - Documentation
     validations:
       required: true
+  - type: dropdown
+    id: connection_mode
+    attributes:
+      label: Router connection mode
+      options:
+        - Local LAN
+        - WireGuard remote
+        - No router involved
+        - Not sure
   - type: textarea
     id: description
     attributes:
@@ -44,9 +68,10 @@ body:
     attributes:
       label: Steps to reproduce
       placeholder: |
-        1. Open...
-        2. Tap...
-        3. See...
+        1. Open WireSpot
+        2. Go to ...
+        3. Tap ...
+        4. See ...
     validations:
       required: true
   - type: textarea
@@ -60,4 +85,10 @@ body:
     attributes:
       label: Logs or screenshots
       description: Remove secrets before posting.
-
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I removed router passwords, WireGuard private keys, license secrets, and customer data.
+          required: true

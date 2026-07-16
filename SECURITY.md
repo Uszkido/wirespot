@@ -1,19 +1,21 @@
 # Security Policy
 
-WireSpot manages RouterOS access, hotspot users, vouchers, VPN state, local
-PIN authentication, and printer workflows. Treat security issues seriously.
+WireSpot manages MikroTik RouterOS access, hotspot users, voucher records,
+WireGuard tunnels, local authentication, printer workflows, licensing, and
+operator business data. Treat security issues with care.
 
-## Supported Version
+## Supported Versions
 
 | Version | Status |
 | --- | --- |
-| 0.1.x | Active development |
+| `0.1.x` | Active development and field testing |
+| Older private builds | Best-effort support only |
 
 ## Report A Vulnerability
 
 Do not open a public GitHub issue for sensitive reports.
 
-Email:
+Email security reports to:
 
 ```text
 Vexelvision@gmail.com
@@ -21,29 +23,64 @@ Vexelvision@gmail.com
 
 Include:
 
-- A short description of the issue.
-- Affected app version or commit hash.
-- Steps to reproduce.
+- App version or commit hash.
+- Affected area: RouterOS API, WireGuard, authentication, licensing, database,
+  printing, reports, Android permissions, backup/restore, or Play Store build.
+- Clear reproduction steps.
+- Expected and actual behavior.
 - Logs with secrets removed.
-- Whether RouterOS, WireGuard, Android, database, printer, or voucher flows are
-  involved.
+- Whether the issue affects local LAN mode, WireGuard mode, or both.
+- Whether real customer/operator data may be exposed.
 
-## Sensitive Data Rules
+## Response Targets
 
-Never share:
+Vexel Innovations aims to:
 
-- RouterOS passwords.
-- WireGuard private keys.
-- Voucher password exports from real deployments.
-- Customer phone numbers or payment records.
-- Android keystore files.
-- Release signing keys.
+- Acknowledge high-risk reports within 3 business days.
+- Triage reproducible vulnerabilities within 7 business days.
+- Provide a fix plan or mitigation when the issue is confirmed.
+- Credit reporters when appropriate and requested.
 
-## Deployment Security
+These targets may vary during early private development, but security reports
+will be prioritized over normal feature work.
 
-- Prefer WireGuard for remote management.
-- Local LAN mode is only for trusted on-site networks.
-- Do not expose RouterOS API ports to the public internet.
-- Use dedicated RouterOS credentials with limited permissions.
-- Rotate router credentials if an operator device is lost.
+## Do Not Share Publicly
 
+Never post:
+
+- RouterOS passwords or admin usernames.
+- WireGuard private keys or full production configs.
+- Android keystore files or signing passwords.
+- Play Billing secrets or server license-signing keys.
+- Real voucher password exports.
+- Customer names, phone numbers, payment records, or sales ledgers.
+- Screenshots that reveal router IPs, VPN addresses, or credentials.
+
+## Secure Deployment Guidance
+
+- Use WireGuard for remote management.
+- Use local LAN mode only on trusted on-site networks.
+- Do not expose RouterOS API ports directly to the public internet.
+- Use a dedicated RouterOS account for WireSpot with the minimum permissions
+  required for hotspot operations.
+- Rotate RouterOS credentials if an operator phone is lost or compromised.
+- Protect Android devices with screen lock, app PIN, and biometric unlock where
+  available.
+- Back up Play Store upload keys and license-signing secrets outside the repo.
+
+## Out Of Scope
+
+The following are normally not treated as WireSpot vulnerabilities unless they
+demonstrate a direct WireSpot flaw:
+
+- Compromised MikroTik routers caused by weak operator passwords.
+- Publicly exposed RouterOS services configured outside WireSpot guidance.
+- Rooted or heavily modified Android devices.
+- Third-party printer firmware vulnerabilities.
+- Social engineering outside WireSpot-controlled channels.
+
+## Security Updates
+
+Confirmed vulnerabilities should be fixed in source first, documented in
+`CHANGELOG.md`, and distributed through the next APK/AAB build or urgent patch
+build depending on severity.

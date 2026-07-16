@@ -253,6 +253,10 @@ Still required before production upload:
 - [SECURITY.md](SECURITY.md)
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- [SUPPORT.md](SUPPORT.md)
+
+WireSpot is proprietary Vexel Innovations software. See [LICENSE](LICENSE) for
+authorized use, contribution, redistribution, and warranty terms.
 
 ## Disclaimer
 

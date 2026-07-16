@@ -13,12 +13,17 @@ Branding, license, and dashboard support polish build.
 - Business branding and logo settings moved near the top of Settings.
 - Operator logo file path preview for co-branded receipts and reports.
 - Operator logo path passed through voucher receipt printing with Vexel logo fallback.
+- Professional repository governance updates for license, security,
+  contributing, code of conduct, support, issue templates, pull request
+  template, and CODEOWNERS.
 
 ### Changed
 
 - Device-bound local licenses now use shorter `VEXEL-XXXX-XXXX` keys.
 - Existing legacy `WS-...` device licenses remain valid.
 - Dashboard support panel now uses professional copy actions instead of a cramped table layout.
+- README governance links now include the support policy and proprietary
+  license notice.
 
 ## 0.1.23+24 - 2026-07-14
 

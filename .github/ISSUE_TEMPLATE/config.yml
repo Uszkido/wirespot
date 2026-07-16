@@ -2,4 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Security report
     url: mailto:Vexelvision@gmail.com
-    about: Report credentials, VPN, authentication, or security-sensitive issues privately.
+    about: Report credentials, VPN, authentication, licensing, or security-sensitive issues privately.
+  - name: Vexel Innovations support
+    url: https://vexel-innovations.vercel.app/
+    about: Contact Vexel Innovations for WireSpot support, licensing, deployment, and business inquiries.

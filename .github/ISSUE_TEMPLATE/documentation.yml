@@ -1,0 +1,33 @@
+name: Documentation request
+description: Request a documentation update or clarification.
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: dropdown
+    id: doc_area
+    attributes:
+      label: Documentation area
+      options:
+        - README
+        - User manual
+        - Technical diagnostics
+        - Operator guide
+        - License generation
+        - Payment and licensing
+        - Play Store release
+        - Privacy policy
+        - Security / support / governance
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: What needs to change?
+      description: Explain what is missing, confusing, outdated, or incorrect.
+    validations:
+      required: true
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Suggested wording or reference
