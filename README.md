@@ -3,7 +3,7 @@
 Secure MikroTik RouterOS hotspot management for Android, built by
 Vexel Innovations in collaboration with TechNova Technologies.
 
-![WireSpot logo](assets/images/wirespot_mark.jpg)
+![WireSpot logo](assets/images/wirespot_readme_logo.png)
 
 WireSpot is a modern Flutter Android application for hotspot operators,
 technicians, and small ISPs who manage MikroTik RouterOS networks. It brings
