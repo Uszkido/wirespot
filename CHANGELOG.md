@@ -4,6 +4,25 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.26+27 - 2026-07-16
+
+WireSpot collaboration branding build.
+
+### Added
+
+- New WireSpot logo mark, full collaboration logo, and brand board assets.
+- TechNova Technologies collaboration partner identity across app support,
+  Settings, dashboard, README, Play Store guide, and operator docs.
+- Shared branding constants for partnership line, tagline, and powered-by text.
+
+### Changed
+
+- App logo widgets now use the new WireSpot mark instead of the older Vexel-only
+  logo asset.
+- Voucher receipts and printer payloads now identify the product as WireSpot.
+- Report exports use the official Vexel Innovations and TechNova Technologies
+  collaboration line.
+
 ## 0.1.25+26 - 2026-07-16
 
 Remote access mode foundation build.

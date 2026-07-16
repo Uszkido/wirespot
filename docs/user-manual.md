@@ -8,6 +8,7 @@ and secure remote access from one mobile workflow.
 
 - Product: WireSpot
 - Company: Vexel Innovations
+- Collaboration partner: TechNova Technologies
 - Email: Vexelvision@gmail.com
 - Phone: +234(0)7038953065
 - Website: https://vexel-innovations.vercel.app/
@@ -97,7 +98,7 @@ The dashboard shows the selected router's operating snapshot:
 - Memory
 - Router identity and health
 - Interface summary
-- Vexel Innovations support details
+- Vexel Innovations support and TechNova collaboration details
 
 If no router is configured, add a router before expecting live metrics.
 
@@ -250,7 +251,8 @@ Professional users can configure operator-facing business details in Settings:
 - Business website
 
 Receipts and reports can show the operator business identity while keeping
-WireSpot identified as powered by Vexel Innovations.
+WireSpot identified as powered by Vexel Innovations in collaboration with
+TechNova Technologies.
 
 ## 15. Safe Operating Practice
 

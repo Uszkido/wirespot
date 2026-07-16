@@ -1,9 +1,9 @@
 # WireSpot
 
 Secure MikroTik RouterOS hotspot management for Android, built by
-Vexel Innovations.
+Vexel Innovations in collaboration with TechNova Technologies.
 
-![WireSpot logo](assets/images/vexel_logo.png)
+![WireSpot logo](assets/images/wirespot_mark.jpg)
 
 WireSpot is a modern Flutter Android application for hotspot operators,
 technicians, and small ISPs who manage MikroTik RouterOS networks. It brings
@@ -18,12 +18,12 @@ public RouterOS API behavior and original WireSpot code.
 
 | Item | Status |
 | --- | --- |
-| Current version | `0.1.25+26` |
+| Current version | `0.1.26+27` |
 | Android debug APK | Builds successfully |
 | Static analysis | Passing |
 | Tests | 47 passing |
-| Latest APK output | `outputs\WireSpot-0.1.25+26-remote-access-modes-debug.apk` |
-| Latest pushed commit | `10f6753` |
+| Latest APK output | `outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk` |
+| Latest pushed commit | Pending next push |
 
 ## Why WireSpot
 
@@ -127,7 +127,7 @@ build\app\outputs\flutter-apk\app-debug.apk
 Current packaged debug APK:
 
 ```text
-outputs\WireSpot-0.1.25+26-remote-access-modes-debug.apk
+outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
 ```
 
 ## Operator Setup
@@ -178,7 +178,8 @@ Professional users can configure:
 - business website
 
 These values are used in voucher receipt preview/share/print output and report
-exports, while WireSpot remains identified as powered by Vexel Innovations.
+exports, while WireSpot remains identified as powered by Vexel Innovations in
+collaboration with TechNova Technologies.
 
 ## Security
 
@@ -241,10 +242,11 @@ Still required before production upload:
 | --- | --- |
 | Product | WireSpot |
 | Company | Vexel Innovations |
+| Collaboration partner | TechNova Technologies |
 | Email | Vexelvision@gmail.com |
 | Phone | +234(0)7038953065 |
 | Website | https://vexel-innovations.vercel.app/ |
-| Logo asset | `assets/images/vexel_logo.png` |
+| Logo asset | `assets/images/wirespot_mark.jpg` |
 
 ## Governance
 

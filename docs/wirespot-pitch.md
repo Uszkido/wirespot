@@ -32,9 +32,11 @@ WireSpot brings the daily hotspot workflow into one mobile app:
 - Remote access is designed around WireGuard instead of exposing RouterOS to
   the public internet.
 - Works for both local LAN servicing and remote managed routers.
-- Vexel Innovations branding, support, and documentation are built in.
+- Vexel Innovations branding, TechNova Technologies collaboration, support,
+  and documentation are built in.
 - Professional co-branding lets operators place their own business identity on
-  receipts and reports while WireSpot remains powered by Vexel Innovations.
+  receipts and reports while WireSpot remains powered by Vexel Innovations in
+  collaboration with TechNova Technologies.
 - Premium licensing is planned for Play Store subscriptions and device-bound
   offline licenses.
 
@@ -105,6 +107,7 @@ The strongest launch message:
 
 - Product: WireSpot
 - Company: Vexel Innovations
+- Collaboration partner: TechNova Technologies
 - Email: Vexelvision@gmail.com
 - Phone: +234(0)7038953065
 - Website: https://vexel-innovations.vercel.app/

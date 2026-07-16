@@ -60,7 +60,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     const SizedBox(height: 8),
                     Text(
                       isSetup
-                          ? 'Create a local operator PIN for ${AppBranding.companyName}.'
+                          ? 'Create a local operator PIN for ${AppBranding.appName}.'
                           : 'Sign in with your local operator PIN.',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(

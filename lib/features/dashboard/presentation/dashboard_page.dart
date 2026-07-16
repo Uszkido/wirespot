@@ -457,7 +457,7 @@ class _BrandingPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppBranding.companyName,
+                      AppBranding.appName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -465,7 +465,9 @@ class _BrandingPanel extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Official WireSpot support',
+                      AppBranding.partnershipLine,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -476,6 +478,14 @@ class _BrandingPanel extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
+          Text(
+            AppBranding.tagline,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,

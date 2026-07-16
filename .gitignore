@@ -11,6 +11,11 @@ coverage/
 work/
 outputs/
 
+# Temporary generated brand boards should not be committed unless exported with
+# the approved TechNova Technologies spelling.
+assets/images/wirespot_logo_full.png
+assets/images/wirespot_brand_board.png
+
 android/.gradle/
 android/local.properties
 android/key.properties

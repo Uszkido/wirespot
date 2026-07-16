@@ -33,7 +33,7 @@ class ReceiptFormatter {
       _alignCenter,
       if (receipt.showLogo) ...[
         _boldOn,
-        _center('VEXEL INNOVATIONS', width),
+        _center('WIRESPOT', width),
         _boldOff,
       ],
       _doubleOn,

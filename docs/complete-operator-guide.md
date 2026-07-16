@@ -53,7 +53,7 @@ router IP from the same network.
 Build or copy the latest debug APK:
 
 ```text
-outputs\WireSpot-0.1.25+26-remote-access-modes-debug.apk
+outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
 ```
 
 Transfer it to the phone and install it. Android may ask you to allow installs
@@ -186,7 +186,7 @@ Reports support:
 
 Settings includes:
 
-- Brand and Vexel Innovations support contact.
+- Brand, Vexel Innovations support contact, and TechNova collaboration details.
 - Security/sign out.
 - Permission readiness.
 - WireGuard VPN.
@@ -236,7 +236,8 @@ Current behavior:
 
 - Voucher receipts show the operator business details.
 - Reports show the operator identity.
-- WireSpot remains identified as powered by Vexel Innovations.
+- WireSpot remains identified as powered by Vexel Innovations in collaboration
+  with TechNova Technologies.
 
 This keeps the app suitable for technicians, resellers, hotels, estates, and
 ISPs who want customer-facing materials to carry their own business identity.

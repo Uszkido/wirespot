@@ -12,7 +12,7 @@ class VoucherReceipt {
     this.showLogo = true,
     this.showPrice = true,
     this.showQrCode = true,
-    this.footer = 'Powered by Vexel Innovations',
+    this.footer = 'Powered by WireSpot',
     this.logoPath = '',
   });
 
@@ -37,7 +37,7 @@ class VoucherReceipt {
         : '${voucher.validityMinutes} minutes';
 
     return [
-      if (showLogo) 'Vexel Innovations Logo',
+      if (showLogo) 'WireSpot Logo',
       businessName,
       'Hotspot Voucher',
       'Template: $templateName',

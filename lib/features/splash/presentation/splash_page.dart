@@ -57,9 +57,19 @@ class _SplashPageState extends ConsumerState<SplashPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              '${AppBranding.companyName} hotspot operations',
+              AppBranding.partnershipLine,
+              textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              AppBranding.tagline,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],

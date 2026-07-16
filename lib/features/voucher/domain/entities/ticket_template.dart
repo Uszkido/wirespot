@@ -7,7 +7,7 @@ class TicketTemplate {
     this.showLogo = true,
     this.showQrCode = true,
     this.showPrice = true,
-    this.footer = 'Powered by Vexel Innovations',
+    this.footer = 'Powered by WireSpot',
   });
 
   final String id;
@@ -64,7 +64,7 @@ class TicketTemplate {
       showLogo: json['showLogo'] as bool? ?? true,
       showQrCode: json['showQrCode'] as bool? ?? true,
       showPrice: json['showPrice'] as bool? ?? true,
-      footer: json['footer'] as String? ?? 'Powered by Vexel Innovations',
+      footer: json['footer'] as String? ?? 'Powered by WireSpot',
     );
   }
 

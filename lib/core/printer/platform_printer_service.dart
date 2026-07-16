@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 
+import '../branding/app_branding.dart';
 import '../../features/voucher/domain/entities/voucher_receipt.dart';
 import 'printer_models.dart';
 import 'printer_service.dart';
@@ -52,7 +53,7 @@ class PlatformPrinterService implements PrinterService {
             'address': printer.address,
             'text': text,
             'paperWidth': paperWidth.name,
-            'logoAsset': receipt.showLogo ? 'assets/images/vexel_logo.png' : '',
+            'logoAsset': receipt.showLogo ? AppBranding.logoAsset : '',
             'logoFile': receipt.showLogo ? receipt.logoPath : '',
           });
       return PrintJobResult(

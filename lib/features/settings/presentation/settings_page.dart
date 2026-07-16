@@ -909,13 +909,25 @@ class _BrandCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'by ${AppBranding.companyName}',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        AppBranding.partnershipLine,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              AppBranding.tagline,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w800,
+              ),
             ),
             const SizedBox(height: 14),
             DecoratedBox(
@@ -928,6 +940,12 @@ class _BrandCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    _SupportLine(
+                      icon: Icons.handshake_outlined,
+                      label: 'Partner',
+                      value: AppBranding.collaboratorName,
+                    ),
+                    SizedBox(height: 8),
                     _SupportLine(
                       icon: Icons.mail_outline,
                       label: 'Email',
@@ -1142,7 +1160,7 @@ class _CoBrandingCard extends ConsumerWidget {
             const SizedBox(height: 8),
             const Text(
               'Upload or enter the operator identity used on receipts and '
-              'reports. WireSpot remains powered by Vexel Innovations.',
+              'reports. WireSpot remains powered by the official collaboration.',
             ),
             const SizedBox(height: 12),
             _BusinessLogoPreview(path: businessLogoPath),

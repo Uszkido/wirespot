@@ -35,7 +35,7 @@ class ReportExportService {
       divider,
       businessName,
       'WireSpot Revenue Report',
-      'Powered by ${AppBranding.companyName}',
+      AppBranding.poweredByLine,
       divider,
       'Period',
       'From: ${_dateTime(summary.from)}',

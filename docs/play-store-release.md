@@ -11,6 +11,7 @@ manual validation.
 | App name | WireSpot |
 | Android package | `com.wirespot.app` |
 | Company | Vexel Innovations |
+| Collaboration partner | TechNova Technologies |
 | Release artifact | Android App Bundle (`.aab`) |
 | Current version | See `VERSION` |
 | Support email | Vexelvision@gmail.com |
