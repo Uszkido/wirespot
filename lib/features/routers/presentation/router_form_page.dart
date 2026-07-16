@@ -30,6 +30,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
 
   bool _useSsl = false;
   bool _requireVpn = true;
+  RouterRemoteAccessMode _remoteAccessMode = RouterRemoteAccessMode.wireGuard;
   bool _isSaving = false;
   bool _didHydrate = false;
 
@@ -110,10 +111,11 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
             passwordController: _passwordController,
             useSsl: _useSsl,
             requireVpn: _requireVpn,
+            remoteAccessMode: _remoteAccessMode,
             isEditing: _isEditing,
             isSaving: _isSaving,
             onUseSslChanged: (value) => setState(() => _useSsl = value),
-            onRequireVpnChanged: (value) => setState(() => _requireVpn = value),
+            onRemoteAccessModeChanged: _setRemoteAccessMode,
             onSave: () => _save(existingRouter),
             onCancel: _returnToRouters,
           );
@@ -133,7 +135,22 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
     _usernameController.text = router.username;
     _useSsl = router.useSsl;
     _requireVpn = router.requireVpn;
+    _remoteAccessMode = router.remoteAccessMode;
     _didHydrate = true;
+  }
+
+  void _setRemoteAccessMode(RouterRemoteAccessMode mode) {
+    setState(() {
+      _remoteAccessMode = mode;
+      _requireVpn = mode.requiresPrivateTunnel;
+      if (mode.recommendedSsl) {
+        _useSsl = true;
+      }
+      final port = _portController.text.trim();
+      if (port.isEmpty || port == '8728' || port == '8729' || port == '443') {
+        _portController.text = mode.recommendedPort.toString();
+      }
+    });
   }
 
   Future<void> _save(RouterEntity? existingRouter) async {
@@ -168,6 +185,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
         apiPort: int.parse(_portController.text.trim()),
         useSsl: _useSsl,
         requireVpn: _requireVpn,
+        remoteAccessMode: _remoteAccessMode,
         username: _usernameController.text.trim(),
         identity: existingRouter?.identity,
         version: existingRouter?.version,
@@ -222,6 +240,32 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
   }
 }
 
+class _RemoteAccessModeHint extends StatelessWidget {
+  const _RemoteAccessModeHint({required this.mode});
+
+  final RouterRemoteAccessMode mode;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Text(
+          mode.description,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+        ),
+      ),
+    );
+  }
+}
+
 class _RouterFormBody extends StatelessWidget {
   const _RouterFormBody({
     required this.formKey,
@@ -232,10 +276,11 @@ class _RouterFormBody extends StatelessWidget {
     required this.passwordController,
     required this.useSsl,
     required this.requireVpn,
+    required this.remoteAccessMode,
     required this.isEditing,
     required this.isSaving,
     required this.onUseSslChanged,
-    required this.onRequireVpnChanged,
+    required this.onRemoteAccessModeChanged,
     required this.onSave,
     required this.onCancel,
   });
@@ -248,16 +293,18 @@ class _RouterFormBody extends StatelessWidget {
   final TextEditingController passwordController;
   final bool useSsl;
   final bool requireVpn;
+  final RouterRemoteAccessMode remoteAccessMode;
   final bool isEditing;
   final bool isSaving;
   final ValueChanged<bool> onUseSslChanged;
-  final ValueChanged<bool> onRequireVpnChanged;
+  final ValueChanged<RouterRemoteAccessMode> onRemoteAccessModeChanged;
   final VoidCallback onSave;
   final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final sslIsRequired = remoteAccessMode.recommendedSsl;
 
     return SafeArea(
       child: ListView(
@@ -304,32 +351,62 @@ class _RouterFormBody extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
+                DropdownButtonFormField<RouterRemoteAccessMode>(
+                  initialValue: remoteAccessMode,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Remote access method',
+                    prefixIcon: Icon(Icons.hub_outlined),
+                  ),
+                  items: [
+                    for (final mode in RouterRemoteAccessMode.values)
+                      DropdownMenuItem(
+                        value: mode,
+                        child: Text(
+                          mode.label,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: (mode) {
+                    if (mode != null) {
+                      onRemoteAccessModeChanged(mode);
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                _RemoteAccessModeHint(mode: remoteAccessMode),
+                const SizedBox(height: 12),
                 SwitchListTile(
                   value: useSsl,
-                  onChanged: onUseSslChanged,
+                  onChanged: sslIsRequired ? null : onUseSslChanged,
                   title: const Text('Use SSL'),
                   subtitle: Text(
-                    'Enable for RouterOS API SSL, usually port 8729.',
+                    sslIsRequired
+                        ? 'Required for this remote access method.'
+                        : 'Enable for RouterOS API SSL, usually port 8729.',
                     style: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                   secondary: const Icon(Icons.enhanced_encryption_outlined),
                   contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 12),
-                SwitchListTile(
-                  value: requireVpn,
-                  onChanged: onRequireVpnChanged,
-                  title: const Text('Require WireGuard VPN'),
-                  subtitle: Text(
-                    requireVpn
-                        ? 'Use this for remote or private VPN management.'
-                        : 'Local LAN mode: connect directly when on-site.',
-                    style: TextStyle(color: colorScheme.onSurfaceVariant),
-                  ),
-                  secondary: Icon(
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
                     requireVpn ? Icons.vpn_lock_outlined : Icons.lan_outlined,
                   ),
-                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    requireVpn
+                        ? 'Private tunnel required'
+                        : 'Direct connection allowed',
+                  ),
+                  subtitle: Text(
+                    requireVpn
+                        ? 'Connect WireGuard, Back To Home, or ZeroTier before RouterOS API communication.'
+                        : 'Only use direct modes on trusted LAN or tightly firewalled API-SSL endpoints.',
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(

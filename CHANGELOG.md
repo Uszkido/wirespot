@@ -4,6 +4,27 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 0.1.25+26 - 2026-07-16
+
+Remote access mode foundation build.
+
+### Added
+
+- Router remote access modes for Local LAN, WireGuard, MikroTik Back To Home,
+  ZeroTier, Public API-SSL, and Custom/Advanced management.
+- Router form selector with per-mode guidance, recommended ports, and SSL
+  defaults for API-SSL paths.
+- Persisted `remote_access_mode` router database column with migration.
+- Android Play Store channel and Settings button to open Google Play
+  subscription/app management.
+
+### Changed
+
+- Router list now shows the selected remote access method instead of a
+  WireGuard-only label.
+- RouterOS API VPN guard now treats WireGuard, Back To Home, and ZeroTier as
+  private tunnel modes.
+
 ## 0.1.24+25 - 2026-07-14
 
 Branding, license, and dashboard support polish build.

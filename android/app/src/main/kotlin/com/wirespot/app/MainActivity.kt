@@ -4,6 +4,7 @@ import android.content.Intent
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import com.wirespot.app.platform.PrinterChannelHandler
+import com.wirespot.app.platform.PlayStoreChannelHandler
 import com.wirespot.app.platform.ShareChannelHandler
 import com.wirespot.app.vpn.WireGuardChannelHandler
 import com.wirespot.app.vpn.WireGuardTunnelManager
@@ -11,6 +12,7 @@ import com.wirespot.app.vpn.WireGuardTunnelManager
 class MainActivity : FlutterActivity() {
     private var wireGuardChannelHandler: WireGuardChannelHandler? = null
     private var printerChannelHandler: PrinterChannelHandler? = null
+    private var playStoreChannelHandler: PlayStoreChannelHandler? = null
     private var shareChannelHandler: ShareChannelHandler? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -21,6 +23,10 @@ class MainActivity : FlutterActivity() {
         ).also { it.attach() }
         printerChannelHandler = PrinterChannelHandler(
             activity = this,
+            binaryMessenger = flutterEngine.dartExecutor.binaryMessenger,
+        ).also { it.attach() }
+        playStoreChannelHandler = PlayStoreChannelHandler(
+            context = this,
             binaryMessenger = flutterEngine.dartExecutor.binaryMessenger,
         ).also { it.attach() }
         shareChannelHandler = ShareChannelHandler(
@@ -34,6 +40,8 @@ class MainActivity : FlutterActivity() {
         wireGuardChannelHandler = null
         printerChannelHandler?.detach()
         printerChannelHandler = null
+        playStoreChannelHandler?.detach()
+        playStoreChannelHandler = null
         shareChannelHandler?.detach()
         shareChannelHandler = null
         super.cleanUpFlutterEngine(flutterEngine)

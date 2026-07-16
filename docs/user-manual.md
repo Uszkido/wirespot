@@ -66,7 +66,27 @@ For local mode:
 
 Do not use local mode for public internet access. It is intended for same-site management only.
 
-## 5. Dashboard
+## 5. Remote Access Methods
+
+WireSpot supports multiple remote access modes for MikroTik management:
+
+- Local LAN: direct on-site access from the same trusted network.
+- WireGuard: private VPN access using a WireGuard tunnel.
+- MikroTik Back To Home: MikroTik-assisted WireGuard access for routers behind
+  NAT.
+- ZeroTier: private overlay network access through ZeroTier.
+- Public API-SSL: advanced public endpoint using RouterOS API-SSL and strict
+  firewall limits.
+- Custom / Advanced: operator-managed routing and firewall path.
+
+Prefer private tunnel modes for remote routers. Use public API-SSL only when
+the router is firewalled to trusted source addresses and strong credentials are
+used.
+
+Back To Home and ZeroTier must already make the router reachable from the
+phone. Save the router using the reachable tunnel or overlay IP address.
+
+## 6. Dashboard
 
 The dashboard shows the selected router's operating snapshot:
 
@@ -84,7 +104,7 @@ If no router is configured, add a router before expecting live metrics.
 Tap the **Online users** dashboard card to open the active hotspot user view
 for the selected router.
 
-## 6. Hotspot Management
+## 7. Hotspot Management
 
 Open Hotspot from the dashboard to manage:
 
@@ -101,7 +121,7 @@ WireSpot can help set up common hotspot operations by preparing profiles,
 users, IP bindings, and voucher batches used by a MikroTik hotspot. Always
 review generated setup plans before applying them to a live router.
 
-## 7. Voucher Management
+## 8. Voucher Management
 
 Open Vouchers to generate hotspot access vouchers.
 
@@ -130,7 +150,7 @@ Voucher generation supports:
 - Optional RouterOS provisioning
 - Voucher history
 
-## 8. Reports
+## 9. Reports
 
 Open Reports to view and export:
 
@@ -142,7 +162,7 @@ Open Reports to view and export:
 
 Export actions provide share-ready CSV/PDF report output for operator records.
 
-## 9. Settings
+## 10. Settings
 
 Settings contains:
 
@@ -160,7 +180,7 @@ Settings contains:
 - JSON restore flow
 - Sign out
 
-## 10. Printing
+## 11. Printing
 
 WireSpot includes Bluetooth thermal printer support for paired ESC/POS printers using 58mm and 80mm receipts. Receipt text includes:
 
@@ -184,7 +204,7 @@ Use paired Bluetooth ESC/POS printers for best results. Test each printer model
 before live customer use because some low-cost printers implement ESC/POS
 commands differently.
 
-## 11. WireGuard VPN
+## 12. WireGuard VPN
 
 WireSpot expects secure RouterOS access over WireGuard.
 
@@ -204,7 +224,7 @@ the app reports that permission was required.
 If the Android permission dialog does not appear, open Settings > Permission
 readiness and request VPN consent from there.
 
-## 12. Licensing
+## 13. Licensing
 
 WireSpot includes a 7-day full-access trial. After the trial, the app requires
 an active license.
@@ -220,7 +240,7 @@ For local device-bound licensing:
 Each generated local license is bound to the Device License ID used during
 generation.
 
-## 13. Professional Co-branding
+## 14. Professional Co-branding
 
 Professional users can configure operator-facing business details in Settings:
 
@@ -232,7 +252,7 @@ Professional users can configure operator-facing business details in Settings:
 Receipts and reports can show the operator business identity while keeping
 WireSpot identified as powered by Vexel Innovations.
 
-## 14. Safe Operating Practice
+## 15. Safe Operating Practice
 
 - Do not expose RouterOS API ports to the public internet.
 - Use WireGuard or another private management network.

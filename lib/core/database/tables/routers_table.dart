@@ -9,6 +9,8 @@ class Routers extends Table {
   IntColumn get apiPort => integer().withDefault(const Constant(8728))();
   BoolColumn get useSsl => boolean().withDefault(const Constant(false))();
   BoolColumn get requireVpn => boolean().withDefault(const Constant(true))();
+  TextColumn get remoteAccessMode =>
+      text().withDefault(const Constant('wireGuard'))();
   TextColumn get username => text().withLength(min: 1, max: 80)();
   TextColumn get identity => text().nullable()();
   TextColumn get version => text().nullable()();

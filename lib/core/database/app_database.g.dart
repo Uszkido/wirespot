@@ -95,6 +95,18 @@ class $RoutersTable extends Routers
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _remoteAccessModeMeta =
+      const VerificationMeta('remoteAccessMode');
+  @override
+  late final GeneratedColumn<String> remoteAccessMode =
+      GeneratedColumn<String>(
+        'remote_access_mode',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('wireGuard'),
+      );
   static const VerificationMeta _usernameMeta = const VerificationMeta(
     'username',
   );
@@ -203,6 +215,7 @@ class $RoutersTable extends Routers
     apiPort,
     useSsl,
     requireVpn,
+    remoteAccessMode,
     username,
     identity,
     version,
@@ -267,6 +280,15 @@ class $RoutersTable extends Routers
       context.handle(
         _requireVpnMeta,
         requireVpn.isAcceptableOrUnknown(data['require_vpn']!, _requireVpnMeta),
+      );
+    }
+    if (data.containsKey('remote_access_mode')) {
+      context.handle(
+        _remoteAccessModeMeta,
+        remoteAccessMode.isAcceptableOrUnknown(
+          data['remote_access_mode']!,
+          _remoteAccessModeMeta,
+        ),
       );
     }
     if (data.containsKey('username')) {
@@ -359,6 +381,10 @@ class $RoutersTable extends Routers
         DriftSqlType.bool,
         data['${effectivePrefix}require_vpn'],
       )!,
+      remoteAccessMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_access_mode'],
+      )!,
       username: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}username'],
@@ -408,6 +434,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
   final int apiPort;
   final bool useSsl;
   final bool requireVpn;
+  final String remoteAccessMode;
   final String username;
   final String? identity;
   final String? version;
@@ -424,6 +451,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     required this.apiPort,
     required this.useSsl,
     required this.requireVpn,
+    required this.remoteAccessMode,
     required this.username,
     this.identity,
     this.version,
@@ -445,6 +473,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     map['api_port'] = Variable<int>(apiPort);
     map['use_ssl'] = Variable<bool>(useSsl);
     map['require_vpn'] = Variable<bool>(requireVpn);
+    map['remote_access_mode'] = Variable<String>(remoteAccessMode);
     map['username'] = Variable<String>(username);
     if (!nullToAbsent || identity != null) {
       map['identity'] = Variable<String>(identity);
@@ -475,6 +504,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       apiPort: Value(apiPort),
       useSsl: Value(useSsl),
       requireVpn: Value(requireVpn),
+      remoteAccessMode: Value(remoteAccessMode),
       username: Value(username),
       identity: identity == null && nullToAbsent
           ? const Value.absent()
@@ -507,6 +537,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       apiPort: serializer.fromJson<int>(json['apiPort']),
       useSsl: serializer.fromJson<bool>(json['useSsl']),
       requireVpn: serializer.fromJson<bool>(json['requireVpn']),
+      remoteAccessMode: serializer.fromJson<String>(json['remoteAccessMode']),
       username: serializer.fromJson<String>(json['username']),
       identity: serializer.fromJson<String?>(json['identity']),
       version: serializer.fromJson<String?>(json['version']),
@@ -528,6 +559,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       'apiPort': serializer.toJson<int>(apiPort),
       'useSsl': serializer.toJson<bool>(useSsl),
       'requireVpn': serializer.toJson<bool>(requireVpn),
+      'remoteAccessMode': serializer.toJson<String>(remoteAccessMode),
       'username': serializer.toJson<String>(username),
       'identity': serializer.toJson<String?>(identity),
       'version': serializer.toJson<String?>(version),
@@ -547,6 +579,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     int? apiPort,
     bool? useSsl,
     bool? requireVpn,
+    String? remoteAccessMode,
     String? username,
     Value<String?> identity = const Value.absent(),
     Value<String?> version = const Value.absent(),
@@ -563,6 +596,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     apiPort: apiPort ?? this.apiPort,
     useSsl: useSsl ?? this.useSsl,
     requireVpn: requireVpn ?? this.requireVpn,
+    remoteAccessMode: remoteAccessMode ?? this.remoteAccessMode,
     username: username ?? this.username,
     identity: identity.present ? identity.value : this.identity,
     version: version.present ? version.value : this.version,
@@ -585,6 +619,9 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       requireVpn: data.requireVpn.present
           ? data.requireVpn.value
           : this.requireVpn,
+      remoteAccessMode: data.remoteAccessMode.present
+          ? data.remoteAccessMode.value
+          : this.remoteAccessMode,
       username: data.username.present ? data.username.value : this.username,
       identity: data.identity.present ? data.identity.value : this.identity,
       version: data.version.present ? data.version.value : this.version,
@@ -608,6 +645,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
           ..write('apiPort: $apiPort, ')
           ..write('useSsl: $useSsl, ')
           ..write('requireVpn: $requireVpn, ')
+          ..write('remoteAccessMode: $remoteAccessMode, ')
           ..write('username: $username, ')
           ..write('identity: $identity, ')
           ..write('version: $version, ')
@@ -629,6 +667,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     apiPort,
     useSsl,
     requireVpn,
+    remoteAccessMode,
     username,
     identity,
     version,
@@ -649,6 +688,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
           other.apiPort == this.apiPort &&
           other.useSsl == this.useSsl &&
           other.requireVpn == this.requireVpn &&
+          other.remoteAccessMode == this.remoteAccessMode &&
           other.username == this.username &&
           other.identity == this.identity &&
           other.version == this.version &&
@@ -667,6 +707,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
   final Value<int> apiPort;
   final Value<bool> useSsl;
   final Value<bool> requireVpn;
+  final Value<String> remoteAccessMode;
   final Value<String> username;
   final Value<String?> identity;
   final Value<String?> version;
@@ -684,6 +725,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     this.apiPort = const Value.absent(),
     this.useSsl = const Value.absent(),
     this.requireVpn = const Value.absent(),
+    this.remoteAccessMode = const Value.absent(),
     this.username = const Value.absent(),
     this.identity = const Value.absent(),
     this.version = const Value.absent(),
@@ -702,6 +744,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     this.apiPort = const Value.absent(),
     this.useSsl = const Value.absent(),
     this.requireVpn = const Value.absent(),
+    this.remoteAccessMode = const Value.absent(),
     required String username,
     this.identity = const Value.absent(),
     this.version = const Value.absent(),
@@ -723,6 +766,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     Expression<int>? apiPort,
     Expression<bool>? useSsl,
     Expression<bool>? requireVpn,
+    Expression<String>? remoteAccessMode,
     Expression<String>? username,
     Expression<String>? identity,
     Expression<String>? version,
@@ -741,6 +785,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
       if (apiPort != null) 'api_port': apiPort,
       if (useSsl != null) 'use_ssl': useSsl,
       if (requireVpn != null) 'require_vpn': requireVpn,
+      if (remoteAccessMode != null) 'remote_access_mode': remoteAccessMode,
       if (username != null) 'username': username,
       if (identity != null) 'identity': identity,
       if (version != null) 'version': version,
@@ -761,6 +806,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     Value<int>? apiPort,
     Value<bool>? useSsl,
     Value<bool>? requireVpn,
+    Value<String>? remoteAccessMode,
     Value<String>? username,
     Value<String?>? identity,
     Value<String?>? version,
@@ -779,6 +825,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
       apiPort: apiPort ?? this.apiPort,
       useSsl: useSsl ?? this.useSsl,
       requireVpn: requireVpn ?? this.requireVpn,
+      remoteAccessMode: remoteAccessMode ?? this.remoteAccessMode,
       username: username ?? this.username,
       identity: identity ?? this.identity,
       version: version ?? this.version,
@@ -814,6 +861,9 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     }
     if (requireVpn.present) {
       map['require_vpn'] = Variable<bool>(requireVpn.value);
+    }
+    if (remoteAccessMode.present) {
+      map['remote_access_mode'] = Variable<String>(remoteAccessMode.value);
     }
     if (username.present) {
       map['username'] = Variable<String>(username.value);
@@ -855,6 +905,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
           ..write('apiPort: $apiPort, ')
           ..write('useSsl: $useSsl, ')
           ..write('requireVpn: $requireVpn, ')
+          ..write('remoteAccessMode: $remoteAccessMode, ')
           ..write('username: $username, ')
           ..write('identity: $identity, ')
           ..write('version: $version, ')
@@ -3764,6 +3815,7 @@ typedef $$RoutersTableCreateCompanionBuilder =
       Value<int> apiPort,
       Value<bool> useSsl,
       Value<bool> requireVpn,
+      Value<String> remoteAccessMode,
       required String username,
       Value<String?> identity,
       Value<String?> version,
@@ -3783,6 +3835,7 @@ typedef $$RoutersTableUpdateCompanionBuilder =
       Value<int> apiPort,
       Value<bool> useSsl,
       Value<bool> requireVpn,
+      Value<String> remoteAccessMode,
       Value<String> username,
       Value<String?> identity,
       Value<String?> version,
@@ -3835,6 +3888,11 @@ class $$RoutersTableFilterComposer
 
   ColumnFilters<bool> get requireVpn => $composableBuilder(
     column: $table.requireVpn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteAccessMode => $composableBuilder(
+    column: $table.remoteAccessMode,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3923,6 +3981,11 @@ class $$RoutersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get remoteAccessMode => $composableBuilder(
+    column: $table.remoteAccessMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get username => $composableBuilder(
     column: $table.username,
     builder: (column) => ColumnOrderings(column),
@@ -3996,6 +4059,11 @@ class $$RoutersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get remoteAccessMode => $composableBuilder(
+    column: $table.remoteAccessMode,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get username =>
       $composableBuilder(column: $table.username, builder: (column) => column);
 
@@ -4061,6 +4129,7 @@ class $$RoutersTableTableManager
                 Value<int> apiPort = const Value.absent(),
                 Value<bool> useSsl = const Value.absent(),
                 Value<bool> requireVpn = const Value.absent(),
+                Value<String> remoteAccessMode = const Value.absent(),
                 Value<String> username = const Value.absent(),
                 Value<String?> identity = const Value.absent(),
                 Value<String?> version = const Value.absent(),
@@ -4078,6 +4147,7 @@ class $$RoutersTableTableManager
                 apiPort: apiPort,
                 useSsl: useSsl,
                 requireVpn: requireVpn,
+                remoteAccessMode: remoteAccessMode,
                 username: username,
                 identity: identity,
                 version: version,
@@ -4097,6 +4167,7 @@ class $$RoutersTableTableManager
                 Value<int> apiPort = const Value.absent(),
                 Value<bool> useSsl = const Value.absent(),
                 Value<bool> requireVpn = const Value.absent(),
+                Value<String> remoteAccessMode = const Value.absent(),
                 required String username,
                 Value<String?> identity = const Value.absent(),
                 Value<String?> version = const Value.absent(),
@@ -4114,6 +4185,7 @@ class $$RoutersTableTableManager
                 apiPort: apiPort,
                 useSsl: useSsl,
                 requireVpn: requireVpn,
+                remoteAccessMode: remoteAccessMode,
                 username: username,
                 identity: identity,
                 version: version,

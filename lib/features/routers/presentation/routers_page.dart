@@ -82,8 +82,8 @@ class _RouterTile extends ConsumerWidget {
           [
             '${router.host}:${router.apiPort}',
             if (router.useSsl) 'SSL',
-            router.requireVpn ? 'WireGuard required' : 'Local LAN',
-          ].join(' · '),
+            router.remoteAccessMode.label,
+          ].join(' - '),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -98,12 +98,12 @@ class _RouterTile extends ConsumerWidget {
                 title: Text('Test connection'),
               ),
             ),
-            if (router.requireVpn)
+            if (router.requiresPrivateTunnel)
               const PopupMenuItem(
                 value: _RouterAction.wireGuard,
                 child: ListTile(
                   leading: Icon(Icons.vpn_key_outlined),
-                  title: Text('WireGuard'),
+                  title: Text('Remote tunnel'),
                 ),
               ),
             const PopupMenuItem(

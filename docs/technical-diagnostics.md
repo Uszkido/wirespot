@@ -172,6 +172,20 @@ Each router has a `requireVpn` flag:
 - `true`: WireSpot checks that WireGuard/VPN status is connected before RouterOS API commands.
 - `false`: WireSpot skips the VPN guard and connects directly to the router host/port.
 
+Each router also has a `remoteAccessMode`:
+
+- `localLan`
+- `wireGuard`
+- `backToHome`
+- `zeroTier`
+- `publicApiSsl`
+- `custom`
+
+WireSpot treats `wireGuard`, `backToHome`, and `zeroTier` as private tunnel
+modes and checks VPN/tunnel status before RouterOS API commands. `publicApiSsl`
+is an advanced direct mode and should be protected by RouterOS firewall rules
+and trusted source addresses.
+
 ## 9. WireGuard Android Backend
 
 WireSpot uses the official WireGuard Android tunnel library through `com.wireguard.android:tunnel` and registers the WireGuard `GoBackend` VPN service in the Android manifest.

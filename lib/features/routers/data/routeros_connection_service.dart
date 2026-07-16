@@ -60,7 +60,7 @@ class RouterOsConnectionService implements RouterConnectionService {
     required Map<String, String> attributes,
     required List<String> queries,
   }) async {
-    if (router.requireVpn) {
+    if (router.requiresPrivateTunnel) {
       await _ensureVpnIsConnected();
     }
     final credentials = await _credentialStore.read(router.id);
@@ -118,7 +118,7 @@ class RouterOsConnectionService implements RouterConnectionService {
     final vpnStatus = await _vpnStatusService.currentStatus();
     if (!vpnStatus.isConnected) {
       throw const RouterOsVpnRequiredException(
-        'WireGuard VPN must be connected before RouterOS API communication.',
+        'A private remote access tunnel must be connected before RouterOS API communication.',
       );
     }
   }

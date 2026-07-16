@@ -13,6 +13,8 @@ void main() {
     expect(router.apiPort, 8728);
     expect(router.useSsl, isFalse);
     expect(router.requireVpn, isTrue);
+    expect(router.remoteAccessMode, RouterRemoteAccessMode.wireGuard);
+    expect(router.requiresPrivateTunnel, isTrue);
     expect(router.isEnabled, isTrue);
   });
 }

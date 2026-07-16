@@ -55,6 +55,7 @@ class RouterLocalRepository implements RouterRepository {
             apiPort: Value(router.apiPort),
             useSsl: Value(router.useSsl),
             requireVpn: Value(router.requireVpn),
+            remoteAccessMode: Value(router.remoteAccessMode.name),
             identity: Value(router.identity),
             version: Value(router.version),
             boardName: Value(router.boardName),
@@ -111,6 +112,10 @@ RouterEntity _mapRouter(RouterRecord record) {
     apiPort: record.apiPort,
     useSsl: record.useSsl,
     requireVpn: record.requireVpn,
+    remoteAccessMode: RouterRemoteAccessMode.fromName(
+      record.remoteAccessMode,
+      requireVpn: record.requireVpn,
+    ),
     username: record.username,
     identity: record.identity,
     version: record.version,

@@ -553,6 +553,29 @@ class _PremiumLicenseCard extends ConsumerWidget {
             ))
               _BillingPlanTile(plan: plan),
             const SizedBox(height: 8),
+            FilledButton.icon(
+              onPressed: () async {
+                try {
+                  await const MethodChannel(
+                    'com.wirespot.app/play_store',
+                  ).invokeMethod<bool>('openSubscriptions');
+                } on PlatformException catch (error) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          error.message ??
+                              'Could not open Google Play subscriptions.',
+                        ),
+                      ),
+                    );
+                  }
+                }
+              },
+              icon: const Icon(Icons.shop_outlined),
+              label: const Text('Google Play subscription'),
+            ),
+            const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () {
                 final request = [

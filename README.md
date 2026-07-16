@@ -18,11 +18,11 @@ public RouterOS API behavior and original WireSpot code.
 
 | Item | Status |
 | --- | --- |
-| Current version | `0.1.24+25` |
+| Current version | `0.1.25+26` |
 | Android debug APK | Builds successfully |
 | Static analysis | Passing |
 | Tests | 47 passing |
-| Latest APK output | `outputs\WireSpot-0.1.24+25-branding-license-polish-debug.apk` |
+| Latest APK output | `outputs\WireSpot-0.1.25+26-remote-access-modes-debug.apk` |
 | Latest pushed commit | `10f6753` |
 
 ## Why WireSpot
@@ -127,7 +127,7 @@ build\app\outputs\flutter-apk\app-debug.apk
 Current packaged debug APK:
 
 ```text
-outputs\WireSpot-0.1.24+25-branding-license-polish-debug.apk
+outputs\WireSpot-0.1.25+26-remote-access-modes-debug.apk
 ```
 
 ## Operator Setup
