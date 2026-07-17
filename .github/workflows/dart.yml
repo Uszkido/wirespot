@@ -24,11 +24,13 @@ jobs:
         with:
           channel: stable
 
-      # Optional: cache pub packages to speed subsequent runs
-      - name: Cache Pub
+      # Cache pub packages and .dart_tool to speed subsequent runs
+      - name: Cache pub & .dart_tool
         uses: actions/cache@v4
         with:
-          path: ~/.pub-cache
+          path: |
+            ~/.pub-cache
+            .dart_tool
           key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pub-
@@ -36,8 +38,18 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
       - name: Analyze project source
         run: flutter analyze
 
       - name: Run tests
-        run: flutter test
+        run: flutter test --coverage
+
+      # Optional: upload coverage to Codecov (enable if you want coverage reports)
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     files: coverage/lcov.info
+      #     fail_ci_if_error: false
