@@ -231,11 +231,14 @@ Professional users can configure operator branding in Settings:
 - Business email.
 - Business phone.
 - Business website.
+- Business logo selected from the phone gallery.
 
 Current behavior:
 
 - Voucher receipts show the operator business details.
 - Reports show the operator identity.
+- WireSpot copies the selected logo into app storage for stable receipt and
+  report reuse.
 - WireSpot remains identified as powered by Vexel Innovations in collaboration
   with TechNova Technologies.
 

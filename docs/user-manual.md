@@ -249,10 +249,16 @@ Professional users can configure operator-facing business details in Settings:
 - Business email
 - Business phone
 - Business website
+- Business logo selected from the phone gallery
 
 Receipts and reports can show the operator business identity while keeping
 WireSpot identified as powered by Vexel Innovations in collaboration with
 TechNova Technologies.
+
+To add a business logo, open Settings > Business branding and logo, tap
+Choose logo, select a PNG/JPG from the phone gallery, then save co-branding.
+WireSpot copies the selected image into app storage so receipts and reports can
+reuse it.
 
 ## 15. Safe Operating Practice
 

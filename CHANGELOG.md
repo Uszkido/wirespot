@@ -4,6 +4,13 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## Unreleased
+
+### Added
+
+- Gallery-based business logo picker for professional co-branding, with selected
+  images copied into WireSpot app storage for stable receipt/report reuse.
+
 ## 0.1.26+27 - 2026-07-16
 
 WireSpot collaboration branding build.

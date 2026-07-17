@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import '../../../core/branding/app_branding.dart';
 import '../../../core/di/providers.dart';
@@ -1171,16 +1174,33 @@ class _CoBrandingCard extends ConsumerWidget {
               onChanged: (value) => businessLogoPath = value,
               keyboardType: TextInputType.text,
               decoration: const InputDecoration(
-                labelText: 'Business logo file path',
-                helperText: 'Paste a local PNG/JPG path copied from the phone.',
+                labelText: 'Selected business logo',
+                helperText: 'Choose a PNG or JPG from your phone gallery.',
                 prefixIcon: Icon(Icons.image_outlined),
               ),
+              readOnly: true,
             ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
+                FilledButton.tonalIcon(
+                  onPressed: isPremium
+                      ? () async {
+                          final selectedPath = await _pickBusinessLogo(
+                            context,
+                            ref,
+                            settings,
+                          );
+                          if (selectedPath != null) {
+                            businessLogoPath = selectedPath;
+                          }
+                        }
+                      : null,
+                  icon: const Icon(Icons.photo_library_outlined),
+                  label: const Text('Choose logo'),
+                ),
                 OutlinedButton.icon(
                   onPressed: isPremium
                       ? () async {
@@ -1284,6 +1304,61 @@ class _CoBrandingCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<String?> _pickBusinessLogo(
+    BuildContext context,
+    WidgetRef ref,
+    AppSettingsSnapshot settings,
+  ) async {
+    final settingsService = ref.read(appSettingsServiceProvider);
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      final pickedImage = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 95,
+      );
+      if (pickedImage == null) {
+        return null;
+      }
+
+      final documents = await getApplicationDocumentsDirectory();
+      final brandingDirectory = Directory(
+        p.join(documents.path, 'branding'),
+      );
+      if (!brandingDirectory.existsSync()) {
+        await brandingDirectory.create(recursive: true);
+      }
+
+      final extension = _safeLogoExtension(pickedImage.path);
+      final logoFile = File(
+        p.join(brandingDirectory.path, 'business_logo$extension'),
+      );
+      await File(pickedImage.path).copy(logoFile.path);
+      await settingsService.save(
+        settings.copyWith(businessLogoPath: logoFile.path),
+      );
+      ref.invalidate(appSettingsProvider);
+
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Business logo selected.')),
+      );
+      return logoFile.path;
+    } on Object catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Could not select logo: $error')),
+      );
+      return null;
+    }
+  }
+
+  String _safeLogoExtension(String sourcePath) {
+    final extension = p.extension(sourcePath).toLowerCase();
+    return switch (extension) {
+      '.jpg' || '.jpeg' || '.png' || '.webp' => extension,
+      _ => '.png',
+    };
   }
 }
 
