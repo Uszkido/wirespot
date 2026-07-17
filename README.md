@@ -199,6 +199,7 @@ collaboration with TechNova Technologies.
 | [docs/technical-diagnostics.md](docs/technical-diagnostics.md) | Debugging and technical checks |
 | [docs/payment-and-licensing.md](docs/payment-and-licensing.md) | Trial, subscription, offline license plan |
 | [docs/play-store-release.md](docs/play-store-release.md) | Play Store signing and release process |
+| [docs/github-automation.md](docs/github-automation.md) | GitHub Actions, CI APK artifacts, and Dependabot automation |
 | [docs/privacy-policy.md](docs/privacy-policy.md) | Privacy policy draft |
 | [docs/workstation-transfer.md](docs/workstation-transfer.md) | Moving the project to another PC |
 | [docs/license-generation.md](docs/license-generation.md) | Local license generation |
