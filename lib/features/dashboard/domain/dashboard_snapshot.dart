@@ -6,6 +6,7 @@ class DashboardSnapshot {
     required this.router,
     this.routerSnapshot,
     this.todaySalesMinor = 0,
+    this.todaySalesCurrency = 'NGN',
     this.onlineUsers = 0,
     this.activeSessions = 0,
   });
@@ -13,6 +14,7 @@ class DashboardSnapshot {
   final RouterEntity router;
   final RouterOsRouterSnapshot? routerSnapshot;
   final int todaySalesMinor;
+  final String todaySalesCurrency;
   final int onlineUsers;
   final int activeSessions;
 

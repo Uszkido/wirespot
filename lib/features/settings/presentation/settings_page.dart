@@ -15,6 +15,7 @@ import '../../../core/licensing/billing_plan.dart';
 import '../../../core/licensing/entitlement_snapshot.dart';
 import '../../../core/licensing/premium_feature.dart';
 import '../../../core/localization/app_text.dart';
+import '../../../core/platform/external_action_service.dart';
 import '../../../core/printer/printer_models.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/utils/id_generator.dart';
@@ -947,24 +948,28 @@ class _BrandCard extends StatelessWidget {
                       icon: Icons.handshake_outlined,
                       label: 'Partner',
                       value: AppBranding.collaboratorName,
+                      action: SupportContactAction.copy,
                     ),
                     SizedBox(height: 8),
                     _SupportLine(
                       icon: Icons.mail_outline,
                       label: 'Email',
                       value: AppBranding.supportEmail,
+                      action: SupportContactAction.email,
                     ),
                     SizedBox(height: 8),
                     _SupportLine(
                       icon: Icons.phone_outlined,
                       label: 'Phone',
                       value: AppBranding.supportPhone,
+                      action: SupportContactAction.phone,
                     ),
                     SizedBox(height: 8),
                     _SupportLine(
                       icon: Icons.language_outlined,
                       label: 'Website',
                       value: AppBranding.website,
+                      action: SupportContactAction.website,
                     ),
                   ],
                 ),
@@ -977,50 +982,104 @@ class _BrandCard extends StatelessWidget {
   }
 }
 
+enum SupportContactAction { copy, email, phone, website }
+
 class _SupportLine extends StatelessWidget {
   const _SupportLine({
     required this.icon,
     required this.label,
     required this.value,
+    required this.action,
   });
 
   final IconData icon;
   final String label;
   final String value;
+  final SupportContactAction action;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 18),
-        const SizedBox(width: 10),
-        SizedBox(
-          width: 58,
-          child: Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => _open(context),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          children: [
+            Icon(icon, size: 18),
+            const SizedBox(width: 10),
+            SizedBox(
+              width: 58,
+              child: Text(
+                label,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+            Expanded(
+              child: SelectableText(
+                value,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            IconButton(
+              tooltip: _actionTooltip,
+              onPressed: () => _open(context),
+              icon: Icon(_actionIcon, size: 18),
+            ),
+            IconButton(
+              tooltip: 'Copy $label',
+              onPressed: () => _copy(context),
+              icon: const Icon(Icons.copy, size: 18),
+            ),
+          ],
         ),
-        Expanded(
-          child: SelectableText(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ),
-        IconButton(
-          tooltip: 'Copy $label',
-          onPressed: () {
-            Clipboard.setData(ClipboardData(text: value));
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('$label copied.')));
-          },
-          icon: const Icon(Icons.copy, size: 18),
-        ),
-      ],
+      ),
     );
+  }
+
+  IconData get _actionIcon {
+    return switch (action) {
+      SupportContactAction.email => Icons.outgoing_mail,
+      SupportContactAction.phone => Icons.call_outlined,
+      SupportContactAction.website => Icons.open_in_browser_outlined,
+      SupportContactAction.copy => Icons.info_outline,
+    };
+  }
+
+  String get _actionTooltip {
+    return switch (action) {
+      SupportContactAction.email => 'Email support',
+      SupportContactAction.phone => 'Call support',
+      SupportContactAction.website => 'Open website',
+      SupportContactAction.copy => 'View $label',
+    };
+  }
+
+  Future<void> _open(BuildContext context) async {
+    if (action == SupportContactAction.copy) {
+      _copy(context);
+      return;
+    }
+    final opened = await (switch (action) {
+      SupportContactAction.email => ExternalActionService.openEmail(value),
+      SupportContactAction.phone => ExternalActionService.openPhone(value),
+      SupportContactAction.website => ExternalActionService.openWebsite(value),
+      SupportContactAction.copy => Future.value(false),
+    });
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not open $label.')));
+    }
+  }
+
+  void _copy(BuildContext context) {
+    Clipboard.setData(ClipboardData(text: value));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('$label copied.')));
   }
 }
 
@@ -1151,7 +1210,7 @@ class _CoBrandingCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Business branding and logo',
+                    'Business branding',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -1162,11 +1221,28 @@ class _CoBrandingCard extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Upload or enter the operator identity used on receipts and '
-              'reports. WireSpot remains powered by the official collaboration.',
+              'Select the operator logo from the phone gallery and enter the '
+              'identity used on receipts and reports.',
             ),
             const SizedBox(height: 12),
             _BusinessLogoPreview(path: businessLogoPath),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: isPremium
+                  ? () async {
+                      final selectedPath = await _pickBusinessLogo(
+                        context,
+                        ref,
+                        settings,
+                      );
+                      if (selectedPath != null) {
+                        businessLogoPath = selectedPath;
+                      }
+                    }
+                  : null,
+              icon: const Icon(Icons.photo_library_outlined),
+              label: const Text('Upload logo from gallery'),
+            ),
             const SizedBox(height: 12),
             TextFormField(
               enabled: isPremium,
@@ -1185,22 +1261,6 @@ class _CoBrandingCard extends ConsumerWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                FilledButton.tonalIcon(
-                  onPressed: isPremium
-                      ? () async {
-                          final selectedPath = await _pickBusinessLogo(
-                            context,
-                            ref,
-                            settings,
-                          );
-                          if (selectedPath != null) {
-                            businessLogoPath = selectedPath;
-                          }
-                        }
-                      : null,
-                  icon: const Icon(Icons.photo_library_outlined),
-                  label: const Text('Choose logo'),
-                ),
                 OutlinedButton.icon(
                   onPressed: isPremium
                       ? () async {

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../../../core/api/routeros_models.dart';
 import '../../../core/di/providers.dart';
 import '../../routers/domain/entities/router_entity.dart';
+import '../../settings/presentation/settings_providers.dart';
 import '../domain/dashboard_snapshot.dart';
 
 final selectedRouterIdProvider = StateProvider<String?>((ref) => null);
@@ -26,6 +27,8 @@ final dashboardSnapshotProvider =
       final sales = await ref
           .watch(reportRepositoryProvider)
           .getSales(routerId: router.id, from: startOfDay, to: today);
+      final defaultCurrency =
+          ref.watch(appSettingsProvider).asData?.value.currencyCode ?? 'NGN';
 
       RouterOsRouterSnapshot? snapshot;
       try {
@@ -43,6 +46,9 @@ final dashboardSnapshotProvider =
         routerSnapshot: snapshot,
         onlineUsers: activeSessions,
         activeSessions: activeSessions,
+        todaySalesCurrency: sales.isEmpty
+            ? defaultCurrency
+            : sales.first.currency,
         todaySalesMinor: sales.fold<int>(
           0,
           (total, sale) => total + sale.amountMinor,

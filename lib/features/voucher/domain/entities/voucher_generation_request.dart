@@ -10,6 +10,7 @@ class VoucherGenerationRequest {
     this.usernameLength = 8,
     this.passwordLength = 6,
     this.priceMinor,
+    this.currencyCode = 'NGN',
     this.encodingSettings = const VoucherEncodingSettings(),
     this.profileId,
     this.routerOsProfile,
@@ -25,6 +26,7 @@ class VoucherGenerationRequest {
   final int usernameLength;
   final int passwordLength;
   final int? priceMinor;
+  final String currencyCode;
   final VoucherEncodingSettings encodingSettings;
   final String? profileId;
   final String? routerOsProfile;

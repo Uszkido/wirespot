@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/routeros_models.dart';
 import '../../../core/branding/app_branding.dart';
+import '../../../core/platform/external_action_service.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/utils/byte_format.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -186,8 +187,8 @@ class _DashboardContent extends ConsumerWidget {
               MetricCard(
                 icon: Icons.receipt_long_outlined,
                 label: 'Today sales',
-                value:
-                    'NGN ${(snapshot.todaySalesMinor / 100).toStringAsFixed(0)}',
+                value: '${snapshot.todaySalesCurrency} '
+                    '${(snapshot.todaySalesMinor / 100).toStringAsFixed(0)}',
               ),
               MetricCard(
                 icon: Icons.memory_outlined,
@@ -494,16 +495,19 @@ class _BrandingPanel extends StatelessWidget {
                 icon: Icons.mail_outline,
                 label: 'Email',
                 value: AppBranding.supportEmail,
+                action: _SupportContactAction.email,
               ),
               _SupportAction(
                 icon: Icons.phone_outlined,
                 label: 'Phone',
                 value: AppBranding.supportPhone,
+                action: _SupportContactAction.phone,
               ),
               _SupportAction(
                 icon: Icons.language_outlined,
                 label: 'Website',
                 value: AppBranding.website,
+                action: _SupportContactAction.website,
               ),
             ],
           ),
@@ -513,29 +517,42 @@ class _BrandingPanel extends StatelessWidget {
   }
 }
 
+enum _SupportContactAction { email, phone, website }
+
 class _SupportAction extends StatelessWidget {
   const _SupportAction({
     required this.icon,
     required this.label,
     required this.value,
+    required this.action,
   });
 
   final IconData icon;
   final String label;
   final String value;
+  final _SupportContactAction action;
 
   @override
   Widget build(BuildContext context) {
     return ActionChip(
       avatar: Icon(icon, size: 18),
       label: Text(label),
-      onPressed: () {
-        Clipboard.setData(ClipboardData(text: value));
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$label copied.')));
-      },
+      onPressed: () => _open(context),
     );
+  }
+
+  Future<void> _open(BuildContext context) async {
+    final opened = await (switch (action) {
+      _SupportContactAction.email => ExternalActionService.openEmail(value),
+      _SupportContactAction.phone => ExternalActionService.openPhone(value),
+      _SupportContactAction.website => ExternalActionService.openWebsite(value),
+    });
+    if (!opened && context.mounted) {
+      Clipboard.setData(ClipboardData(text: value));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open $label. $label copied.')),
+      );
+    }
   }
 }
 

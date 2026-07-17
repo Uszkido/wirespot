@@ -3,6 +3,7 @@ package com.wirespot.app
 import android.content.Intent
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import com.wirespot.app.platform.ExternalActionChannelHandler
 import com.wirespot.app.platform.PrinterChannelHandler
 import com.wirespot.app.platform.PlayStoreChannelHandler
 import com.wirespot.app.platform.ShareChannelHandler
@@ -14,6 +15,7 @@ class MainActivity : FlutterActivity() {
     private var printerChannelHandler: PrinterChannelHandler? = null
     private var playStoreChannelHandler: PlayStoreChannelHandler? = null
     private var shareChannelHandler: ShareChannelHandler? = null
+    private var externalActionChannelHandler: ExternalActionChannelHandler? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -33,6 +35,10 @@ class MainActivity : FlutterActivity() {
             context = this,
             binaryMessenger = flutterEngine.dartExecutor.binaryMessenger,
         ).also { it.attach() }
+        externalActionChannelHandler = ExternalActionChannelHandler(
+            activity = this,
+            binaryMessenger = flutterEngine.dartExecutor.binaryMessenger,
+        ).also { it.attach() }
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
@@ -44,6 +50,8 @@ class MainActivity : FlutterActivity() {
         playStoreChannelHandler = null
         shareChannelHandler?.detach()
         shareChannelHandler = null
+        externalActionChannelHandler?.detach()
+        externalActionChannelHandler = null
         super.cleanUpFlutterEngine(flutterEngine)
     }
 

@@ -7,6 +7,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../routers/domain/entities/router_entity.dart';
 import '../../routers/presentation/router_providers.dart';
+import '../../settings/presentation/settings_providers.dart';
 import '../domain/entities/hotspot_active_session_entity.dart';
 import '../domain/entities/hotspot_cookie_entity.dart';
 import '../domain/entities/hotspot_ip_binding_entity.dart';
@@ -770,6 +771,8 @@ Future<void> _showCreateUserDialog(
   final limitUptimeController = TextEditingController();
   final priceController = TextEditingController();
   final dataLimitMbController = TextEditingController();
+  final currencyCode =
+      ref.read(appSettingsProvider).asData?.value.currencyCode ?? 'NGN';
   var userMode = 'usernamePassword';
   try {
     final input = await showDialog<HotspotUserInput>(
@@ -839,9 +842,9 @@ Future<void> _showCreateUserDialog(
                       child: TextField(
                         controller: priceController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Price',
-                          prefixText: 'NGN ',
+                          prefixText: '$currencyCode ',
                         ),
                       ),
                     ),
@@ -884,7 +887,7 @@ Future<void> _showCreateUserDialog(
                         : dataLimitMb * 1024 * 1024,
                     comment: priceController.text.trim().isEmpty
                         ? null
-                        : 'Price NGN ${priceController.text.trim()}',
+                        : 'Price $currencyCode ${priceController.text.trim()}',
                   ),
                 );
               },
@@ -932,6 +935,8 @@ Future<void> _showCreateProfileDialog(
   final sharedUsersController = TextEditingController(text: '1');
   final priceController = TextEditingController();
   final dataLimitMbController = TextEditingController();
+  final currencyCode =
+      ref.read(appSettingsProvider).asData?.value.currencyCode ?? 'NGN';
   try {
     final input = await showDialog<HotspotProfileInput>(
       context: context,
@@ -978,9 +983,9 @@ Future<void> _showCreateProfileDialog(
                     child: TextField(
                       controller: priceController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Price',
-                        prefixText: 'NGN ',
+                        prefixText: '$currencyCode ',
                       ),
                     ),
                   ),

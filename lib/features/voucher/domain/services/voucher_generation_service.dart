@@ -44,7 +44,7 @@ class VoucherGenerationService {
         username: username,
         password: password,
         priceMinor: request.priceMinor ?? request.plan.priceMinor,
-        currency: request.plan.currency,
+        currency: request.currencyCode,
         validityMinutes: request.plan.validityMinutes,
         generatedAt: DateTime.now(),
         note: request.note ?? request.plan.name,

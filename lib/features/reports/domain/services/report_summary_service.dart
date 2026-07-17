@@ -10,6 +10,7 @@ class ReportSummaryService {
   Future<RevenueSummary> revenueSummary({
     String? routerId,
     required ReportPeriod period,
+    String defaultCurrency = 'NGN',
     DateTime? now,
   }) async {
     final range = ReportDateRange.forPeriod(period, now: now);
@@ -25,7 +26,7 @@ class ReportSummaryService {
     return RevenueSummary(
       sales: sales,
       totalMinor: total,
-      currency: sales.isEmpty ? 'NGN' : sales.first.currency,
+      currency: sales.isEmpty ? defaultCurrency : sales.first.currency,
       from: range.from,
       to: range.to,
     );

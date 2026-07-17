@@ -54,6 +54,8 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
   Widget build(BuildContext context) {
     final routers = ref.watch(routersProvider);
     final encoding = ref.watch(voucherEncodingProvider);
+    final settings = ref.watch(appSettingsProvider).asData?.value;
+    final currencyCode = settings?.currencyCode ?? 'NGN';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Vouchers')),
@@ -97,6 +99,7 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
                     passwordLengthController: _passwordLengthController,
                     dataLimitMbController: _dataLimitMbController,
                     routerOsProfileController: _routerOsProfileController,
+                    currencyCode: currencyCode,
                     isGenerating: _isGenerating,
                     provisionOnRouter: _provisionOnRouter,
                     onRouterChanged: (value) {
@@ -116,7 +119,8 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
                     onProvisionChanged: (value) {
                       setState(() => _provisionOnRouter = value);
                     },
-                    onGenerate: () => _generate(router, encodingSettings),
+                    onGenerate: () =>
+                        _generate(router, encodingSettings, currencyCode),
                   ),
                   const SizedBox(height: 20),
                   _VoucherHistory(router: router),
@@ -156,6 +160,7 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
   Future<void> _generate(
     RouterEntity router,
     VoucherEncodingSettings encodingSettings,
+    String currencyCode,
   ) async {
     if (_isGenerating) {
       return;
@@ -201,6 +206,7 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
             VoucherGenerationRequest(
               routerId: router.id,
               plan: _selectedPlan,
+              currencyCode: currencyCode,
               quantity: quantity,
               usernamePrefix: _prefixController.text.trim(),
               usernameLength: usernameLength,
@@ -260,6 +266,7 @@ class _VoucherGeneratorCard extends StatelessWidget {
     required this.passwordLengthController,
     required this.dataLimitMbController,
     required this.routerOsProfileController,
+    required this.currencyCode,
     required this.isGenerating,
     required this.provisionOnRouter,
     required this.onRouterChanged,
@@ -281,6 +288,7 @@ class _VoucherGeneratorCard extends StatelessWidget {
   final TextEditingController passwordLengthController;
   final TextEditingController dataLimitMbController;
   final TextEditingController routerOsProfileController;
+  final String currencyCode;
   final bool isGenerating;
   final bool provisionOnRouter;
   final ValueChanged<String?> onRouterChanged;
@@ -411,9 +419,9 @@ class _VoucherGeneratorCard extends StatelessWidget {
                   child: TextField(
                     controller: priceController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Price',
-                      prefixText: 'NGN ',
+                      prefixText: '$currencyCode ',
                     ),
                   ),
                 ),

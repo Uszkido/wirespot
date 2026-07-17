@@ -22,7 +22,7 @@ class WireSpotApp extends ConsumerWidget {
       darkTheme: AppTheme.dark(),
       themeMode: _themeMode(settings?.themePreference),
       locale: _materialLocale(settings?.languageCode),
-      supportedLocales: const [Locale('en'), Locale('fr')],
+      supportedLocales: const [Locale('en'), Locale('fr'), Locale('ha')],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -43,6 +43,7 @@ class WireSpotApp extends ConsumerWidget {
   Locale _materialLocale(String? languageCode) {
     return switch (languageCode) {
       'fr' => const Locale('fr'),
+      'ha' => const Locale('ha'),
       _ => const Locale('en'),
     };
   }
