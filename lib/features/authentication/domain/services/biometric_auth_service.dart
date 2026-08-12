@@ -14,10 +14,8 @@ class BiometricAuthService {
   Future<bool> authenticate() {
     return _localAuthentication.authenticate(
       localizedReason: 'Unlock WireSpot',
-      options: const AuthenticationOptions(
-        biometricOnly: false,
-        stickyAuth: true,
-      ),
+      biometricOnly: false,
+      persistAcrossBackgrounding: true,
     );
   }
 }

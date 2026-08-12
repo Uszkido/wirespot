@@ -87,10 +87,8 @@ class SchedulerExecutionService {
   ) async {
     try {
       final message = switch (task.type) {
-        ScheduledTaskType.activeSessionRefresh =>
-          await _activeSessionRefresh(),
-        ScheduledTaskType.expiredUserCleanup =>
-          await _expiredSessionCleanup(),
+        ScheduledTaskType.activeSessionRefresh => await _activeSessionRefresh(),
+        ScheduledTaskType.expiredUserCleanup => await _expiredSessionCleanup(),
         ScheduledTaskType.voucherCleanup => await _voucherCleanup(now),
         ScheduledTaskType.dailySalesSummary => await _dailySalesSummary(now),
         ScheduledTaskType.databaseBackup => await _databaseBackup(),

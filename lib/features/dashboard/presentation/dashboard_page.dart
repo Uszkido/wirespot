@@ -200,7 +200,8 @@ class _DashboardContent extends ConsumerWidget {
               MetricCard(
                 icon: Icons.receipt_long_outlined,
                 label: text.todaySales,
-                value: '${snapshot.todaySalesCurrency} '
+                value:
+                    '${snapshot.todaySalesCurrency} '
                     '${(snapshot.todaySalesMinor / 100).toStringAsFixed(0)}',
               ),
               MetricCard(
@@ -325,9 +326,7 @@ class _RouterHealthPanel extends ConsumerWidget {
         ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en';
     final text = AppText(languageCode);
     if (resource == null) {
-      return _DashboardPanel(
-        child: Text(text.connectVpnForHealth),
-      );
+      return _DashboardPanel(child: Text(text.connectVpnForHealth));
     }
 
     return _DashboardPanel(

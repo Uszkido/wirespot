@@ -330,14 +330,12 @@ class _FakeHotspotService implements HotspotService {
   @override
   Future<List<HotspotIpBindingEntity>> getIpBindings(
     RouterEntity router,
-  ) async =>
-      const [];
+  ) async => const [];
 
   @override
   Future<List<HotspotUserProfileEntity>> getProfiles(
     RouterEntity router,
-  ) async =>
-      const [];
+  ) async => const [];
 
   @override
   Future<List<HotspotQueueEntity>> getQueues(RouterEntity router) async =>
@@ -397,14 +395,11 @@ class _FakeVoucherRepository implements VoucherRepository {
     String? routerId,
     DateTime? from,
     DateTime? to,
-  }) async =>
-      vouchers
-          .where((voucher) => routerId == null || voucher.routerId == routerId)
-          .where(
-            (voucher) => from == null || !voucher.generatedAt.isBefore(from),
-          )
-          .where((voucher) => to == null || !voucher.generatedAt.isAfter(to))
-          .toList();
+  }) async => vouchers
+      .where((voucher) => routerId == null || voucher.routerId == routerId)
+      .where((voucher) => from == null || !voucher.generatedAt.isBefore(from))
+      .where((voucher) => to == null || !voucher.generatedAt.isAfter(to))
+      .toList();
 
   @override
   Future<void> saveProfile(HotspotProfileEntity profile) async {}

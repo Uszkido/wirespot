@@ -204,7 +204,9 @@ class _SchedulerCard extends ConsumerWidget {
                         ref.invalidate(schedulerTasksProvider);
                       }
                     : null,
-                title: Text(text.scheduledTaskLabel(task.type.name, task.label)),
+                title: Text(
+                  text.scheduledTaskLabel(task.type.name, task.label),
+                ),
                 subtitle: Text(
                   '${text.everyMinutes(task.intervalMinutes)}\n'
                   '${text.lastRun}: ${_lastRunText(task)}',
@@ -1414,9 +1416,7 @@ class _CoBrandingCard extends ConsumerWidget {
       }
 
       final documents = await getApplicationDocumentsDirectory();
-      final brandingDirectory = Directory(
-        p.join(documents.path, 'branding'),
-      );
+      final brandingDirectory = Directory(p.join(documents.path, 'branding'));
       if (!brandingDirectory.existsSync()) {
         await brandingDirectory.create(recursive: true);
       }

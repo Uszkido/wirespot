@@ -12,8 +12,7 @@ class AppText {
 
   String get hotspot => _pick(en: 'Hotspot', fr: 'Hotspot', ha: 'Hotspot');
 
-  String get vouchers =>
-      _pick(en: 'Vouchers', fr: 'Coupons', ha: 'Tikiti');
+  String get vouchers => _pick(en: 'Vouchers', fr: 'Coupons', ha: 'Tikiti');
 
   String get reports => _pick(en: 'Reports', fr: 'Rapports', ha: 'Rahotanni');
 
@@ -38,8 +37,11 @@ class AppText {
 
   String get close => _pick(en: 'Close', fr: 'Fermer', ha: 'Rufe');
 
-  String get onlineUsers =>
-      _pick(en: 'Online users', fr: 'Utilisateurs en ligne', ha: 'Masu amfani online');
+  String get onlineUsers => _pick(
+    en: 'Online users',
+    fr: 'Utilisateurs en ligne',
+    ha: 'Masu amfani online',
+  );
 
   String get todaySales =>
       _pick(en: 'Today sales', fr: 'Ventes du jour', ha: 'Sayarwar yau');
@@ -63,7 +65,8 @@ class AppText {
 
   String get board => _pick(en: 'Board', fr: 'Carte', ha: 'Allo');
 
-  String get uptime => _pick(en: 'Uptime', fr: 'Duree active', ha: 'Lokacin aiki');
+  String get uptime =>
+      _pick(en: 'Uptime', fr: 'Duree active', ha: 'Lokacin aiki');
 
   String get freeMemory =>
       _pick(en: 'Free memory', fr: 'Memoire libre', ha: 'Memory da ya rage');
@@ -75,8 +78,11 @@ class AppText {
 
   String get down => _pick(en: 'Down', fr: 'Arrete', ha: 'Ya tsaya');
 
-  String get noInterfaces =>
-      _pick(en: 'No interfaces reported.', fr: 'Aucune interface signalee.', ha: 'Babu interface da aka nuna.');
+  String get noInterfaces => _pick(
+    en: 'No interfaces reported.',
+    fr: 'Aucune interface signalee.',
+    ha: 'Babu interface da aka nuna.',
+  );
 
   String get connectVpnForHealth => _pick(
     en: 'Connect WireGuard and refresh to load RouterOS health.',
@@ -90,8 +96,11 @@ class AppText {
     ha: 'Bayanan interface zai bayyana bayan VPN ya hade kuma RouterOS API ya amsa.',
   );
 
-  String get pressBackAgain =>
-      _pick(en: 'Press back again to exit WireSpot.', fr: 'Appuyez encore sur retour pour quitter WireSpot.', ha: 'Danna baya sau daya kuma don fita daga WireSpot.');
+  String get pressBackAgain => _pick(
+    en: 'Press back again to exit WireSpot.',
+    fr: 'Appuyez encore sur retour pour quitter WireSpot.',
+    ha: 'Danna baya sau daya kuma don fita daga WireSpot.',
+  );
 
   String get addRouterMessage => _pick(
     en: 'Connect a MikroTik router before viewing dashboard data.',
@@ -147,8 +156,11 @@ class AppText {
     ha: 'Gwajin hadewa ya kasa: $error',
   );
 
-  String get deleteRouterQuestion =>
-      _pick(en: 'Delete router?', fr: 'Supprimer routeur?', ha: 'A goge rauta?');
+  String get deleteRouterQuestion => _pick(
+    en: 'Delete router?',
+    fr: 'Supprimer routeur?',
+    ha: 'A goge rauta?',
+  );
 
   String removeRouterMessage(String name) => _pick(
     en: 'Remove $name and its saved credentials.',
@@ -156,8 +168,11 @@ class AppText {
     ha: 'Goge $name da bayanan shigarsa da aka ajiye.',
   );
 
-  String get routerDeleted =>
-      _pick(en: 'Router deleted.', fr: 'Routeur supprime.', ha: 'An goge rauta.');
+  String get routerDeleted => _pick(
+    en: 'Router deleted.',
+    fr: 'Routeur supprime.',
+    ha: 'An goge rauta.',
+  );
 
   String get dashboardUnavailable => _pick(
     en: 'Dashboard unavailable',
@@ -262,7 +277,11 @@ class AppText {
     ha: 'Kowane minti $minutes',
   );
 
-  String get lastRun => _pick(en: 'Last run', fr: 'Derniere execution', ha: 'Gudanarwa ta karshe');
+  String get lastRun => _pick(
+    en: 'Last run',
+    fr: 'Derniere execution',
+    ha: 'Gudanarwa ta karshe',
+  );
 
   String get premium => _pick(en: 'Premium', fr: 'Premium', ha: 'Premium');
 
@@ -338,8 +357,11 @@ class AppText {
 
   String get quantity => _pick(en: 'Quantity', fr: 'Quantite', ha: 'Yawa');
 
-  String get userPrefix =>
-      _pick(en: 'User prefix', fr: 'Prefixe utilisateur', ha: 'Prefix na mai amfani');
+  String get userPrefix => _pick(
+    en: 'User prefix',
+    fr: 'Prefixe utilisateur',
+    ha: 'Prefix na mai amfani',
+  );
 
   String get pinDigits =>
       _pick(en: 'PIN digits', fr: 'Chiffres PIN', ha: 'Lambobin PIN');

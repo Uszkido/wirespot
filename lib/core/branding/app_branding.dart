@@ -9,8 +9,7 @@ class AppBranding {
   static const website = 'https://vexel-innovations.vercel.app/';
   static const logoAsset = 'assets/images/wirespot_mark.jpg';
   static const tagline = 'Connecting Possibilities';
-  static const partnershipLine =
-      'by Vexel Innovations x TechNova Technologies';
+  static const partnershipLine = 'by Vexel Innovations x TechNova Technologies';
   static const poweredByLine =
       'Powered by Vexel Innovations in collaboration with TechNova Technologies';
 }
