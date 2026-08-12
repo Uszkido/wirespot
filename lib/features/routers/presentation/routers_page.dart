@@ -23,16 +23,17 @@ class RoutersPage extends ConsumerWidget {
         ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en';
     final text = AppText(languageCode);
     final selectedRouterId = ref.watch(selectedRouterIdProvider);
+    final items = routers.asData?.value ?? const <RouterEntity>[];
+    final connectionStates = ref.watch(routerConnectionStatesProvider(items));
 
     return Scaffold(
       appBar: AppBar(
         title: Text(text.routers),
         actions: [
-          if (routers.asData?.value.isNotEmpty ?? false)
+          if (items.isNotEmpty)
             IconButton(
               tooltip: 'Test all router connections',
-              onPressed: () =>
-                  _testAllConnections(context, ref, routers.asData!.value),
+              onPressed: () => _testAllConnections(context, ref, items),
               icon: const Icon(Icons.network_check_outlined),
             ),
         ],
@@ -69,6 +70,7 @@ class RoutersPage extends ConsumerWidget {
                   isActive:
                       items[index].id == selectedRouterId ||
                       (selectedRouterId == null && index == 0),
+                  isConnected: connectionStates.asData?.value[items[index].id],
                 );
               },
             ),
@@ -109,10 +111,15 @@ class RoutersPage extends ConsumerWidget {
 }
 
 class _RouterTile extends ConsumerWidget {
-  const _RouterTile({required this.router, required this.isActive});
+  const _RouterTile({
+    required this.router,
+    required this.isActive,
+    required this.isConnected,
+  });
 
   final RouterEntity router;
   final bool isActive;
+  final bool? isConnected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -124,8 +131,12 @@ class _RouterTile extends ConsumerWidget {
     return Card(
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: colorScheme.primaryContainer,
-          foregroundColor: colorScheme.onPrimaryContainer,
+          backgroundColor: isConnected == true
+              ? colorScheme.primaryContainer
+              : colorScheme.surfaceContainerHighest,
+          foregroundColor: isConnected == true
+              ? colorScheme.onPrimaryContainer
+              : colorScheme.onSurfaceVariant,
           child: const Icon(Icons.router_outlined),
         ),
         title: Row(
@@ -141,6 +152,15 @@ class _RouterTile extends ConsumerWidget {
               const Padding(
                 padding: EdgeInsets.only(left: 8),
                 child: Icon(Icons.check_circle, size: 18),
+              ),
+            if (isConnected != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Icon(
+                  isConnected! ? Icons.wifi : Icons.wifi_off,
+                  size: 18,
+                  color: isConnected! ? colorScheme.primary : colorScheme.error,
+                ),
               ),
           ],
         ),
