@@ -62,9 +62,7 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<PinHashService>(PinHashService.new)
     ..registerLazySingleton<BiometricAuthService>(BiometricAuthService.new)
     ..registerLazySingleton<FlutterSecureStorage>(
-      () => const FlutterSecureStorage(
-        aOptions: AndroidOptions(encryptedSharedPreferences: true),
-      ),
+      () => const FlutterSecureStorage(aOptions: AndroidOptions()),
     )
     ..registerLazySingleton<SecureStorageService>(
       () => SecureStorageService(sl<FlutterSecureStorage>()),
