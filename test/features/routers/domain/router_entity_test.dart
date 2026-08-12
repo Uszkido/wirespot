@@ -20,6 +20,10 @@ void main() {
       router.vendor.supports(RouterCapability.hotspotSetupPresets),
       isTrue,
     );
+    expect(
+      router.vendor.setupChecklist,
+      contains('Enable the RouterOS API service on a trusted port.'),
+    );
     expect(router.supportsHotspotVouchers, isTrue);
     expect(router.requiresPrivateTunnel, isTrue);
     expect(router.isEnabled, isTrue);
@@ -42,6 +46,12 @@ void main() {
     expect(router.vendor.plans(RouterCapability.cloudController), isTrue);
     expect(router.vendor.plans(RouterCapability.voucherProvisioning), isTrue);
     expect(router.vendor.activeCapabilitySummary, 'No live connector yet');
+    expect(
+      router.vendor.setupChecklist,
+      contains(
+        'Prepare Ruijie Cloud or controller access for the managed site.',
+      ),
+    );
     expect(router.supportsHotspotVouchers, isFalse);
   });
 }

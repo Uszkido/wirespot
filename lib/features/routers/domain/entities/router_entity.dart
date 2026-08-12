@@ -19,6 +19,11 @@ enum RouterVendor {
     defaultPort: 8728,
     defaultUseSsl: false,
     usesRouterOsApi: true,
+    setupChecklist: [
+      'Enable the RouterOS API service on a trusted port.',
+      'Use WireGuard, Back To Home, ZeroTier, or a trusted LAN for access.',
+      'Create a least-privilege RouterOS user for WireSpot operations.',
+    ],
     activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
@@ -34,6 +39,11 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
+    setupChecklist: [
+      'Prepare Ruijie Cloud or controller access for the managed site.',
+      'Keep gateway, access point, and captive portal details ready.',
+      'Use HTTPS controller/cloud credentials when the connector ships.',
+    ],
     plannedCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
@@ -50,6 +60,11 @@ enum RouterVendor {
     defaultPort: 22,
     defaultUseSsl: false,
     usesRouterOsApi: false,
+    setupChecklist: [
+      'Enable trusted SSH or LuCI access from the WireSpot device/network.',
+      'Prepare captive portal package details such as NoDogSplash or CoovaChilli.',
+      'Use a limited operator account where possible.',
+    ],
     plannedCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
@@ -63,6 +78,11 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
+    setupChecklist: [
+      'Prepare Omada Controller access for the target site.',
+      'Keep portal, WLAN, voucher, and client policies ready.',
+      'Use HTTPS controller credentials when the connector ships.',
+    ],
     plannedCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
@@ -79,6 +99,11 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
+    setupChecklist: [
+      'Prepare UniFi Network controller access for the target site.',
+      'Keep guest hotspot, WLAN, and voucher policies ready.',
+      'Use HTTPS controller credentials when the connector ships.',
+    ],
     plannedCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
@@ -95,6 +120,11 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
+    setupChecklist: [
+      'Confirm the router exposes SSH, SNMP, or an HTTPS management API.',
+      'Use a private management network or VPN where possible.',
+      'Treat automation as monitoring-first until a brand connector exists.',
+    ],
     plannedCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
@@ -108,6 +138,7 @@ enum RouterVendor {
     required this.defaultPort,
     required this.defaultUseSsl,
     required this.usesRouterOsApi,
+    required this.setupChecklist,
     this.activeCapabilities = const {},
     this.plannedCapabilities = const {},
   });
@@ -117,6 +148,7 @@ enum RouterVendor {
   final int defaultPort;
   final bool defaultUseSsl;
   final bool usesRouterOsApi;
+  final List<String> setupChecklist;
   final Set<RouterCapability> activeCapabilities;
   final Set<RouterCapability> plannedCapabilities;
 
