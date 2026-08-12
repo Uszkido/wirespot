@@ -2,24 +2,28 @@
 
 ## One-line Summary
 
-WireSpot is a modern Android hotspot management app for MikroTik RouterOS,
-designed for operators who need secure router access, voucher sales, active
-user control, reports, thermal printing, and remote support through WireGuard.
+WireSpot is a modern Android hotspot management app for business Wi-Fi
+operators, starting with full MikroTik RouterOS support and expanding toward
+multi-brand router control for Ruijie/Reyee, OpenWrt, TP-Link Omada, Ubiquiti
+UniFi, and generic routers.
 
 ## The Problem
 
-Many hotspot operators still manage MikroTik routers with manual WinBox work,
-unsafe public router access, scattered voucher records, and separate tools for
-printing, reporting, and remote support. This creates slow operations, weak
-security, poor sales tracking, and difficult troubleshooting.
+Many hotspot operators still manage routers with vendor dashboards, manual
+router work, unsafe public access, scattered voucher records, and separate
+tools for printing, reporting, and remote support. This creates slow
+operations, weak security, poor sales tracking, and difficult troubleshooting.
 
 ## The Solution
 
 WireSpot brings the daily hotspot workflow into one mobile app:
 
 - Connect to MikroTik locally on-site or remotely through WireGuard.
+- Track and prepare additional router brands through a connector-ready
+  architecture.
 - Manage routers, hotspot users, profiles, sessions, queues, cookies, and IP
   bindings.
+- Apply business hotspot setup presets for common operator scenarios.
 - Generate single or batch vouchers with QR codes.
 - Print tickets and receipts on 58mm or 80mm Bluetooth thermal printers.
 - Track sales, voucher history, and reports.
@@ -27,8 +31,10 @@ WireSpot brings the daily hotspot workflow into one mobile app:
 
 ## Why WireSpot Stands Out
 
-- Built for MikroTik hotspot operators, not generic router monitoring.
-- RouterOS API client is original and implemented from scratch.
+- Built for hotspot operators, not generic router monitoring.
+- MikroTik RouterOS support is live and original, implemented from scratch.
+- Multi-brand foundation is in place for Ruijie/Reyee, OpenWrt, Omada, UniFi,
+  and generic router connectors.
 - Remote access is designed around WireGuard instead of exposing RouterOS to
   the public internet.
 - Works for both local LAN servicing and remote managed routers.
@@ -47,6 +53,7 @@ WireSpot brings the daily hotspot workflow into one mobile app:
 - Estate and hotel Wi-Fi operators
 - Small ISPs
 - MikroTik technicians
+- Ruijie/Reyee and managed Wi-Fi technicians as connector support expands
 - Voucher resellers
 - Managed Wi-Fi support teams
 
@@ -75,9 +82,10 @@ Recommended product IDs:
 ## Current Development Status
 
 WireSpot already includes the main Android application, RouterOS integration,
-dashboard metrics, active user loading, hotspot workflows, voucher generation,
-reporting, settings, local licensing, WireGuard backend wiring, Bluetooth
-printing, co-branding, documentation, and Play Store preparation files.
+multi-brand router metadata, business hotspot setup presets, dashboard metrics,
+active user loading, hotspot workflows, voucher generation, reporting,
+settings, local licensing, WireGuard backend wiring, Bluetooth printing,
+co-branding, documentation, and Play Store preparation files.
 
 Remaining production hardening includes:
 
@@ -87,13 +95,15 @@ Remaining production hardening includes:
 - Server-side license validation.
 - Release signing and Play Store internal testing.
 - More UI flow and RouterOS command tests.
+- First non-MikroTik connector implementation, starting with Ruijie/Reyee.
 
 ## Go-to-market Positioning
 
 WireSpot should launch as a professional operator tool rather than a casual
 utility. The recommended first market is MikroTik hotspot operators who already
 sell Wi-Fi access through vouchers and need a cleaner Android workflow for
-daily management.
+daily management. The expansion market is small business Wi-Fi operators using
+Ruijie/Reyee, OpenWrt, Omada, UniFi, and similar managed router platforms.
 
 The strongest launch message:
 

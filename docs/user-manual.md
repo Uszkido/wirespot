@@ -1,8 +1,9 @@
 # WireSpot User Manual
 
-WireSpot is an Android hotspot operations app for MikroTik RouterOS routers.
-It helps operators manage routers, hotspot users, vouchers, receipts, reports,
-and secure remote access from one mobile workflow.
+WireSpot is an Android hotspot operations app for business Wi-Fi and voucher
+networks. MikroTik RouterOS is the current full live connector. The app now has
+a multi-brand foundation for Ruijie/Reyee, OpenWrt, TP-Link Omada, Ubiquiti
+UniFi, and generic router integrations.
 
 ## Branding And Support
 
@@ -25,7 +26,7 @@ The PIN is stored as a salted hash. Router passwords and voucher passwords are s
 
 ## 2. Recommended Router Setup
 
-Before using RouterOS features:
+Before using MikroTik RouterOS features:
 
 1. Enable the RouterOS API service on the MikroTik router.
 2. Create a dedicated RouterOS user for WireSpot with only the permissions needed for hotspot operations.
@@ -38,18 +39,24 @@ Common RouterOS API ports:
 - Plain API: `8728`
 - SSL API: `8729`
 
+For Ruijie/Reyee, OpenWrt, Omada, UniFi, and generic routers, WireSpot can save
+the router brand and connection details as planned connectors. Live hotspot
+automation for those brands will be added through their own supported APIs or
+controller integrations.
+
 ## 3. Add A Router
 
 1. Go to Dashboard.
 2. Open Routers.
 3. Tap Add.
-4. Enter router name, host, API port, username, and password.
-5. Choose SSL if the router API service supports it.
-6. Choose the connection mode:
+4. Choose the router brand.
+5. Enter router name, host, management port, username, and password.
+6. Choose SSL if the router API or controller service supports it.
+7. Choose the connection mode:
    - Keep **Require WireGuard VPN** on for remote/private VPN routers.
    - Turn it off for **Local LAN** use when your phone is on the same network as the MikroTik.
-7. Save.
-8. Use Test Connection to confirm RouterOS API access.
+8. Save.
+9. Use Test Connection to confirm RouterOS API access for MikroTik routers.
 
 If Test Connection fails, check the selected connection mode first. VPN routers need WireGuard connected. Local LAN routers need the phone connected to the same network as the MikroTik. Then verify host, port, username, password, and RouterOS API service status.
 
@@ -116,11 +123,21 @@ Open Hotspot from the dashboard to manage:
 - IP bindings
 - Queues
 
-Available operations include creating users, creating profiles, disconnecting active sessions, deleting users, resetting counters, and removing hotspot records.
+Available MikroTik operations include creating users, creating profiles,
+disconnecting active sessions, deleting users, resetting counters, and removing
+hotspot records.
 
-WireSpot can help set up common hotspot operations by preparing profiles,
-users, IP bindings, and voucher batches used by a MikroTik hotspot. Always
-review generated setup plans before applying them to a live router.
+WireSpot can help set up common hotspot operations with business presets:
+
+- Quick voucher hotspot
+- Small business hotspot
+- Hotel guest Wi-Fi
+- RADIUS managed hotspot
+
+For MikroTik, these presets prepare RouterOS hotspot, IP pool, DHCP, and NAT
+setup plans. Always review generated setup plans before applying them to a live
+router. For Ruijie/Reyee and other brands, presets are planned until the brand
+connector is implemented.
 
 ## 8. Voucher Management
 
@@ -148,7 +165,7 @@ Voucher generation supports:
 - Receipt preview
 - Share action
 - Bluetooth print action
-- Optional RouterOS provisioning
+- Optional RouterOS provisioning for MikroTik routers
 - Voucher history
 
 ## 9. Reports
@@ -207,7 +224,9 @@ commands differently.
 
 ## 12. WireGuard VPN
 
-WireSpot expects secure RouterOS access over WireGuard.
+WireSpot expects secure router management access over private paths such as
+WireGuard where possible. MikroTik RouterOS commands are currently protected by
+the VPN guard when the selected access mode requires a tunnel.
 
 The app includes:
 

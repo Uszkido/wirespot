@@ -2,9 +2,11 @@
 
 Effective date: 2026-07-14
 
-WireSpot is a MikroTik RouterOS hotspot management application by Vexel
-Innovations. This policy explains what information the app stores, why it is
-needed, and how operators control sharing.
+WireSpot is a hotspot operations application by Vexel Innovations. MikroTik
+RouterOS is the current full live router connector, and additional router
+brands are being added through a multi-brand connector foundation. This policy
+explains what information the app stores, why it is needed, and how operators
+control sharing.
 
 ## Summary
 
@@ -18,7 +20,7 @@ WireSpot does not sell personal data.
 
 WireSpot may store:
 
-- router profiles
+- router profiles, including selected router brand
 - router connection settings
 - hotspot voucher history
 - sales records
@@ -35,8 +37,9 @@ device storage where supported by Android.
 
 ## Router Communication
 
-When an operator connects WireSpot to a MikroTik router, the app sends RouterOS
-API commands required for the selected action. Examples include:
+When an operator connects WireSpot to a supported router, the app sends the
+router or controller commands required for the selected action. Current live
+MikroTik support sends RouterOS API commands. Examples include:
 
 - reading router status
 - loading hotspot users and sessions
@@ -48,6 +51,10 @@ API commands required for the selected action. Examples include:
 
 WireSpot does not perform hidden router management actions outside the operator
 workflow.
+
+Ruijie/Reyee, OpenWrt, Omada, UniFi, and generic router records can be saved as
+planned connectors. WireSpot does not perform live management actions for those
+brands until their connector is implemented.
 
 ## VPN Data
 
@@ -94,8 +101,8 @@ data depending on Android backup settings.
 
 Operators should:
 
-- use dedicated RouterOS accounts for WireSpot
-- avoid exposing RouterOS API ports publicly
+- use dedicated router accounts for WireSpot
+- avoid exposing router management ports publicly
 - use WireGuard for remote management
 - protect device PIN/password
 - rotate router credentials if a phone is lost

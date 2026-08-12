@@ -15,7 +15,7 @@ Describe what changed and why.
 ## Area
 
 - [ ] Authentication / PIN / biometric
-- [ ] RouterOS API / router management
+- [ ] Router connectors / router management
 - [ ] WireGuard / VPN
 - [ ] Hotspot users / profiles / sessions
 - [ ] Vouchers / receipts / QR
@@ -32,14 +32,16 @@ Describe what changed and why.
 - [ ] Android debug APK build
 - [ ] Manual app test on Android phone
 - [ ] Real MikroTik RouterOS test
+- [ ] Real non-MikroTik router/controller test
 - [ ] WireGuard tunnel test
 - [ ] Bluetooth printer test
 - [ ] Not applicable
 
-## RouterOS / Android Notes
+## Router / Android Notes
 
-Mention affected RouterOS commands, Android permissions, VPN behavior,
-database migrations, platform-channel calls, or Play Store/release behavior.
+Mention affected RouterOS commands, router brand connectors, Android
+permissions, VPN behavior, database migrations, platform-channel calls, or Play
+Store/release behavior.
 
 ## Screenshots Or Logs
 

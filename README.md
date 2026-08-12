@@ -1,18 +1,20 @@
 # WireSpot
 
-Secure MikroTik RouterOS hotspot management for Android, built by
+Secure multi-brand hotspot operations for Android, built by
 Vexel Innovations in collaboration with TechNova Technologies.
 
 ![WireSpot logo](assets/images/wirespot_readme_logo.png)
 
 WireSpot is a modern Flutter Android application for hotspot operators,
-technicians, and small ISPs who manage MikroTik RouterOS networks. It brings
-router management, hotspot users, voucher generation, thermal printing,
+technicians, and small ISPs who manage business Wi-Fi and voucher networks. It
+brings router management, hotspot users, voucher generation, thermal printing,
 reporting, WireGuard remote access, backup, and licensing into one mobile app.
 
 This codebase is original work. It does not copy Mikhmon, WireNex, or any
-proprietary application. Router communication is implemented from scratch using
-public RouterOS API behavior and original WireSpot code.
+proprietary application. The current production connector uses public RouterOS
+API behavior and original WireSpot code. A multi-brand connector foundation is
+now in place for Ruijie/Reyee, OpenWrt, TP-Link Omada, Ubiquiti UniFi, and
+generic router integrations.
 
 ## Project Status
 
@@ -21,19 +23,22 @@ public RouterOS API behavior and original WireSpot code.
 | Current version | `0.1.26+27` |
 | Android debug APK | Builds successfully |
 | Static analysis | Passing |
-| Tests | 47 passing |
+| Tests | 58 passing |
 | Latest APK output | `outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk` |
-| Latest pushed commit | Pending next push |
+| Latest pushed commit | See GitHub `main` |
 
 ## Why WireSpot
 
-Hotspot operators often manage MikroTik routers with several disconnected
-tools: WinBox for router work, spreadsheets for sales, manual voucher records,
+Hotspot operators often manage routers with several disconnected tools: vendor
+dashboards for router work, spreadsheets for sales, manual voucher records,
 separate QR generators, and unsafe public router access for remote support.
 
 WireSpot solves that with a focused Android workflow:
 
 - Manage MikroTik routers locally or through WireGuard VPN.
+- Track other router brands as planned connectors, including Ruijie/Reyee,
+  OpenWrt, TP-Link Omada, Ubiquiti UniFi, and generic routers.
+- Start hotspot configuration from prebuilt business presets.
 - Create and control hotspot users, profiles, sessions, queues, cookies, and
   IP bindings.
 - Generate single or batch vouchers with QR payloads.
@@ -46,8 +51,13 @@ WireSpot solves that with a focused Android workflow:
 
 - **RouterOS API client from scratch**: socket protocol, command execution,
   login, read/write, listen support, timeout/error handling, SSL-ready paths.
+- **Multi-brand router foundation**: router records now store vendor/capability
+  metadata for MikroTik, Ruijie/Reyee, OpenWrt, TP-Link Omada, Ubiquiti UniFi,
+  and generic routers.
 - **WireGuard-first remote access**: designed so operators do not need to expose
   RouterOS API ports directly to the internet.
+- **Business hotspot presets**: quick voucher, small business, hotel guest
+  Wi-Fi, and RADIUS-managed setup templates.
 - **Hotspot operations**: users, profiles, sessions, cookies, queues, IP
   bindings, disconnect, reset counters, delete, search/filter foundations.
 - **Voucher workflow**: plans, random credentials, PIN-style vouchers, price,
@@ -81,7 +91,7 @@ WireSpot solves that with a focused Android workflow:
 | App | Flutter, Material 3 |
 | State/navigation | Riverpod, GoRouter |
 | Storage | Drift/SQLite, secure storage |
-| Networking | Original RouterOS API client, Dio where HTTP is needed |
+| Networking | Original RouterOS API client, Dio where HTTP/cloud APIs are needed |
 | Android | Kotlin platform channels for VPN, Bluetooth, sharing, printing |
 | VPN | WireGuard Android tunnel backend integration |
 | Printing | ESC/POS Bluetooth thermal printer support |
@@ -96,7 +106,9 @@ WireSpot solves that with a focused Android workflow:
 - Android SDK and platform tools
 - Git for Windows
 - Android phone for real VPN/Bluetooth/router testing
-- MikroTik RouterOS router with API enabled
+- MikroTik RouterOS router with API enabled for full live hotspot operations
+- Ruijie/Reyee, OpenWrt, TP-Link Omada, UniFi, or generic router for planned
+  connector setup/field discovery
 
 The project currently uses this local Flutter path in the documented commands:
 
@@ -134,10 +146,11 @@ outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
 
 1. Install the APK on an Android phone.
 2. Open WireSpot and create/sign in with local PIN.
-3. Add a MikroTik router in **Routers**.
+3. Add a router in **Routers** and choose its brand.
 4. Use local LAN mode when on-site, or import/connect WireGuard for remote
    router management.
-5. Test RouterOS API connection.
+5. Test RouterOS API connection for MikroTik routers. Other brands are tracked
+   for planned connectors until their integrations are implemented.
 6. Configure Settings:
    - language and currency
    - license
@@ -189,6 +202,17 @@ collaboration with TechNova Technologies.
 - RouterOS credentials should never be committed or shared.
 - Play Store signing keys must stay private and must not be pushed to GitHub.
 
+## Router Brand Support
+
+| Brand / connector | Current support | Notes |
+| --- | --- | --- |
+| MikroTik RouterOS | Full active connector | RouterOS API, hotspot users, vouchers, dashboard snapshots, setup presets |
+| Ruijie / Reyee | Planned connector foundation | Added as a selectable brand; cloud/open API integration is next |
+| OpenWrt | Planned connector foundation | Future SSH/LuCI/ubus integration |
+| TP-Link Omada | Planned connector foundation | Future Omada Controller integration |
+| Ubiquiti UniFi | Planned connector foundation | Future UniFi Controller integration |
+| Generic router | Planned limited connector | Future SSH/SNMP/basic monitoring where supported |
+
 ## Documentation
 
 | Document | Purpose |
@@ -231,6 +255,8 @@ Still required before production upload:
 - Real Play Billing or server-side license validation.
 - Release signing and Play Store AAB.
 - More field testing on MikroTik hotspot setup.
+- Implement first non-MikroTik connector, starting with Ruijie/Reyee discovery.
+- Expand business setup presets across supported brands.
 - WireGuard validation across multiple Android models.
 - Printer testing across common 58mm/80mm ESC/POS models.
 - More polished real PDF/Excel file generation.
@@ -264,5 +290,6 @@ authorized use, contribution, redistribution, and warranty terms.
 ## Disclaimer
 
 WireSpot is in active development and field testing. Test on non-critical
-routers before production deployment, keep RouterOS backups, and use WireGuard
-for remote access instead of exposing RouterOS management ports publicly.
+routers before production deployment, keep router backups, and use private
+management paths such as WireGuard instead of exposing management ports
+publicly.

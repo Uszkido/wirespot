@@ -1,7 +1,8 @@
 # WireSpot Technical Diagnostics
 
-This guide helps diagnose Flutter, Android, RouterOS API, WireGuard, database,
-Bluetooth printer, licensing, and release-build issues for WireSpot.
+This guide helps diagnose Flutter, Android, RouterOS API, multi-brand router
+metadata, WireGuard, database, Bluetooth printer, licensing, and release-build
+issues for WireSpot.
 
 ## 1. Project Paths
 
@@ -129,6 +130,11 @@ Use normal Git, not Flutter's bundled mini-git, for GitHub pushes.
 
 ## 7. RouterOS API Diagnostics
 
+MikroTik RouterOS is the current live router connector. Ruijie/Reyee, OpenWrt,
+TP-Link Omada, Ubiquiti UniFi, and generic routers can be saved as planned
+connectors, but live diagnostics for those brands will use their own APIs after
+the connector is implemented.
+
 Check RouterOS API service:
 
 ```routeros
@@ -167,7 +173,19 @@ Check hotspot profiles:
 
 ## 8. Local LAN Versus WireGuard Mode
 
-Each router has a `requireVpn` flag:
+Each router has a `vendor` value and a `requireVpn` flag. Current vendor values
+include:
+
+- `mikrotik`
+- `ruijie`
+- `openWrt`
+- `tpLinkOmada`
+- `ubiquitiUniFi`
+- `generic`
+
+Only `mikrotik` currently uses the RouterOS API connector.
+
+Each router also has a `requireVpn` flag:
 
 - `true`: WireSpot checks that WireGuard/VPN status is connected before RouterOS API commands.
 - `false`: WireSpot skips the VPN guard and connects directly to the router host/port.
@@ -200,7 +218,8 @@ If VPN connect does not work:
 
 Default is `true` for safety. Existing routers are migrated to `true`.
 
-Use local mode only when the Android device is on the same trusted LAN as the MikroTik. Do not expose RouterOS API ports to the public internet.
+Use local mode only when the Android device is on the same trusted LAN as the
+router. Do not expose router management ports to the public internet.
 
 ## 10. Bluetooth Printer Diagnostics
 

@@ -23,10 +23,10 @@ body:
     validations:
       required: true
   - type: input
-    id: routeros
+    id: router
     attributes:
-      label: RouterOS version and router board
-      placeholder: "RouterOS 7.19.6, L009UiGS-2HaxD"
+      label: Router brand, firmware, and model
+      placeholder: "MikroTik RouterOS 7.19.6, L009UiGS-2HaxD"
   - type: dropdown
     id: area
     attributes:
@@ -34,6 +34,7 @@ body:
       options:
         - Authentication / PIN / biometric
         - Router connection
+        - Router connectors / brand support
         - RouterOS API
         - WireGuard / VPN
         - Hotspot users / profiles / sessions

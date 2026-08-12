@@ -5,7 +5,11 @@ testing, backup, and Play Store preparation.
 
 ## 1. What WireSpot Is
 
-WireSpot is an Android app for managing MikroTik RouterOS hotspot operations.
+WireSpot is an Android app for managing business hotspot operations. MikroTik
+RouterOS is the current full live connector. WireSpot also includes a
+multi-brand foundation for Ruijie/Reyee, OpenWrt, TP-Link Omada, Ubiquiti
+UniFi, and generic router integrations.
+
 It supports router management, local LAN access, WireGuard remote access,
 hotspot users, profiles, sessions, voucher generation, QR codes, ticket
 printing, reporting, scheduler settings, backup, app security, and licensing.
@@ -14,7 +18,9 @@ printing, reporting, scheduler settings, backup, app security, and licensing.
 
 - App login with local PIN and biometric-ready flow.
 - Secure router credential storage.
-- Multiple MikroTik router records.
+- Multiple router records with brand selection.
+- MikroTik RouterOS live hotspot management.
+- Ruijie/Reyee, OpenWrt, Omada, UniFi, and generic router connector foundation.
 - Local LAN mode and WireGuard-required mode.
 - Router connection testing.
 - Dashboard with online users, sales, CPU, memory, health, and interfaces.
@@ -35,8 +41,8 @@ printing, reporting, scheduler settings, backup, app security, and licensing.
 
 ## 3. Recommended Router Security
 
-For remote routers, do not expose RouterOS API ports directly to the internet.
-Use WireGuard.
+For remote routers, do not expose management ports directly to the internet.
+Use WireGuard or another private management path where possible.
 
 Recommended approach:
 
@@ -72,13 +78,17 @@ from the source app.
 Use the Routers screen:
 
 1. Tap add router.
-2. Enter router name, host/IP, port, username, and password.
-3. Choose whether the router requires WireGuard.
-4. Save.
-5. Tap test connection.
+2. Choose the router brand.
+3. Enter router name, host/IP, port, username, and password.
+4. Choose whether the router requires WireGuard.
+5. Save.
+6. Tap test connection.
 
 RouterOS API access must be enabled on the MikroTik router. The default API
 port is usually `8728`; API-SSL is usually `8729` when configured.
+
+Non-MikroTik brands can be saved as planned connectors. WireSpot will not send
+RouterOS commands to them until their own connector is implemented.
 
 ## 7. Local LAN Mode
 
@@ -124,9 +134,17 @@ The Hotspot screen is for daily customer/user operations:
 
 ## 10. Hotspot Setup
 
-The hotspot setup assistant helps prepare common MikroTik hotspot components.
-Review the generated plan before applying changes. Field testing on real
-routers is still recommended before using it on a production site.
+The hotspot setup assistant helps prepare common hotspot business setups:
+
+- Quick voucher hotspot
+- Small business hotspot
+- Hotel guest Wi-Fi
+- RADIUS managed hotspot
+
+For MikroTik routers, these presets prepare RouterOS hotspot components,
+including server profiles, hotspot servers, pools, DHCP, and NAT. Review the
+generated plan before applying changes. Field testing on real routers is still
+recommended before using it on a production site.
 
 ## 11. Voucher Generation
 

@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Focus requests on real hotspot operator workflows, RouterOS management, secure access, vouchers, reports, printing, licensing, or Play Store readiness.
+        Focus requests on real hotspot operator workflows, router connectors, RouterOS management, secure access, vouchers, reports, printing, licensing, or Play Store readiness.
   - type: textarea
     id: problem
     attributes:
@@ -27,6 +27,7 @@ body:
       label: Area
       options:
         - Router setup
+        - Router connectors / brand support
         - RouterOS API
         - WireGuard / VPN
         - Hotspot users / profiles / sessions
@@ -54,8 +55,8 @@ body:
   - type: textarea
     id: routeros
     attributes:
-      label: RouterOS impact
-      description: Mention any RouterOS commands, permissions, or hotspot behavior that may be affected.
+      label: Router impact
+      description: Mention any router brand, RouterOS commands, controller APIs, permissions, or hotspot behavior that may be affected.
   - type: textarea
     id: notes
     attributes:
