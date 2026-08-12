@@ -152,6 +152,9 @@ Future<void> configureDependencies() async {
         settingsService: sl<SchedulerSettingsService>(),
         backupService: sl<BackupService>(),
         reportSummaryService: sl<ReportSummaryService>(),
+        routerRepository: sl<RouterRepository>(),
+        hotspotService: sl<HotspotService>(),
+        voucherRepository: sl<VoucherRepository>(),
       ),
     )
     ..registerLazySingleton<WireGuardSettingsService>(

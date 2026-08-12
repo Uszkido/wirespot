@@ -64,6 +64,25 @@ class VoucherLocalRepository implements VoucherRepository {
   }
 
   @override
+  Future<void> deleteVouchers(List<String> voucherIds) async {
+    final ids = voucherIds
+        .map((id) => id.trim())
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+    if (ids.isEmpty) {
+      return;
+    }
+
+    await (_database.delete(
+      _database.voucherHistory,
+    )..where((table) => table.id.isIn(ids))).go();
+    for (final id in ids) {
+      await _secretStore.deletePassword(id);
+    }
+  }
+
+  @override
   Future<void> saveProfile(HotspotProfileEntity profile) {
     final now = DateTime.now();
     return _database

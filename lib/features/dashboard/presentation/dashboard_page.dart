@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/routeros_models.dart';
 import '../../../core/branding/app_branding.dart';
+import '../../../core/localization/app_text.dart';
 import '../../../core/platform/external_action_service.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/utils/byte_format.dart';
@@ -12,6 +13,7 @@ import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/brand_logo.dart';
 import '../../../shared/widgets/metric_card.dart';
 import '../../../shared/widgets/section_header.dart';
+import '../../settings/presentation/settings_providers.dart';
 import '../domain/dashboard_snapshot.dart';
 import 'dashboard_providers.dart';
 
@@ -28,6 +30,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final snapshot = ref.watch(dashboardSnapshotProvider);
+    final languageCode =
+        ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en';
+    final text = AppText(languageCode);
 
     return PopScope(
       canPop: false,
@@ -56,48 +61,48 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
           actions: [
             IconButton(
-              tooltip: 'Refresh',
+              tooltip: text.refresh,
               onPressed: () => ref.invalidate(dashboardSnapshotProvider),
               icon: const Icon(Icons.refresh),
             ),
             PopupMenuButton<String>(
-              tooltip: 'Open section',
+              tooltip: text.dashboard,
               icon: const Icon(Icons.more_vert),
               onSelected: (route) => context.push(route),
-              itemBuilder: (context) => const [
+              itemBuilder: (context) => [
                 PopupMenuItem(
                   value: AppRoutes.routers,
                   child: ListTile(
-                    leading: Icon(Icons.router_outlined),
-                    title: Text('Routers'),
+                    leading: const Icon(Icons.router_outlined),
+                    title: Text(text.routers),
                   ),
                 ),
                 PopupMenuItem(
                   value: AppRoutes.hotspot,
                   child: ListTile(
-                    leading: Icon(Icons.wifi_tethering),
-                    title: Text('Hotspot'),
+                    leading: const Icon(Icons.wifi_tethering),
+                    title: Text(text.hotspot),
                   ),
                 ),
                 PopupMenuItem(
                   value: AppRoutes.vouchers,
                   child: ListTile(
-                    leading: Icon(Icons.confirmation_number_outlined),
-                    title: Text('Vouchers'),
+                    leading: const Icon(Icons.confirmation_number_outlined),
+                    title: Text(text.vouchers),
                   ),
                 ),
                 PopupMenuItem(
                   value: AppRoutes.reports,
                   child: ListTile(
-                    leading: Icon(Icons.bar_chart_outlined),
-                    title: Text('Reports'),
+                    leading: const Icon(Icons.bar_chart_outlined),
+                    title: Text(text.reports),
                   ),
                 ),
                 PopupMenuItem(
                   value: AppRoutes.settings,
                   child: ListTile(
-                    leading: Icon(Icons.settings_outlined),
-                    title: Text('Settings'),
+                    leading: const Icon(Icons.settings_outlined),
+                    title: Text(text.settings),
                   ),
                 ),
               ],
@@ -109,13 +114,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             if (value == null) {
               return EmptyState(
                 icon: Icons.router_outlined,
-                title: 'Add a router',
-                message:
-                    'Connect a MikroTik router before viewing dashboard data.',
+                title: text.addRouter,
+                message: text.addRouterMessage,
                 action: FilledButton.icon(
                   onPressed: () => context.push(AppRoutes.newRouter),
                   icon: const Icon(Icons.add),
-                  label: const Text('Add router'),
+                  label: Text(text.addRouter),
                 ),
               );
             }
@@ -123,12 +127,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           },
           error: (error, stackTrace) => EmptyState(
             icon: Icons.error_outline,
-            title: 'Dashboard unavailable',
+            title: text.dashboardUnavailable,
             message: error.toString(),
             action: FilledButton.icon(
               onPressed: () => ref.invalidate(dashboardSnapshotProvider),
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(text.retry),
             ),
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -150,7 +154,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
     _lastBackPressedAt = now;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Press back again to exit WireSpot.')),
+      SnackBar(
+        content: Text(
+          AppText(
+            ref.read(appSettingsProvider).asData?.value.languageCode ?? 'en',
+          ).pressBackAgain,
+        ),
+      ),
     );
   }
 }
@@ -166,6 +176,9 @@ class _DashboardContent extends ConsumerWidget {
     final routerSnapshot = snapshot.routerSnapshot;
     final resource = routerSnapshot?.resource;
     final memoryPercent = _memoryPercent(resource);
+    final languageCode =
+        ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en';
+    final text = AppText(languageCode);
 
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(dashboardSnapshotProvider),
@@ -180,13 +193,13 @@ class _DashboardContent extends ConsumerWidget {
             children: [
               MetricCard(
                 icon: Icons.people_outline,
-                label: 'Online users',
+                label: text.onlineUsers,
                 value: snapshot.onlineUsers.toString(),
                 onTap: () => context.push(AppRoutes.hotspotSessions),
               ),
               MetricCard(
                 icon: Icons.receipt_long_outlined,
-                label: 'Today sales',
+                label: text.todaySales,
                 value: '${snapshot.todaySalesCurrency} '
                     '${(snapshot.todaySalesMinor / 100).toStringAsFixed(0)}',
               ),
@@ -197,24 +210,24 @@ class _DashboardContent extends ConsumerWidget {
               ),
               MetricCard(
                 icon: Icons.storage_outlined,
-                label: 'Memory',
+                label: text.memory,
                 value: memoryPercent == null ? '--' : '$memoryPercent%',
               ),
             ],
           ),
           const SizedBox(height: 28),
-          const SectionHeader(title: 'Router Health'),
+          SectionHeader(title: text.routerHealth),
           const SizedBox(height: 12),
           _RouterHealthPanel(snapshot: routerSnapshot),
           const SizedBox(height: 20),
-          const SectionHeader(title: 'Interfaces'),
+          SectionHeader(title: text.interfaces),
           const SizedBox(height: 12),
           if (routerSnapshot == null)
-            _OfflinePanel(theme: theme)
+            _OfflinePanel(theme: theme, text: text)
           else
-            _InterfacesPanel(interfaces: routerSnapshot.interfaces),
+            _InterfacesPanel(interfaces: routerSnapshot.interfaces, text: text),
           const SizedBox(height: 20),
-          const SectionHeader(title: 'Support'),
+          SectionHeader(title: text.support),
           const SizedBox(height: 12),
           const _BrandingPanel(),
         ],
@@ -231,16 +244,19 @@ class _DashboardContent extends ConsumerWidget {
   }
 }
 
-class _RouterHeader extends StatelessWidget {
+class _RouterHeader extends ConsumerWidget {
   const _RouterHeader({required this.snapshot});
 
   final DashboardSnapshot snapshot;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isOnline = snapshot.routerSnapshot != null;
+    final languageCode =
+        ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en';
+    final text = AppText(languageCode);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -289,7 +305,7 @@ class _RouterHeader extends StatelessWidget {
               isOnline ? Icons.check_circle : Icons.warning_amber,
               size: 18,
             ),
-            label: Text(isOnline ? 'Online' : 'API offline'),
+            label: Text(isOnline ? text.online : text.apiOffline),
           ),
         ],
       ),
@@ -297,33 +313,36 @@ class _RouterHeader extends StatelessWidget {
   }
 }
 
-class _RouterHealthPanel extends StatelessWidget {
+class _RouterHealthPanel extends ConsumerWidget {
   const _RouterHealthPanel({required this.snapshot});
 
   final RouterOsRouterSnapshot? snapshot;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final resource = snapshot?.resource;
+    final languageCode =
+        ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en';
+    final text = AppText(languageCode);
     if (resource == null) {
-      return const _DashboardPanel(
-        child: Text('Connect WireGuard and refresh to load RouterOS health.'),
+      return _DashboardPanel(
+        child: Text(text.connectVpnForHealth),
       );
     }
 
     return _DashboardPanel(
       child: Column(
         children: [
-          _HealthRow(label: 'Version', value: resource.version),
-          _HealthRow(label: 'Board', value: resource.boardName),
-          _HealthRow(label: 'Uptime', value: resource.uptime),
+          _HealthRow(label: text.version, value: resource.version),
+          _HealthRow(label: text.board, value: resource.boardName),
+          _HealthRow(label: text.uptime, value: resource.uptime),
           _HealthRow(
-            label: 'Free memory',
+            label: text.freeMemory,
             value: ByteFormat.compact(resource.freeMemory),
           ),
           if (resource.temperature != null)
             _HealthRow(
-              label: 'Temperature',
+              label: text.temperature,
               value: '${resource.temperature} C',
             ),
         ],
@@ -333,21 +352,22 @@ class _RouterHealthPanel extends StatelessWidget {
 }
 
 class _InterfacesPanel extends StatelessWidget {
-  const _InterfacesPanel({required this.interfaces});
+  const _InterfacesPanel({required this.interfaces, required this.text});
 
   final List<RouterOsInterface> interfaces;
+  final AppText text;
 
   @override
   Widget build(BuildContext context) {
     if (interfaces.isEmpty) {
-      return const _DashboardPanel(child: Text('No interfaces reported.'));
+      return _DashboardPanel(child: Text(text.noInterfaces));
     }
 
     return _DashboardPanel(
       child: Column(
         children: [
           for (final interface in interfaces.take(6))
-            _InterfaceRow(interface: interface),
+            _InterfaceRow(interface: interface, text: text),
         ],
       ),
     );
@@ -355,9 +375,10 @@ class _InterfacesPanel extends StatelessWidget {
 }
 
 class _InterfaceRow extends StatelessWidget {
-  const _InterfaceRow({required this.interface});
+  const _InterfaceRow({required this.interface, required this.text});
 
   final RouterOsInterface interface;
+  final AppText text;
 
   @override
   Widget build(BuildContext context) {
@@ -373,7 +394,7 @@ class _InterfaceRow extends StatelessWidget {
       title: Text(interface.name),
       subtitle: Text(interface.type.isEmpty ? 'interface' : interface.type),
       trailing: Text(
-        isRunning ? 'Running' : 'Down',
+        isRunning ? text.running : text.down,
         style: TextStyle(
           color: isRunning ? colorScheme.primary : colorScheme.onSurfaceVariant,
         ),
@@ -422,15 +443,16 @@ class _HealthRow extends StatelessWidget {
 }
 
 class _OfflinePanel extends StatelessWidget {
-  const _OfflinePanel({required this.theme});
+  const _OfflinePanel({required this.theme, required this.text});
 
   final ThemeData theme;
+  final AppText text;
 
   @override
   Widget build(BuildContext context) {
     return _DashboardPanel(
       child: Text(
-        'Interface data appears after the VPN is connected and RouterOS API responds.',
+        text.interfaceDataAfterConnection,
         style: theme.textTheme.bodyMedium,
       ),
     );

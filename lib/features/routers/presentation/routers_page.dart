@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/di/providers.dart';
+import '../../../core/localization/app_text.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../settings/presentation/settings_providers.dart';
 import '../domain/entities/router_entity.dart';
 import 'router_providers.dart';
 
@@ -14,11 +16,14 @@ class RoutersPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final routers = ref.watch(routersProvider);
+    final languageCode =
+        ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en';
+    final text = AppText(languageCode);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Routers')),
+      appBar: AppBar(title: Text(text.routers)),
       floatingActionButton: FloatingActionButton(
-        tooltip: 'Add router',
+        tooltip: text.addRouter,
         onPressed: () => context.push(AppRoutes.newRouter),
         child: const Icon(Icons.add),
       ),
@@ -27,13 +32,12 @@ class RoutersPage extends ConsumerWidget {
           if (items.isEmpty) {
             return EmptyState(
               icon: Icons.router_outlined,
-              title: 'No routers yet',
-              message:
-                  'Add your first MikroTik router to manage hotspot users.',
+              title: text.noRoutersYet,
+              message: text.noRoutersMessage,
               action: FilledButton.icon(
                 onPressed: () => context.push(AppRoutes.newRouter),
                 icon: const Icon(Icons.add),
-                label: const Text('Add router'),
+                label: Text(text.addRouter),
               ),
             );
           }
@@ -52,7 +56,7 @@ class RoutersPage extends ConsumerWidget {
         },
         error: (error, stackTrace) => EmptyState(
           icon: Icons.error_outline,
-          title: 'Could not load routers',
+          title: text.couldNotLoadRouters,
           message: error.toString(),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -69,6 +73,9 @@ class _RouterTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final languageCode =
+        ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en';
+    final text = AppText(languageCode);
 
     return Card(
       child: ListTile(
@@ -88,36 +95,36 @@ class _RouterTile extends ConsumerWidget {
           overflow: TextOverflow.ellipsis,
         ),
         trailing: PopupMenuButton<_RouterAction>(
-          tooltip: 'Router actions',
+          tooltip: text.routerActions,
           onSelected: (action) => _handleAction(context, ref, action),
           itemBuilder: (context) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: _RouterAction.test,
               child: ListTile(
-                leading: Icon(Icons.network_check),
-                title: Text('Test connection'),
+                leading: const Icon(Icons.network_check),
+                title: Text(text.testConnection),
               ),
             ),
             if (router.requiresPrivateTunnel)
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: _RouterAction.wireGuard,
                 child: ListTile(
-                  leading: Icon(Icons.vpn_key_outlined),
-                  title: Text('Remote tunnel'),
+                  leading: const Icon(Icons.vpn_key_outlined),
+                  title: Text(text.remoteTunnel),
                 ),
               ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: _RouterAction.edit,
               child: ListTile(
-                leading: Icon(Icons.edit_outlined),
-                title: Text('Edit'),
+                leading: const Icon(Icons.edit_outlined),
+                title: Text(text.edit),
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: _RouterAction.delete,
               child: ListTile(
-                leading: Icon(Icons.delete_outline),
-                title: Text('Delete'),
+                leading: const Icon(Icons.delete_outline),
+                title: Text(text.delete),
               ),
             ),
           ],
@@ -149,8 +156,11 @@ class _RouterTile extends ConsumerWidget {
 
   Future<void> _testConnection(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
+    final text = AppText(
+      ref.read(appSettingsProvider).asData?.value.languageCode ?? 'en',
+    );
     messenger.showSnackBar(
-      const SnackBar(content: Text('Testing router connection...')),
+      SnackBar(content: Text(text.testingRouterConnection)),
     );
 
     try {
@@ -161,32 +171,35 @@ class _RouterTile extends ConsumerWidget {
         SnackBar(
           content: Text(
             isOnline
-                ? 'Router connection successful.'
-                : 'Router connection failed.',
+                ? text.routerConnectionSuccessful
+                : text.routerConnectionFailed,
           ),
         ),
       );
     } on Object catch (error) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Connection test failed: $error')),
+        SnackBar(content: Text(text.connectionTestFailed(error))),
       );
     }
   }
 
   Future<void> _deleteRouter(BuildContext context, WidgetRef ref) async {
+    final text = AppText(
+      ref.read(appSettingsProvider).asData?.value.languageCode ?? 'en',
+    );
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete router?'),
-        content: Text('Remove ${router.name} and its saved credentials.'),
+        title: Text(text.deleteRouterQuestion),
+        content: Text(text.removeRouterMessage(router.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(text.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: Text(text.delete),
           ),
         ],
       ),
@@ -201,7 +214,7 @@ class _RouterTile extends ConsumerWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Router deleted.')));
+      ).showSnackBar(SnackBar(content: Text(text.routerDeleted)));
     }
   }
 }

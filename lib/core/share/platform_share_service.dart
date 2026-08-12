@@ -15,17 +15,34 @@ class PlatformShareService implements ShareService {
 
   @override
   Future<void> shareVoucherReceipt(VoucherReceipt receipt) {
-    return _channel.invokeMethod<void>('shareText', {
-      'subject': 'WireSpot voucher ${receipt.voucher.username}',
-      'text': receipt.toPlainText(),
-    });
+    return _shareText(
+      subject: 'WireSpot voucher ${receipt.voucher.username}',
+      text: receipt.toPlainText(),
+    );
+  }
+
+  @override
+  Future<void> shareVoucherReceipts(List<VoucherReceipt> receipts) {
+    if (receipts.isEmpty) {
+      return Future.value();
+    }
+    return _shareText(
+      subject: 'WireSpot vouchers (${receipts.length})',
+      text: receipts
+          .map((receipt) => receipt.toPlainText())
+          .join('\n\n---\n\n'),
+    );
   }
 
   @override
   Future<void> shareReportExport(ReportExport export) {
+    return _shareText(subject: export.fileName, text: export.content);
+  }
+
+  Future<void> _shareText({required String subject, required String text}) {
     return _channel.invokeMethod<void>('shareText', {
-      'subject': export.fileName,
-      'text': export.content,
+      'subject': subject,
+      'text': text,
     });
   }
 }

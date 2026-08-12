@@ -1,8 +1,14 @@
 import 'dart:async';
 
+import '../../../hotspot/domain/entities/hotspot_active_session_entity.dart';
+import '../../../hotspot/domain/services/hotspot_service.dart';
 import '../../../reports/domain/entities/report_period.dart';
 import '../../../reports/domain/services/report_summary_service.dart';
+import '../../../routers/domain/entities/router_entity.dart';
+import '../../../routers/domain/repositories/router_repository.dart';
 import '../../../settings/domain/services/backup_service.dart';
+import '../../../voucher/domain/entities/voucher_entity.dart';
+import '../../../voucher/domain/repositories/voucher_repository.dart';
 import '../entities/scheduled_task.dart';
 import 'scheduler_settings_service.dart';
 
@@ -11,13 +17,22 @@ class SchedulerExecutionService {
     required SchedulerSettingsService settingsService,
     required BackupService backupService,
     required ReportSummaryService reportSummaryService,
+    required RouterRepository routerRepository,
+    required HotspotService hotspotService,
+    required VoucherRepository voucherRepository,
   }) : _settingsService = settingsService,
        _backupService = backupService,
-       _reportSummaryService = reportSummaryService;
+       _reportSummaryService = reportSummaryService,
+       _routerRepository = routerRepository,
+       _hotspotService = hotspotService,
+       _voucherRepository = voucherRepository;
 
   final SchedulerSettingsService _settingsService;
   final BackupService _backupService;
   final ReportSummaryService _reportSummaryService;
+  final RouterRepository _routerRepository;
+  final HotspotService _hotspotService;
+  final VoucherRepository _voucherRepository;
 
   Timer? _timer;
   bool _isRunning = false;
@@ -73,10 +88,10 @@ class SchedulerExecutionService {
     try {
       final message = switch (task.type) {
         ScheduledTaskType.activeSessionRefresh =>
-          'Waiting for router scope before refreshing active sessions.',
+          await _activeSessionRefresh(),
         ScheduledTaskType.expiredUserCleanup =>
-          'Waiting for router scope before cleaning expired users.',
-        ScheduledTaskType.voucherCleanup => 'Voucher cleanup scan completed.',
+          await _expiredSessionCleanup(),
+        ScheduledTaskType.voucherCleanup => await _voucherCleanup(now),
         ScheduledTaskType.dailySalesSummary => await _dailySalesSummary(now),
         ScheduledTaskType.databaseBackup => await _databaseBackup(),
       };
@@ -105,10 +120,132 @@ class SchedulerExecutionService {
         '${summary.currency} ${summary.totalMajor.toStringAsFixed(0)}.';
   }
 
+  Future<String> _activeSessionRefresh() async {
+    final routers = await _enabledRouters();
+    if (routers.isEmpty) {
+      return 'No enabled routers available for active session refresh.';
+    }
+
+    var reachableRouters = 0;
+    var activeSessions = 0;
+    final failures = <String>[];
+    for (final router in routers) {
+      try {
+        final sessions = await _hotspotService.getActiveSessions(router);
+        reachableRouters += 1;
+        activeSessions += sessions.length;
+      } on Object catch (error) {
+        failures.add('${router.name}: $error');
+      }
+    }
+
+    return _routerTaskMessage(
+      action: 'Active session refresh',
+      reachableRouters: reachableRouters,
+      totalRouters: routers.length,
+      details: '$activeSessions active sessions found',
+      failures: failures,
+    );
+  }
+
+  Future<String> _expiredSessionCleanup() async {
+    final routers = await _enabledRouters();
+    if (routers.isEmpty) {
+      return 'No enabled routers available for expired session cleanup.';
+    }
+
+    var reachableRouters = 0;
+    var disconnectedSessions = 0;
+    final failures = <String>[];
+    for (final router in routers) {
+      try {
+        final sessions = await _hotspotService.getActiveSessions(router);
+        reachableRouters += 1;
+        final expiredSessions = sessions.where(_isExpiredSession).toList();
+        for (final session in expiredSessions) {
+          await _hotspotService.disconnectSession(router, session.id);
+        }
+        disconnectedSessions += expiredSessions.length;
+      } on Object catch (error) {
+        failures.add('${router.name}: $error');
+      }
+    }
+
+    return _routerTaskMessage(
+      action: 'Expired session cleanup',
+      reachableRouters: reachableRouters,
+      totalRouters: routers.length,
+      details: '$disconnectedSessions expired sessions disconnected',
+      failures: failures,
+    );
+  }
+
   Future<String> _databaseBackup() async {
     final backup = await _backupService.buildBackup();
     return 'Backup snapshot ready: ${backup.printers.length} printers, '
         '${backup.settings.length} settings.';
+  }
+
+  Future<String> _voucherCleanup(DateTime now) async {
+    final vouchers = await _voucherRepository.getVoucherHistory();
+    final expiredVoucherIds = vouchers
+        .where((voucher) => _isExpiredUnusedVoucher(voucher, now))
+        .map((voucher) => voucher.id)
+        .toList();
+    await _voucherRepository.deleteVouchers(expiredVoucherIds);
+    final label = expiredVoucherIds.length == 1 ? 'voucher' : 'vouchers';
+    return 'Voucher cleanup removed ${expiredVoucherIds.length} expired '
+        'unused $label from local history.';
+  }
+
+  Future<List<RouterEntity>> _enabledRouters() async {
+    final routers = await _routerRepository.getRouters();
+    return routers.where((router) => router.isEnabled).toList();
+  }
+
+  bool _isExpiredSession(HotspotActiveSessionEntity session) {
+    final timeLeft = session.sessionTimeLeft?.trim().toLowerCase();
+    if (timeLeft == null || timeLeft.isEmpty) {
+      return false;
+    }
+    return timeLeft == '0' ||
+        timeLeft == '0s' ||
+        timeLeft == '00:00:00' ||
+        timeLeft == '0:00:00';
+  }
+
+  bool _isExpiredUnusedVoucher(VoucherEntity voucher, DateTime now) {
+    final validityMinutes = voucher.validityMinutes;
+    if (validityMinutes == null || validityMinutes <= 0) {
+      return false;
+    }
+    if (voucher.soldAt != null || voucher.printedAt != null) {
+      return false;
+    }
+    final expiresAt = voucher.generatedAt.add(
+      Duration(minutes: validityMinutes),
+    );
+    return !expiresAt.isAfter(now);
+  }
+
+  String _routerTaskMessage({
+    required String action,
+    required int reachableRouters,
+    required int totalRouters,
+    required String details,
+    required List<String> failures,
+  }) {
+    final buffer = StringBuffer(
+      '$action completed on $reachableRouters/$totalRouters routers; $details.',
+    );
+    if (failures.isNotEmpty) {
+      buffer.write(' Failures: ${failures.take(3).join('; ')}');
+      if (failures.length > 3) {
+        buffer.write(' and ${failures.length - 3} more');
+      }
+      buffer.write('.');
+    }
+    return buffer.toString();
   }
 }
 
