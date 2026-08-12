@@ -5,9 +5,9 @@ import '../../../core/api/routeros_models.dart';
 import '../../../core/storage/router_credential_store.dart';
 import '../../../core/vpn/vpn_status_service.dart';
 import '../domain/entities/router_entity.dart';
-import '../domain/services/router_connection_service.dart';
+import '../domain/services/router_connector.dart';
 
-class RouterOsConnectionService implements RouterConnectionService {
+class RouterOsConnectionService implements RouterConnector {
   const RouterOsConnectionService({
     required RouterOsClientFactory clientFactory,
     required RouterCredentialStore credentialStore,
@@ -19,6 +19,9 @@ class RouterOsConnectionService implements RouterConnectionService {
   final RouterOsClientFactory _clientFactory;
   final RouterCredentialStore _credentialStore;
   final VpnStatusService _vpnStatusService;
+
+  @override
+  RouterVendor get vendor => RouterVendor.mikrotik;
 
   @override
   Future<bool> testConnection(RouterEntity router) async {

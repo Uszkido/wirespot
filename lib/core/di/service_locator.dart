@@ -11,8 +11,11 @@ import '../../features/reports/data/report_local_repository.dart';
 import '../../features/reports/domain/repositories/report_repository.dart';
 import '../../features/reports/domain/services/report_export_service.dart';
 import '../../features/reports/domain/services/report_summary_service.dart';
+import '../../features/routers/data/multi_vendor_router_connection_service.dart';
+import '../../features/routers/data/planned_router_connector.dart';
 import '../../features/routers/data/routeros_connection_service.dart';
 import '../../features/routers/data/router_local_repository.dart';
+import '../../features/routers/domain/entities/router_entity.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
 import '../../features/routers/domain/services/router_connection_service.dart';
 import '../../features/scheduler/domain/services/scheduler_execution_service.dart';
@@ -96,10 +99,18 @@ Future<void> configureDependencies() async {
           RouterLocalRepository(sl<AppDatabase>(), sl<RouterCredentialStore>()),
     )
     ..registerLazySingleton<RouterConnectionService>(
-      () => RouterOsConnectionService(
-        clientFactory: sl<RouterOsClientFactory>(),
-        credentialStore: sl<RouterCredentialStore>(),
-        vpnStatusService: sl<VpnStatusService>(),
+      () => MultiVendorRouterConnectionService(
+        connectors: [
+          RouterOsConnectionService(
+            clientFactory: sl<RouterOsClientFactory>(),
+            credentialStore: sl<RouterCredentialStore>(),
+            vpnStatusService: sl<VpnStatusService>(),
+          ),
+          for (final vendor in RouterVendor.values.where(
+            (vendor) => vendor != RouterVendor.mikrotik,
+          ))
+            PlannedRouterConnector(vendor),
+        ],
       ),
     )
     ..registerLazySingleton<HotspotService>(
