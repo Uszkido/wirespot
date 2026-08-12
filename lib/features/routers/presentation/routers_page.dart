@@ -358,13 +358,23 @@ class _RouterTile extends ConsumerWidget {
       return;
     }
 
+    final activeRouterService = ref.read(activeRouterServiceProvider);
+    final storedActiveRouterId = await activeRouterService
+        .loadSelectedRouterId();
     await ref.read(routerRepositoryProvider).deleteRouter(router.id);
-    ref.invalidate(routersProvider);
-    if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(text.routerDeleted)));
+    if (storedActiveRouterId == router.id) {
+      await activeRouterService.clearSelectedRouter();
+      ref.read(selectedRouterIdProvider.notifier).state = null;
+      ref.invalidate(storedActiveRouterIdProvider);
+      ref.invalidate(dashboardSnapshotProvider);
     }
+    if (!context.mounted) {
+      return;
+    }
+    ref.invalidate(routersProvider);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(text.routerDeleted)));
   }
 }
 

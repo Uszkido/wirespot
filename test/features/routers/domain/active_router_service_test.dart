@@ -12,6 +12,16 @@ void main() {
 
     expect(await service.loadSelectedRouterId(), 'router-2');
   });
+
+  test('clears the selected router id', () async {
+    final repository = _MemorySettingsRepository();
+    final service = ActiveRouterService(repository);
+    await service.selectRouter('router-2');
+
+    await service.clearSelectedRouter();
+
+    expect(await service.loadSelectedRouterId(), isNull);
+  });
 }
 
 class _MemorySettingsRepository implements SettingsRepository {

@@ -7,7 +7,9 @@ class ActiveRouterService {
   final SettingsRepository _settingsRepository;
 
   Future<String?> loadSelectedRouterId() {
-    return _settingsRepository.readSetting(AppSettingsKeys.activeRouterId);
+    return _settingsRepository
+        .readSetting(AppSettingsKeys.activeRouterId)
+        .then((routerId) => routerId?.isEmpty ?? true ? null : routerId);
   }
 
   Future<void> selectRouter(String routerId) {
@@ -15,5 +17,9 @@ class ActiveRouterService {
       AppSettingsKeys.activeRouterId,
       routerId,
     );
+  }
+
+  Future<void> clearSelectedRouter() {
+    return _settingsRepository.writeSetting(AppSettingsKeys.activeRouterId, '');
   }
 }
