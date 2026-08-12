@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_ip_binding_input.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_profile_input.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_setup_input.dart';
+import 'package:wirespot/features/hotspot/domain/entities/hotspot_setup_preset.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_user_input.dart';
 
 void main() {
@@ -159,5 +160,28 @@ void main() {
       '/ip/hotspot/add',
     ]);
     expect(plan.toLines().first, 'Add missing interface IP address');
+  });
+
+  test('business setup presets create ready hotspot plans', () {
+    final input = HotspotSetupPreset.smallBusiness.toInput();
+
+    expect(input.serverName, 'business-hotspot');
+    expect(input.provisionNetwork, isTrue);
+    expect(input.enableNatMasquerade, isTrue);
+    expect(
+      input.toPlan().steps.map((step) => step.command),
+      containsAll([
+        '/ip/address/add',
+        '/ip/dhcp-server/add',
+        '/ip/hotspot/add',
+      ]),
+    );
+  });
+
+  test('RADIUS preset enables external AAA', () {
+    final input = HotspotSetupPreset.radiusManaged.toInput();
+
+    expect(input.useRadius, isTrue);
+    expect(input.toServerProfileAttributes()['use-radius'], 'yes');
   });
 }

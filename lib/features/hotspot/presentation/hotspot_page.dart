@@ -15,6 +15,7 @@ import '../domain/entities/hotspot_ip_binding_input.dart';
 import '../domain/entities/hotspot_profile_input.dart';
 import '../domain/entities/hotspot_queue_entity.dart';
 import '../domain/entities/hotspot_setup_input.dart';
+import '../domain/entities/hotspot_setup_preset.dart';
 import '../domain/entities/hotspot_user_entity.dart';
 import '../domain/entities/hotspot_user_input.dart';
 import '../domain/entities/hotspot_user_profile_entity.dart';
@@ -428,29 +429,85 @@ Future<void> _showSetupHotspotDialog(
   WidgetRef ref,
   RouterEntity router,
 ) async {
-  final serverNameController = TextEditingController(text: 'hotspot1');
-  final interfaceController = TextEditingController(text: 'bridge');
-  final serverProfileController = TextEditingController(text: 'hsprof1');
-  final hotspotAddressController = TextEditingController(text: '10.5.50.1');
-  final dnsNameController = TextEditingController(text: 'hotspot.local');
-  final addressPoolController = TextEditingController(text: 'hs-pool');
-  final ipAddressController = TextEditingController(text: '10.5.50.1/24');
-  final poolNameController = TextEditingController(text: 'hs-pool');
-  final poolRangesController = TextEditingController(
-    text: '10.5.50.10-10.5.50.254',
+  if (!router.supportsHotspotVouchers) {
+    _showSnack(
+      context,
+      '${router.vendor.label} hotspot setup presets are planned, but not available yet.',
+    );
+    return;
+  }
+
+  var selectedPreset = HotspotSetupPreset.quickVoucher;
+  final initialInput = selectedPreset.toInput();
+  final serverNameController = TextEditingController(
+    text: initialInput.serverName,
   );
-  final dhcpServerController = TextEditingController(text: 'hs-dhcp');
-  final dhcpNetworkController = TextEditingController(text: '10.5.50.0/24');
-  final dhcpGatewayController = TextEditingController(text: '10.5.50.1');
-  final dnsServersController = TextEditingController(text: '10.5.50.1');
-  final natSrcAddressController = TextEditingController(text: '10.5.50.0/24');
+  final interfaceController = TextEditingController(
+    text: initialInput.interfaceName,
+  );
+  final serverProfileController = TextEditingController(
+    text: initialInput.serverProfileName,
+  );
+  final hotspotAddressController = TextEditingController(
+    text: initialInput.hotspotAddress,
+  );
+  final dnsNameController = TextEditingController(text: initialInput.dnsName);
+  final addressPoolController = TextEditingController(
+    text: initialInput.addressPool,
+  );
+  final ipAddressController = TextEditingController(
+    text: initialInput.ipAddressWithPrefix,
+  );
+  final poolNameController = TextEditingController(text: initialInput.poolName);
+  final poolRangesController = TextEditingController(
+    text: initialInput.poolRanges,
+  );
+  final dhcpServerController = TextEditingController(
+    text: initialInput.dhcpServerName,
+  );
+  final dhcpNetworkController = TextEditingController(
+    text: initialInput.dhcpNetwork,
+  );
+  final dhcpGatewayController = TextEditingController(
+    text: initialInput.dhcpGateway,
+  );
+  final dnsServersController = TextEditingController(
+    text: initialInput.dnsServers,
+  );
+  final natSrcAddressController = TextEditingController(
+    text: initialInput.natSrcAddress,
+  );
   final natOutInterfaceController = TextEditingController();
-  var provisionNetwork = false;
-  var enableNatMasquerade = false;
-  var loginByCookie = true;
-  var loginByHttpPap = true;
-  var loginByHttps = false;
-  var useRadius = false;
+  var provisionNetwork = initialInput.provisionNetwork;
+  var enableNatMasquerade = initialInput.enableNatMasquerade;
+  var loginByCookie = initialInput.loginByCookie;
+  var loginByHttpPap = initialInput.loginByHttpPap;
+  var loginByHttps = initialInput.loginByHttps;
+  var useRadius = initialInput.useRadius;
+
+  void applyPreset(HotspotSetupInput input) {
+    serverNameController.text = input.serverName;
+    interfaceController.text = input.interfaceName;
+    serverProfileController.text = input.serverProfileName;
+    hotspotAddressController.text = input.hotspotAddress ?? '';
+    dnsNameController.text = input.dnsName ?? '';
+    addressPoolController.text = input.addressPool ?? '';
+    ipAddressController.text = input.ipAddressWithPrefix ?? '';
+    poolNameController.text = input.poolName ?? '';
+    poolRangesController.text = input.poolRanges ?? '';
+    dhcpServerController.text = input.dhcpServerName ?? '';
+    dhcpNetworkController.text = input.dhcpNetwork ?? '';
+    dhcpGatewayController.text = input.dhcpGateway ?? '';
+    dnsServersController.text = input.dnsServers ?? '';
+    natSrcAddressController.text = input.natSrcAddress ?? '';
+    natOutInterfaceController.text = input.natOutInterface ?? '';
+    provisionNetwork = input.provisionNetwork;
+    enableNatMasquerade = input.enableNatMasquerade;
+    loginByCookie = input.loginByCookie;
+    loginByHttpPap = input.loginByHttpPap;
+    loginByHttps = input.loginByHttps;
+    useRadius = input.useRadius;
+  }
 
   try {
     final input = await showDialog<HotspotSetupInput>(
@@ -462,6 +519,42 @@ Future<void> _showSetupHotspotDialog(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                DropdownButtonFormField<HotspotSetupPreset>(
+                  initialValue: selectedPreset,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Business setup preset',
+                    prefixIcon: Icon(Icons.tune_outlined),
+                  ),
+                  items: [
+                    for (final preset in HotspotSetupPreset.values)
+                      DropdownMenuItem(
+                        value: preset,
+                        child: Text(
+                          preset.label,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: (preset) {
+                    if (preset == null) {
+                      return;
+                    }
+                    setState(() {
+                      selectedPreset = preset;
+                      applyPreset(preset.toInput());
+                    });
+                  },
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    selectedPreset.description,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 TextField(
                   controller: serverNameController,
                   decoration: const InputDecoration(

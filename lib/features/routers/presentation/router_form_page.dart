@@ -30,6 +30,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
 
   bool _useSsl = false;
   bool _requireVpn = true;
+  RouterVendor _vendor = RouterVendor.mikrotik;
   RouterRemoteAccessMode _remoteAccessMode = RouterRemoteAccessMode.wireGuard;
   bool _isSaving = false;
   bool _didHydrate = false;
@@ -111,9 +112,11 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
             passwordController: _passwordController,
             useSsl: _useSsl,
             requireVpn: _requireVpn,
+            vendor: _vendor,
             remoteAccessMode: _remoteAccessMode,
             isEditing: _isEditing,
             isSaving: _isSaving,
+            onVendorChanged: _setVendor,
             onUseSslChanged: (value) => setState(() => _useSsl = value),
             onRemoteAccessModeChanged: _setRemoteAccessMode,
             onSave: () => _save(existingRouter),
@@ -135,8 +138,25 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
     _usernameController.text = router.username;
     _useSsl = router.useSsl;
     _requireVpn = router.requireVpn;
+    _vendor = router.vendor;
     _remoteAccessMode = router.remoteAccessMode;
     _didHydrate = true;
+  }
+
+  void _setVendor(RouterVendor vendor) {
+    setState(() {
+      final oldVendor = _vendor;
+      _vendor = vendor;
+      final port = _portController.text.trim();
+      if (port.isEmpty || port == oldVendor.defaultPort.toString()) {
+        _portController.text = vendor.defaultPort.toString();
+      }
+      _useSsl = vendor.defaultUseSsl;
+      if (vendor == RouterVendor.mikrotik &&
+          _remoteAccessMode == RouterRemoteAccessMode.publicApiSsl) {
+        _useSsl = true;
+      }
+    });
   }
 
   void _setRemoteAccessMode(RouterRemoteAccessMode mode) {
@@ -182,6 +202,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
         groupId: existingRouter?.groupId,
         name: _nameController.text.trim(),
         host: _hostController.text.trim(),
+        vendor: _vendor,
         apiPort: int.parse(_portController.text.trim()),
         useSsl: _useSsl,
         requireVpn: _requireVpn,
@@ -266,6 +287,48 @@ class _RemoteAccessModeHint extends StatelessWidget {
   }
 }
 
+class _RouterVendorHint extends StatelessWidget {
+  const _RouterVendorHint({required this.vendor});
+
+  final RouterVendor vendor;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final capabilities = vendor.supportsHotspotVouchers
+        ? 'Hotspot vouchers supported now.'
+        : 'Connector planned. Hotspot automation is not available yet.';
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              vendor.description,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              capabilities,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _RouterFormBody extends StatelessWidget {
   const _RouterFormBody({
     required this.formKey,
@@ -276,9 +339,11 @@ class _RouterFormBody extends StatelessWidget {
     required this.passwordController,
     required this.useSsl,
     required this.requireVpn,
+    required this.vendor,
     required this.remoteAccessMode,
     required this.isEditing,
     required this.isSaving,
+    required this.onVendorChanged,
     required this.onUseSslChanged,
     required this.onRemoteAccessModeChanged,
     required this.onSave,
@@ -293,9 +358,11 @@ class _RouterFormBody extends StatelessWidget {
   final TextEditingController passwordController;
   final bool useSsl;
   final bool requireVpn;
+  final RouterVendor vendor;
   final RouterRemoteAccessMode remoteAccessMode;
   final bool isEditing;
   final bool isSaving;
+  final ValueChanged<RouterVendor> onVendorChanged;
   final ValueChanged<bool> onUseSslChanged;
   final ValueChanged<RouterRemoteAccessMode> onRemoteAccessModeChanged;
   final VoidCallback onSave;
@@ -325,6 +392,32 @@ class _RouterFormBody extends StatelessWidget {
                     prefixIcon: Icon(Icons.label_outline),
                   ),
                 ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<RouterVendor>(
+                  initialValue: vendor,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Router brand',
+                    prefixIcon: Icon(Icons.memory_outlined),
+                  ),
+                  items: [
+                    for (final value in RouterVendor.values)
+                      DropdownMenuItem(
+                        value: value,
+                        child: Text(
+                          value.label,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      onVendorChanged(value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                _RouterVendorHint(vendor: vendor),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: hostController,

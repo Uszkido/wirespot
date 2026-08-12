@@ -29,6 +29,16 @@ class $RoutersTable extends Routers
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _vendorMeta = const VerificationMeta('vendor');
+  @override
+  late final GeneratedColumn<String> vendor = GeneratedColumn<String>(
+    'vendor',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('mikrotik'),
+  );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -210,6 +220,7 @@ class $RoutersTable extends Routers
   List<GeneratedColumn> get $columns => [
     id,
     groupId,
+    vendor,
     name,
     host,
     apiPort,
@@ -246,6 +257,12 @@ class $RoutersTable extends Routers
       context.handle(
         _groupIdMeta,
         groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    }
+    if (data.containsKey('vendor')) {
+      context.handle(
+        _vendorMeta,
+        vendor.isAcceptableOrUnknown(data['vendor']!, _vendorMeta),
       );
     }
     if (data.containsKey('name')) {
@@ -361,6 +378,10 @@ class $RoutersTable extends Routers
         DriftSqlType.string,
         data['${effectivePrefix}group_id'],
       ),
+      vendor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vendor'],
+      )!,
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
@@ -429,6 +450,7 @@ class $RoutersTable extends Routers
 class RouterRecord extends DataClass implements Insertable<RouterRecord> {
   final String id;
   final String? groupId;
+  final String vendor;
   final String name;
   final String host;
   final int apiPort;
@@ -446,6 +468,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
   const RouterRecord({
     required this.id,
     this.groupId,
+    required this.vendor,
     required this.name,
     required this.host,
     required this.apiPort,
@@ -468,6 +491,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     if (!nullToAbsent || groupId != null) {
       map['group_id'] = Variable<String>(groupId);
     }
+    map['vendor'] = Variable<String>(vendor);
     map['name'] = Variable<String>(name);
     map['host'] = Variable<String>(host);
     map['api_port'] = Variable<int>(apiPort);
@@ -499,6 +523,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       groupId: groupId == null && nullToAbsent
           ? const Value.absent()
           : Value(groupId),
+      vendor: Value(vendor),
       name: Value(name),
       host: Value(host),
       apiPort: Value(apiPort),
@@ -532,6 +557,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     return RouterRecord(
       id: serializer.fromJson<String>(json['id']),
       groupId: serializer.fromJson<String?>(json['groupId']),
+      vendor: serializer.fromJson<String>(json['vendor']),
       name: serializer.fromJson<String>(json['name']),
       host: serializer.fromJson<String>(json['host']),
       apiPort: serializer.fromJson<int>(json['apiPort']),
@@ -554,6 +580,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'groupId': serializer.toJson<String?>(groupId),
+      'vendor': serializer.toJson<String>(vendor),
       'name': serializer.toJson<String>(name),
       'host': serializer.toJson<String>(host),
       'apiPort': serializer.toJson<int>(apiPort),
@@ -574,6 +601,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
   RouterRecord copyWith({
     String? id,
     Value<String?> groupId = const Value.absent(),
+    String? vendor,
     String? name,
     String? host,
     int? apiPort,
@@ -591,6 +619,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
   }) => RouterRecord(
     id: id ?? this.id,
     groupId: groupId.present ? groupId.value : this.groupId,
+    vendor: vendor ?? this.vendor,
     name: name ?? this.name,
     host: host ?? this.host,
     apiPort: apiPort ?? this.apiPort,
@@ -612,6 +641,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     return RouterRecord(
       id: data.id.present ? data.id.value : this.id,
       groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      vendor: data.vendor.present ? data.vendor.value : this.vendor,
       name: data.name.present ? data.name.value : this.name,
       host: data.host.present ? data.host.value : this.host,
       apiPort: data.apiPort.present ? data.apiPort.value : this.apiPort,
@@ -640,6 +670,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     return (StringBuffer('RouterRecord(')
           ..write('id: $id, ')
           ..write('groupId: $groupId, ')
+          ..write('vendor: $vendor, ')
           ..write('name: $name, ')
           ..write('host: $host, ')
           ..write('apiPort: $apiPort, ')
@@ -662,6 +693,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
   int get hashCode => Object.hash(
     id,
     groupId,
+    vendor,
     name,
     host,
     apiPort,
@@ -683,6 +715,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       (other is RouterRecord &&
           other.id == this.id &&
           other.groupId == this.groupId &&
+          other.vendor == this.vendor &&
           other.name == this.name &&
           other.host == this.host &&
           other.apiPort == this.apiPort &&
@@ -702,6 +735,7 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
 class RoutersCompanion extends UpdateCompanion<RouterRecord> {
   final Value<String> id;
   final Value<String?> groupId;
+  final Value<String> vendor;
   final Value<String> name;
   final Value<String> host;
   final Value<int> apiPort;
@@ -720,6 +754,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
   const RoutersCompanion({
     this.id = const Value.absent(),
     this.groupId = const Value.absent(),
+    this.vendor = const Value.absent(),
     this.name = const Value.absent(),
     this.host = const Value.absent(),
     this.apiPort = const Value.absent(),
@@ -739,6 +774,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
   RoutersCompanion.insert({
     required String id,
     this.groupId = const Value.absent(),
+    this.vendor = const Value.absent(),
     required String name,
     required String host,
     this.apiPort = const Value.absent(),
@@ -761,6 +797,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
   static Insertable<RouterRecord> custom({
     Expression<String>? id,
     Expression<String>? groupId,
+    Expression<String>? vendor,
     Expression<String>? name,
     Expression<String>? host,
     Expression<int>? apiPort,
@@ -780,6 +817,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (groupId != null) 'group_id': groupId,
+      if (vendor != null) 'vendor': vendor,
       if (name != null) 'name': name,
       if (host != null) 'host': host,
       if (apiPort != null) 'api_port': apiPort,
@@ -801,6 +839,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
   RoutersCompanion copyWith({
     Value<String>? id,
     Value<String?>? groupId,
+    Value<String>? vendor,
     Value<String>? name,
     Value<String>? host,
     Value<int>? apiPort,
@@ -820,6 +859,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     return RoutersCompanion(
       id: id ?? this.id,
       groupId: groupId ?? this.groupId,
+      vendor: vendor ?? this.vendor,
       name: name ?? this.name,
       host: host ?? this.host,
       apiPort: apiPort ?? this.apiPort,
@@ -846,6 +886,9 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     }
     if (groupId.present) {
       map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (vendor.present) {
+      map['vendor'] = Variable<String>(vendor.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -900,6 +943,7 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     return (StringBuffer('RoutersCompanion(')
           ..write('id: $id, ')
           ..write('groupId: $groupId, ')
+          ..write('vendor: $vendor, ')
           ..write('name: $name, ')
           ..write('host: $host, ')
           ..write('apiPort: $apiPort, ')
@@ -3810,6 +3854,7 @@ typedef $$RoutersTableCreateCompanionBuilder =
     RoutersCompanion Function({
       required String id,
       Value<String?> groupId,
+      Value<String> vendor,
       required String name,
       required String host,
       Value<int> apiPort,
@@ -3830,6 +3875,7 @@ typedef $$RoutersTableUpdateCompanionBuilder =
     RoutersCompanion Function({
       Value<String> id,
       Value<String?> groupId,
+      Value<String> vendor,
       Value<String> name,
       Value<String> host,
       Value<int> apiPort,
@@ -3863,6 +3909,11 @@ class $$RoutersTableFilterComposer
 
   ColumnFilters<String> get groupId => $composableBuilder(
     column: $table.groupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get vendor => $composableBuilder(
+    column: $table.vendor,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3956,6 +4007,11 @@ class $$RoutersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get vendor => $composableBuilder(
+    column: $table.vendor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
@@ -4042,6 +4098,9 @@ class $$RoutersTableAnnotationComposer
   GeneratedColumn<String> get groupId =>
       $composableBuilder(column: $table.groupId, builder: (column) => column);
 
+  GeneratedColumn<String> get vendor =>
+      $composableBuilder(column: $table.vendor, builder: (column) => column);
+
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
@@ -4124,6 +4183,7 @@ class $$RoutersTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String?> groupId = const Value.absent(),
+                Value<String> vendor = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> host = const Value.absent(),
                 Value<int> apiPort = const Value.absent(),
@@ -4142,6 +4202,7 @@ class $$RoutersTableTableManager
               }) => RoutersCompanion(
                 id: id,
                 groupId: groupId,
+                vendor: vendor,
                 name: name,
                 host: host,
                 apiPort: apiPort,
@@ -4162,6 +4223,7 @@ class $$RoutersTableTableManager
               ({
                 required String id,
                 Value<String?> groupId = const Value.absent(),
+                Value<String> vendor = const Value.absent(),
                 required String name,
                 required String host,
                 Value<int> apiPort = const Value.absent(),
@@ -4180,6 +4242,7 @@ class $$RoutersTableTableManager
               }) => RoutersCompanion.insert(
                 id: id,
                 groupId: groupId,
+                vendor: vendor,
                 name: name,
                 host: host,
                 apiPort: apiPort,

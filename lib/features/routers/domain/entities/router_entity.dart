@@ -1,3 +1,77 @@
+enum RouterVendor {
+  mikrotik(
+    label: 'MikroTik RouterOS',
+    description: 'Full RouterOS API support for hotspot users and vouchers.',
+    defaultPort: 8728,
+    defaultUseSsl: false,
+    usesRouterOsApi: true,
+    supportsHotspotVouchers: true,
+  ),
+  ruijie(
+    label: 'Ruijie / Reyee',
+    description: 'Ruijie Cloud/Open API integration planned.',
+    defaultPort: 443,
+    defaultUseSsl: true,
+    usesRouterOsApi: false,
+    supportsHotspotVouchers: false,
+  ),
+  openWrt(
+    label: 'OpenWrt',
+    description: 'OpenWrt SSH/LuCI integration planned.',
+    defaultPort: 22,
+    defaultUseSsl: false,
+    usesRouterOsApi: false,
+    supportsHotspotVouchers: false,
+  ),
+  tpLinkOmada(
+    label: 'TP-Link Omada',
+    description: 'Omada Controller integration planned.',
+    defaultPort: 443,
+    defaultUseSsl: true,
+    usesRouterOsApi: false,
+    supportsHotspotVouchers: false,
+  ),
+  ubiquitiUniFi(
+    label: 'Ubiquiti UniFi',
+    description: 'UniFi Controller integration planned.',
+    defaultPort: 443,
+    defaultUseSsl: true,
+    usesRouterOsApi: false,
+    supportsHotspotVouchers: false,
+  ),
+  generic(
+    label: 'Generic router',
+    description: 'Generic SSH/SNMP monitoring integration planned.',
+    defaultPort: 443,
+    defaultUseSsl: true,
+    usesRouterOsApi: false,
+    supportsHotspotVouchers: false,
+  );
+
+  const RouterVendor({
+    required this.label,
+    required this.description,
+    required this.defaultPort,
+    required this.defaultUseSsl,
+    required this.usesRouterOsApi,
+    required this.supportsHotspotVouchers,
+  });
+
+  final String label;
+  final String description;
+  final int defaultPort;
+  final bool defaultUseSsl;
+  final bool usesRouterOsApi;
+  final bool supportsHotspotVouchers;
+
+  static RouterVendor fromName(String? name) {
+    return RouterVendor.values.firstWhere(
+      (value) => value.name == name,
+      orElse: () => RouterVendor.mikrotik,
+    );
+  }
+}
+
 enum RouterRemoteAccessMode {
   localLan(
     label: 'Local LAN',
@@ -74,6 +148,7 @@ class RouterEntity {
     required this.name,
     required this.host,
     required this.username,
+    this.vendor = RouterVendor.mikrotik,
     this.groupId,
     this.apiPort = 8728,
     this.useSsl = false,
@@ -90,6 +165,7 @@ class RouterEntity {
 
   final String id;
   final String? groupId;
+  final RouterVendor vendor;
   final String name;
   final String host;
   final int apiPort;
@@ -107,4 +183,6 @@ class RouterEntity {
 
   bool get requiresPrivateTunnel =>
       requireVpn || remoteAccessMode.requiresPrivateTunnel;
+
+  bool get supportsHotspotVouchers => vendor.supportsHotspotVouchers;
 }

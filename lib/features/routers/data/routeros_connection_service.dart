@@ -22,6 +22,12 @@ class RouterOsConnectionService implements RouterConnectionService {
 
   @override
   Future<bool> testConnection(RouterEntity router) async {
+    if (!router.vendor.usesRouterOsApi) {
+      throw RouterOsApiException(
+        '${router.vendor.label} support is planned, but its connector is not implemented yet.',
+        category: 'unsupported_vendor',
+      );
+    }
     try {
       await execute(router, '/system/identity/print');
       return true;
@@ -37,6 +43,12 @@ class RouterOsConnectionService implements RouterConnectionService {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async {
+    if (!router.vendor.usesRouterOsApi) {
+      throw RouterOsApiException(
+        '${router.vendor.label} does not use the RouterOS API connector.',
+        category: 'unsupported_vendor',
+      );
+    }
     try {
       return await _executeOnce(
         router,

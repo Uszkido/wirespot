@@ -87,9 +87,11 @@ class _RouterTile extends ConsumerWidget {
         title: Text(router.name, maxLines: 1, overflow: TextOverflow.ellipsis),
         subtitle: Text(
           [
+            router.vendor.label,
             '${router.host}:${router.apiPort}',
             if (router.useSsl) 'SSL',
             router.remoteAccessMode.label,
+            if (!router.vendor.supportsHotspotVouchers) 'limited',
           ].join(' - '),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 class Routers extends Table {
   TextColumn get id => text()();
   TextColumn get groupId => text().nullable()();
+  TextColumn get vendor => text().withDefault(const Constant('mikrotik'))();
   TextColumn get name => text().withLength(min: 1, max: 80)();
   TextColumn get host => text().withLength(min: 1, max: 255)();
   IntColumn get apiPort => integer().withDefault(const Constant(8728))();

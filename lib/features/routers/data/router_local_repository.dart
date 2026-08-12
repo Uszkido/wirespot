@@ -48,6 +48,7 @@ class RouterLocalRepository implements RouterRepository {
         .insertOnConflictUpdate(
           RoutersCompanion.insert(
             id: router.id,
+            vendor: Value(router.vendor.name),
             name: router.name,
             host: router.host,
             username: router.username,
@@ -107,6 +108,7 @@ RouterEntity _mapRouter(RouterRecord record) {
   return RouterEntity(
     id: record.id,
     groupId: record.groupId,
+    vendor: RouterVendor.fromName(record.vendor),
     name: record.name,
     host: record.host,
     apiPort: record.apiPort,
