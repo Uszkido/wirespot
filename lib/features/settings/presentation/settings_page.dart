@@ -121,16 +121,19 @@ class SettingsPage extends ConsumerWidget {
   }
 }
 
-class _PermissionSettingsCard extends StatelessWidget {
+class _PermissionSettingsCard extends ConsumerWidget {
   const _PermissionSettingsCard();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = AppText(
+      ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en',
+    );
     return Card(
       child: ListTile(
         leading: const Icon(Icons.admin_panel_settings_outlined),
-        title: const Text('Permission readiness'),
-        subtitle: const Text('Request VPN consent and Bluetooth access.'),
+        title: Text(text.permissionReadiness),
+        subtitle: Text(text.permissionReadinessSubtitle),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push(AppRoutes.permissions),
       ),
@@ -138,16 +141,19 @@ class _PermissionSettingsCard extends StatelessWidget {
   }
 }
 
-class _WireGuardSettingsCard extends StatelessWidget {
+class _WireGuardSettingsCard extends ConsumerWidget {
   const _WireGuardSettingsCard();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = AppText(
+      ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en',
+    );
     return Card(
       child: ListTile(
         leading: const Icon(Icons.vpn_key_outlined),
-        title: const Text('WireGuard VPN'),
-        subtitle: const Text('Import tunnels, connect, view status, and logs.'),
+        title: Text(text.wireGuardVpn),
+        subtitle: Text(text.wireGuardVpnSubtitle),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push(AppRoutes.wireGuard),
       ),
@@ -164,6 +170,9 @@ class _SchedulerCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isPremium = entitlement?.allows(PremiumFeature.scheduler) ?? false;
+    final text = AppText(
+      ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en',
+    );
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -174,13 +183,13 @@ class _SchedulerCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Scheduler',
+                    text.scheduler,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
-                if (!isPremium) const Chip(label: Text('Premium')),
+                if (!isPremium) Chip(label: Text(text.premium)),
               ],
             ),
             const SizedBox(height: 8),
@@ -195,13 +204,36 @@ class _SchedulerCard extends ConsumerWidget {
                         ref.invalidate(schedulerTasksProvider);
                       }
                     : null,
-                title: Text(task.label),
+                title: Text(
+                  text.scheduledTaskLabel(task.type.name, task.label),
+                ),
                 subtitle: Text(
-                  'Every ${task.intervalMinutes} minutes\n'
-                  'Last run: ${_lastRunText(task)}',
+                  '${text.everyMinutes(task.intervalMinutes)}\n'
+                  '${text.lastRun}: ${_lastRunText(task)}',
                 ),
                 contentPadding: EdgeInsets.zero,
               ),
+            const SizedBox(height: 8),
+            FilledButton.icon(
+              onPressed: isPremium
+                  ? () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      final results = await ref
+                          .read(schedulerExecutionServiceProvider)
+                          .runDueTasks();
+                      ref.invalidate(schedulerTasksProvider);
+                      if (!context.mounted) {
+                        return;
+                      }
+                      final summary = results.isEmpty
+                          ? text.noSchedulerTasksDue
+                          : text.ranSchedulerTasks(results.length);
+                      messenger.showSnackBar(SnackBar(content: Text(summary)));
+                    }
+                  : null,
+              icon: const Icon(Icons.play_arrow_outlined),
+              label: Text(text.runDueTasksNow),
+            ),
           ],
         ),
       ),
@@ -1384,9 +1416,7 @@ class _CoBrandingCard extends ConsumerWidget {
       }
 
       final documents = await getApplicationDocumentsDirectory();
-      final brandingDirectory = Directory(
-        p.join(documents.path, 'branding'),
-      );
+      final brandingDirectory = Directory(p.join(documents.path, 'branding'));
       if (!brandingDirectory.existsSync()) {
         await brandingDirectory.create(recursive: true);
       }

@@ -58,7 +58,7 @@ void main() {
 
     expect(text, contains('North Campus WiFi'));
     expect(text, contains('support@north.example'));
-    expect(text, contains('Powered by Vexel Innovations'));
+    expect(text, contains('Powered by WireSpot'));
     expect(text, isNot(contains(AppBranding.supportEmail)));
     expect(receipt.logoPath, contains('north-logo.png'));
   });

@@ -10,6 +10,14 @@ The format follows practical release notes for operators and maintainers.
 
 - Gallery-based business logo picker for professional co-branding, with selected
   images copied into WireSpot app storage for stable receipt/report reuse.
+- Router-aware scheduler execution for active session refresh and expired
+  active-session cleanup across enabled MikroTik routers.
+- Scheduler voucher cleanup now removes expired, unused local voucher records
+  and clears their encrypted stored passwords.
+- Settings now includes a premium "Run due tasks now" scheduler action for
+  field testing and manual operator execution.
+- Scheduler tests covering due-task execution, skipped tasks, session refresh,
+  expired session disconnect behavior, and voucher cleanup.
 
 ## 0.1.26+27 - 2026-07-16
 

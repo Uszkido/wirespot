@@ -10,6 +10,7 @@ build/
 coverage/
 work/
 outputs/
+archive/
 
 # Temporary generated brand boards should not be committed unless exported with
 # the approved TechNova Technologies spelling.

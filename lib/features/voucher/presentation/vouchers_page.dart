@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/di/providers.dart';
 import '../../../core/licensing/premium_feature.dart';
+import '../../../core/printer/printer_models.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../routers/domain/entities/router_entity.dart';
@@ -37,6 +38,7 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
   bool _provisionOnRouter = true;
   bool _didHydrateEncoding = false;
   VoucherCodeMode? _modeOverride;
+  final _selectedVoucherIds = <String>{};
 
   @override
   void dispose() {
@@ -123,7 +125,15 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
                         _generate(router, encodingSettings, currencyCode),
                   ),
                   const SizedBox(height: 20),
-                  _VoucherHistory(router: router),
+                  _VoucherHistory(
+                    router: router,
+                    selectedVoucherIds: _selectedVoucherIds,
+                    onSelectionChanged: _setVoucherSelected,
+                    onSelectAll: _selectAllVouchers,
+                    onClearSelection: _clearVoucherSelection,
+                    onShareSelected: _shareVouchers,
+                    onPrintSelected: _printVouchers,
+                  ),
                 ],
               );
             },
@@ -234,6 +244,7 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
           );
       ref.invalidate(voucherHistoryProvider(router.id));
       if (mounted) {
+        _clearVoucherSelection();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${vouchers.length} voucher(s) generated.')),
         );
@@ -247,6 +258,118 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
     } finally {
       if (mounted) {
         setState(() => _isGenerating = false);
+      }
+    }
+  }
+
+  void _setVoucherSelected(String voucherId, bool selected) {
+    setState(() {
+      if (selected) {
+        _selectedVoucherIds.add(voucherId);
+      } else {
+        _selectedVoucherIds.remove(voucherId);
+      }
+    });
+  }
+
+  void _selectAllVouchers(List<VoucherEntity> vouchers) {
+    setState(() {
+      _selectedVoucherIds.addAll(vouchers.map((voucher) => voucher.id));
+    });
+  }
+
+  void _clearVoucherSelection() {
+    setState(_selectedVoucherIds.clear);
+  }
+
+  Future<void> _shareVouchers(List<VoucherEntity> vouchers) async {
+    if (vouchers.isEmpty) {
+      return;
+    }
+    final template = await ref
+        .read(ticketTemplateSettingsServiceProvider)
+        .loadSelected();
+    final settings = await ref.read(appSettingsServiceProvider).load();
+    final receipts = vouchers
+        .map(
+          (voucher) => ref
+              .read(voucherReceiptTemplateServiceProvider)
+              .build(voucher: voucher, settings: settings, template: template),
+        )
+        .toList();
+    try {
+      await ref.read(shareServiceProvider).shareVoucherReceipts(receipts);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${receipts.length} vouchers ready to share.'),
+          ),
+        );
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not share vouchers: $error')),
+        );
+      }
+    }
+  }
+
+  Future<void> _printVouchers(List<VoucherEntity> vouchers) async {
+    if (vouchers.isEmpty) {
+      return;
+    }
+    final template = await ref
+        .read(ticketTemplateSettingsServiceProvider)
+        .loadSelected();
+    final settings = await ref.read(appSettingsServiceProvider).load();
+    final printerService = ref.read(printerServiceProvider);
+    try {
+      final printers = await printerService.pairedBluetoothPrinters();
+      if (printers.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No paired Bluetooth printers found.'),
+            ),
+          );
+        }
+        return;
+      }
+      final paperWidth = template.paperWidthMm == 80
+          ? PrinterPaperWidth.mm80
+          : PrinterPaperWidth.mm58;
+      var printed = 0;
+      for (final voucher in vouchers) {
+        final receipt = ref
+            .read(voucherReceiptTemplateServiceProvider)
+            .build(voucher: voucher, settings: settings, template: template);
+        final result = await printerService.printVoucherReceipt(
+          printer: printers.first,
+          receipt: receipt,
+          paperWidth: paperWidth,
+        );
+        if (result.success) {
+          printed += 1;
+        }
+      }
+      if (mounted) {
+        final failed = vouchers.length - printed;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              failed == 0
+                  ? '$printed vouchers sent to the printer.'
+                  : '$printed sent; $failed could not be printed.',
+            ),
+          ),
+        );
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not print vouchers: $error')),
+        );
       }
     }
   }
@@ -477,9 +600,23 @@ class _VoucherGeneratorCard extends StatelessWidget {
 }
 
 class _VoucherHistory extends ConsumerWidget {
-  const _VoucherHistory({required this.router});
+  const _VoucherHistory({
+    required this.router,
+    required this.selectedVoucherIds,
+    required this.onSelectionChanged,
+    required this.onSelectAll,
+    required this.onClearSelection,
+    required this.onShareSelected,
+    required this.onPrintSelected,
+  });
 
   final RouterEntity router;
+  final Set<String> selectedVoucherIds;
+  final void Function(String voucherId, bool selected) onSelectionChanged;
+  final ValueChanged<List<VoucherEntity>> onSelectAll;
+  final VoidCallback onClearSelection;
+  final Future<void> Function(List<VoucherEntity> vouchers) onShareSelected;
+  final Future<void> Function(List<VoucherEntity> vouchers) onPrintSelected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -498,15 +635,75 @@ class _VoucherHistory extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'History',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'History',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (selectedVoucherIds.isNotEmpty)
+                  TextButton(
+                    onPressed: onClearSelection,
+                    child: Text(
+                      '${selectedVoucherIds.length} selected · Clear',
+                    ),
+                  )
+                else
+                  TextButton(
+                    onPressed: () => onSelectAll(items),
+                    child: const Text('Select all'),
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
+            if (selectedVoucherIds.isNotEmpty) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => onShareSelected(
+                        items
+                            .where(
+                              (voucher) =>
+                                  selectedVoucherIds.contains(voucher.id),
+                            )
+                            .toList(),
+                      ),
+                      icon: const Icon(Icons.share_outlined),
+                      label: const Text('Share selected'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () => onPrintSelected(
+                        items
+                            .where(
+                              (voucher) =>
+                                  selectedVoucherIds.contains(voucher.id),
+                            )
+                            .toList(),
+                      ),
+                      icon: const Icon(Icons.print_outlined),
+                      label: const Text('Print selected'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
             for (final voucher in items)
-              _VoucherTile(router: router, voucher: voucher),
+              _VoucherTile(
+                router: router,
+                voucher: voucher,
+                selected: selectedVoucherIds.contains(voucher.id),
+                onSelected: (selected) =>
+                    onSelectionChanged(voucher.id, selected),
+              ),
           ],
         );
       },
@@ -521,10 +718,17 @@ class _VoucherHistory extends ConsumerWidget {
 }
 
 class _VoucherTile extends ConsumerWidget {
-  const _VoucherTile({required this.router, required this.voucher});
+  const _VoucherTile({
+    required this.router,
+    required this.voucher,
+    required this.selected,
+    required this.onSelected,
+  });
 
   final RouterEntity router;
   final VoucherEntity voucher;
+  final bool selected;
+  final ValueChanged<bool> onSelected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -538,7 +742,16 @@ class _VoucherTile extends ConsumerWidget {
 
     return Card(
       child: ExpansionTile(
-        leading: const Icon(Icons.confirmation_number_outlined),
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Checkbox(
+              value: selected,
+              onChanged: (value) => onSelected(value ?? false),
+            ),
+            const Icon(Icons.confirmation_number_outlined),
+          ],
+        ),
         title: Text(voucher.username),
         subtitle: Text(voucher.note ?? router.name),
         trailing: Text(receipt.showQrCode ? 'QR' : ''),
@@ -634,7 +847,13 @@ class _VoucherTile extends ConsumerWidget {
       }
       final result = await ref
           .read(printerServiceProvider)
-          .printVoucherReceipt(printer: printers.first, receipt: receipt);
+          .printVoucherReceipt(
+            printer: printers.first,
+            receipt: receipt,
+            paperWidth: template.paperWidthMm == 80
+                ? PrinterPaperWidth.mm80
+                : PrinterPaperWidth.mm58,
+          );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result.message ?? 'Print job sent.')),

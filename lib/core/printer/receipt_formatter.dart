@@ -31,11 +31,7 @@ class ReceiptFormatter {
 
     return [
       _alignCenter,
-      if (receipt.showLogo) ...[
-        _boldOn,
-        _center('WIRESPOT', width),
-        _boldOff,
-      ],
+      if (receipt.showLogo) ...[_boldOn, _center('WIRESPOT', width), _boldOff],
       _doubleOn,
       _center(receipt.businessName, width),
       _doubleOff,

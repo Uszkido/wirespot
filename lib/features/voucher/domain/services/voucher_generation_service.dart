@@ -49,7 +49,6 @@ class VoucherGenerationService {
         generatedAt: DateTime.now(),
         note: request.note ?? request.plan.name,
       );
-      await _repository.saveVoucher(voucher);
       if (request.provisionOnRouter) {
         await _hotspotService!.createUser(
           router!,
@@ -63,6 +62,7 @@ class VoucherGenerationService {
           ),
         );
       }
+      await _repository.saveVoucher(voucher);
       vouchers.add(voucher);
     }
 

@@ -10,6 +10,8 @@ abstract interface class VoucherRepository {
     DateTime? to,
   });
 
+  Future<void> deleteVouchers(List<String> voucherIds);
+
   Future<void> saveProfile(HotspotProfileEntity profile);
 
   Future<List<HotspotProfileEntity>> getProfiles(String routerId);

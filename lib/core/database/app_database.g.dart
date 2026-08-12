@@ -95,18 +95,18 @@ class $RoutersTable extends Routers
     ),
     defaultValue: const Constant(true),
   );
-  static const VerificationMeta _remoteAccessModeMeta =
-      const VerificationMeta('remoteAccessMode');
+  static const VerificationMeta _remoteAccessModeMeta = const VerificationMeta(
+    'remoteAccessMode',
+  );
   @override
-  late final GeneratedColumn<String> remoteAccessMode =
-      GeneratedColumn<String>(
-        'remote_access_mode',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        defaultValue: const Constant('wireGuard'),
-      );
+  late final GeneratedColumn<String> remoteAccessMode = GeneratedColumn<String>(
+    'remote_access_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('wireGuard'),
+  );
   static const VerificationMeta _usernameMeta = const VerificationMeta(
     'username',
   );

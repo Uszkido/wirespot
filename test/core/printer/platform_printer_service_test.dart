@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wirespot/core/branding/app_branding.dart';
 import 'package:wirespot/core/printer/platform_printer_service.dart';
 import 'package:wirespot/core/printer/printer_models.dart';
 import 'package:wirespot/features/voucher/domain/entities/voucher_entity.dart';
@@ -37,7 +38,7 @@ void main() {
     );
 
     final arguments = Map<Object?, Object?>.from(calls.single.arguments as Map);
-    expect(arguments['logoAsset'], 'assets/images/vexel_logo.png');
+    expect(arguments['logoAsset'], AppBranding.logoAsset);
     expect(arguments['logoFile'], isEmpty);
   });
 
