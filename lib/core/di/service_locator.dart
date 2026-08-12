@@ -15,9 +15,11 @@ import '../../features/routers/data/multi_vendor_router_connection_service.dart'
 import '../../features/routers/data/planned_router_connector.dart';
 import '../../features/routers/data/routeros_connection_service.dart';
 import '../../features/routers/data/router_local_repository.dart';
+import '../../features/routers/data/ruijie_cloud_connection_service.dart';
 import '../../features/routers/domain/entities/router_entity.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
 import '../../features/routers/domain/services/router_connection_service.dart';
+import '../../features/routers/domain/services/router_fleet_connection_service.dart';
 import '../../features/scheduler/domain/services/scheduler_execution_service.dart';
 import '../../features/scheduler/domain/services/scheduler_settings_service.dart';
 import '../../features/settings/data/settings_local_repository.dart';
@@ -98,6 +100,11 @@ Future<void> configureDependencies() async {
       () =>
           RouterLocalRepository(sl<AppDatabase>(), sl<RouterCredentialStore>()),
     )
+    ..registerLazySingleton<RuijieCloudConnectionService>(
+      () => RuijieCloudConnectionService(
+        credentialStore: sl<RouterCredentialStore>(),
+      ),
+    )
     ..registerLazySingleton<RouterConnectionService>(
       () => MultiVendorRouterConnectionService(
         connectors: [
@@ -106,12 +113,18 @@ Future<void> configureDependencies() async {
             credentialStore: sl<RouterCredentialStore>(),
             vpnStatusService: sl<VpnStatusService>(),
           ),
+          sl<RuijieCloudConnectionService>(),
           for (final vendor in RouterVendor.values.where(
-            (vendor) => vendor != RouterVendor.mikrotik,
+            (vendor) =>
+                vendor != RouterVendor.mikrotik &&
+                vendor != RouterVendor.ruijie,
           ))
             PlannedRouterConnector(vendor),
         ],
       ),
+    )
+    ..registerLazySingleton<RouterFleetConnectionService>(
+      () => RouterFleetConnectionService(sl<RouterConnectionService>()),
     )
     ..registerLazySingleton<HotspotService>(
       () => RouterOsHotspotService(sl<RouterConnectionService>()),

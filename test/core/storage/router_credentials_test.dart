@@ -17,5 +17,18 @@ void main() {
 
     expect(decoded.username, 'admin');
     expect(decoded.password, 'secret');
+    expect(decoded.accessToken, isNull);
+  });
+
+  test('RouterCredentials serializes an optional cloud access token', () {
+    const credentials = RouterCredentials(
+      username: 'cloud-account',
+      password: '',
+      accessToken: 'token',
+    );
+
+    final decoded = RouterCredentials.fromJson(credentials.toJson());
+
+    expect(decoded.accessToken, 'token');
   });
 }

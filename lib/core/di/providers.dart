@@ -6,7 +6,9 @@ import '../../features/reports/domain/repositories/report_repository.dart';
 import '../../features/reports/domain/services/report_export_service.dart';
 import '../../features/reports/domain/services/report_summary_service.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
+import '../../features/routers/data/ruijie_cloud_connection_service.dart';
 import '../../features/routers/domain/services/router_connection_service.dart';
+import '../../features/routers/domain/services/router_fleet_connection_service.dart';
 import '../../features/scheduler/domain/services/scheduler_execution_service.dart';
 import '../../features/scheduler/domain/services/scheduler_settings_service.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
@@ -59,6 +61,16 @@ final routerRepositoryProvider = Provider<RouterRepository>(
 final routerConnectionServiceProvider = Provider<RouterConnectionService>(
   (ref) => sl<RouterConnectionService>(),
 );
+
+final routerFleetConnectionServiceProvider =
+    Provider<RouterFleetConnectionService>(
+      (ref) => sl<RouterFleetConnectionService>(),
+    );
+
+final ruijieCloudConnectionServiceProvider =
+    Provider<RuijieCloudConnectionService>(
+      (ref) => sl<RuijieCloudConnectionService>(),
+    );
 
 final hotspotServiceProvider = Provider<HotspotService>(
   (ref) => sl<HotspotService>(),

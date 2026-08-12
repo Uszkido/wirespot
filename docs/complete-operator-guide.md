@@ -87,8 +87,10 @@ Use the Routers screen:
 RouterOS API access must be enabled on the MikroTik router. The default API
 port is usually `8728`; API-SSL is usually `8729` when configured.
 
-Non-MikroTik brands can be saved as planned connectors. WireSpot will not send
-RouterOS commands to them until their own connector is implemented.
+Ruijie/Reyee supports a limited, read-only Ruijie Cloud connection test using a
+vendor-issued access token. It does not send RouterOS commands or change Ruijie
+configuration. OpenWrt, Omada, UniFi, and generic brands can be saved as
+planned connectors. See [Ruijie Cloud Setup](ruijie-cloud-setup.md).
 
 ## 7. Local LAN Mode
 

@@ -8,6 +8,11 @@ The format follows practical release notes for operators and maintainers.
 
 ### Added
 
+- Limited Ruijie/Reyee Cloud connector for secure token-based connection
+  verification through device discovery, with hotspot and voucher operations
+  kept disabled pending verified vendor API contracts.
+- Ruijie Cloud operator setup guide covering API credential requirements,
+  secure token handling, connection testing, and current limitations.
 - Multi-brand router foundation for MikroTik, Ruijie/Reyee, OpenWrt, TP-Link
   Omada, Ubiquiti UniFi, and generic router records.
 - Hotspot business setup presets for quick voucher, small business, hotel

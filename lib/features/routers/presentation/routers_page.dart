@@ -6,8 +6,11 @@ import '../../../core/di/providers.dart';
 import '../../../core/localization/app_text.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../dashboard/presentation/dashboard_providers.dart';
 import '../../settings/presentation/settings_providers.dart';
 import '../domain/entities/router_entity.dart';
+import '../domain/entities/ruijie_cloud_device.dart';
+import '../domain/services/router_fleet_connection_service.dart';
 import 'router_providers.dart';
 
 class RoutersPage extends ConsumerWidget {
@@ -19,9 +22,21 @@ class RoutersPage extends ConsumerWidget {
     final languageCode =
         ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en';
     final text = AppText(languageCode);
+    final selectedRouterId = ref.watch(selectedRouterIdProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(text.routers)),
+      appBar: AppBar(
+        title: Text(text.routers),
+        actions: [
+          if (routers.asData?.value.isNotEmpty ?? false)
+            IconButton(
+              tooltip: 'Test all router connections',
+              onPressed: () =>
+                  _testAllConnections(context, ref, routers.asData!.value),
+              icon: const Icon(Icons.network_check_outlined),
+            ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         tooltip: text.addRouter,
         onPressed: () => context.push(AppRoutes.newRouter),
@@ -49,7 +64,12 @@ class RoutersPage extends ConsumerWidget {
               itemCount: items.length,
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
-                return _RouterTile(router: items[index]);
+                return _RouterTile(
+                  router: items[index],
+                  isActive:
+                      items[index].id == selectedRouterId ||
+                      (selectedRouterId == null && index == 0),
+                );
               },
             ),
           );
@@ -63,12 +83,36 @@ class RoutersPage extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _testAllConnections(
+    BuildContext context,
+    WidgetRef ref,
+    List<RouterEntity> routers,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('Testing ${routers.length} router connections...'),
+      ),
+    );
+    final results = await ref
+        .read(routerFleetConnectionServiceProvider)
+        .testConnections(routers);
+    if (!context.mounted) {
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (context) => _FleetConnectionResultsDialog(results: results),
+    );
+  }
 }
 
 class _RouterTile extends ConsumerWidget {
-  const _RouterTile({required this.router});
+  const _RouterTile({required this.router, required this.isActive});
 
   final RouterEntity router;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -84,7 +128,22 @@ class _RouterTile extends ConsumerWidget {
           foregroundColor: colorScheme.onPrimaryContainer,
           child: const Icon(Icons.router_outlined),
         ),
-        title: Text(router.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                router.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isActive)
+              const Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Icon(Icons.check_circle, size: 18),
+              ),
+          ],
+        ),
         subtitle: Text(
           [
             router.vendor.label,
@@ -110,6 +169,25 @@ class _RouterTile extends ConsumerWidget {
                 title: Text(text.testConnection),
               ),
             ),
+            PopupMenuItem(
+              value: _RouterAction.useRouter,
+              child: ListTile(
+                leading: Icon(
+                  isActive
+                      ? Icons.check_circle_outline
+                      : Icons.swap_horiz_outlined,
+                ),
+                title: Text(isActive ? 'Current router' : 'Use this router'),
+              ),
+            ),
+            if (router.vendor == RouterVendor.ruijie)
+              const PopupMenuItem(
+                value: _RouterAction.discoverDevices,
+                child: ListTile(
+                  leading: Icon(Icons.devices_other_outlined),
+                  title: Text('Discover cloud devices'),
+                ),
+              ),
             if (router.requiresPrivateTunnel)
               PopupMenuItem(
                 value: _RouterAction.wireGuard,
@@ -147,6 +225,16 @@ class _RouterTile extends ConsumerWidget {
       case _RouterAction.test:
         await _testConnection(context, ref);
         break;
+      case _RouterAction.useRouter:
+        ref.read(selectedRouterIdProvider.notifier).state = router.id;
+        ref.invalidate(dashboardSnapshotProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${router.name} is now the active router.')),
+        );
+        break;
+      case _RouterAction.discoverDevices:
+        await _discoverDevices(context, ref);
+        break;
       case _RouterAction.edit:
         context.push(AppRoutes.editRouter(router.id));
         break;
@@ -156,6 +244,32 @@ class _RouterTile extends ConsumerWidget {
       case _RouterAction.delete:
         await _deleteRouter(context, ref);
         break;
+    }
+  }
+
+  Future<void> _discoverDevices(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Discovering Ruijie Cloud devices...')),
+    );
+
+    try {
+      final devices = await ref
+          .read(ruijieCloudConnectionServiceProvider)
+          .discoverDevices(router);
+      if (!context.mounted) {
+        return;
+      }
+      await showDialog<void>(
+        context: context,
+        builder: (context) => _RuijieDevicesDialog(devices: devices),
+      );
+    } on Object catch (error) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Could not discover Ruijie Cloud devices: $error'),
+        ),
+      );
     }
   }
 
@@ -224,4 +338,97 @@ class _RouterTile extends ConsumerWidget {
   }
 }
 
-enum _RouterAction { test, wireGuard, edit, delete }
+enum _RouterAction { test, useRouter, discoverDevices, wireGuard, edit, delete }
+
+class _RuijieDevicesDialog extends StatelessWidget {
+  const _RuijieDevicesDialog({required this.devices});
+
+  final List<RuijieCloudDevice> devices;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Ruijie Cloud devices'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: devices.isEmpty
+            ? const Text('No devices were returned for this cloud connection.')
+            : ListView.separated(
+                shrinkWrap: true,
+                itemCount: devices.length,
+                separatorBuilder: (context, index) => const Divider(),
+                itemBuilder: (context, index) {
+                  final device = devices[index];
+                  final details = [
+                    if (device.model != null) device.model!,
+                    if (device.status != null) device.status!,
+                    if (device.siteName != null) device.siteName!,
+                  ];
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.router_outlined),
+                    title: Text(device.name.isEmpty ? device.id : device.name),
+                    subtitle: Text(
+                      [
+                        if (device.id.isNotEmpty) device.id,
+                        ...details,
+                      ].join(' • '),
+                    ),
+                  );
+                },
+              ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
+        ),
+      ],
+    );
+  }
+}
+
+class _FleetConnectionResultsDialog extends StatelessWidget {
+  const _FleetConnectionResultsDialog({required this.results});
+
+  final List<RouterConnectionResult> results;
+
+  @override
+  Widget build(BuildContext context) {
+    final connected = results.where((result) => result.isConnected).length;
+    return AlertDialog(
+      title: Text('$connected of ${results.length} routers connected'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemCount: results.length,
+          separatorBuilder: (context, index) => const Divider(),
+          itemBuilder: (context, index) {
+            final result = results[index];
+            return ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(
+                result.isConnected
+                    ? Icons.check_circle_outline
+                    : Icons.error_outline,
+                color: result.isConnected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.error,
+              ),
+              title: Text(result.router.name),
+              subtitle: Text(result.router.vendor.label),
+              trailing: Text(result.isConnected ? 'Connected' : 'Unavailable'),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
+        ),
+      ],
+    );
+  }
+}

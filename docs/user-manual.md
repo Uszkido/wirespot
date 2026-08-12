@@ -39,10 +39,13 @@ Common RouterOS API ports:
 - Plain API: `8728`
 - SSL API: `8729`
 
-For Ruijie/Reyee, OpenWrt, Omada, UniFi, and generic routers, WireSpot can save
-the router brand and connection details as planned connectors. Live hotspot
-automation for those brands will be added through their own supported APIs or
-controller integrations.
+For Ruijie/Reyee, WireSpot can securely store a Ruijie Cloud access token and
+verify the cloud connection through device discovery. It does not yet alter
+Ruijie hotspot or voucher settings. OpenWrt, Omada, UniFi, and generic routers
+remain planned connectors.
+
+See [Ruijie Cloud Setup](ruijie-cloud-setup.md) for the required credentials
+and the safe setup process.
 
 ## 3. Add A Router
 
@@ -50,7 +53,8 @@ controller integrations.
 2. Open Routers.
 3. Tap Add.
 4. Choose the router brand.
-5. Enter router name, host, management port, username, and password.
+5. Enter router name, host, management port, username, and password. For
+   Ruijie/Reyee, enter the Ruijie Cloud host and access token instead.
 6. Choose SSL if the router API or controller service supports it.
 7. Choose the connection mode:
    - Keep **Require WireGuard VPN** on for remote/private VPN routers.

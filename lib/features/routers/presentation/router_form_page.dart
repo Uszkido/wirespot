@@ -152,6 +152,10 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
         _portController.text = vendor.defaultPort.toString();
       }
       _useSsl = vendor.defaultUseSsl;
+      if (vendor.usesCloudAccessToken) {
+        _remoteAccessMode = RouterRemoteAccessMode.publicApiSsl;
+        _requireVpn = false;
+      }
       if (vendor == RouterVendor.mikrotik &&
           _remoteAccessMode == RouterRemoteAccessMode.publicApiSsl) {
         _useSsl = true;
@@ -183,10 +187,15 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
 
     final password = _passwordController.text.trim();
     if (!_isEditing && password.isEmpty) {
-      _showMessage('Password is required for a new router.');
+      _showMessage(
+        _vendor.usesCloudAccessToken
+            ? 'Ruijie Cloud access token is required for a new router.'
+            : 'Password is required for a new router.',
+      );
       return;
     }
-    if (_isEditing &&
+    if (!_vendor.usesCloudAccessToken &&
+        _isEditing &&
         existingRouter != null &&
         existingRouter.username != _usernameController.text.trim() &&
         password.isEmpty) {
@@ -225,7 +234,8 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
                 ? null
                 : RouterCredentials(
                     username: router.username,
-                    password: password,
+                    password: _vendor.usesCloudAccessToken ? '' : password,
+                    accessToken: _vendor.usesCloudAccessToken ? password : null,
                   ),
           );
       ref.invalidate(routersProvider);
@@ -430,6 +440,7 @@ class _RouterFormBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final sslIsRequired = remoteAccessMode.recommendedSsl;
+    final usesCloudAccessToken = vendor.usesCloudAccessToken;
 
     return SafeArea(
       child: ListView(
@@ -563,11 +574,15 @@ class _RouterFormBody extends StatelessWidget {
                 TextFormField(
                   controller: usernameController,
                   textInputAction: TextInputAction.next,
-                  validator: (value) =>
-                      Validators.requiredText(value, label: 'Username'),
-                  decoration: const InputDecoration(
-                    labelText: 'Username',
-                    prefixIcon: Icon(Icons.person_outline),
+                  validator: usesCloudAccessToken
+                      ? null
+                      : (value) =>
+                            Validators.requiredText(value, label: 'Username'),
+                  decoration: InputDecoration(
+                    labelText: usesCloudAccessToken
+                        ? 'Ruijie Cloud account (optional)'
+                        : 'Username',
+                    prefixIcon: const Icon(Icons.person_outline),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -577,9 +592,19 @@ class _RouterFormBody extends StatelessWidget {
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (_) => onSave(),
                   decoration: InputDecoration(
-                    labelText: isEditing ? 'Password' : 'Password required',
+                    labelText: usesCloudAccessToken
+                        ? isEditing
+                              ? 'Ruijie Cloud access token'
+                              : 'Ruijie Cloud access token required'
+                        : isEditing
+                        ? 'Password'
+                        : 'Password required',
                     helperText: isEditing
-                        ? 'Leave blank to keep current password.'
+                        ? usesCloudAccessToken
+                              ? 'Leave blank to keep the current access token.'
+                              : 'Leave blank to keep current password.'
+                        : usesCloudAccessToken
+                        ? 'Get an AppID/Secret and access token from Ruijie Cloud.'
                         : null,
                     prefixIcon: const Icon(Icons.password_outlined),
                   ),

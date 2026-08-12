@@ -39,7 +39,7 @@ enum RouterVendor {
   ),
   ruijie(
     label: 'Ruijie / Reyee',
-    description: 'Ruijie Cloud/Open API integration planned.',
+    description: 'Ruijie Cloud connection verification is available.',
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
@@ -52,8 +52,11 @@ enum RouterVendor {
       'Keep gateway, access point, and captive portal details ready.',
       'Use HTTPS controller/cloud credentials when the connector ships.',
     ],
-    plannedCapabilities: {
+    activeCapabilities: {
       RouterCapability.connectionTest,
+      RouterCapability.cloudController,
+    },
+    plannedCapabilities: {
       RouterCapability.dashboardSnapshot,
       RouterCapability.hotspotUsers,
       RouterCapability.hotspotSetupPresets,
@@ -184,6 +187,8 @@ enum RouterVendor {
 
   bool get supportsHotspotVouchers =>
       supports(RouterCapability.voucherProvisioning);
+
+  bool get usesCloudAccessToken => this == RouterVendor.ruijie;
 
   bool supports(RouterCapability capability) {
     return activeCapabilities.contains(capability);

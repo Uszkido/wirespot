@@ -151,8 +151,9 @@ outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
 3. Add a router in **Routers** and choose its brand.
 4. Use local LAN mode when on-site, or import/connect WireGuard for remote
    router management.
-5. Test RouterOS API connection for MikroTik routers. Other brands are tracked
-   for planned connectors until their integrations are implemented.
+5. Test the RouterOS API connection for MikroTik routers. For Ruijie/Reyee,
+   enter the Ruijie Cloud host and a vendor-issued access token, then test the
+   cloud connection. Other brands remain planned connectors.
 6. Configure Settings:
    - language and currency
    - license
@@ -209,7 +210,7 @@ collaboration with TechNova Technologies.
 | Brand / connector | Current support | Notes |
 | --- | --- | --- |
 | MikroTik RouterOS | Full active connector | RouterOS API, hotspot users, vouchers, dashboard snapshots, setup presets |
-| Ruijie / Reyee | Planned connector foundation | Added as a selectable brand; cloud/open API integration is next |
+| Ruijie / Reyee | Limited active connector | Secure token-based Ruijie Cloud connection test via device discovery; hotspot and voucher changes remain planned |
 | OpenWrt | Planned connector foundation | Future SSH/LuCI/ubus integration |
 | TP-Link Omada | Planned connector foundation | Future Omada Controller integration |
 | Ubiquiti UniFi | Planned connector foundation | Future UniFi Controller integration |
@@ -226,6 +227,7 @@ collaboration with TechNova Technologies.
 | [docs/payment-and-licensing.md](docs/payment-and-licensing.md) | Trial, subscription, offline license plan |
 | [docs/play-store-release.md](docs/play-store-release.md) | Play Store signing and release process |
 | [docs/ios-roadmap.md](docs/ios-roadmap.md) | iOS build, platform-channel, and App Store roadmap |
+| [docs/ruijie-cloud-setup.md](docs/ruijie-cloud-setup.md) | Ruijie Cloud token setup and current integration limits |
 | [docs/github-automation.md](docs/github-automation.md) | GitHub Actions, CI APK artifacts, and Dependabot automation |
 | [docs/privacy-policy.md](docs/privacy-policy.md) | Privacy policy draft |
 | [docs/workstation-transfer.md](docs/workstation-transfer.md) | Moving the project to another PC |
@@ -259,7 +261,8 @@ Still required before production upload:
 - Release signing and Play Store AAB.
 - iOS platform folder, native iOS platform channels, and App Store release path.
 - More field testing on MikroTik hotspot setup.
-- Implement first non-MikroTik connector, starting with Ruijie/Reyee discovery.
+- Expand the Ruijie/Reyee connector from cloud verification into supported site,
+  device, captive-portal, and voucher operations after API approval.
 - Expand business setup presets across supported brands.
 - WireGuard validation across multiple Android models.
 - Printer testing across common 58mm/80mm ESC/POS models.

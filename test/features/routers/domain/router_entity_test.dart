@@ -29,7 +29,7 @@ void main() {
     expect(router.isEnabled, isTrue);
   });
 
-  test('Ruijie routers are tracked as planned non-RouterOS connectors', () {
+  test('Ruijie routers support cloud connection verification', () {
     const router = RouterEntity(
       id: 'router-ruijie',
       name: 'Guest Reyee',
@@ -47,10 +47,11 @@ void main() {
       router.vendor.managementSurfaceLabel,
       'Ruijie Cloud or local controller',
     );
-    expect(router.vendor.hasLiveConnector, isFalse);
-    expect(router.vendor.plans(RouterCapability.cloudController), isTrue);
+    expect(router.vendor.hasLiveConnector, isTrue);
+    expect(router.vendor.supports(RouterCapability.connectionTest), isTrue);
+    expect(router.vendor.supports(RouterCapability.cloudController), isTrue);
     expect(router.vendor.plans(RouterCapability.voucherProvisioning), isTrue);
-    expect(router.vendor.activeCapabilitySummary, 'No live connector yet');
+    expect(router.vendor.activeCapabilitySummary, contains('Connection test'));
     expect(
       router.vendor.setupChecklist,
       contains(

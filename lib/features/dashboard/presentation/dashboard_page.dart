@@ -14,6 +14,7 @@ import '../../../shared/widgets/brand_logo.dart';
 import '../../../shared/widgets/metric_card.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../settings/presentation/settings_providers.dart';
+import '../../routers/presentation/router_providers.dart';
 import '../domain/dashboard_snapshot.dart';
 import 'dashboard_providers.dart';
 
@@ -33,6 +34,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final languageCode =
         ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en';
     final text = AppText(languageCode);
+    final routers = ref.watch(routersProvider).asData?.value ?? const [];
+    final selectedRouterId = ref.watch(selectedRouterIdProvider);
 
     return PopScope(
       canPop: false,
@@ -60,6 +63,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ],
           ),
           actions: [
+            if (routers.isNotEmpty)
+              PopupMenuButton<String>(
+                tooltip: 'Switch active router',
+                icon: const Icon(Icons.swap_horiz_outlined),
+                onSelected: (routerId) {
+                  ref.read(selectedRouterIdProvider.notifier).state = routerId;
+                  ref.invalidate(dashboardSnapshotProvider);
+                },
+                itemBuilder: (context) => [
+                  for (var index = 0; index < routers.length; index++)
+                    CheckedPopupMenuItem(
+                      value: routers[index].id,
+                      checked:
+                          routers[index].id == selectedRouterId ||
+                          (selectedRouterId == null && index == 0),
+                      child: Text(routers[index].name),
+                    ),
+                ],
+              ),
             IconButton(
               tooltip: text.refresh,
               onPressed: () => ref.invalidate(dashboardSnapshotProvider),
