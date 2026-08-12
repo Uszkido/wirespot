@@ -1,3 +1,17 @@
+enum RouterCapability {
+  connectionTest(label: 'Connection test'),
+  dashboardSnapshot(label: 'Dashboard snapshot'),
+  hotspotUsers(label: 'Hotspot users'),
+  hotspotSetupPresets(label: 'Hotspot setup presets'),
+  voucherProvisioning(label: 'Voucher provisioning'),
+  trafficMonitoring(label: 'Traffic monitoring'),
+  cloudController(label: 'Cloud/controller API');
+
+  const RouterCapability({required this.label});
+
+  final String label;
+}
+
 enum RouterVendor {
   mikrotik(
     label: 'MikroTik RouterOS',
@@ -5,7 +19,14 @@ enum RouterVendor {
     defaultPort: 8728,
     defaultUseSsl: false,
     usesRouterOsApi: true,
-    supportsHotspotVouchers: true,
+    activeCapabilities: {
+      RouterCapability.connectionTest,
+      RouterCapability.dashboardSnapshot,
+      RouterCapability.hotspotUsers,
+      RouterCapability.hotspotSetupPresets,
+      RouterCapability.voucherProvisioning,
+      RouterCapability.trafficMonitoring,
+    },
   ),
   ruijie(
     label: 'Ruijie / Reyee',
@@ -13,7 +34,15 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
-    supportsHotspotVouchers: false,
+    plannedCapabilities: {
+      RouterCapability.connectionTest,
+      RouterCapability.dashboardSnapshot,
+      RouterCapability.hotspotUsers,
+      RouterCapability.hotspotSetupPresets,
+      RouterCapability.voucherProvisioning,
+      RouterCapability.trafficMonitoring,
+      RouterCapability.cloudController,
+    },
   ),
   openWrt(
     label: 'OpenWrt',
@@ -21,7 +50,12 @@ enum RouterVendor {
     defaultPort: 22,
     defaultUseSsl: false,
     usesRouterOsApi: false,
-    supportsHotspotVouchers: false,
+    plannedCapabilities: {
+      RouterCapability.connectionTest,
+      RouterCapability.dashboardSnapshot,
+      RouterCapability.hotspotSetupPresets,
+      RouterCapability.trafficMonitoring,
+    },
   ),
   tpLinkOmada(
     label: 'TP-Link Omada',
@@ -29,7 +63,15 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
-    supportsHotspotVouchers: false,
+    plannedCapabilities: {
+      RouterCapability.connectionTest,
+      RouterCapability.dashboardSnapshot,
+      RouterCapability.hotspotUsers,
+      RouterCapability.hotspotSetupPresets,
+      RouterCapability.voucherProvisioning,
+      RouterCapability.trafficMonitoring,
+      RouterCapability.cloudController,
+    },
   ),
   ubiquitiUniFi(
     label: 'Ubiquiti UniFi',
@@ -37,7 +79,15 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
-    supportsHotspotVouchers: false,
+    plannedCapabilities: {
+      RouterCapability.connectionTest,
+      RouterCapability.dashboardSnapshot,
+      RouterCapability.hotspotUsers,
+      RouterCapability.hotspotSetupPresets,
+      RouterCapability.voucherProvisioning,
+      RouterCapability.trafficMonitoring,
+      RouterCapability.cloudController,
+    },
   ),
   generic(
     label: 'Generic router',
@@ -45,7 +95,11 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
-    supportsHotspotVouchers: false,
+    plannedCapabilities: {
+      RouterCapability.connectionTest,
+      RouterCapability.dashboardSnapshot,
+      RouterCapability.trafficMonitoring,
+    },
   );
 
   const RouterVendor({
@@ -54,7 +108,8 @@ enum RouterVendor {
     required this.defaultPort,
     required this.defaultUseSsl,
     required this.usesRouterOsApi,
-    required this.supportsHotspotVouchers,
+    this.activeCapabilities = const {},
+    this.plannedCapabilities = const {},
   });
 
   final String label;
@@ -62,7 +117,35 @@ enum RouterVendor {
   final int defaultPort;
   final bool defaultUseSsl;
   final bool usesRouterOsApi;
-  final bool supportsHotspotVouchers;
+  final Set<RouterCapability> activeCapabilities;
+  final Set<RouterCapability> plannedCapabilities;
+
+  bool get hasLiveConnector => activeCapabilities.isNotEmpty;
+
+  bool get supportsHotspotVouchers =>
+      supports(RouterCapability.voucherProvisioning);
+
+  bool supports(RouterCapability capability) {
+    return activeCapabilities.contains(capability);
+  }
+
+  bool plans(RouterCapability capability) {
+    return !supports(capability) && plannedCapabilities.contains(capability);
+  }
+
+  String get activeCapabilitySummary {
+    if (activeCapabilities.isEmpty) {
+      return 'No live connector yet';
+    }
+    return activeCapabilities.map((capability) => capability.label).join(', ');
+  }
+
+  String get plannedCapabilitySummary {
+    if (plannedCapabilities.isEmpty) {
+      return 'No additional capabilities planned yet';
+    }
+    return plannedCapabilities.map((capability) => capability.label).join(', ');
+  }
 
   static RouterVendor fromName(String? name) {
     return RouterVendor.values.firstWhere(

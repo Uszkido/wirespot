@@ -15,6 +15,11 @@ void main() {
     expect(router.requireVpn, isTrue);
     expect(router.remoteAccessMode, RouterRemoteAccessMode.wireGuard);
     expect(router.vendor, RouterVendor.mikrotik);
+    expect(router.vendor.hasLiveConnector, isTrue);
+    expect(
+      router.vendor.supports(RouterCapability.hotspotSetupPresets),
+      isTrue,
+    );
     expect(router.supportsHotspotVouchers, isTrue);
     expect(router.requiresPrivateTunnel, isTrue);
     expect(router.isEnabled, isTrue);
@@ -33,6 +38,10 @@ void main() {
 
     expect(router.vendor.label, 'Ruijie / Reyee');
     expect(router.vendor.usesRouterOsApi, isFalse);
+    expect(router.vendor.hasLiveConnector, isFalse);
+    expect(router.vendor.plans(RouterCapability.cloudController), isTrue);
+    expect(router.vendor.plans(RouterCapability.voucherProvisioning), isTrue);
+    expect(router.vendor.activeCapabilitySummary, 'No live connector yet');
     expect(router.supportsHotspotVouchers, isFalse);
   });
 }

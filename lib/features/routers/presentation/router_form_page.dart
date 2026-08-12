@@ -295,9 +295,12 @@ class _RouterVendorHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final capabilities = vendor.supportsHotspotVouchers
-        ? 'Hotspot vouchers supported now.'
-        : 'Connector planned. Hotspot automation is not available yet.';
+    final activeCapabilities = vendor.hasLiveConnector
+        ? 'Available now: ${vendor.activeCapabilitySummary}.'
+        : 'Available now: connector planned.';
+    final plannedCapabilities = vendor.plannedCapabilities.isEmpty
+        ? null
+        : 'Planned: ${vendor.plannedCapabilitySummary}.';
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -317,11 +320,20 @@ class _RouterVendorHint extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              capabilities,
+              activeCapabilities,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
+            if (plannedCapabilities != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                plannedCapabilities,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ],
         ),
       ),

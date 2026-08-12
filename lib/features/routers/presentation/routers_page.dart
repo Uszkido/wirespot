@@ -91,7 +91,10 @@ class _RouterTile extends ConsumerWidget {
             '${router.host}:${router.apiPort}',
             if (router.useSsl) 'SSL',
             router.remoteAccessMode.label,
-            if (!router.vendor.supportsHotspotVouchers) 'limited',
+            if (!router.vendor.hasLiveConnector) 'planned',
+            if (router.vendor.hasLiveConnector &&
+                !router.vendor.supportsHotspotVouchers)
+              'limited',
           ].join(' - '),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
