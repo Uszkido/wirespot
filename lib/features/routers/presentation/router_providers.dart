@@ -8,15 +8,11 @@ final routersProvider = StreamProvider.autoDispose<List<RouterEntity>>((ref) {
   return ref.watch(routerRepositoryProvider).watchRouters();
 });
 
-final routerConnectionStatesProvider = FutureProvider.autoDispose
-    .family<Map<String, bool>, List<RouterEntity>>((ref, routers) async {
-      final results = await ref
-          .watch(routerFleetConnectionServiceProvider)
-          .testConnections(routers);
-      return {
-        for (final result in results) result.router.id: result.isConnected,
-      };
-    });
+/// Last operator-requested fleet connection results. Router screens never make
+/// network calls merely by rendering; operators explicitly run the fleet check.
+final routerConnectionStatesProvider = StateProvider<Map<String, bool>>(
+  (ref) => const {},
+);
 
 final routerByIdProvider = FutureProvider.autoDispose
     .family<RouterEntity?, String>((ref, routerId) {

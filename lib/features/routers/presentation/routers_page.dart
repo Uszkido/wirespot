@@ -29,7 +29,7 @@ class RoutersPage extends ConsumerWidget {
         ?.value;
     final effectiveRouterId = selectedRouterId ?? storedActiveRouterId;
     final items = routers.asData?.value ?? const <RouterEntity>[];
-    final connectionStates = ref.watch(routerConnectionStatesProvider(items));
+    final connectionStates = ref.watch(routerConnectionStatesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -66,7 +66,8 @@ class RoutersPage extends ConsumerWidget {
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(routersProvider);
-              ref.invalidate(routerConnectionStatesProvider(items));
+              ref.read(routerConnectionStatesProvider.notifier).state =
+                  const {};
             },
             child: ListView.separated(
               padding: const EdgeInsets.all(16),
@@ -85,8 +86,7 @@ class RoutersPage extends ConsumerWidget {
                   isActive:
                       items[routerIndex].id == effectiveRouterId ||
                       (effectiveRouterId == null && routerIndex == 0),
-                  isConnected:
-                      connectionStates.asData?.value[items[routerIndex].id],
+                  isConnected: connectionStates[items[routerIndex].id],
                 );
               },
             ),
@@ -116,6 +116,9 @@ class RoutersPage extends ConsumerWidget {
     final results = await ref
         .read(routerFleetConnectionServiceProvider)
         .testConnections(routers);
+    ref.read(routerConnectionStatesProvider.notifier).state = {
+      for (final result in results) result.router.id: result.isConnected,
+    };
     if (!context.mounted) {
       return;
     }
@@ -123,7 +126,6 @@ class RoutersPage extends ConsumerWidget {
       context: context,
       builder: (context) => _FleetConnectionResultsDialog(results: results),
     );
-    ref.invalidate(routerConnectionStatesProvider(routers));
   }
 }
 
@@ -134,15 +136,14 @@ class _FleetStatusCard extends StatelessWidget {
   });
 
   final int routerCount;
-  final AsyncValue<Map<String, bool>> connectionStates;
+  final Map<String, bool> connectionStates;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final states = connectionStates.asData?.value;
-    final connected = states?.values.where((value) => value).length ?? 0;
-    final unavailable = states == null ? 0 : states.length - connected;
-    final checking = connectionStates.isLoading;
+    final connected = connectionStates.values.where((value) => value).length;
+    final unavailable = connectionStates.length - connected;
+    final needsCheck = connectionStates.isEmpty;
 
     return Card(
       color: colorScheme.surfaceContainerHighest,
@@ -151,14 +152,14 @@ class _FleetStatusCard extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              checking ? Icons.sync_outlined : Icons.hub_outlined,
+              needsCheck ? Icons.network_check_outlined : Icons.hub_outlined,
               color: colorScheme.primary,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                checking
-                    ? 'Checking $routerCount router connections...'
+                needsCheck
+                    ? '$routerCount routers saved • run Test all to check connectivity'
                     : '$connected of $routerCount routers online'
                           '${unavailable == 0 ? '' : ' • $unavailable unavailable'}',
                 style: Theme.of(context).textTheme.titleSmall,
