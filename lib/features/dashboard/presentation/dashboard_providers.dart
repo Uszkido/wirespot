@@ -9,6 +9,10 @@ import '../domain/dashboard_snapshot.dart';
 
 final selectedRouterIdProvider = StateProvider<String?>((ref) => null);
 
+final storedActiveRouterIdProvider = FutureProvider.autoDispose<String?>(
+  (ref) => ref.watch(activeRouterServiceProvider).loadSelectedRouterId(),
+);
+
 final dashboardSnapshotProvider =
     FutureProvider.autoDispose<DashboardSnapshot?>((ref) async {
       final routers = await ref.watch(routerRepositoryProvider).getRouters();
@@ -16,7 +20,9 @@ final dashboardSnapshotProvider =
         return null;
       }
 
-      final selectedRouterId = ref.watch(selectedRouterIdProvider);
+      final selectedRouterId =
+          ref.watch(selectedRouterIdProvider) ??
+          await ref.watch(storedActiveRouterIdProvider.future);
       final router = routers.firstWhere(
         (item) => item.id == selectedRouterId,
         orElse: () => routers.first,

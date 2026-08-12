@@ -23,6 +23,11 @@ class RoutersPage extends ConsumerWidget {
         ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en';
     final text = AppText(languageCode);
     final selectedRouterId = ref.watch(selectedRouterIdProvider);
+    final storedActiveRouterId = ref
+        .watch(storedActiveRouterIdProvider)
+        .asData
+        ?.value;
+    final effectiveRouterId = selectedRouterId ?? storedActiveRouterId;
     final items = routers.asData?.value ?? const <RouterEntity>[];
     final connectionStates = ref.watch(routerConnectionStatesProvider(items));
 
@@ -68,8 +73,8 @@ class RoutersPage extends ConsumerWidget {
                 return _RouterTile(
                   router: items[index],
                   isActive:
-                      items[index].id == selectedRouterId ||
-                      (selectedRouterId == null && index == 0),
+                      items[index].id == effectiveRouterId ||
+                      (effectiveRouterId == null && index == 0),
                   isConnected: connectionStates.asData?.value[items[index].id],
                 );
               },
@@ -247,6 +252,11 @@ class _RouterTile extends ConsumerWidget {
         break;
       case _RouterAction.useRouter:
         ref.read(selectedRouterIdProvider.notifier).state = router.id;
+        await ref.read(activeRouterServiceProvider).selectRouter(router.id);
+        if (!context.mounted) {
+          return;
+        }
+        ref.invalidate(storedActiveRouterIdProvider);
         ref.invalidate(dashboardSnapshotProvider);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${router.name} is now the active router.')),

@@ -9,6 +9,7 @@ import '../../features/routers/domain/repositories/router_repository.dart';
 import '../../features/routers/data/ruijie_cloud_connection_service.dart';
 import '../../features/routers/domain/services/router_connection_service.dart';
 import '../../features/routers/domain/services/router_fleet_connection_service.dart';
+import '../../features/routers/domain/services/active_router_service.dart';
 import '../../features/scheduler/domain/services/scheduler_execution_service.dart';
 import '../../features/scheduler/domain/services/scheduler_settings_service.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
@@ -66,6 +67,10 @@ final routerFleetConnectionServiceProvider =
     Provider<RouterFleetConnectionService>(
       (ref) => sl<RouterFleetConnectionService>(),
     );
+
+final activeRouterServiceProvider = Provider<ActiveRouterService>(
+  (ref) => sl<ActiveRouterService>(),
+);
 
 final ruijieCloudConnectionServiceProvider =
     Provider<RuijieCloudConnectionService>(

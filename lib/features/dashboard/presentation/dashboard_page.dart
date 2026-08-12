@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/routeros_models.dart';
 import '../../../core/branding/app_branding.dart';
+import '../../../core/di/providers.dart';
 import '../../../core/localization/app_text.dart';
 import '../../../core/platform/external_action_service.dart';
 import '../../../core/router/app_routes.dart';
@@ -36,6 +37,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final text = AppText(languageCode);
     final routers = ref.watch(routersProvider).asData?.value ?? const [];
     final selectedRouterId = ref.watch(selectedRouterIdProvider);
+    final storedActiveRouterId = ref
+        .watch(storedActiveRouterIdProvider)
+        .asData
+        ?.value;
+    final effectiveRouterId = selectedRouterId ?? storedActiveRouterId;
 
     return PopScope(
       canPop: false,
@@ -69,6 +75,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 icon: const Icon(Icons.swap_horiz_outlined),
                 onSelected: (routerId) {
                   ref.read(selectedRouterIdProvider.notifier).state = routerId;
+                  ref.read(activeRouterServiceProvider).selectRouter(routerId);
+                  ref.invalidate(storedActiveRouterIdProvider);
                   ref.invalidate(dashboardSnapshotProvider);
                 },
                 itemBuilder: (context) => [
@@ -76,8 +84,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     CheckedPopupMenuItem(
                       value: routers[index].id,
                       checked:
-                          routers[index].id == selectedRouterId ||
-                          (selectedRouterId == null && index == 0),
+                          routers[index].id == effectiveRouterId ||
+                          (effectiveRouterId == null && index == 0),
                       child: Text(routers[index].name),
                     ),
                 ],

@@ -20,6 +20,7 @@ import '../../features/routers/domain/entities/router_entity.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
 import '../../features/routers/domain/services/router_connection_service.dart';
 import '../../features/routers/domain/services/router_fleet_connection_service.dart';
+import '../../features/routers/domain/services/active_router_service.dart';
 import '../../features/scheduler/domain/services/scheduler_execution_service.dart';
 import '../../features/scheduler/domain/services/scheduler_settings_service.dart';
 import '../../features/settings/data/settings_local_repository.dart';
@@ -125,6 +126,9 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<RouterFleetConnectionService>(
       () => RouterFleetConnectionService(sl<RouterConnectionService>()),
+    )
+    ..registerLazySingleton<ActiveRouterService>(
+      () => ActiveRouterService(sl<SettingsRepository>()),
     )
     ..registerLazySingleton<HotspotService>(
       () => RouterOsHotspotService(sl<RouterConnectionService>()),

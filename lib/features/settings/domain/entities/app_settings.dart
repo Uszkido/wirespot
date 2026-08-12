@@ -12,6 +12,7 @@ class AppSettingsKeys {
   static const businessPhone = 'business_phone';
   static const businessWebsite = 'business_website';
   static const businessLogoPath = 'business_logo_path';
+  static const activeRouterId = 'active_router_id';
 }
 
 class SupportedLanguage {
