@@ -93,6 +93,7 @@ WireSpot solves that with a focused Android workflow:
 | Storage | Drift/SQLite, secure storage |
 | Networking | Original RouterOS API client, Dio where HTTP/cloud APIs are needed |
 | Android | Kotlin platform channels for VPN, Bluetooth, sharing, printing |
+| iOS | Planned Flutter target requiring native iOS channel implementations |
 | VPN | WireGuard Android tunnel backend integration |
 | Printing | ESC/POS Bluetooth thermal printer support |
 | QR | QR generation and WireGuard QR import |
@@ -106,6 +107,7 @@ WireSpot solves that with a focused Android workflow:
 - Android SDK and platform tools
 - Git for Windows
 - Android phone for real VPN/Bluetooth/router testing
+- macOS, Xcode, CocoaPods, and Apple Developer account for future iOS builds
 - MikroTik RouterOS router with API enabled for full live hotspot operations
 - Ruijie/Reyee, OpenWrt, TP-Link Omada, UniFi, or generic router for planned
   connector setup/field discovery
@@ -223,6 +225,7 @@ collaboration with TechNova Technologies.
 | [docs/technical-diagnostics.md](docs/technical-diagnostics.md) | Debugging and technical checks |
 | [docs/payment-and-licensing.md](docs/payment-and-licensing.md) | Trial, subscription, offline license plan |
 | [docs/play-store-release.md](docs/play-store-release.md) | Play Store signing and release process |
+| [docs/ios-roadmap.md](docs/ios-roadmap.md) | iOS build, platform-channel, and App Store roadmap |
 | [docs/github-automation.md](docs/github-automation.md) | GitHub Actions, CI APK artifacts, and Dependabot automation |
 | [docs/privacy-policy.md](docs/privacy-policy.md) | Privacy policy draft |
 | [docs/workstation-transfer.md](docs/workstation-transfer.md) | Moving the project to another PC |
@@ -254,6 +257,7 @@ Still required before production upload:
 
 - Real Play Billing or server-side license validation.
 - Release signing and Play Store AAB.
+- iOS platform folder, native iOS platform channels, and App Store release path.
 - More field testing on MikroTik hotspot setup.
 - Implement first non-MikroTik connector, starting with Ruijie/Reyee discovery.
 - Expand business setup presets across supported brands.

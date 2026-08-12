@@ -12,6 +12,8 @@ The format follows practical release notes for operators and maintainers.
   Omada, Ubiquiti UniFi, and generic router records.
 - Hotspot business setup presets for quick voucher, small business, hotel
   guest Wi-Fi, and RADIUS-managed deployments.
+- iOS roadmap documenting the future Flutter iOS target, required native
+  platform-channel work, and App Store release path.
 - Gallery-based business logo picker for professional co-branding, with selected
   images copied into WireSpot app storage for stable receipt/report reuse.
 - Router-aware scheduler execution for active session refresh and expired
