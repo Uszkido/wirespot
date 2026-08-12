@@ -8,6 +8,7 @@ import '../../../core/licensing/premium_feature.dart';
 import '../../../core/printer/printer_models.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../dashboard/presentation/dashboard_providers.dart';
 import '../../routers/domain/entities/router_entity.dart';
 import '../../routers/presentation/router_providers.dart';
 import '../../settings/presentation/settings_providers.dart';
@@ -76,7 +77,10 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
             );
           }
 
-          final selectedId = ref.watch(selectedVoucherRouterIdProvider);
+          final selectedId =
+              ref.watch(selectedVoucherRouterIdProvider) ??
+              ref.watch(selectedRouterIdProvider) ??
+              ref.watch(storedActiveRouterIdProvider).asData?.value;
           final router = items.firstWhere(
             (item) => item.id == selectedId,
             orElse: () => items.first,
@@ -107,6 +111,14 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
                     onRouterChanged: (value) {
                       ref.read(selectedVoucherRouterIdProvider.notifier).state =
                           value;
+                      if (value != null) {
+                        ref.read(selectedRouterIdProvider.notifier).state =
+                            value;
+                        ref
+                            .read(activeRouterServiceProvider)
+                            .selectRouter(value);
+                        ref.invalidate(storedActiveRouterIdProvider);
+                      }
                     },
                     onPlanChanged: (plan) {
                       setState(() {

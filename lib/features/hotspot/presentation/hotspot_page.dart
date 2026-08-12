@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/di/providers.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../dashboard/presentation/dashboard_providers.dart';
 import '../../routers/domain/entities/router_entity.dart';
 import '../../routers/presentation/router_providers.dart';
 import '../../settings/presentation/settings_providers.dart';
@@ -47,7 +48,10 @@ class HotspotPage extends ConsumerWidget {
             );
           }
 
-          final selectedId = ref.watch(selectedHotspotRouterIdProvider);
+          final selectedId =
+              ref.watch(selectedHotspotRouterIdProvider) ??
+              ref.watch(selectedRouterIdProvider) ??
+              ref.watch(storedActiveRouterIdProvider).asData?.value;
           final router = items.firstWhere(
             (item) => item.id == selectedId,
             orElse: () => items.first,
@@ -106,6 +110,11 @@ class _HotspotRouterScope extends ConsumerWidget {
                   onChanged: (value) {
                     ref.read(selectedHotspotRouterIdProvider.notifier).state =
                         value;
+                    if (value != null) {
+                      ref.read(selectedRouterIdProvider.notifier).state = value;
+                      ref.read(activeRouterServiceProvider).selectRouter(value);
+                      ref.invalidate(storedActiveRouterIdProvider);
+                    }
                   },
                 ),
                 const SizedBox(height: 8),
