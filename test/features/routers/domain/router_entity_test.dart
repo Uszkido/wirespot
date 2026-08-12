@@ -42,6 +42,11 @@ void main() {
 
     expect(router.vendor.label, 'Ruijie / Reyee');
     expect(router.vendor.usesRouterOsApi, isFalse);
+    expect(router.vendor.requiresController, isTrue);
+    expect(
+      router.vendor.managementSurfaceLabel,
+      'Ruijie Cloud or local controller',
+    );
     expect(router.vendor.hasLiveConnector, isFalse);
     expect(router.vendor.plans(RouterCapability.cloudController), isTrue);
     expect(router.vendor.plans(RouterCapability.voucherProvisioning), isTrue);

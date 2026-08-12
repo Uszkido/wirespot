@@ -320,6 +320,20 @@ class _RouterVendorHint extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
+              'Connection target: ${vendor.managementSurfaceLabel}.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Security: ${vendor.securityNote}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
               activeCapabilities,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,

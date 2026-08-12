@@ -19,6 +19,10 @@ enum RouterVendor {
     defaultPort: 8728,
     defaultUseSsl: false,
     usesRouterOsApi: true,
+    managementSurfaceLabel: 'RouterOS API',
+    requiresController: false,
+    securityNote:
+        'Prefer private VPN or LAN access with a least-privilege account.',
     setupChecklist: [
       'Enable the RouterOS API service on a trusted port.',
       'Use WireGuard, Back To Home, ZeroTier, or a trusted LAN for access.',
@@ -39,6 +43,10 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
+    managementSurfaceLabel: 'Ruijie Cloud or local controller',
+    requiresController: true,
+    securityNote:
+        'Use HTTPS controller access and keep site credentials separate.',
     setupChecklist: [
       'Prepare Ruijie Cloud or controller access for the managed site.',
       'Keep gateway, access point, and captive portal details ready.',
@@ -60,6 +68,10 @@ enum RouterVendor {
     defaultPort: 22,
     defaultUseSsl: false,
     usesRouterOsApi: false,
+    managementSurfaceLabel: 'SSH or LuCI',
+    requiresController: false,
+    securityNote:
+        'Do not expose SSH or LuCI publicly; prefer VPN or trusted LAN access.',
     setupChecklist: [
       'Enable trusted SSH or LuCI access from the WireSpot device/network.',
       'Prepare captive portal package details such as NoDogSplash or CoovaChilli.',
@@ -78,6 +90,9 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
+    managementSurfaceLabel: 'Omada Controller',
+    requiresController: true,
+    securityNote: 'Use HTTPS controller access with a scoped operator account.',
     setupChecklist: [
       'Prepare Omada Controller access for the target site.',
       'Keep portal, WLAN, voucher, and client policies ready.',
@@ -99,6 +114,9 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
+    managementSurfaceLabel: 'UniFi Network controller',
+    requiresController: true,
+    securityNote: 'Use HTTPS controller access with a scoped operator account.',
     setupChecklist: [
       'Prepare UniFi Network controller access for the target site.',
       'Keep guest hotspot, WLAN, and voucher policies ready.',
@@ -120,6 +138,10 @@ enum RouterVendor {
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
+    managementSurfaceLabel: 'SSH, SNMP, or HTTPS API',
+    requiresController: false,
+    securityNote:
+        'Prefer read-only monitoring credentials until a connector is verified.',
     setupChecklist: [
       'Confirm the router exposes SSH, SNMP, or an HTTPS management API.',
       'Use a private management network or VPN where possible.',
@@ -138,6 +160,9 @@ enum RouterVendor {
     required this.defaultPort,
     required this.defaultUseSsl,
     required this.usesRouterOsApi,
+    required this.managementSurfaceLabel,
+    required this.requiresController,
+    required this.securityNote,
     required this.setupChecklist,
     this.activeCapabilities = const {},
     this.plannedCapabilities = const {},
@@ -148,6 +173,9 @@ enum RouterVendor {
   final int defaultPort;
   final bool defaultUseSsl;
   final bool usesRouterOsApi;
+  final String managementSurfaceLabel;
+  final bool requiresController;
+  final String securityNote;
   final List<String> setupChecklist;
   final Set<RouterCapability> activeCapabilities;
   final Set<RouterCapability> plannedCapabilities;

@@ -33,7 +33,9 @@ class PlannedRouterConnector implements RouterConnector {
   RouterOsApiException _unsupported(RouterEntity router) {
     return RouterOsApiException(
       '${router.vendor.label} is saved as a planned connector. '
-      'WireSpot cannot manage it until this brand integration is implemented.',
+      'WireSpot cannot manage it until this brand integration is implemented. '
+      'It will connect through ${router.vendor.managementSurfaceLabel}. '
+      '${router.vendor.setupChecklist.first}',
       category: 'unsupported_vendor',
     );
   }

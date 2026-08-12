@@ -48,6 +48,11 @@ void main() {
               (error) => error.message,
               'message',
               contains('planned connector'),
+            )
+            .having(
+              (error) => error.message,
+              'message',
+              contains('Ruijie Cloud or local controller'),
             ),
       ),
     );
