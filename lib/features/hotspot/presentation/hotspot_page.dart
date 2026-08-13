@@ -121,6 +121,8 @@ class _HotspotRouterScope extends ConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 8),
+                _HotspotCapabilityBanner(router: router),
+                const SizedBox(height: 8),
                 Align(
                   alignment: Alignment.centerRight,
                   child: OutlinedButton.icon(
@@ -162,6 +164,40 @@ class _HotspotRouterScope extends ConsumerWidget {
   }
 }
 
+class _HotspotCapabilityBanner extends StatelessWidget {
+  const _HotspotCapabilityBanner({required this.router});
+
+  final RouterEntity router;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Icon(Icons.wifi_tethering, color: colorScheme.onPrimaryContainer),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                '${router.name}: live ${router.vendor.label} hotspot operations are enabled.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _UnsupportedHotspotRouter extends ConsumerWidget {
   const _UnsupportedHotspotRouter({
     required this.routers,
@@ -188,6 +224,11 @@ class _UnsupportedHotspotRouter extends ConsumerWidget {
           ],
           onChanged: (value) {
             ref.read(selectedHotspotRouterIdProvider.notifier).state = value;
+            if (value != null) {
+              ref.read(selectedRouterIdProvider.notifier).state = value;
+              ref.read(activeRouterServiceProvider).selectRouter(value);
+              ref.invalidate(storedActiveRouterIdProvider);
+            }
           },
         ),
         const SizedBox(height: 32),
