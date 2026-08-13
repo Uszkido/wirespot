@@ -1,6 +1,6 @@
 # WireSpot
 
-Secure multi-brand hotspot operations for Android, built by
+Secure multi-brand hotspot operations built by
 Vexel Innovations in collaboration with TechNova Technologies.
 
 ![WireSpot logo](assets/images/wirespot_readme_logo.png)
