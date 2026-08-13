@@ -87,6 +87,9 @@ class _HotspotRouterScope extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!router.vendor.supports(RouterCapability.hotspotUsers)) {
+      return _UnsupportedHotspotRouter(routers: routers, router: router);
+    }
     return DefaultTabController(
       length: 6,
       initialIndex: initialTabIndex.clamp(0, 5).toInt(),
@@ -155,6 +158,62 @@ class _HotspotRouterScope extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _UnsupportedHotspotRouter extends ConsumerWidget {
+  const _UnsupportedHotspotRouter({
+    required this.routers,
+    required this.router,
+  });
+
+  final List<RouterEntity> routers;
+  final RouterEntity router;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        DropdownButtonFormField<String>(
+          initialValue: router.id,
+          decoration: const InputDecoration(
+            labelText: 'Router',
+            prefixIcon: Icon(Icons.router_outlined),
+          ),
+          items: [
+            for (final item in routers)
+              DropdownMenuItem(value: item.id, child: Text(item.name)),
+          ],
+          onChanged: (value) {
+            ref.read(selectedHotspotRouterIdProvider.notifier).state = value;
+          },
+        ),
+        const SizedBox(height: 32),
+        Icon(
+          Icons.lock_outline,
+          size: 48,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Hotspot controls are not available for ${router.vendor.label}',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          router.vendor.hasLiveConnector
+              ? 'This connection currently supports ${router.vendor.activeCapabilitySummary.toLowerCase()}. '
+                    'Hotspot users, setup, and vouchers remain disabled until the vendor API is verified.'
+              : 'This brand is saved for future connector support. Select a MikroTik router for live RouterOS hotspot operations.',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }
