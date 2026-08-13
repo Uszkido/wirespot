@@ -84,6 +84,34 @@ void main() {
     });
   });
 
+  test('HotspotSetupInput reports incomplete network provisioning', () {
+    const input = HotspotSetupInput(
+      serverName: 'hotspot1',
+      interfaceName: 'bridge',
+      serverProfileName: 'hsprof1',
+      provisionNetwork: true,
+      poolName: 'hs-pool',
+      enableNatMasquerade: true,
+    );
+
+    expect(
+      input.validationErrors,
+      containsAll([
+        'Enter the interface IP address.',
+        'Enter the IP pool name and range.',
+        'Enter the DHCP server name.',
+        'Enter the DHCP network and gateway.',
+        'Enter the NAT source network.',
+      ]),
+    );
+  });
+
+  test('business setup presets pass local setup validation', () {
+    for (final preset in HotspotSetupPreset.values) {
+      expect(preset.toInput().validationErrors, isEmpty, reason: preset.name);
+    }
+  });
+
   test('HotspotSetupInput maps optional network provisioning attributes', () {
     const input = HotspotSetupInput(
       serverName: 'hotspot1',

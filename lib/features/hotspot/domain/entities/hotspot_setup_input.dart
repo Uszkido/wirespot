@@ -51,6 +51,40 @@ class HotspotSetupInput {
   final bool useRadius;
   final bool disabled;
 
+  List<String> get validationErrors {
+    final errors = <String>[];
+    if (!_hasText(serverName)) {
+      errors.add('Enter a hotspot server name.');
+    }
+    if (!_hasText(interfaceName)) {
+      errors.add('Choose the interface that will run the hotspot.');
+    }
+    if (!_hasText(serverProfileName)) {
+      errors.add('Enter a hotspot server profile name.');
+    }
+    if (!_hasText(addressPool) && !(_hasText(poolName) && provisionNetwork)) {
+      errors.add('Enter an address pool or enable network provisioning.');
+    }
+    if (provisionNetwork) {
+      if (!_hasText(ipAddressWithPrefix)) {
+        errors.add('Enter the interface IP address.');
+      }
+      if (!_hasText(poolName) || !_hasText(poolRanges)) {
+        errors.add('Enter the IP pool name and range.');
+      }
+      if (!_hasText(dhcpServerName)) {
+        errors.add('Enter the DHCP server name.');
+      }
+      if (!_hasText(dhcpNetwork) || !_hasText(dhcpGateway)) {
+        errors.add('Enter the DHCP network and gateway.');
+      }
+      if (enableNatMasquerade && !_hasText(natSrcAddress)) {
+        errors.add('Enter the NAT source network.');
+      }
+    }
+    return errors;
+  }
+
   Map<String, String> toServerProfileAttributes() {
     return {
       'name': serverProfileName.trim(),

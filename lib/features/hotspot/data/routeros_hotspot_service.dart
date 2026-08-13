@@ -373,22 +373,9 @@ class RouterOsHotspotService implements HotspotService {
   }
 
   void _validateSetupInput(HotspotSetupInput input) {
-    if (input.serverName.trim().isEmpty) {
-      throw ArgumentError.value(input.serverName, 'serverName', 'Required');
-    }
-    if (input.interfaceName.trim().isEmpty) {
-      throw ArgumentError.value(
-        input.interfaceName,
-        'interfaceName',
-        'Required',
-      );
-    }
-    if (input.serverProfileName.trim().isEmpty) {
-      throw ArgumentError.value(
-        input.serverProfileName,
-        'serverProfileName',
-        'Required',
-      );
+    final errors = input.validationErrors;
+    if (errors.isNotEmpty) {
+      throw ArgumentError(errors.join(' '));
     }
   }
 

@@ -869,6 +869,14 @@ Future<void> _showSetupHotspotDialog(
     if (!context.mounted) {
       return;
     }
+    final validationErrors = input.validationErrors;
+    if (validationErrors.isNotEmpty) {
+      _showSnack(
+        context,
+        'Complete the setup before reviewing it: ${validationErrors.first}',
+      );
+      return;
+    }
     final confirmed = await _showSetupPlanDialog(
       context,
       router: router,
