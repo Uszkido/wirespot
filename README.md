@@ -5,7 +5,7 @@ Vexel Innovations in collaboration with TechNova Technologies.
 
 ![WireSpot logo](assets/images/wirespot_readme_logo.png)
 
-WireSpot is a modern Flutter Android application for hotspot operators,
+WireSpot is a modern Flutter application for hotspot operators,
 technicians, and small ISPs who manage business Wi-Fi and voucher networks. It
 brings router management, hotspot users, voucher generation, thermal printing,
 reporting, WireGuard remote access, backup, and licensing into one mobile app.
