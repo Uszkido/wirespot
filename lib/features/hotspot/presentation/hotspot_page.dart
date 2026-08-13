@@ -869,7 +869,12 @@ Future<void> _showSetupHotspotDialog(
     if (!context.mounted) {
       return;
     }
-    final confirmed = await _showSetupPlanDialog(context, input);
+    final confirmed = await _showSetupPlanDialog(
+      context,
+      router: router,
+      preset: selectedPreset,
+      input: input,
+    );
     if (!confirmed) {
       return;
     }
@@ -902,14 +907,16 @@ Future<void> _showSetupHotspotDialog(
 }
 
 Future<bool> _showSetupPlanDialog(
-  BuildContext context,
-  HotspotSetupInput input,
-) async {
+  BuildContext context, {
+  required RouterEntity router,
+  required HotspotSetupPreset preset,
+  required HotspotSetupInput input,
+}) async {
   final plan = input.toPlan();
   final result = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Review setup'),
+      title: const Text('Review and apply setup'),
       content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
@@ -917,8 +924,14 @@ Future<bool> _showSetupPlanDialog(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text(
+                'Target router: ${router.name}',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              Text('${router.vendor.label} • ${preset.label}'),
+              const SizedBox(height: 12),
               const Text(
-                'WireSpot will check for existing records before adding these RouterOS settings.',
+                'This can create network, DHCP, NAT, and hotspot records on the selected router. WireSpot checks for existing records before adding settings.',
               ),
               const SizedBox(height: 12),
               for (final step in plan.steps)
