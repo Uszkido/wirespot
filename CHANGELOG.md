@@ -8,6 +8,9 @@ The format follows practical release notes for operators and maintainers.
 
 ### Added
 
+- Multi-router fleet operations: persistent active-router selection, concurrent
+  on-demand connection tests, reachable-router summary, site/business groups,
+  and fleet filtering by group.
 - Limited Ruijie/Reyee Cloud connector for secure token-based connection
   verification through device discovery, with hotspot and voucher operations
   kept disabled pending verified vendor API contracts.
@@ -32,6 +35,8 @@ The format follows practical release notes for operators and maintainers.
 
 ### Changed
 
+- Hotspot and voucher router selectors now follow and update the app-wide
+  active router selection.
 - README, user manual, operator guide, privacy policy, diagnostics, pitch, and
   GitHub templates now describe WireSpot as a multi-brand hotspot operations
   app while identifying MikroTik RouterOS as the current full live connector.

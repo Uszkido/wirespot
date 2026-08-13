@@ -62,6 +62,22 @@ and the safe setup process.
 8. Save.
 9. Use Test Connection to confirm RouterOS API access for MikroTik routers.
 
+## Router Fleet And Groups
+
+WireSpot supports multiple saved routers at the same time. The router with the
+check mark is the active router used by default in Dashboard, Hotspot, and
+Vouchers. Select **Use this router** from any router menu, or use the Dashboard
+switch icon, to change it. The choice is remembered when you reopen the app.
+
+Use **Test all router connections** to test available routers concurrently.
+The result identifies every online and unavailable router without making one
+router block the others.
+
+When adding or editing a router, choose **Router group / site** to attach it
+to a business, branch, hotel, estate, or other location. Create a group from
+the same form, then use the **Fleet group** filter on the Routers screen to
+view and test only that location.
+
 If Test Connection fails, check the selected connection mode first. VPN routers need WireGuard connected. Local LAN routers need the phone connected to the same network as the MikroTik. Then verify host, port, username, password, and RouterOS API service status.
 
 ## 4. Local On-Site Use Without VPN

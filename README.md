@@ -216,6 +216,19 @@ collaboration with TechNova Technologies.
 | Ubiquiti UniFi | Planned connector foundation | Future UniFi Controller integration |
 | Generic router | Planned limited connector | Future SSH/SNMP/basic monitoring where supported |
 
+## Multi-Router Fleet Operations
+
+WireSpot can keep many router records and work with them as a fleet. Choose an
+**active router** from the Dashboard or Routers screen; that selection is
+remembered across app restarts and becomes the default in Dashboard, Hotspot,
+and Vouchers. The app can test several routers concurrently through **Test all
+router connections**.
+
+Create router groups for businesses, branches, hotels, estates, or sites. Use
+the **Fleet group** filter to focus the list and run connection checks only for
+the selected group. The active router is only the router currently in focus—it
+does not stop WireSpot from testing or scheduling work across other routers.
+
 ## Documentation
 
 | Document | Purpose |
