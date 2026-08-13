@@ -546,6 +546,7 @@ Future<void> _showSetupHotspotDialog(
     return;
   }
 
+  final interfaceNamesFuture = _loadHotspotInterfaceNames(ref, router);
   var selectedPreset = HotspotSetupPreset.quickVoucher;
   final initialInput = selectedPreset.toInput();
   final serverNameController = TextEditingController(
@@ -700,12 +701,63 @@ Future<void> _showSetupHotspotDialog(
                     ),
                   ),
                   const SizedBox(height: 8),
-                  TextField(
-                    controller: interfaceController,
-                    decoration: const InputDecoration(
-                      labelText: 'Interface',
-                      helperText: 'Example: bridge, wlan1, ether2',
-                    ),
+                  FutureBuilder<List<String>>(
+                    future: interfaceNamesFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return TextField(
+                          controller: interfaceController,
+                          enabled: false,
+                          decoration: const InputDecoration(
+                            labelText: 'Interface',
+                            helperText: 'Loading interfaces from the router...',
+                          ),
+                        );
+                      }
+
+                      final interfaceNames = snapshot.data ?? const <String>[];
+                      if (interfaceNames.isEmpty) {
+                        return TextField(
+                          controller: interfaceController,
+                          decoration: InputDecoration(
+                            labelText: 'Interface',
+                            helperText: snapshot.hasError
+                                ? 'Could not load interfaces. Enter a verified name.'
+                                : 'No interfaces were reported. Enter a verified name.',
+                          ),
+                        );
+                      }
+
+                      final selectedInterface =
+                          interfaceNames.contains(interfaceController.text)
+                          ? interfaceController.text
+                          : null;
+                      return DropdownButtonFormField<String>(
+                        key: ValueKey(selectedInterface),
+                        initialValue: selectedInterface,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Hotspot interface',
+                          helperText:
+                              'Choose an interface reported by this router.',
+                        ),
+                        items: [
+                          for (final interfaceName in interfaceNames)
+                            DropdownMenuItem(
+                              value: interfaceName,
+                              child: Text(interfaceName),
+                            ),
+                        ],
+                        onChanged: (interfaceName) {
+                          if (interfaceName == null) {
+                            return;
+                          }
+                          setState(
+                            () => interfaceController.text = interfaceName,
+                          );
+                        },
+                      );
+                    },
                   ),
                   const SizedBox(height: 8),
                   TextField(
@@ -935,6 +987,23 @@ Future<void> _showSetupHotspotDialog(
     natSrcAddressController.dispose();
     natOutInterfaceController.dispose();
   }
+}
+
+Future<List<String>> _loadHotspotInterfaceNames(
+  WidgetRef ref,
+  RouterEntity router,
+) async {
+  final response = await ref
+      .read(routerConnectionServiceProvider)
+      .execute(router, '/interface/print');
+  final interfaceNames =
+      response.records
+          .map((record) => record['name']?.trim() ?? '')
+          .where((name) => name.isNotEmpty)
+          .toSet()
+          .toList()
+        ..sort();
+  return interfaceNames;
 }
 
 Future<bool> _showSetupPlanDialog(
