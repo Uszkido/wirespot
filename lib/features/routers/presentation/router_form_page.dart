@@ -9,6 +9,7 @@ import '../../../core/storage/router_credentials.dart';
 import '../../../core/utils/id_generator.dart';
 import '../../../core/utils/validators.dart';
 import '../domain/entities/router_entity.dart';
+import '../domain/entities/router_group_entity.dart';
 import 'router_providers.dart';
 
 class RouterFormPage extends ConsumerStatefulWidget {
@@ -32,6 +33,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
   bool _requireVpn = true;
   RouterVendor _vendor = RouterVendor.mikrotik;
   RouterRemoteAccessMode _remoteAccessMode = RouterRemoteAccessMode.wireGuard;
+  String? _groupId;
   bool _isSaving = false;
   bool _didHydrate = false;
 
@@ -98,6 +100,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
       );
     }
 
+    final groups = ref.watch(routerGroupsProvider).asData?.value ?? const [];
     return Scaffold(
       appBar: AppBar(title: Text(_isEditing ? 'Edit router' : 'Add router')),
       body: Builder(
@@ -114,11 +117,15 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
             requireVpn: _requireVpn,
             vendor: _vendor,
             remoteAccessMode: _remoteAccessMode,
+            groups: groups,
+            groupId: _groupId,
             isEditing: _isEditing,
             isSaving: _isSaving,
             onVendorChanged: _setVendor,
             onUseSslChanged: (value) => setState(() => _useSsl = value),
             onRemoteAccessModeChanged: _setRemoteAccessMode,
+            onGroupChanged: (value) => setState(() => _groupId = value),
+            onCreateGroup: _createGroup,
             onSave: () => _save(existingRouter),
             onCancel: _returnToRouters,
           );
@@ -140,6 +147,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
     _requireVpn = router.requireVpn;
     _vendor = router.vendor;
     _remoteAccessMode = router.remoteAccessMode;
+    _groupId = router.groupId;
     _didHydrate = true;
   }
 
@@ -208,7 +216,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
       final now = DateTime.now();
       final router = RouterEntity(
         id: existingRouter?.id ?? IdGenerator.timestampId('router'),
-        groupId: existingRouter?.groupId,
+        groupId: _groupId,
         name: _nameController.text.trim(),
         host: _hostController.text.trim(),
         vendor: _vendor,
@@ -268,6 +276,50 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
       return;
     }
     context.go(AppRoutes.routers);
+  }
+
+  Future<void> _createGroup() async {
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Create router group'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textInputAction: TextInputAction.done,
+          decoration: const InputDecoration(
+            labelText: 'Group name',
+            hintText: 'Example: Lagos branches',
+          ),
+          onSubmitted: (value) => Navigator.of(context).pop(value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(controller.text),
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    final trimmedName = name?.trim() ?? '';
+    if (trimmedName.isEmpty) {
+      return;
+    }
+    final group = RouterGroupEntity(
+      id: IdGenerator.timestampId('group'),
+      name: trimmedName,
+    );
+    await ref.read(routerRepositoryProvider).saveGroup(group);
+    ref.invalidate(routerGroupsProvider);
+    if (mounted) {
+      setState(() => _groupId = group.id);
+    }
   }
 }
 
@@ -409,11 +461,15 @@ class _RouterFormBody extends StatelessWidget {
     required this.requireVpn,
     required this.vendor,
     required this.remoteAccessMode,
+    required this.groups,
+    required this.groupId,
     required this.isEditing,
     required this.isSaving,
     required this.onVendorChanged,
     required this.onUseSslChanged,
     required this.onRemoteAccessModeChanged,
+    required this.onGroupChanged,
+    required this.onCreateGroup,
     required this.onSave,
     required this.onCancel,
   });
@@ -428,11 +484,15 @@ class _RouterFormBody extends StatelessWidget {
   final bool requireVpn;
   final RouterVendor vendor;
   final RouterRemoteAccessMode remoteAccessMode;
+  final List<RouterGroupEntity> groups;
+  final String? groupId;
   final bool isEditing;
   final bool isSaving;
   final ValueChanged<RouterVendor> onVendorChanged;
   final ValueChanged<bool> onUseSslChanged;
   final ValueChanged<RouterRemoteAccessMode> onRemoteAccessModeChanged;
+  final ValueChanged<String?> onGroupChanged;
+  final Future<void> Function() onCreateGroup;
   final VoidCallback onSave;
   final VoidCallback onCancel;
 
@@ -462,6 +522,38 @@ class _RouterFormBody extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
+                DropdownButtonFormField<String?>(
+                  initialValue: groupId,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Router group / site',
+                    prefixIcon: Icon(Icons.folder_outlined),
+                  ),
+                  items: [
+                    const DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text('No group'),
+                    ),
+                    for (final group in groups)
+                      DropdownMenuItem<String?>(
+                        value: group.id,
+                        child: Text(
+                          group.name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: onGroupChanged,
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: onCreateGroup,
+                    icon: const Icon(Icons.create_new_folder_outlined),
+                    label: const Text('Create group'),
+                  ),
+                ),
+                const SizedBox(height: 4),
                 DropdownButtonFormField<RouterVendor>(
                   initialValue: vendor,
                   isExpanded: true,

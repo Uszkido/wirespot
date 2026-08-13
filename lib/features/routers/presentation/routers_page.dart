@@ -9,6 +9,7 @@ import '../../../shared/widgets/empty_state.dart';
 import '../../dashboard/presentation/dashboard_providers.dart';
 import '../../settings/presentation/settings_providers.dart';
 import '../domain/entities/router_entity.dart';
+import '../domain/entities/router_group_entity.dart';
 import '../domain/entities/ruijie_cloud_device.dart';
 import '../domain/services/router_fleet_connection_service.dart';
 import 'router_providers.dart';
@@ -30,6 +31,8 @@ class RoutersPage extends ConsumerWidget {
     final effectiveRouterId = selectedRouterId ?? storedActiveRouterId;
     final items = routers.asData?.value ?? const <RouterEntity>[];
     final connectionStates = ref.watch(routerConnectionStatesProvider);
+    final groups = ref.watch(routerGroupsProvider).asData?.value ?? const [];
+    final groupsById = {for (final group in groups) group.id: group};
 
     return Scaffold(
       appBar: AppBar(
@@ -87,6 +90,7 @@ class RoutersPage extends ConsumerWidget {
                       items[routerIndex].id == effectiveRouterId ||
                       (effectiveRouterId == null && routerIndex == 0),
                   isConnected: connectionStates[items[routerIndex].id],
+                  group: groupsById[items[routerIndex].groupId],
                 );
               },
             ),
@@ -177,11 +181,13 @@ class _RouterTile extends ConsumerWidget {
     required this.router,
     required this.isActive,
     required this.isConnected,
+    this.group,
   });
 
   final RouterEntity router;
   final bool isActive;
   final bool? isConnected;
+  final RouterGroupEntity? group;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -229,6 +235,7 @@ class _RouterTile extends ConsumerWidget {
         subtitle: Text(
           [
             router.vendor.label,
+            if (group != null) group!.name,
             '${router.host}:${router.apiPort}',
             if (router.useSsl) 'SSL',
             router.remoteAccessMode.label,
