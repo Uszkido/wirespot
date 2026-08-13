@@ -15,6 +15,9 @@ final routerConnectionStatesProvider = StateProvider<Map<String, bool>>(
   (ref) => const {},
 );
 
+/// Null means the fleet view includes every site and ungrouped router.
+final selectedRouterGroupIdProvider = StateProvider<String?>((ref) => null);
+
 final routerByIdProvider = FutureProvider.autoDispose
     .family<RouterEntity?, String>((ref, routerId) {
       return ref.watch(routerRepositoryProvider).getRouter(routerId);

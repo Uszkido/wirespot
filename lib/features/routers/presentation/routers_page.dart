@@ -33,15 +33,19 @@ class RoutersPage extends ConsumerWidget {
     final connectionStates = ref.watch(routerConnectionStatesProvider);
     final groups = ref.watch(routerGroupsProvider).asData?.value ?? const [];
     final groupsById = {for (final group in groups) group.id: group};
+    final selectedGroupId = ref.watch(selectedRouterGroupIdProvider);
+    final filteredItems = selectedGroupId == null
+        ? items
+        : items.where((router) => router.groupId == selectedGroupId).toList();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(text.routers),
         actions: [
-          if (items.isNotEmpty)
+          if (filteredItems.isNotEmpty)
             IconButton(
-              tooltip: 'Test all router connections',
-              onPressed: () => _testAllConnections(context, ref, items),
+              tooltip: 'Test visible router connections',
+              onPressed: () => _testAllConnections(context, ref, filteredItems),
               icon: const Icon(Icons.network_check_outlined),
             ),
         ],
@@ -74,23 +78,32 @@ class RoutersPage extends ConsumerWidget {
             },
             child: ListView.separated(
               padding: const EdgeInsets.all(16),
-              itemCount: items.length + 1,
+              itemCount: filteredItems.length + 2,
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return _FleetStatusCard(
-                    routerCount: items.length,
+                    routerCount: filteredItems.length,
                     connectionStates: connectionStates,
                   );
                 }
-                final routerIndex = index - 1;
+                if (index == 1) {
+                  return _RouterGroupFilter(
+                    groups: groups,
+                    selectedGroupId: selectedGroupId,
+                    onChanged: (value) =>
+                        ref.read(selectedRouterGroupIdProvider.notifier).state =
+                            value,
+                  );
+                }
+                final routerIndex = index - 2;
                 return _RouterTile(
-                  router: items[routerIndex],
+                  router: filteredItems[routerIndex],
                   isActive:
-                      items[routerIndex].id == effectiveRouterId ||
+                      filteredItems[routerIndex].id == effectiveRouterId ||
                       (effectiveRouterId == null && routerIndex == 0),
-                  isConnected: connectionStates[items[routerIndex].id],
-                  group: groupsById[items[routerIndex].groupId],
+                  isConnected: connectionStates[filteredItems[routerIndex].id],
+                  group: groupsById[filteredItems[routerIndex].groupId],
                 );
               },
             ),
@@ -129,6 +142,36 @@ class RoutersPage extends ConsumerWidget {
     await showDialog<void>(
       context: context,
       builder: (context) => _FleetConnectionResultsDialog(results: results),
+    );
+  }
+}
+
+class _RouterGroupFilter extends StatelessWidget {
+  const _RouterGroupFilter({
+    required this.groups,
+    required this.selectedGroupId,
+    required this.onChanged,
+  });
+
+  final List<RouterGroupEntity> groups;
+  final String? selectedGroupId;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<String?>(
+      initialValue: selectedGroupId,
+      isExpanded: true,
+      decoration: const InputDecoration(
+        labelText: 'Fleet group',
+        prefixIcon: Icon(Icons.filter_list_outlined),
+      ),
+      items: [
+        const DropdownMenuItem<String?>(value: null, child: Text('All groups')),
+        for (final group in groups)
+          DropdownMenuItem<String?>(value: group.id, child: Text(group.name)),
+      ],
+      onChanged: onChanged,
     );
   }
 }
