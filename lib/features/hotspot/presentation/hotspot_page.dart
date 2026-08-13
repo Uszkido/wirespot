@@ -618,249 +618,272 @@ Future<void> _showSetupHotspotDialog(
     useRadius = input.useRadius;
   }
 
+  HotspotSetupInput buildInput() {
+    return HotspotSetupInput(
+      serverName: serverNameController.text.trim(),
+      interfaceName: interfaceController.text.trim(),
+      serverProfileName: serverProfileController.text.trim(),
+      hotspotAddress: hotspotAddressController.text.trim(),
+      dnsName: dnsNameController.text.trim(),
+      addressPool: addressPoolController.text.trim(),
+      provisionNetwork: provisionNetwork,
+      ipAddressWithPrefix: ipAddressController.text.trim(),
+      poolName: poolNameController.text.trim(),
+      poolRanges: poolRangesController.text.trim(),
+      dhcpServerName: dhcpServerController.text.trim(),
+      dhcpNetwork: dhcpNetworkController.text.trim(),
+      dhcpGateway: dhcpGatewayController.text.trim(),
+      dnsServers: dnsServersController.text.trim(),
+      enableNatMasquerade: enableNatMasquerade,
+      natSrcAddress: natSrcAddressController.text.trim(),
+      natOutInterface: natOutInterfaceController.text.trim(),
+      loginByCookie: loginByCookie,
+      loginByHttpPap: loginByHttpPap,
+      loginByHttps: loginByHttps,
+      useRadius: useRadius,
+    );
+  }
+
   try {
     final input = await showDialog<HotspotSetupInput>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Setup hotspot'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DropdownButtonFormField<HotspotSetupPreset>(
-                  initialValue: selectedPreset,
-                  isExpanded: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Business setup preset',
-                    prefixIcon: Icon(Icons.tune_outlined),
-                  ),
-                  items: [
-                    for (final preset in HotspotSetupPreset.values)
-                      DropdownMenuItem(
-                        value: preset,
-                        child: Text(
-                          preset.label,
-                          overflow: TextOverflow.ellipsis,
+      builder: (context) {
+        String? validationError;
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: const Text('Setup hotspot'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<HotspotSetupPreset>(
+                    initialValue: selectedPreset,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Business setup preset',
+                      prefixIcon: Icon(Icons.tune_outlined),
+                    ),
+                    items: [
+                      for (final preset in HotspotSetupPreset.values)
+                        DropdownMenuItem(
+                          value: preset,
+                          child: Text(
+                            preset.label,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                  ],
-                  onChanged: (preset) {
-                    if (preset == null) {
-                      return;
-                    }
-                    setState(() {
-                      selectedPreset = preset;
-                      applyPreset(preset.toInput());
-                    });
-                  },
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    selectedPreset.description,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    ],
+                    onChanged: (preset) {
+                      if (preset == null) {
+                        return;
+                      }
+                      setState(() {
+                        selectedPreset = preset;
+                        applyPreset(preset.toInput());
+                      });
+                    },
                   ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: serverNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Server name',
-                    helperText: 'Example: hotspot1',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: interfaceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Interface',
-                    helperText: 'Example: bridge, wlan1, ether2',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: serverProfileController,
-                  decoration: const InputDecoration(
-                    labelText: 'Server profile',
-                    helperText: 'Created if it does not already exist.',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: hotspotAddressController,
-                  decoration: const InputDecoration(
-                    labelText: 'Hotspot address',
-                    helperText: 'Optional, e.g. 10.5.50.1',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: dnsNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'DNS name',
-                    helperText: 'Optional captive portal name.',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: addressPoolController,
-                  decoration: const InputDecoration(
-                    labelText: 'Address pool',
-                    helperText: 'Existing or generated RouterOS pool.',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                SwitchListTile(
-                  value: provisionNetwork,
-                  onChanged: (value) =>
-                      setState(() => provisionNetwork = value),
-                  title: const Text('Provision LAN network'),
-                  subtitle: const Text(
-                    'Adds missing IP address, pool, DHCP, and optional NAT.',
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                if (provisionNetwork) ...[
                   const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      selectedPreset.description,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   TextField(
-                    controller: ipAddressController,
+                    controller: serverNameController,
                     decoration: const InputDecoration(
-                      labelText: 'Interface IP',
-                      helperText: 'Example: 10.5.50.1/24',
+                      labelText: 'Server name',
+                      helperText: 'Example: hotspot1',
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
-                    controller: poolNameController,
-                    decoration: const InputDecoration(labelText: 'Pool name'),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: poolRangesController,
+                    controller: interfaceController,
                     decoration: const InputDecoration(
-                      labelText: 'Pool ranges',
-                      helperText: 'Example: 10.5.50.10-10.5.50.254',
+                      labelText: 'Interface',
+                      helperText: 'Example: bridge, wlan1, ether2',
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
-                    controller: dhcpServerController,
+                    controller: serverProfileController,
                     decoration: const InputDecoration(
-                      labelText: 'DHCP server name',
+                      labelText: 'Server profile',
+                      helperText: 'Created if it does not already exist.',
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
-                    controller: dhcpNetworkController,
+                    controller: hotspotAddressController,
                     decoration: const InputDecoration(
-                      labelText: 'DHCP network',
-                      helperText: 'Example: 10.5.50.0/24',
+                      labelText: 'Hotspot address',
+                      helperText: 'Optional, e.g. 10.5.50.1',
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
-                    controller: dhcpGatewayController,
-                    decoration: const InputDecoration(labelText: 'Gateway'),
+                    controller: dnsNameController,
+                    decoration: const InputDecoration(
+                      labelText: 'DNS name',
+                      helperText: 'Optional captive portal name.',
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
-                    controller: dnsServersController,
+                    controller: addressPoolController,
                     decoration: const InputDecoration(
-                      labelText: 'DNS servers',
-                      helperText: 'Comma-separated RouterOS value.',
+                      labelText: 'Address pool',
+                      helperText: 'Existing or generated RouterOS pool.',
                     ),
                   ),
+                  const SizedBox(height: 8),
                   SwitchListTile(
-                    value: enableNatMasquerade,
+                    value: provisionNetwork,
                     onChanged: (value) =>
-                        setState(() => enableNatMasquerade = value),
-                    title: const Text('Add NAT masquerade'),
+                        setState(() => provisionNetwork = value),
+                    title: const Text('Provision LAN network'),
+                    subtitle: const Text(
+                      'Adds missing IP address, pool, DHCP, and optional NAT.',
+                    ),
                     contentPadding: EdgeInsets.zero,
                   ),
-                  if (enableNatMasquerade) ...[
+                  if (provisionNetwork) ...[
                     const SizedBox(height: 8),
                     TextField(
-                      controller: natSrcAddressController,
+                      controller: ipAddressController,
                       decoration: const InputDecoration(
-                        labelText: 'NAT source',
+                        labelText: 'Interface IP',
+                        helperText: 'Example: 10.5.50.1/24',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: poolNameController,
+                      decoration: const InputDecoration(labelText: 'Pool name'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: poolRangesController,
+                      decoration: const InputDecoration(
+                        labelText: 'Pool ranges',
+                        helperText: 'Example: 10.5.50.10-10.5.50.254',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: dhcpServerController,
+                      decoration: const InputDecoration(
+                        labelText: 'DHCP server name',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: dhcpNetworkController,
+                      decoration: const InputDecoration(
+                        labelText: 'DHCP network',
                         helperText: 'Example: 10.5.50.0/24',
                       ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
-                      controller: natOutInterfaceController,
+                      controller: dhcpGatewayController,
+                      decoration: const InputDecoration(labelText: 'Gateway'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: dnsServersController,
                       decoration: const InputDecoration(
-                        labelText: 'WAN interface',
-                        helperText: 'Optional, e.g. ether1',
+                        labelText: 'DNS servers',
+                        helperText: 'Comma-separated RouterOS value.',
+                      ),
+                    ),
+                    SwitchListTile(
+                      value: enableNatMasquerade,
+                      onChanged: (value) =>
+                          setState(() => enableNatMasquerade = value),
+                      title: const Text('Add NAT masquerade'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    if (enableNatMasquerade) ...[
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: natSrcAddressController,
+                        decoration: const InputDecoration(
+                          labelText: 'NAT source',
+                          helperText: 'Example: 10.5.50.0/24',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: natOutInterfaceController,
+                        decoration: const InputDecoration(
+                          labelText: 'WAN interface',
+                          helperText: 'Optional, e.g. ether1',
+                        ),
+                      ),
+                    ],
+                  ],
+                  SwitchListTile(
+                    value: loginByCookie,
+                    onChanged: (value) => setState(() => loginByCookie = value),
+                    title: const Text('Cookie login'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  SwitchListTile(
+                    value: loginByHttpPap,
+                    onChanged: (value) =>
+                        setState(() => loginByHttpPap = value),
+                    title: const Text('HTTP PAP login'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  SwitchListTile(
+                    value: loginByHttps,
+                    onChanged: (value) => setState(() => loginByHttps = value),
+                    title: const Text('HTTPS login'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  SwitchListTile(
+                    value: useRadius,
+                    onChanged: (value) => setState(() => useRadius = value),
+                    title: const Text('Use RADIUS'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  if (validationError != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      validationError!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ],
                 ],
-                SwitchListTile(
-                  value: loginByCookie,
-                  onChanged: (value) => setState(() => loginByCookie = value),
-                  title: const Text('Cookie login'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                SwitchListTile(
-                  value: loginByHttpPap,
-                  onChanged: (value) => setState(() => loginByHttpPap = value),
-                  title: const Text('HTTP PAP login'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                SwitchListTile(
-                  value: loginByHttps,
-                  onChanged: (value) => setState(() => loginByHttps = value),
-                  title: const Text('HTTPS login'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                SwitchListTile(
-                  value: useRadius,
-                  onChanged: (value) => setState(() => useRadius = value),
-                  title: const Text('Use RADIUS'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(
-                HotspotSetupInput(
-                  serverName: serverNameController.text.trim(),
-                  interfaceName: interfaceController.text.trim(),
-                  serverProfileName: serverProfileController.text.trim(),
-                  hotspotAddress: hotspotAddressController.text.trim(),
-                  dnsName: dnsNameController.text.trim(),
-                  addressPool: addressPoolController.text.trim(),
-                  provisionNetwork: provisionNetwork,
-                  ipAddressWithPrefix: ipAddressController.text.trim(),
-                  poolName: poolNameController.text.trim(),
-                  poolRanges: poolRangesController.text.trim(),
-                  dhcpServerName: dhcpServerController.text.trim(),
-                  dhcpNetwork: dhcpNetworkController.text.trim(),
-                  dhcpGateway: dhcpGatewayController.text.trim(),
-                  dnsServers: dnsServersController.text.trim(),
-                  enableNatMasquerade: enableNatMasquerade,
-                  natSrcAddress: natSrcAddressController.text.trim(),
-                  natOutInterface: natOutInterfaceController.text.trim(),
-                  loginByCookie: loginByCookie,
-                  loginByHttpPap: loginByHttpPap,
-                  loginByHttps: loginByHttps,
-                  useRadius: useRadius,
-                ),
               ),
-              child: const Text('Create'),
             ),
-          ],
-        ),
-      ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final input = buildInput();
+                  final errors = input.validationErrors;
+                  if (errors.isNotEmpty) {
+                    setState(() => validationError = errors.first);
+                    return;
+                  }
+                  Navigator.of(context).pop(input);
+                },
+                child: const Text('Create'),
+              ),
+            ],
+          ),
+        );
+      },
     );
 
     if (input == null) {
