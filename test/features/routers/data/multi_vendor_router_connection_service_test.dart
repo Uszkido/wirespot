@@ -89,4 +89,14 @@ class _RecordingConnector implements RouterConnector {
 
   @override
   Future<bool> testConnection(RouterEntity router) async => true;
+
+  @override
+  Stream<Map<String, String>> stream(
+    RouterEntity router,
+    String command, {
+    Map<String, String> attributes = const {},
+    List<String> queries = const [],
+  }) {
+    throw UnimplementedError();
+  }
 }

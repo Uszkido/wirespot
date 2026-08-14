@@ -7,6 +7,7 @@ import '../../features/hotspot/domain/repositories/hotspot_deployment_repository
 import '../../features/reports/domain/repositories/report_repository.dart';
 import '../../features/reports/domain/services/report_export_service.dart';
 import '../../features/reports/domain/services/report_summary_service.dart';
+import '../../features/diagnostics/domain/services/network_diagnostics_service.dart';
 import '../../features/voucher/domain/services/voucher_export_service.dart';
 import '../../features/voucher/domain/services/voucher_pdf_service.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
@@ -127,6 +128,10 @@ final reportRepositoryProvider = Provider<ReportRepository>(
 
 final reportSummaryServiceProvider = Provider<ReportSummaryService>(
   (ref) => sl<ReportSummaryService>(),
+);
+
+final networkDiagnosticsServiceProvider = Provider<NetworkDiagnosticsService>(
+  (ref) => sl<NetworkDiagnosticsService>(),
 );
 
 final reportExportServiceProvider = Provider<ReportExportService>(

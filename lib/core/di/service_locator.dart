@@ -14,6 +14,7 @@ import '../../features/reports/data/report_local_repository.dart';
 import '../../features/reports/domain/repositories/report_repository.dart';
 import '../../features/reports/domain/services/report_export_service.dart';
 import '../../features/reports/domain/services/report_summary_service.dart';
+import '../../features/diagnostics/domain/services/network_diagnostics_service.dart';
 import '../../features/routers/data/multi_vendor_router_connection_service.dart';
 import '../../features/routers/data/planned_router_connector.dart';
 import '../../features/routers/data/routeros_connection_service.dart';
@@ -175,6 +176,9 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<ReportSummaryService>(
       () => ReportSummaryService(sl<ReportRepository>()),
+    )
+    ..registerLazySingleton<NetworkDiagnosticsService>(
+      () => NetworkDiagnosticsService(sl<RouterConnectionService>()),
     )
     ..registerLazySingleton<ReportExportService>(ReportExportService.new)
     ..registerLazySingleton<SettingsRepository>(

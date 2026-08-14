@@ -26,6 +26,16 @@ class PlannedRouterConnector implements RouterConnector {
   }
 
   @override
+  Stream<Map<String, String>> stream(
+    RouterEntity router,
+    String command, {
+    Map<String, String> attributes = const {},
+    List<String> queries = const [],
+  }) {
+    throw _unsupported(router);
+  }
+
+  @override
   Future<RouterOsRouterSnapshot> getSnapshot(RouterEntity router) async {
     throw _unsupported(router);
   }

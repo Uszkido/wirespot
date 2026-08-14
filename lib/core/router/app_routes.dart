@@ -10,6 +10,7 @@ class AppRoutes {
   static const vouchers = '/vouchers';
   static const reports = '/reports';
   static const settings = '/settings';
+  static const diagnostics = '/diagnostics';
   static const wireGuard = '/wireguard';
   static const permissions = '/permissions';
 

@@ -32,6 +32,18 @@ class MultiVendorRouterConnectionService implements RouterConnectionService {
   }
 
   @override
+  Stream<Map<String, String>> stream(
+    RouterEntity router,
+    String command, {
+    Map<String, String> attributes = const {},
+    List<String> queries = const [],
+  }) {
+    return _connectorFor(
+      router,
+    ).stream(router, command, attributes: attributes, queries: queries);
+  }
+
+  @override
   Future<RouterOsRouterSnapshot> getSnapshot(RouterEntity router) {
     return _connectorFor(router).getSnapshot(router);
   }

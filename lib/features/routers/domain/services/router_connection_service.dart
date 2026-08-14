@@ -12,5 +12,12 @@ abstract interface class RouterConnectionService {
     List<String> queries,
   });
 
+  Stream<Map<String, String>> stream(
+    RouterEntity router,
+    String command, {
+    Map<String, String> attributes,
+    List<String> queries,
+  });
+
   Future<RouterOsRouterSnapshot> getSnapshot(RouterEntity router);
 }

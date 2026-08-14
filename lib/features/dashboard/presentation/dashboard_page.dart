@@ -107,6 +107,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     title: Text(text.routers),
                   ),
                 ),
+                const PopupMenuItem(
+                  value: AppRoutes.diagnostics,
+                  child: ListTile(
+                    leading: Icon(Icons.network_ping_outlined),
+                    title: Text('Diagnostics'),
+                  ),
+                ),
                 PopupMenuItem(
                   value: AppRoutes.hotspot,
                   child: ListTile(

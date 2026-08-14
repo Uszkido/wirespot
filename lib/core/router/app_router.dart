@@ -5,6 +5,7 @@ import '../licensing/license_gate.dart';
 import '../../features/authentication/presentation/auth_controller.dart';
 import '../../features/authentication/presentation/login_page.dart';
 import '../../features/dashboard/presentation/dashboard_page.dart';
+import '../../features/diagnostics/presentation/diagnostics_page.dart';
 import '../../features/hotspot/presentation/hotspot_page.dart';
 import '../../features/permissions/presentation/permission_readiness_page.dart';
 import '../../features/reports/presentation/reports_page.dart';
@@ -59,6 +60,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.routers,
         name: 'routers',
         builder: (context, state) => const LicenseGate(child: RoutersPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.diagnostics,
+        name: 'diagnostics',
+        builder: (context, state) => const LicenseGate(child: DiagnosticsPage()),
       ),
       GoRoute(
         path: AppRoutes.hotspot,

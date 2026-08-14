@@ -107,6 +107,64 @@ class RouterOsConnectionService implements RouterConnector {
   }
 
   @override
+  Stream<Map<String, String>> stream(
+    RouterEntity router,
+    String command, {
+    Map<String, String> attributes = const {},
+    List<String> queries = const [],
+  }) async* {
+    if (!router.vendor.usesRouterOsApi) {
+      throw RouterOsApiException(
+        '${router.vendor.label} does not use the RouterOS API connector.',
+        category: 'unsupported_vendor',
+      );
+    }
+    yield* _streamOnce(
+      router,
+      command,
+      attributes: attributes,
+      queries: queries,
+    );
+  }
+
+  Stream<Map<String, String>> _streamOnce(
+    RouterEntity router,
+    String command, {
+    required Map<String, String> attributes,
+    required List<String> queries,
+  }) async* {
+    if (router.requiresPrivateTunnel) {
+      await _ensureVpnIsConnected();
+    }
+    final credentials = await _credentialStore.read(router.id);
+    if (credentials == null) {
+      throw const RouterOsAuthenticationException(
+        'Router credentials are not available in secure storage.',
+      );
+    }
+
+    final client = _clientFactory.create(
+      host: router.host,
+      port: router.apiPort,
+      useSsl: router.useSsl,
+    );
+
+    try {
+      await client.login(
+        username: credentials.username,
+        password: credentials.password,
+      );
+      yield* client.listen(
+        command,
+        attributes: attributes,
+        queries: queries,
+      );
+    } finally {
+      await client.disconnect();
+    }
+  }
+
+  @override
   Future<RouterOsRouterSnapshot> getSnapshot(RouterEntity router) async {
     final identityResponse = await execute(router, '/system/identity/print');
     final resourceResponse = await execute(router, '/system/resource/print');

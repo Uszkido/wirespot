@@ -71,6 +71,16 @@ class RuijieCloudConnectionService implements RouterConnector {
   }
 
   @override
+  Stream<Map<String, String>> stream(
+    RouterEntity router,
+    String command, {
+    Map<String, String> attributes = const {},
+    List<String> queries = const [],
+  }) {
+    throw _unsupportedOperation();
+  }
+
+  @override
   Future<RouterOsRouterSnapshot> getSnapshot(RouterEntity router) {
     throw _unsupportedOperation();
   }
