@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -53,6 +55,27 @@ class PlatformShareService implements ShareService {
         ],
         subject: export.fileName,
         text: 'WireSpot export',
+      ),
+    );
+  }
+
+  @override
+  Future<void> sharePdfCard(
+    List<int> bytes,
+    String fileName, {
+    String? subject,
+  }) async {
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [
+          XFile.fromData(
+            Uint8List.fromList(bytes),
+            mimeType: 'application/pdf',
+            name: fileName,
+          ),
+        ],
+        subject: subject ?? fileName,
+        text: subject,
       ),
     );
   }

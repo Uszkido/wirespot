@@ -37,6 +37,7 @@ import '../../features/voucher/domain/services/voucher_code_generator.dart';
 import '../../features/voucher/domain/services/voucher_encoding_settings_service.dart';
 import '../../features/voucher/domain/services/voucher_generation_service.dart';
 import '../../features/voucher/domain/services/voucher_export_service.dart';
+import '../../features/voucher/domain/services/voucher_pdf_service.dart';
 import '../../features/voucher/domain/services/ticket_template_settings_service.dart';
 import '../../features/voucher/domain/services/voucher_qr_service.dart';
 import '../../features/voucher/domain/services/voucher_receipt_template_service.dart';
@@ -168,6 +169,7 @@ Future<void> configureDependencies() async {
       ),
     )
     ..registerLazySingleton<VoucherExportService>(VoucherExportService.new)
+    ..registerLazySingleton<VoucherPdfService>(VoucherPdfService.new)
     ..registerLazySingleton<ReportRepository>(
       () => ReportLocalRepository(sl<AppDatabase>()),
     )

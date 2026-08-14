@@ -7,4 +7,10 @@ abstract interface class ShareService {
   Future<void> shareVoucherReceipts(List<VoucherReceipt> receipts);
 
   Future<void> shareReportExport(ReportExport export);
+
+  Future<void> sharePdfCard(
+    List<int> bytes,
+    String fileName, {
+    String? subject,
+  });
 }

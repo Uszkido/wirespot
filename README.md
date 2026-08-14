@@ -61,7 +61,15 @@ WireSpot solves that with a focused Android workflow:
 - **Hotspot operations**: users, profiles, sessions, cookies, queues, IP
   bindings, disconnect, reset counters, delete, search/filter foundations.
 - **Voucher workflow**: plans, random credentials, PIN-style vouchers, price,
-  data limits, QR payloads, receipt preview, share, and print.
+  data limits, QR payloads, receipt preview, share, and print. Operators can
+  choose username/password, username-only, or PIN-only formats; set a prefix,
+  character set, lengths, and confusing-character exclusions.
+- **Ticket templates**: selectable and editable 58 mm, 80 mm, and QR-compact
+  receipt layouts, with controls for logo, QR code, price, and footer text.
+- **Scheduled operations**: configurable in-app jobs for active-session
+  refresh, expired-session cleanup, expired unused-voucher cleanup, daily
+  sales summaries, and backup snapshots. Router jobs run across enabled
+  MikroTik routers.
 - **Professional co-branding**: operators can set business name, email, phone,
   and website for customer-facing receipts and reports.
 - **Reporting**: daily, weekly, monthly summaries with CSV and PDF-text export
@@ -79,9 +87,9 @@ WireSpot solves that with a focused Android workflow:
 | Routers | Add, edit, delete, group-ready records, test connection |
 | WireGuard | Import/scan configs, connect/disconnect, status, logs, statistics |
 | Hotspot | Manage users, profiles, sessions, queues, cookies, IP bindings |
-| Vouchers | Generate vouchers, QR payloads, history, share, print |
+| Vouchers | Generate vouchers, QR payloads, configurable credentials, history, share, print |
 | Reports | Revenue summaries, sales lists, CSV/PDF-text export |
-| Settings | Theme, language, currency, license, co-branding, printer, backup |
+| Settings | Theme, language, currency, license, co-branding, ticket templates, voucher encoding, scheduler, printer, backup |
 | Permissions | VPN, Bluetooth, camera, and network readiness guidance |
 
 ## Tech Stack
@@ -97,6 +105,7 @@ WireSpot solves that with a focused Android workflow:
 | VPN | WireGuard Android tunnel backend integration |
 | Printing | ESC/POS Bluetooth thermal printer support |
 | QR | QR generation and WireGuard QR import |
+| Automation | In-app scheduler with configurable due-task execution |
 | Architecture | Clean Architecture, MVVM, repositories, dependency injection |
 
 ## Requirements
@@ -158,6 +167,8 @@ outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
    - language and currency
    - license
    - professional co-branding
+   - ticket template and voucher credential format
+   - optional scheduled operations
    - Bluetooth printer
    - WireGuard and permission readiness
 7. Generate vouchers, print tickets, manage users, and review reports.
@@ -222,7 +233,9 @@ WireSpot can keep many router records and work with them as a fleet. Choose an
 **active router** from the Dashboard or Routers screen; that selection is
 remembered across app restarts and becomes the default in Dashboard, Hotspot,
 and Vouchers. The app can test several routers concurrently through **Test all
-router connections**.
+router connections**. Its scheduled session-refresh and expired-session cleanup
+jobs similarly work across all enabled MikroTik routers rather than only the
+active router.
 
 Create router groups for businesses, branches, hotels, estates, or sites. Use
 the **Fleet group** filter to focus the list and run connection checks only for
@@ -280,6 +293,8 @@ Still required before production upload:
 - WireGuard validation across multiple Android models.
 - Printer testing across common 58mm/80mm ESC/POS models.
 - More polished real PDF/Excel file generation.
+- Background scheduling that remains reliable when Android has terminated the
+  app; current scheduled jobs run while WireSpot is running.
 - More RouterOS command tests and UI flow tests.
 - Final Play Store screenshots, privacy URL, and production listing.
 

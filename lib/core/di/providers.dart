@@ -8,6 +8,7 @@ import '../../features/reports/domain/repositories/report_repository.dart';
 import '../../features/reports/domain/services/report_export_service.dart';
 import '../../features/reports/domain/services/report_summary_service.dart';
 import '../../features/voucher/domain/services/voucher_export_service.dart';
+import '../../features/voucher/domain/services/voucher_pdf_service.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
 import '../../features/routers/data/ruijie_cloud_connection_service.dart';
 import '../../features/routers/domain/services/router_connection_service.dart';
@@ -134,6 +135,10 @@ final reportExportServiceProvider = Provider<ReportExportService>(
 
 final voucherExportServiceProvider = Provider<VoucherExportService>(
   (ref) => sl<VoucherExportService>(),
+);
+
+final voucherPdfServiceProvider = Provider<VoucherPdfService>(
+  (ref) => sl<VoucherPdfService>(),
 );
 
 final settingsRepositoryProvider = Provider<SettingsRepository>(
