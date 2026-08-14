@@ -6,7 +6,7 @@ import 'package:wirespot/features/reports/domain/entities/sale_entity.dart';
 import 'package:wirespot/features/reports/domain/services/report_export_service.dart';
 
 void main() {
-  test('exports branded CSV content', () {
+  test('exports a real Excel workbook', () async {
     const service = ReportExportService();
     final summary = RevenueSummary(
       sales: [
@@ -25,17 +25,18 @@ void main() {
       to: DateTime(2026, 1, 2),
     );
 
-    final export = service.export(
+    final export = await service.export(
       ReportExportRequest(summary: summary, format: ReportExportFormat.excel),
     );
 
-    expect(export.fileName, endsWith('.csv'));
+    expect(export.fileName, endsWith('.xlsx'));
+    expect(export.bytes, isNotEmpty);
     expect(export.content, contains('sold_at,router_id'));
     expect(export.content, contains('amount_minor,amount'));
     expect(export.content, contains('Voucher sale'));
   });
 
-  test('exports polished PDF text content', () {
+  test('exports a real PDF document', () async {
     const service = ReportExportService();
     final summary = RevenueSummary(
       sales: [
@@ -56,18 +57,19 @@ void main() {
       to: DateTime(2026, 1, 2),
     );
 
-    final export = service.export(
+    final export = await service.export(
       ReportExportRequest(summary: summary, format: ReportExportFormat.pdf),
     );
 
-    expect(export.fileName, endsWith('.pdf.txt'));
+    expect(export.fileName, endsWith('.pdf'));
+    expect(export.bytes.take(4), [37, 80, 68, 70]);
     expect(export.content, contains('WireSpot Revenue Report'));
     expect(export.content, contains('Summary'));
     expect(export.content, contains('Router: router-1'));
     expect(export.content, contains('Payment: cash'));
   });
 
-  test('exports co-branded PDF text content', () {
+  test('exports co-branded PDF content', () async {
     const service = ReportExportService();
     final summary = RevenueSummary(
       sales: const [],
@@ -77,7 +79,7 @@ void main() {
       to: DateTime(2026, 1, 2),
     );
 
-    final export = service.export(
+    final export = await service.export(
       ReportExportRequest(summary: summary, format: ReportExportFormat.pdf),
       settings: const AppSettingsSnapshot(
         themePreference: AppThemePreference.system,

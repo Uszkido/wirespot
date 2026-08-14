@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../features/reports/domain/entities/report_export.dart';
 import '../../features/voucher/domain/entities/voucher_receipt.dart';
@@ -36,7 +37,16 @@ class PlatformShareService implements ShareService {
 
   @override
   Future<void> shareReportExport(ReportExport export) {
-    return _shareText(subject: export.fileName, text: export.content);
+    final mimeType = switch (export.format) {
+      ReportExportFormat.pdf => 'application/pdf',
+      ReportExportFormat.excel =>
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    };
+    return Share.shareXFiles(
+      [XFile.fromData(export.bytes, mimeType: mimeType, name: export.fileName)],
+      subject: export.fileName,
+      text: 'WireSpot export',
+    );
   }
 
   Future<void> _shareText({required String subject, required String text}) {

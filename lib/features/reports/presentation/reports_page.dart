@@ -235,7 +235,7 @@ class _ReportContent extends ConsumerWidget {
     if (!context.mounted) {
       return;
     }
-    final export = ref
+    final export = await ref
         .read(reportExportServiceProvider)
         .export(
           ReportExportRequest(summary: summary, format: format),

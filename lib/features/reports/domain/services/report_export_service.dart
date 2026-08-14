@@ -1,3 +1,8 @@
+import 'dart:typed_data';
+
+import 'package:excel/excel.dart';
+import 'package:pdf/widgets.dart' as pw;
+
 import '../../../../core/branding/app_branding.dart';
 import '../../../settings/domain/entities/app_settings.dart';
 import '../entities/report_export.dart';
@@ -6,23 +11,54 @@ import '../entities/revenue_summary.dart';
 class ReportExportService {
   const ReportExportService();
 
-  ReportExport export(
+  Future<ReportExport> export(
     ReportExportRequest request, {
     AppSettingsSnapshot? settings,
-  }) {
+  }) async {
     final extension = switch (request.format) {
-      ReportExportFormat.pdf => 'pdf.txt',
-      ReportExportFormat.excel => 'csv',
+      ReportExportFormat.pdf => 'pdf',
+      ReportExportFormat.excel => 'xlsx',
     };
+    final content = request.format == ReportExportFormat.pdf
+        ? _pdfText(request.summary, settings)
+        : _csv(request.summary);
     return ReportExport(
       format: request.format,
       fileName:
           'wirespot-report-${DateTime.now().millisecondsSinceEpoch}.$extension',
-      content: switch (request.format) {
-        ReportExportFormat.pdf => _pdfText(request.summary, settings),
-        ReportExportFormat.excel => _csv(request.summary),
-      },
+      content: content,
+      bytes: request.format == ReportExportFormat.pdf
+          ? await _buildPdf(content)
+          : _buildExcel(request.summary),
     );
+  }
+
+  Future<Uint8List> _buildPdf(String content) async {
+    final document = pw.Document();
+    document.addPage(pw.MultiPage(build: (_) => [pw.Text(content)]));
+    return document.save();
+  }
+
+  Uint8List _buildExcel(RevenueSummary summary) {
+    final workbook = Excel.createExcel();
+    final sheet = workbook['Revenue report'];
+    sheet.appendRow([
+      TextCellValue('Sold at'),
+      TextCellValue('Router'),
+      TextCellValue('Voucher'),
+      TextCellValue('Amount'),
+      TextCellValue('Currency'),
+    ]);
+    for (final sale in summary.sales) {
+      sheet.appendRow([
+        TextCellValue(sale.soldAt.toIso8601String()),
+        TextCellValue(sale.routerId),
+        TextCellValue(sale.voucherId ?? ''),
+        IntCellValue(sale.amountMinor),
+        TextCellValue(sale.currency),
+      ]);
+    }
+    return Uint8List.fromList(workbook.encode()!);
   }
 
   String _pdfText(RevenueSummary summary, AppSettingsSnapshot? settings) {
