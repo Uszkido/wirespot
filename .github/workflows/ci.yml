@@ -55,7 +55,7 @@ jobs:
         run: flutter test
 
       - name: Build Android debug APK
-        run: flutter build apk --debug --target-platform android-arm64
+        run: flutter build apk --debug --verbose
 
       - name: Upload debug APK artifact
         uses: actions/upload-artifact@v7
