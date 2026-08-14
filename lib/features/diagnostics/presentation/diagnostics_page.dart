@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/providers.dart';
+import '../../dashboard/presentation/dashboard_providers.dart';
 import '../../routers/presentation/router_providers.dart';
 
 enum DiagnosticMode { ping, traceroute }

@@ -33,6 +33,8 @@ dependencies:
   pdf: ^3.12.0
   excel: ^4.0.6
   share_plus: ^12.0.2
+  file_picker: ^11.0.3
+  csv: ^8.0.0
 
 dev_dependencies:
   flutter_test:
