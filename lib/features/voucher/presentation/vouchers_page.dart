@@ -12,6 +12,7 @@ import '../../dashboard/presentation/dashboard_providers.dart';
 import '../../routers/domain/entities/router_entity.dart';
 import '../../routers/presentation/router_providers.dart';
 import '../../settings/presentation/settings_providers.dart';
+import '../../reports/domain/entities/report_export.dart';
 import '../domain/entities/ticket_template.dart';
 import '../domain/entities/voucher_encoding_settings.dart';
 import '../domain/entities/voucher_entity.dart';
@@ -144,6 +145,7 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
                     onSelectAll: _selectAllVouchers,
                     onClearSelection: _clearVoucherSelection,
                     onShareSelected: _shareVouchers,
+                    onExportSelected: _exportVouchers,
                     onPrintSelected: _printVouchers,
                   ),
                 ],
@@ -325,6 +327,13 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
         );
       }
     }
+  }
+
+  Future<void> _exportVouchers(List<VoucherEntity> vouchers) async {
+    final export = await ref
+        .read(voucherExportServiceProvider)
+        .export(vouchers, ReportExportFormat.pdf);
+    await ref.read(shareServiceProvider).shareReportExport(export);
   }
 
   Future<void> _printVouchers(List<VoucherEntity> vouchers) async {
@@ -619,6 +628,7 @@ class _VoucherHistory extends ConsumerWidget {
     required this.onSelectAll,
     required this.onClearSelection,
     required this.onShareSelected,
+    required this.onExportSelected,
     required this.onPrintSelected,
   });
 
@@ -628,6 +638,7 @@ class _VoucherHistory extends ConsumerWidget {
   final ValueChanged<List<VoucherEntity>> onSelectAll;
   final VoidCallback onClearSelection;
   final Future<void> Function(List<VoucherEntity> vouchers) onShareSelected;
+  final Future<void> Function(List<VoucherEntity> vouchers) onExportSelected;
   final Future<void> Function(List<VoucherEntity> vouchers) onPrintSelected;
 
   @override
@@ -687,6 +698,21 @@ class _VoucherHistory extends ConsumerWidget {
                       ),
                       icon: const Icon(Icons.share_outlined),
                       label: const Text('Share selected'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => onExportSelected(
+                        items
+                            .where(
+                              (voucher) =>
+                                  selectedVoucherIds.contains(voucher.id),
+                            )
+                            .toList(),
+                      ),
+                      icon: const Icon(Icons.file_download_outlined),
+                      label: const Text('Export PDF'),
                     ),
                   ),
                   const SizedBox(width: 12),

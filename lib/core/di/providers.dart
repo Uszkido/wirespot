@@ -7,6 +7,7 @@ import '../../features/hotspot/domain/repositories/hotspot_deployment_repository
 import '../../features/reports/domain/repositories/report_repository.dart';
 import '../../features/reports/domain/services/report_export_service.dart';
 import '../../features/reports/domain/services/report_summary_service.dart';
+import '../../features/voucher/domain/services/voucher_export_service.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
 import '../../features/routers/data/ruijie_cloud_connection_service.dart';
 import '../../features/routers/domain/services/router_connection_service.dart';
@@ -129,6 +130,10 @@ final reportSummaryServiceProvider = Provider<ReportSummaryService>(
 
 final reportExportServiceProvider = Provider<ReportExportService>(
   (ref) => sl<ReportExportService>(),
+);
+
+final voucherExportServiceProvider = Provider<VoucherExportService>(
+  (ref) => sl<VoucherExportService>(),
 );
 
 final settingsRepositoryProvider = Provider<SettingsRepository>(
