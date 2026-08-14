@@ -6,6 +6,7 @@ import '../domain/entities/hotspot_ip_binding_entity.dart';
 import '../domain/entities/hotspot_ip_binding_input.dart';
 import '../domain/entities/hotspot_profile_input.dart';
 import '../domain/entities/hotspot_queue_entity.dart';
+import '../domain/entities/hotspot_setup_inspection.dart';
 import '../domain/entities/hotspot_setup_input.dart';
 import '../domain/entities/hotspot_user_entity.dart';
 import '../domain/entities/hotspot_user_input.dart';
@@ -16,6 +17,30 @@ class RouterOsHotspotService implements HotspotService {
   const RouterOsHotspotService(this._routerConnectionService);
 
   final RouterConnectionService _routerConnectionService;
+
+  @override
+  Future<HotspotSetupInspection> inspectSetup(
+    RouterEntity router,
+    HotspotSetupInput input,
+  ) async {
+    _validateSetupInput(input);
+    final responses = await Future.wait([
+      _routerConnectionService.execute(
+        router,
+        '/ip/hotspot/profile/print',
+        queries: ['=name=${input.serverProfileName.trim()}'],
+      ),
+      _routerConnectionService.execute(
+        router,
+        '/ip/hotspot/print',
+        queries: ['=name=${input.serverName.trim()}'],
+      ),
+    ]);
+    return HotspotSetupInspection(
+      profileExists: responses[0].records.isNotEmpty,
+      serverExists: responses[1].records.isNotEmpty,
+    );
+  }
 
   @override
   Future<void> setupHotspot(

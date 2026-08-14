@@ -15,6 +15,7 @@ import '../domain/entities/hotspot_ip_binding_entity.dart';
 import '../domain/entities/hotspot_ip_binding_input.dart';
 import '../domain/entities/hotspot_profile_input.dart';
 import '../domain/entities/hotspot_queue_entity.dart';
+import '../domain/entities/hotspot_setup_inspection.dart';
 import '../domain/entities/hotspot_setup_input.dart';
 import '../domain/entities/hotspot_setup_preset.dart';
 import '../domain/entities/hotspot_user_entity.dart';
@@ -952,11 +953,18 @@ Future<void> _showSetupHotspotDialog(
       );
       return;
     }
+    final inspection = await ref
+        .read(hotspotServiceProvider)
+        .inspectSetup(router, input);
+    if (!context.mounted) {
+      return;
+    }
     final confirmed = await _showSetupPlanDialog(
       context,
       router: router,
       preset: selectedPreset,
       input: input,
+      inspection: inspection,
     );
     if (!confirmed) {
       return;
@@ -1011,6 +1019,7 @@ Future<bool> _showSetupPlanDialog(
   required RouterEntity router,
   required HotspotSetupPreset preset,
   required HotspotSetupInput input,
+  required HotspotSetupInspection inspection,
 }) async {
   final plan = input.toPlan();
   final result = await showDialog<bool>(
@@ -1029,6 +1038,11 @@ Future<bool> _showSetupPlanDialog(
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               Text('${router.vendor.label} • ${preset.label}'),
+              const SizedBox(height: 12),
+              Text(
+                '${inspection.profileAction} • ${inspection.serverAction}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: 12),
               const Text(
                 'This can create network, DHCP, NAT, and hotspot records on the selected router. WireSpot checks for existing records before adding settings.',

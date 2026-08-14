@@ -5,12 +5,18 @@ import '../entities/hotspot_ip_binding_entity.dart';
 import '../entities/hotspot_ip_binding_input.dart';
 import '../entities/hotspot_profile_input.dart';
 import '../entities/hotspot_queue_entity.dart';
+import '../entities/hotspot_setup_inspection.dart';
 import '../entities/hotspot_setup_input.dart';
 import '../entities/hotspot_user_entity.dart';
 import '../entities/hotspot_user_input.dart';
 import '../entities/hotspot_user_profile_entity.dart';
 
 abstract interface class HotspotService {
+  Future<HotspotSetupInspection> inspectSetup(
+    RouterEntity router,
+    HotspotSetupInput input,
+  );
+
   Future<void> setupHotspot(RouterEntity router, HotspotSetupInput input);
 
   Future<List<HotspotUserEntity>> getUsers(RouterEntity router);

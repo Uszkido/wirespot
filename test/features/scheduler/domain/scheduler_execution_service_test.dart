@@ -6,6 +6,7 @@ import 'package:wirespot/features/hotspot/domain/entities/hotspot_ip_binding_ent
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_ip_binding_input.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_profile_input.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_queue_entity.dart';
+import 'package:wirespot/features/hotspot/domain/entities/hotspot_setup_inspection.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_setup_input.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_user_entity.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_user_input.dart';
@@ -282,6 +283,13 @@ class _FakeHotspotService implements HotspotService {
   final sessions = <String, List<HotspotActiveSessionEntity>>{};
   final disconnectedSessions = <String>[];
   var sessionLoads = 0;
+
+  @override
+  Future<HotspotSetupInspection> inspectSetup(
+    RouterEntity router,
+    HotspotSetupInput input,
+  ) async =>
+      const HotspotSetupInspection(serverExists: false, profileExists: false);
 
   @override
   Future<void> createIpBinding(
