@@ -241,6 +241,9 @@ class _ReportContent extends ConsumerWidget {
           ReportExportRequest(summary: summary, format: format),
           settings: settings,
         );
+    if (!context.mounted) {
+      return;
+    }
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(

@@ -36,16 +36,24 @@ class PlatformShareService implements ShareService {
   }
 
   @override
-  Future<void> shareReportExport(ReportExport export) {
+  Future<void> shareReportExport(ReportExport export) async {
     final mimeType = switch (export.format) {
       ReportExportFormat.pdf => 'application/pdf',
       ReportExportFormat.excel =>
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     };
-    return Share.shareXFiles(
-      [XFile.fromData(export.bytes, mimeType: mimeType, name: export.fileName)],
-      subject: export.fileName,
-      text: 'WireSpot export',
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [
+          XFile.fromData(
+            export.bytes,
+            mimeType: mimeType,
+            name: export.fileName,
+          ),
+        ],
+        subject: export.fileName,
+        text: 'WireSpot export',
+      ),
     );
   }
 
