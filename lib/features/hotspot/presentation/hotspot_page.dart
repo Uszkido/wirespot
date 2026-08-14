@@ -92,8 +92,8 @@ class _HotspotRouterScope extends ConsumerWidget {
       return _UnsupportedHotspotRouter(routers: routers, router: router);
     }
     return DefaultTabController(
-      length: 6,
-      initialIndex: initialTabIndex.clamp(0, 5).toInt(),
+      length: 7,
+      initialIndex: initialTabIndex.clamp(0, 6).toInt(),
       child: Column(
         children: [
           Padding(
@@ -145,6 +145,7 @@ class _HotspotRouterScope extends ConsumerWidget {
               Tab(text: 'Cookies'),
               Tab(text: 'Bindings'),
               Tab(text: 'Queues'),
+              Tab(text: 'Deployments'),
             ],
           ),
           Expanded(
@@ -156,11 +157,61 @@ class _HotspotRouterScope extends ConsumerWidget {
                 _CookiesTab(router: router),
                 _BindingsTab(router: router),
                 _QueuesTab(router: router),
+                _DeploymentsTab(router: router),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DeploymentsTab extends ConsumerWidget {
+  const _DeploymentsTab({required this.router});
+  final RouterEntity router;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final history = ref.watch(hotspotDeploymentHistoryProvider(router.id));
+    return history.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) =>
+          Center(child: Text('Could not load deployments: $error')),
+      data: (items) => items.isEmpty
+          ? const EmptyState(
+              icon: Icons.history_outlined,
+              title: 'No deployment history',
+              message:
+                  'Completed and failed hotspot setup attempts appear here.',
+            )
+          : RefreshIndicator(
+              onRefresh: () async =>
+                  ref.invalidate(hotspotDeploymentHistoryProvider(router.id)),
+              child: ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  final succeeded =
+                      item.status == HotspotDeploymentStatus.succeeded;
+                  return ListTile(
+                    leading: Icon(
+                      succeeded
+                          ? Icons.check_circle_outline
+                          : Icons.error_outline,
+                      color: succeeded
+                          ? Colors.green
+                          : Theme.of(context).colorScheme.error,
+                    ),
+                    title: Text(item.preset),
+                    subtitle: Text(
+                      '${item.profileAction} • ${item.serverAction}\n${item.deployedAt.toLocal()}',
+                    ),
+                    isThreeLine: true,
+                  );
+                },
+              ),
+            ),
     );
   }
 }
@@ -969,8 +1020,16 @@ Future<void> _showSetupHotspotDialog(
     if (!confirmed) {
       return;
     }
-    await ref.read(hotspotServiceProvider).setupHotspot(router, input);
+    await ref
+        .read(hotspotDeploymentServiceProvider)
+        .deploy(
+          router: router,
+          preset: selectedPreset,
+          input: input,
+          inspection: inspection,
+        );
     ref.invalidate(hotspotProfilesProvider(router));
+    ref.invalidate(hotspotDeploymentHistoryProvider(router.id));
     if (context.mounted) {
       _showSnack(context, 'Hotspot server setup completed.');
     }

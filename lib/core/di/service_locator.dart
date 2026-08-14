@@ -6,6 +6,9 @@ import '../../features/authentication/domain/services/auth_service.dart';
 import '../../features/authentication/domain/services/biometric_auth_service.dart';
 import '../../features/authentication/domain/services/pin_hash_service.dart';
 import '../../features/hotspot/data/routeros_hotspot_service.dart';
+import '../../features/hotspot/data/hotspot_deployment_local_repository.dart';
+import '../../features/hotspot/domain/repositories/hotspot_deployment_repository.dart';
+import '../../features/hotspot/domain/services/hotspot_deployment_service.dart';
 import '../../features/hotspot/domain/services/hotspot_service.dart';
 import '../../features/reports/data/report_local_repository.dart';
 import '../../features/reports/domain/repositories/report_repository.dart';
@@ -132,6 +135,15 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<HotspotService>(
       () => RouterOsHotspotService(sl<RouterConnectionService>()),
+    )
+    ..registerLazySingleton<HotspotDeploymentRepository>(
+      () => HotspotDeploymentLocalRepository(sl<AppDatabase>()),
+    )
+    ..registerLazySingleton<HotspotDeploymentService>(
+      () => HotspotDeploymentService(
+        hotspotService: sl<HotspotService>(),
+        repository: sl<HotspotDeploymentRepository>(),
+      ),
     )
     ..registerLazySingleton<VoucherRepository>(
       () => VoucherLocalRepository(sl<AppDatabase>(), sl<VoucherSecretStore>()),

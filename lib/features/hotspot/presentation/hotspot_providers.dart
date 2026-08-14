@@ -8,6 +8,7 @@ import '../domain/entities/hotspot_cookie_entity.dart';
 import '../domain/entities/hotspot_ip_binding_entity.dart';
 import '../domain/entities/hotspot_queue_entity.dart';
 import '../domain/entities/hotspot_user_entity.dart';
+import '../domain/entities/hotspot_deployment_entity.dart';
 import '../domain/entities/hotspot_user_profile_entity.dart';
 
 final selectedHotspotRouterIdProvider = StateProvider<String?>((ref) => null);
@@ -41,3 +42,10 @@ final hotspotQueuesProvider = FutureProvider.autoDispose
     .family<List<HotspotQueueEntity>, RouterEntity>((ref, router) {
       return ref.watch(hotspotServiceProvider).getQueues(router);
     });
+
+final hotspotDeploymentHistoryProvider = FutureProvider.autoDispose
+    .family<List<HotspotDeploymentEntity>, String>(
+      (ref, routerId) => ref
+          .watch(hotspotDeploymentRepositoryProvider)
+          .getHistory(routerId: routerId),
+    );

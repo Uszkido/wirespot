@@ -1843,6 +1843,687 @@ class HotspotProfilesCompanion extends UpdateCompanion<HotspotProfileRecord> {
   }
 }
 
+class $HotspotDeploymentHistoryTable extends HotspotDeploymentHistory
+    with TableInfo<$HotspotDeploymentHistoryTable, HotspotDeploymentRecord> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HotspotDeploymentHistoryTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _routerIdMeta = const VerificationMeta(
+    'routerId',
+  );
+  @override
+  late final GeneratedColumn<String> routerId = GeneratedColumn<String>(
+    'router_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _routerNameMeta = const VerificationMeta(
+    'routerName',
+  );
+  @override
+  late final GeneratedColumn<String> routerName = GeneratedColumn<String>(
+    'router_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _presetMeta = const VerificationMeta('preset');
+  @override
+  late final GeneratedColumn<String> preset = GeneratedColumn<String>(
+    'preset',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _serverNameMeta = const VerificationMeta(
+    'serverName',
+  );
+  @override
+  late final GeneratedColumn<String> serverName = GeneratedColumn<String>(
+    'server_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _profileNameMeta = const VerificationMeta(
+    'profileName',
+  );
+  @override
+  late final GeneratedColumn<String> profileName = GeneratedColumn<String>(
+    'profile_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _serverActionMeta = const VerificationMeta(
+    'serverAction',
+  );
+  @override
+  late final GeneratedColumn<String> serverAction = GeneratedColumn<String>(
+    'server_action',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _profileActionMeta = const VerificationMeta(
+    'profileAction',
+  );
+  @override
+  late final GeneratedColumn<String> profileAction = GeneratedColumn<String>(
+    'profile_action',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _messageMeta = const VerificationMeta(
+    'message',
+  );
+  @override
+  late final GeneratedColumn<String> message = GeneratedColumn<String>(
+    'message',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deployedAtMeta = const VerificationMeta(
+    'deployedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deployedAt = GeneratedColumn<DateTime>(
+    'deployed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    routerId,
+    routerName,
+    preset,
+    serverName,
+    profileName,
+    serverAction,
+    profileAction,
+    status,
+    message,
+    deployedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'hotspot_deployment_history';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<HotspotDeploymentRecord> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('router_id')) {
+      context.handle(
+        _routerIdMeta,
+        routerId.isAcceptableOrUnknown(data['router_id']!, _routerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_routerIdMeta);
+    }
+    if (data.containsKey('router_name')) {
+      context.handle(
+        _routerNameMeta,
+        routerName.isAcceptableOrUnknown(data['router_name']!, _routerNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_routerNameMeta);
+    }
+    if (data.containsKey('preset')) {
+      context.handle(
+        _presetMeta,
+        preset.isAcceptableOrUnknown(data['preset']!, _presetMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_presetMeta);
+    }
+    if (data.containsKey('server_name')) {
+      context.handle(
+        _serverNameMeta,
+        serverName.isAcceptableOrUnknown(data['server_name']!, _serverNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_serverNameMeta);
+    }
+    if (data.containsKey('profile_name')) {
+      context.handle(
+        _profileNameMeta,
+        profileName.isAcceptableOrUnknown(
+          data['profile_name']!,
+          _profileNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_profileNameMeta);
+    }
+    if (data.containsKey('server_action')) {
+      context.handle(
+        _serverActionMeta,
+        serverAction.isAcceptableOrUnknown(
+          data['server_action']!,
+          _serverActionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_serverActionMeta);
+    }
+    if (data.containsKey('profile_action')) {
+      context.handle(
+        _profileActionMeta,
+        profileAction.isAcceptableOrUnknown(
+          data['profile_action']!,
+          _profileActionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_profileActionMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('message')) {
+      context.handle(
+        _messageMeta,
+        message.isAcceptableOrUnknown(data['message']!, _messageMeta),
+      );
+    }
+    if (data.containsKey('deployed_at')) {
+      context.handle(
+        _deployedAtMeta,
+        deployedAt.isAcceptableOrUnknown(data['deployed_at']!, _deployedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deployedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  HotspotDeploymentRecord map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HotspotDeploymentRecord(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      routerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}router_id'],
+      )!,
+      routerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}router_name'],
+      )!,
+      preset: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}preset'],
+      )!,
+      serverName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}server_name'],
+      )!,
+      profileName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_name'],
+      )!,
+      serverAction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}server_action'],
+      )!,
+      profileAction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_action'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      message: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message'],
+      ),
+      deployedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deployed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $HotspotDeploymentHistoryTable createAlias(String alias) {
+    return $HotspotDeploymentHistoryTable(attachedDatabase, alias);
+  }
+}
+
+class HotspotDeploymentRecord extends DataClass
+    implements Insertable<HotspotDeploymentRecord> {
+  final String id;
+  final String routerId;
+  final String routerName;
+  final String preset;
+  final String serverName;
+  final String profileName;
+  final String serverAction;
+  final String profileAction;
+  final String status;
+  final String? message;
+  final DateTime deployedAt;
+  const HotspotDeploymentRecord({
+    required this.id,
+    required this.routerId,
+    required this.routerName,
+    required this.preset,
+    required this.serverName,
+    required this.profileName,
+    required this.serverAction,
+    required this.profileAction,
+    required this.status,
+    this.message,
+    required this.deployedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['router_id'] = Variable<String>(routerId);
+    map['router_name'] = Variable<String>(routerName);
+    map['preset'] = Variable<String>(preset);
+    map['server_name'] = Variable<String>(serverName);
+    map['profile_name'] = Variable<String>(profileName);
+    map['server_action'] = Variable<String>(serverAction);
+    map['profile_action'] = Variable<String>(profileAction);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || message != null) {
+      map['message'] = Variable<String>(message);
+    }
+    map['deployed_at'] = Variable<DateTime>(deployedAt);
+    return map;
+  }
+
+  HotspotDeploymentHistoryCompanion toCompanion(bool nullToAbsent) {
+    return HotspotDeploymentHistoryCompanion(
+      id: Value(id),
+      routerId: Value(routerId),
+      routerName: Value(routerName),
+      preset: Value(preset),
+      serverName: Value(serverName),
+      profileName: Value(profileName),
+      serverAction: Value(serverAction),
+      profileAction: Value(profileAction),
+      status: Value(status),
+      message: message == null && nullToAbsent
+          ? const Value.absent()
+          : Value(message),
+      deployedAt: Value(deployedAt),
+    );
+  }
+
+  factory HotspotDeploymentRecord.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HotspotDeploymentRecord(
+      id: serializer.fromJson<String>(json['id']),
+      routerId: serializer.fromJson<String>(json['routerId']),
+      routerName: serializer.fromJson<String>(json['routerName']),
+      preset: serializer.fromJson<String>(json['preset']),
+      serverName: serializer.fromJson<String>(json['serverName']),
+      profileName: serializer.fromJson<String>(json['profileName']),
+      serverAction: serializer.fromJson<String>(json['serverAction']),
+      profileAction: serializer.fromJson<String>(json['profileAction']),
+      status: serializer.fromJson<String>(json['status']),
+      message: serializer.fromJson<String?>(json['message']),
+      deployedAt: serializer.fromJson<DateTime>(json['deployedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'routerId': serializer.toJson<String>(routerId),
+      'routerName': serializer.toJson<String>(routerName),
+      'preset': serializer.toJson<String>(preset),
+      'serverName': serializer.toJson<String>(serverName),
+      'profileName': serializer.toJson<String>(profileName),
+      'serverAction': serializer.toJson<String>(serverAction),
+      'profileAction': serializer.toJson<String>(profileAction),
+      'status': serializer.toJson<String>(status),
+      'message': serializer.toJson<String?>(message),
+      'deployedAt': serializer.toJson<DateTime>(deployedAt),
+    };
+  }
+
+  HotspotDeploymentRecord copyWith({
+    String? id,
+    String? routerId,
+    String? routerName,
+    String? preset,
+    String? serverName,
+    String? profileName,
+    String? serverAction,
+    String? profileAction,
+    String? status,
+    Value<String?> message = const Value.absent(),
+    DateTime? deployedAt,
+  }) => HotspotDeploymentRecord(
+    id: id ?? this.id,
+    routerId: routerId ?? this.routerId,
+    routerName: routerName ?? this.routerName,
+    preset: preset ?? this.preset,
+    serverName: serverName ?? this.serverName,
+    profileName: profileName ?? this.profileName,
+    serverAction: serverAction ?? this.serverAction,
+    profileAction: profileAction ?? this.profileAction,
+    status: status ?? this.status,
+    message: message.present ? message.value : this.message,
+    deployedAt: deployedAt ?? this.deployedAt,
+  );
+  HotspotDeploymentRecord copyWithCompanion(
+    HotspotDeploymentHistoryCompanion data,
+  ) {
+    return HotspotDeploymentRecord(
+      id: data.id.present ? data.id.value : this.id,
+      routerId: data.routerId.present ? data.routerId.value : this.routerId,
+      routerName: data.routerName.present
+          ? data.routerName.value
+          : this.routerName,
+      preset: data.preset.present ? data.preset.value : this.preset,
+      serverName: data.serverName.present
+          ? data.serverName.value
+          : this.serverName,
+      profileName: data.profileName.present
+          ? data.profileName.value
+          : this.profileName,
+      serverAction: data.serverAction.present
+          ? data.serverAction.value
+          : this.serverAction,
+      profileAction: data.profileAction.present
+          ? data.profileAction.value
+          : this.profileAction,
+      status: data.status.present ? data.status.value : this.status,
+      message: data.message.present ? data.message.value : this.message,
+      deployedAt: data.deployedAt.present
+          ? data.deployedAt.value
+          : this.deployedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HotspotDeploymentRecord(')
+          ..write('id: $id, ')
+          ..write('routerId: $routerId, ')
+          ..write('routerName: $routerName, ')
+          ..write('preset: $preset, ')
+          ..write('serverName: $serverName, ')
+          ..write('profileName: $profileName, ')
+          ..write('serverAction: $serverAction, ')
+          ..write('profileAction: $profileAction, ')
+          ..write('status: $status, ')
+          ..write('message: $message, ')
+          ..write('deployedAt: $deployedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    routerId,
+    routerName,
+    preset,
+    serverName,
+    profileName,
+    serverAction,
+    profileAction,
+    status,
+    message,
+    deployedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HotspotDeploymentRecord &&
+          other.id == this.id &&
+          other.routerId == this.routerId &&
+          other.routerName == this.routerName &&
+          other.preset == this.preset &&
+          other.serverName == this.serverName &&
+          other.profileName == this.profileName &&
+          other.serverAction == this.serverAction &&
+          other.profileAction == this.profileAction &&
+          other.status == this.status &&
+          other.message == this.message &&
+          other.deployedAt == this.deployedAt);
+}
+
+class HotspotDeploymentHistoryCompanion
+    extends UpdateCompanion<HotspotDeploymentRecord> {
+  final Value<String> id;
+  final Value<String> routerId;
+  final Value<String> routerName;
+  final Value<String> preset;
+  final Value<String> serverName;
+  final Value<String> profileName;
+  final Value<String> serverAction;
+  final Value<String> profileAction;
+  final Value<String> status;
+  final Value<String?> message;
+  final Value<DateTime> deployedAt;
+  final Value<int> rowid;
+  const HotspotDeploymentHistoryCompanion({
+    this.id = const Value.absent(),
+    this.routerId = const Value.absent(),
+    this.routerName = const Value.absent(),
+    this.preset = const Value.absent(),
+    this.serverName = const Value.absent(),
+    this.profileName = const Value.absent(),
+    this.serverAction = const Value.absent(),
+    this.profileAction = const Value.absent(),
+    this.status = const Value.absent(),
+    this.message = const Value.absent(),
+    this.deployedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HotspotDeploymentHistoryCompanion.insert({
+    required String id,
+    required String routerId,
+    required String routerName,
+    required String preset,
+    required String serverName,
+    required String profileName,
+    required String serverAction,
+    required String profileAction,
+    required String status,
+    this.message = const Value.absent(),
+    required DateTime deployedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       routerId = Value(routerId),
+       routerName = Value(routerName),
+       preset = Value(preset),
+       serverName = Value(serverName),
+       profileName = Value(profileName),
+       serverAction = Value(serverAction),
+       profileAction = Value(profileAction),
+       status = Value(status),
+       deployedAt = Value(deployedAt);
+  static Insertable<HotspotDeploymentRecord> custom({
+    Expression<String>? id,
+    Expression<String>? routerId,
+    Expression<String>? routerName,
+    Expression<String>? preset,
+    Expression<String>? serverName,
+    Expression<String>? profileName,
+    Expression<String>? serverAction,
+    Expression<String>? profileAction,
+    Expression<String>? status,
+    Expression<String>? message,
+    Expression<DateTime>? deployedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (routerId != null) 'router_id': routerId,
+      if (routerName != null) 'router_name': routerName,
+      if (preset != null) 'preset': preset,
+      if (serverName != null) 'server_name': serverName,
+      if (profileName != null) 'profile_name': profileName,
+      if (serverAction != null) 'server_action': serverAction,
+      if (profileAction != null) 'profile_action': profileAction,
+      if (status != null) 'status': status,
+      if (message != null) 'message': message,
+      if (deployedAt != null) 'deployed_at': deployedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HotspotDeploymentHistoryCompanion copyWith({
+    Value<String>? id,
+    Value<String>? routerId,
+    Value<String>? routerName,
+    Value<String>? preset,
+    Value<String>? serverName,
+    Value<String>? profileName,
+    Value<String>? serverAction,
+    Value<String>? profileAction,
+    Value<String>? status,
+    Value<String?>? message,
+    Value<DateTime>? deployedAt,
+    Value<int>? rowid,
+  }) {
+    return HotspotDeploymentHistoryCompanion(
+      id: id ?? this.id,
+      routerId: routerId ?? this.routerId,
+      routerName: routerName ?? this.routerName,
+      preset: preset ?? this.preset,
+      serverName: serverName ?? this.serverName,
+      profileName: profileName ?? this.profileName,
+      serverAction: serverAction ?? this.serverAction,
+      profileAction: profileAction ?? this.profileAction,
+      status: status ?? this.status,
+      message: message ?? this.message,
+      deployedAt: deployedAt ?? this.deployedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (routerId.present) {
+      map['router_id'] = Variable<String>(routerId.value);
+    }
+    if (routerName.present) {
+      map['router_name'] = Variable<String>(routerName.value);
+    }
+    if (preset.present) {
+      map['preset'] = Variable<String>(preset.value);
+    }
+    if (serverName.present) {
+      map['server_name'] = Variable<String>(serverName.value);
+    }
+    if (profileName.present) {
+      map['profile_name'] = Variable<String>(profileName.value);
+    }
+    if (serverAction.present) {
+      map['server_action'] = Variable<String>(serverAction.value);
+    }
+    if (profileAction.present) {
+      map['profile_action'] = Variable<String>(profileAction.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (message.present) {
+      map['message'] = Variable<String>(message.value);
+    }
+    if (deployedAt.present) {
+      map['deployed_at'] = Variable<DateTime>(deployedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HotspotDeploymentHistoryCompanion(')
+          ..write('id: $id, ')
+          ..write('routerId: $routerId, ')
+          ..write('routerName: $routerName, ')
+          ..write('preset: $preset, ')
+          ..write('serverName: $serverName, ')
+          ..write('profileName: $profileName, ')
+          ..write('serverAction: $serverAction, ')
+          ..write('profileAction: $profileAction, ')
+          ..write('status: $status, ')
+          ..write('message: $message, ')
+          ..write('deployedAt: $deployedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $VoucherHistoryTable extends VoucherHistory
     with TableInfo<$VoucherHistoryTable, VoucherRecord> {
   @override
@@ -3831,6 +4512,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $HotspotProfilesTable hotspotProfiles = $HotspotProfilesTable(
     this,
   );
+  late final $HotspotDeploymentHistoryTable hotspotDeploymentHistory =
+      $HotspotDeploymentHistoryTable(this);
   late final $VoucherHistoryTable voucherHistory = $VoucherHistoryTable(this);
   late final $SalesTable sales = $SalesTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
@@ -3843,6 +4526,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     routers,
     routerGroups,
     hotspotProfiles,
+    hotspotDeploymentHistory,
     voucherHistory,
     sales,
     appSettings,
@@ -4757,6 +5441,351 @@ typedef $$HotspotProfilesTableProcessedTableManager =
         >,
       ),
       HotspotProfileRecord,
+      PrefetchHooks Function()
+    >;
+typedef $$HotspotDeploymentHistoryTableCreateCompanionBuilder =
+    HotspotDeploymentHistoryCompanion Function({
+      required String id,
+      required String routerId,
+      required String routerName,
+      required String preset,
+      required String serverName,
+      required String profileName,
+      required String serverAction,
+      required String profileAction,
+      required String status,
+      Value<String?> message,
+      required DateTime deployedAt,
+      Value<int> rowid,
+    });
+typedef $$HotspotDeploymentHistoryTableUpdateCompanionBuilder =
+    HotspotDeploymentHistoryCompanion Function({
+      Value<String> id,
+      Value<String> routerId,
+      Value<String> routerName,
+      Value<String> preset,
+      Value<String> serverName,
+      Value<String> profileName,
+      Value<String> serverAction,
+      Value<String> profileAction,
+      Value<String> status,
+      Value<String?> message,
+      Value<DateTime> deployedAt,
+      Value<int> rowid,
+    });
+
+class $$HotspotDeploymentHistoryTableFilterComposer
+    extends Composer<_$AppDatabase, $HotspotDeploymentHistoryTable> {
+  $$HotspotDeploymentHistoryTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get routerId => $composableBuilder(
+    column: $table.routerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get routerName => $composableBuilder(
+    column: $table.routerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get preset => $composableBuilder(
+    column: $table.preset,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serverName => $composableBuilder(
+    column: $table.serverName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileName => $composableBuilder(
+    column: $table.profileName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serverAction => $composableBuilder(
+    column: $table.serverAction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileAction => $composableBuilder(
+    column: $table.profileAction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get message => $composableBuilder(
+    column: $table.message,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deployedAt => $composableBuilder(
+    column: $table.deployedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$HotspotDeploymentHistoryTableOrderingComposer
+    extends Composer<_$AppDatabase, $HotspotDeploymentHistoryTable> {
+  $$HotspotDeploymentHistoryTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get routerId => $composableBuilder(
+    column: $table.routerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get routerName => $composableBuilder(
+    column: $table.routerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get preset => $composableBuilder(
+    column: $table.preset,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get serverName => $composableBuilder(
+    column: $table.serverName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profileName => $composableBuilder(
+    column: $table.profileName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get serverAction => $composableBuilder(
+    column: $table.serverAction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profileAction => $composableBuilder(
+    column: $table.profileAction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get message => $composableBuilder(
+    column: $table.message,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deployedAt => $composableBuilder(
+    column: $table.deployedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$HotspotDeploymentHistoryTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HotspotDeploymentHistoryTable> {
+  $$HotspotDeploymentHistoryTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get routerId =>
+      $composableBuilder(column: $table.routerId, builder: (column) => column);
+
+  GeneratedColumn<String> get routerName => $composableBuilder(
+    column: $table.routerName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get preset =>
+      $composableBuilder(column: $table.preset, builder: (column) => column);
+
+  GeneratedColumn<String> get serverName => $composableBuilder(
+    column: $table.serverName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get profileName => $composableBuilder(
+    column: $table.profileName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get serverAction => $composableBuilder(
+    column: $table.serverAction,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get profileAction => $composableBuilder(
+    column: $table.profileAction,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get message =>
+      $composableBuilder(column: $table.message, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deployedAt => $composableBuilder(
+    column: $table.deployedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$HotspotDeploymentHistoryTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HotspotDeploymentHistoryTable,
+          HotspotDeploymentRecord,
+          $$HotspotDeploymentHistoryTableFilterComposer,
+          $$HotspotDeploymentHistoryTableOrderingComposer,
+          $$HotspotDeploymentHistoryTableAnnotationComposer,
+          $$HotspotDeploymentHistoryTableCreateCompanionBuilder,
+          $$HotspotDeploymentHistoryTableUpdateCompanionBuilder,
+          (
+            HotspotDeploymentRecord,
+            BaseReferences<
+              _$AppDatabase,
+              $HotspotDeploymentHistoryTable,
+              HotspotDeploymentRecord
+            >,
+          ),
+          HotspotDeploymentRecord,
+          PrefetchHooks Function()
+        > {
+  $$HotspotDeploymentHistoryTableTableManager(
+    _$AppDatabase db,
+    $HotspotDeploymentHistoryTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HotspotDeploymentHistoryTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$HotspotDeploymentHistoryTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$HotspotDeploymentHistoryTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> routerId = const Value.absent(),
+                Value<String> routerName = const Value.absent(),
+                Value<String> preset = const Value.absent(),
+                Value<String> serverName = const Value.absent(),
+                Value<String> profileName = const Value.absent(),
+                Value<String> serverAction = const Value.absent(),
+                Value<String> profileAction = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> message = const Value.absent(),
+                Value<DateTime> deployedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HotspotDeploymentHistoryCompanion(
+                id: id,
+                routerId: routerId,
+                routerName: routerName,
+                preset: preset,
+                serverName: serverName,
+                profileName: profileName,
+                serverAction: serverAction,
+                profileAction: profileAction,
+                status: status,
+                message: message,
+                deployedAt: deployedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String routerId,
+                required String routerName,
+                required String preset,
+                required String serverName,
+                required String profileName,
+                required String serverAction,
+                required String profileAction,
+                required String status,
+                Value<String?> message = const Value.absent(),
+                required DateTime deployedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => HotspotDeploymentHistoryCompanion.insert(
+                id: id,
+                routerId: routerId,
+                routerName: routerName,
+                preset: preset,
+                serverName: serverName,
+                profileName: profileName,
+                serverAction: serverAction,
+                profileAction: profileAction,
+                status: status,
+                message: message,
+                deployedAt: deployedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$HotspotDeploymentHistoryTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HotspotDeploymentHistoryTable,
+      HotspotDeploymentRecord,
+      $$HotspotDeploymentHistoryTableFilterComposer,
+      $$HotspotDeploymentHistoryTableOrderingComposer,
+      $$HotspotDeploymentHistoryTableAnnotationComposer,
+      $$HotspotDeploymentHistoryTableCreateCompanionBuilder,
+      $$HotspotDeploymentHistoryTableUpdateCompanionBuilder,
+      (
+        HotspotDeploymentRecord,
+        BaseReferences<
+          _$AppDatabase,
+          $HotspotDeploymentHistoryTable,
+          HotspotDeploymentRecord
+        >,
+      ),
+      HotspotDeploymentRecord,
       PrefetchHooks Function()
     >;
 typedef $$VoucherHistoryTableCreateCompanionBuilder =
@@ -5778,6 +6807,11 @@ class $AppDatabaseManager {
       $$RouterGroupsTableTableManager(_db, _db.routerGroups);
   $$HotspotProfilesTableTableManager get hotspotProfiles =>
       $$HotspotProfilesTableTableManager(_db, _db.hotspotProfiles);
+  $$HotspotDeploymentHistoryTableTableManager get hotspotDeploymentHistory =>
+      $$HotspotDeploymentHistoryTableTableManager(
+        _db,
+        _db.hotspotDeploymentHistory,
+      );
   $$VoucherHistoryTableTableManager get voucherHistory =>
       $$VoucherHistoryTableTableManager(_db, _db.voucherHistory);
   $$SalesTableTableManager get sales =>

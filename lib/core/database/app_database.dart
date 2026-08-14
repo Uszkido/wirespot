@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'database_connection.dart';
 import 'tables/app_settings_table.dart';
 import 'tables/hotspot_profiles_table.dart';
+import 'tables/hotspot_deployment_history_table.dart';
 import 'tables/printer_configs_table.dart';
 import 'tables/router_groups_table.dart';
 import 'tables/routers_table.dart';
@@ -16,6 +17,7 @@ part 'app_database.g.dart';
     Routers,
     RouterGroups,
     HotspotProfiles,
+    HotspotDeploymentHistory,
     VoucherHistory,
     Sales,
     AppSettings,
@@ -28,7 +30,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -42,6 +44,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 4) {
         await migrator.addColumn(routers, routers.vendor);
+      }
+      if (from < 5) {
+        await migrator.createTable(hotspotDeploymentHistory);
       }
     },
   );

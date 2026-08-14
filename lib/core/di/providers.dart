@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/authentication/domain/services/auth_service.dart';
 import '../../features/hotspot/domain/services/hotspot_service.dart';
+import '../../features/hotspot/domain/services/hotspot_deployment_service.dart';
+import '../../features/hotspot/domain/repositories/hotspot_deployment_repository.dart';
 import '../../features/reports/domain/repositories/report_repository.dart';
 import '../../features/reports/domain/services/report_export_service.dart';
 import '../../features/reports/domain/services/report_summary_service.dart';
@@ -80,6 +82,15 @@ final ruijieCloudConnectionServiceProvider =
 final hotspotServiceProvider = Provider<HotspotService>(
   (ref) => sl<HotspotService>(),
 );
+
+final hotspotDeploymentServiceProvider = Provider<HotspotDeploymentService>(
+  (ref) => sl<HotspotDeploymentService>(),
+);
+
+final hotspotDeploymentRepositoryProvider =
+    Provider<HotspotDeploymentRepository>(
+      (ref) => sl<HotspotDeploymentRepository>(),
+    );
 
 final voucherRepositoryProvider = Provider<VoucherRepository>(
   (ref) => sl<VoucherRepository>(),
