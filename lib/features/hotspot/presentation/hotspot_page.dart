@@ -11,6 +11,7 @@ import '../../routers/presentation/router_providers.dart';
 import '../../settings/presentation/settings_providers.dart';
 import '../domain/entities/hotspot_active_session_entity.dart';
 import '../domain/entities/hotspot_cookie_entity.dart';
+import '../domain/entities/hotspot_deployment_entity.dart';
 import '../domain/entities/hotspot_ip_binding_entity.dart';
 import '../domain/entities/hotspot_ip_binding_input.dart';
 import '../domain/entities/hotspot_profile_input.dart';

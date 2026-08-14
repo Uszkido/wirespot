@@ -1,6 +1,6 @@
 import 'package:uuid/uuid.dart';
 
-import '../../routers/domain/entities/router_entity.dart';
+import '../../../routers/domain/entities/router_entity.dart';
 import '../entities/hotspot_deployment_entity.dart';
 import '../entities/hotspot_setup_inspection.dart';
 import '../entities/hotspot_setup_input.dart';
