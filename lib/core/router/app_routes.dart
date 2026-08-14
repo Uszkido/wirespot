@@ -11,6 +11,7 @@ class AppRoutes {
   static const reports = '/reports';
   static const settings = '/settings';
   static const diagnostics = '/diagnostics';
+  static const alerts = '/alerts';
   static const wireGuard = '/wireguard';
   static const permissions = '/permissions';
 

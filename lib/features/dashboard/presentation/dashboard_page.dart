@@ -114,6 +114,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     title: Text('Diagnostics'),
                   ),
                 ),
+                const PopupMenuItem(
+                  value: AppRoutes.alerts,
+                  child: ListTile(
+                    leading: Icon(Icons.notifications_active_outlined),
+                    title: Text('Alert Settings'),
+                  ),
+                ),
                 PopupMenuItem(
                   value: AppRoutes.hotspot,
                   child: ListTile(

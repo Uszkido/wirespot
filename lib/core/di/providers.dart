@@ -8,6 +8,8 @@ import '../../features/reports/domain/repositories/report_repository.dart';
 import '../../features/reports/domain/services/report_export_service.dart';
 import '../../features/reports/domain/services/report_summary_service.dart';
 import '../../features/diagnostics/domain/services/network_diagnostics_service.dart';
+import '../../features/hotspot/domain/services/csv_import_service.dart';
+import '../../features/alerts/domain/services/router_alert_service.dart';
 import '../../features/voucher/domain/services/voucher_export_service.dart';
 import '../../features/voucher/domain/services/voucher_pdf_service.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
@@ -132,6 +134,14 @@ final reportSummaryServiceProvider = Provider<ReportSummaryService>(
 
 final networkDiagnosticsServiceProvider = Provider<NetworkDiagnosticsService>(
   (ref) => sl<NetworkDiagnosticsService>(),
+);
+
+final csvImportServiceProvider = Provider<CsvImportService>(
+  (ref) => sl<CsvImportService>(),
+);
+
+final routerAlertServiceProvider = Provider<RouterAlertService>(
+  (ref) => sl<RouterAlertService>(),
 );
 
 final reportExportServiceProvider = Provider<ReportExportService>(

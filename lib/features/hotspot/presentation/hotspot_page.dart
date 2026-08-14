@@ -327,10 +327,24 @@ class _UsersTab extends ConsumerWidget {
       emptyTitle: 'No hotspot users',
       emptyMessage: 'Create users or generate vouchers to populate this list.',
       onRefresh: () async => ref.invalidate(hotspotUsersProvider(router)),
-      action: FloatingActionButton(
-        tooltip: 'Add hotspot user',
-        onPressed: () => _showCreateUserDialog(context, ref, router),
-        child: const Icon(Icons.person_add_alt),
+      action: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.small(
+            heroTag: 'bulk_import',
+            tooltip: 'Bulk import from CSV',
+            onPressed: () => context.push('/hotspot/import?routerId=${router.id}'),
+            child: const Icon(Icons.upload_file),
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton(
+            heroTag: 'add_user',
+            tooltip: 'Add hotspot user',
+            onPressed: () => _showCreateUserDialog(context, ref, router),
+            child: const Icon(Icons.person_add_alt),
+          ),
+        ],
       ),
       itemBuilder: (context, user) => ListTile(
         leading: Icon(user.disabled ? Icons.person_off_outlined : Icons.person),

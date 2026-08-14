@@ -6,6 +6,8 @@ import '../../features/authentication/presentation/auth_controller.dart';
 import '../../features/authentication/presentation/login_page.dart';
 import '../../features/dashboard/presentation/dashboard_page.dart';
 import '../../features/diagnostics/presentation/diagnostics_page.dart';
+import '../../features/hotspot/presentation/csv_import_page.dart';
+import '../../features/alerts/presentation/alert_settings_page.dart';
 import '../../features/hotspot/presentation/hotspot_page.dart';
 import '../../features/permissions/presentation/permission_readiness_page.dart';
 import '../../features/reports/presentation/reports_page.dart';
@@ -67,6 +69,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LicenseGate(child: DiagnosticsPage()),
       ),
       GoRoute(
+        path: AppRoutes.alerts,
+        name: 'alerts',
+        builder: (context, state) => const LicenseGate(child: AlertSettingsPage()),
+      ),
+      GoRoute(
         path: AppRoutes.hotspot,
         name: 'hotspot',
         builder: (context, state) {
@@ -75,6 +82,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             child: HotspotPage(initialTabIndex: tab == 'sessions' ? 2 : 0),
           );
         },
+      ),
+      GoRoute(
+        path: '/hotspot/import',
+        name: 'csv-import',
+        builder: (context, state) => const LicenseGate(child: CsvImportPage()),
       ),
       GoRoute(
         path: AppRoutes.vouchers,
