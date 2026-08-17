@@ -34,8 +34,11 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
   }
 
   void _start() {
-    final router =
-        ref.read(routersProvider).asData?.value.firstWhere(
+    final router = ref
+        .read(routersProvider)
+        .asData
+        ?.value
+        .firstWhere(
           (r) => r.id == ref.read(selectedRouterIdProvider),
           orElse: () => ref.read(routersProvider).asData!.value.first,
         );
@@ -109,9 +112,7 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Network Diagnostics'),
-      ),
+      appBar: AppBar(title: const Text('Network Diagnostics')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -213,7 +214,10 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
                 'ERROR: $_error',
-                style: const TextStyle(color: Colors.redAccent, fontFamily: 'monospace'),
+                style: const TextStyle(
+                  color: Colors.redAccent,
+                  fontFamily: 'monospace',
+                ),
               ),
             );
           }
@@ -225,7 +229,10 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
                 child: SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.green,
+                  ),
                 ),
               ),
             );
@@ -234,7 +241,7 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
 
         final result = _results[index];
         final parts = result.entries.map((e) => '${e.key}: ${e.value}');
-        
+
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 2),
           child: Text(

@@ -42,7 +42,9 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
     });
 
     try {
-      final parsedUsers = await ref.read(csvImportServiceProvider).parseCsv(file);
+      final parsedUsers = await ref
+          .read(csvImportServiceProvider)
+          .parseCsv(file);
       setState(() {
         _users = parsedUsers;
       });
@@ -55,13 +57,16 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
 
   Future<void> _import() async {
     if (_users == null || _users!.isEmpty) return;
-    
-    final router =
-        ref.read(routersProvider).asData?.value.firstWhere(
+
+    final router = ref
+        .read(routersProvider)
+        .asData
+        ?.value
+        .firstWhere(
           (r) => r.id == ref.read(selectedRouterIdProvider),
           orElse: () => ref.read(routersProvider).asData!.value.first,
         );
-        
+
     if (router == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -78,18 +83,20 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
     });
 
     try {
-      await ref.read(csvImportServiceProvider).importUsers(
-        router,
-        _users!,
-        onProgress: (current, total) {
-          if (mounted) {
-            setState(() {
-              _importProgress = current;
-            });
-          }
-        },
-      );
-      
+      await ref
+          .read(csvImportServiceProvider)
+          .importUsers(
+            router,
+            _users!,
+            onProgress: (current, total) {
+              if (mounted) {
+                setState(() {
+                  _importProgress = current;
+                });
+              }
+            },
+          );
+
       setState(() {
         _success = true;
         _isImporting = false;
@@ -105,9 +112,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('CSV Bulk Import'),
-      ),
+      appBar: AppBar(title: const Text('CSV Bulk Import')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -119,10 +124,16 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      const Icon(Icons.upload_file, size: 48, color: Colors.blue),
+                      const Icon(
+                        Icons.upload_file,
+                        size: 48,
+                        color: Colors.blue,
+                      ),
                       const SizedBox(height: 16),
                       Text(
-                        _file == null ? 'Select a CSV file to import users.' : 'Selected: ${_file!.name}',
+                        _file == null
+                            ? 'Select a CSV file to import users.'
+                            : 'Selected: ${_file!.name}',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
@@ -142,7 +153,10 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
                     _error!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               if (_success)
@@ -153,11 +167,19 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        const Icon(Icons.check_circle, color: Colors.green, size: 48),
+                        const Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                          size: 48,
+                        ),
                         const SizedBox(height: 8),
                         const Text(
                           'Import Successful!',
-                          style: TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text('Successfully imported ${_users!.length} users.'),
                       ],
@@ -169,7 +191,9 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                   children: [
                     const CircularProgressIndicator(),
                     const SizedBox(height: 16),
-                    Text('Importing user $_importProgress of ${_users!.length}...'),
+                    Text(
+                      'Importing user $_importProgress of ${_users!.length}...',
+                    ),
                   ],
                 ),
               if (_users != null && !_isImporting && !_success)
@@ -185,19 +209,30 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                            border: Border.all(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.outlineVariant,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: ListView.separated(
-                            itemCount: _users!.length > 10 ? 10 : _users!.length,
-                            separatorBuilder: (context, index) => const Divider(height: 1),
+                            itemCount: _users!.length > 10
+                                ? 10
+                                : _users!.length,
+                            separatorBuilder: (context, index) =>
+                                const Divider(height: 1),
                             itemBuilder: (context, index) {
                               final user = _users![index];
                               return ListTile(
                                 dense: true,
                                 title: Text(user.username),
-                                subtitle: Text('Profile: ${user.profile ?? 'default'} | Uptime limit: ${user.limitUptime ?? 'none'}'),
-                                trailing: Text(user.password.isNotEmpty ? '***' : 'No pass'),
+                                subtitle: Text(
+                                  'Profile: ${user.profile ?? 'default'} | Uptime limit: ${user.limitUptime ?? 'none'}',
+                                ),
+                                trailing: Text(
+                                  user.password.isNotEmpty ? '***' : 'No pass',
+                                ),
                               );
                             },
                           ),

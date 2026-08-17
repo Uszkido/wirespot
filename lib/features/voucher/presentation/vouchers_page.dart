@@ -312,13 +312,17 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
         )
         .toList();
     try {
-      final pdfBytes = await ref.read(voucherPdfServiceProvider).buildPdfBatch(receipts);
+      final pdfBytes = await ref
+          .read(voucherPdfServiceProvider)
+          .buildPdfBatch(receipts);
       final count = receipts.length;
-      await ref.read(shareServiceProvider).sharePdfCard(
-        pdfBytes,
-        'wirespot_vouchers_$count.pdf',
-        subject: '$count Wi-Fi Vouchers',
-      );
+      await ref
+          .read(shareServiceProvider)
+          .sharePdfCard(
+            pdfBytes,
+            'wirespot_vouchers_$count.pdf',
+            subject: '$count Wi-Fi Vouchers',
+          );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -853,12 +857,16 @@ class _VoucherTile extends ConsumerWidget {
         .read(voucherReceiptTemplateServiceProvider)
         .build(voucher: voucher, settings: settings, template: template);
     try {
-      final pdfBytes = await ref.read(voucherPdfServiceProvider).buildPdf(receipt);
-      await ref.read(shareServiceProvider).sharePdfCard(
-        pdfBytes,
-        'wirespot_voucher_${voucher.username}.pdf',
-        subject: 'Wi-Fi Voucher: ${voucher.username}',
-      );
+      final pdfBytes = await ref
+          .read(voucherPdfServiceProvider)
+          .buildPdf(receipt);
+      await ref
+          .read(shareServiceProvider)
+          .sharePdfCard(
+            pdfBytes,
+            'wirespot_voucher_${voucher.username}.pdf',
+            subject: 'Wi-Fi Voucher: ${voucher.username}',
+          );
     } on Object catch (error) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

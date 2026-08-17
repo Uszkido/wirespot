@@ -66,12 +66,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.diagnostics,
         name: 'diagnostics',
-        builder: (context, state) => const LicenseGate(child: DiagnosticsPage()),
+        builder: (context, state) =>
+            const LicenseGate(child: DiagnosticsPage()),
       ),
       GoRoute(
         path: AppRoutes.alerts,
         name: 'alerts',
-        builder: (context, state) => const LicenseGate(child: AlertSettingsPage()),
+        builder: (context, state) =>
+            const LicenseGate(child: AlertSettingsPage()),
       ),
       GoRoute(
         path: AppRoutes.hotspot,

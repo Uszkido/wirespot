@@ -12,8 +12,8 @@ class RouterAlertService {
   RouterAlertService({
     required RouterConnectionService connectionService,
     required NotificationService notificationService,
-  })  : _connectionService = connectionService,
-        _notificationService = notificationService;
+  }) : _connectionService = connectionService,
+       _notificationService = notificationService;
 
   final RouterConnectionService _connectionService;
   final NotificationService _notificationService;
@@ -77,8 +77,9 @@ class RouterAlertService {
 
   Future<void> _poll() async {
     for (final router in _routers) {
-      final rulesForRouter =
-          _rules.where((r) => r.routerId == router.id && r.enabled);
+      final rulesForRouter = _rules.where(
+        (r) => r.routerId == router.id && r.enabled,
+      );
       if (rulesForRouter.isEmpty) continue;
 
       try {

@@ -62,8 +62,8 @@ class _AlertSettingsPageState extends ConsumerState<AlertSettingsPage> {
                     'Tap + to add a threshold alert for CPU, memory, or interface status.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -122,9 +122,9 @@ class _AlertSettingsPageState extends ConsumerState<AlertSettingsPage> {
   Future<void> _showAddRuleDialog(BuildContext context) async {
     final routers = ref.read(routersProvider).asData?.value ?? [];
     if (routers.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No routers available.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No routers available.')));
       return;
     }
 
@@ -193,8 +193,7 @@ class _AlertSettingsPageState extends ConsumerState<AlertSettingsPage> {
                       id: const Uuid().v4(),
                       routerId: selectedRouterId!,
                       metric: selectedMetric,
-                      threshold:
-                          int.tryParse(thresholdController.text) ?? 80,
+                      threshold: int.tryParse(thresholdController.text) ?? 80,
                     ),
                   );
                 },

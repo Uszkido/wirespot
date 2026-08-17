@@ -21,16 +21,11 @@ class NetworkDiagnosticsService {
     );
   }
 
-  Stream<Map<String, String>> traceroute(
-    RouterEntity router,
-    String address,
-  ) {
+  Stream<Map<String, String>> traceroute(RouterEntity router, String address) {
     return _routerConnectionService.stream(
       router,
       '/tool/traceroute',
-      attributes: {
-        'address': address,
-      },
+      attributes: {'address': address},
     );
   }
 }

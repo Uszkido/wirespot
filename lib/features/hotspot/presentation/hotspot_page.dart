@@ -334,7 +334,8 @@ class _UsersTab extends ConsumerWidget {
           FloatingActionButton.small(
             heroTag: 'bulk_import',
             tooltip: 'Bulk import from CSV',
-            onPressed: () => context.push('/hotspot/import?routerId=${router.id}'),
+            onPressed: () =>
+                context.push('/hotspot/import?routerId=${router.id}'),
             child: const Icon(Icons.upload_file),
           ),
           const SizedBox(height: 16),

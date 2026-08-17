@@ -154,11 +154,7 @@ class RouterOsConnectionService implements RouterConnector {
         username: credentials.username,
         password: credentials.password,
       );
-      yield* client.listen(
-        command,
-        attributes: attributes,
-        queries: queries,
-      );
+      yield* client.listen(command, attributes: attributes, queries: queries);
     } finally {
       await client.disconnect();
     }
