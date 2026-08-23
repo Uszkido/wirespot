@@ -12,7 +12,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.wirespot.app"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -64,6 +64,6 @@ flutter {
 }
 
 dependencies {
-    implementation "com.wireguard.android:tunnel:1.0.20230707"
+    implementation "com.wireguard.android:tunnel:1.0.20260102"
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4"
 }
