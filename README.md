@@ -11,10 +11,10 @@ brings router management, hotspot users, voucher generation, thermal printing,
 reporting, WireGuard remote access, backup, and licensing into one mobile app.
 
 This codebase is original work. It does not copy Mikhmon, WireNex, or any
-proprietary application. The current production connector uses public RouterOS
-API behavior and original WireSpot code. A multi-brand connector foundation is
-now in place for Ruijie/Reyee, OpenWrt, TP-Link Omada, Ubiquiti UniFi, and
-generic router integrations.
+proprietary application. Active connectors are built for 6 router brands:
+MikroTik RouterOS (socket/TLS API), Ruijie / Reyee (Cloud & REST API),
+OpenWrt (LuCI & ubus API), TP-Link Omada (Controller OpenAPI), Ubiquiti
+UniFi (Controller REST API), and Generic Routers (HTTP/REST/SNMP).
 
 ## Project Status
 
@@ -24,9 +24,10 @@ generic router integrations.
 | Android debug APK | Builds successfully |
 | Static analysis | Passing (0 issues) |
 | Tests | 82 passing |
+| Multi-Vendor Connectors | 6 Full Active Connectors (MikroTik, Ruijie, OpenWrt, Omada, UniFi, Generic) |
 | Web Dashboard | Fully Synchronized & Static Hosting Ready (`web_app/`) |
 | Latest APK output | `outputs\WireSpot-0.1.27+28-brand-collaboration-debug.apk` |
-| Latest pushed commit | See GitHub `main` |
+| Latest pushed commit | See GitHub `main` (`6cd64e52`) |
 
 ## Why WireSpot
 
@@ -36,9 +37,8 @@ separate QR generators, and unsafe public router access for remote support.
 
 WireSpot solves that with a focused Android workflow:
 
-- Manage MikroTik routers locally or through WireGuard VPN.
-- Track other router brands as planned connectors, including Ruijie/Reyee,
-  OpenWrt, TP-Link Omada, Ubiquiti UniFi, and generic routers.
+- Manage MikroTik, Ruijie / Reyee, OpenWrt, TP-Link Omada, Ubiquiti UniFi, and
+  Generic routers with active vendor connectors.
 - Start hotspot configuration from prebuilt business presets.
 - Create and control hotspot users, profiles, sessions, queues, cookies, and
   IP bindings.
