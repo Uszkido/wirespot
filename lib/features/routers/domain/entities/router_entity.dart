@@ -333,4 +333,24 @@ class RouterEntity {
       requireVpn || remoteAccessMode.requiresPrivateTunnel;
 
   bool get supportsHotspotVouchers => vendor.supportsHotspotVouchers;
+
+  Map<String, Object?> toJson() => {
+        'id': id,
+        'groupId': groupId,
+        'vendor': vendor.name,
+        'name': name,
+        'host': host,
+        'apiPort': apiPort,
+        'useSsl': useSsl,
+        'requireVpn': requireVpn,
+        'remoteAccessMode': remoteAccessMode.name,
+        'username': username,
+        'identity': identity,
+        'version': version,
+        'boardName': boardName,
+        'isEnabled': isEnabled,
+        'lastConnectedAt': lastConnectedAt?.toUtc().toIso8601String(),
+        'createdAt': createdAt?.toUtc().toIso8601String(),
+        'updatedAt': updatedAt?.toUtc().toIso8601String(),
+      };
 }

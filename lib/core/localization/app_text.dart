@@ -444,6 +444,66 @@ class AppText {
     ha: 'An kasa loda tikiti',
   );
 
+  String get cloudSync =>
+      _pick(en: 'Cloud Sync', fr: 'Sync Nuage', ha: 'Cloud Sync');
+
+  String get cloudSyncSubtitle => _pick(
+    en: 'Connect to WireSpot Cloud, manage session & view sync operations.',
+    fr: 'Connecter a WireSpot Cloud, gerer la session et voir la synchronisation.',
+    ha: 'Hada da WireSpot Cloud, sarrafa zamanta da duba aikace-aikacen sync.',
+  );
+
+  String get cloudConnection => _pick(
+    en: 'Cloud connection',
+    fr: 'Connexion nuage',
+    ha: 'Hadin Cloud',
+  );
+
+  String get cloudSessionText =>
+      _pick(en: 'Cloud session', fr: 'Session nuage', ha: 'Zamanta na Cloud');
+
+  String get apiBaseUrl =>
+      _pick(en: 'API base URL', fr: 'URL de base API', ha: 'Adireshin API');
+
+  String get organizationId => _pick(
+    en: 'Organization ID',
+    fr: 'ID d organisation',
+    ha: 'Lambar kungiya',
+  );
+
+  String get allowInsecureDev => _pick(
+    en: 'Allow HTTP (dev mode)',
+    fr: 'Autoriser HTTP (mode dev)',
+    ha: 'Yarda da HTTP (gwaji)',
+  );
+
+  String get syncNow =>
+      _pick(en: 'Sync Now', fr: 'Synchroniser', ha: 'Fara Sync');
+
+  String get pendingOperations => _pick(
+    en: 'Pending operations',
+    fr: 'Operations en attente',
+    ha: 'Ayyukan da ke jiran sync',
+  );
+
+  String get cloudAccessToken => _pick(
+    en: 'Cloud access token',
+    fr: 'Jeton d acces nuage',
+    ha: 'Token na shiga Cloud',
+  );
+
+  String get retryFailed => _pick(
+    en: 'Retry Failed',
+    fr: 'Reessayer les echecs',
+    ha: 'Sake gwada wanda ya gaza',
+  );
+
+  String get clearCompleted => _pick(
+    en: 'Clear Completed',
+    fr: 'Effacer les termines',
+    ha: 'Goge wanda aka gama',
+  );
+
   String _pick({required String en, required String fr, required String ha}) {
     return switch (languageCode) {
       'fr' => fr,

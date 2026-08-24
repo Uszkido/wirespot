@@ -1,4 +1,5 @@
 import '../../../../core/utils/id_generator.dart';
+import '../../../cloud/domain/services/cloud_sync_service.dart';
 import '../../../hotspot/domain/entities/hotspot_user_input.dart';
 import '../../../hotspot/domain/services/hotspot_service.dart';
 import '../../../routers/domain/entities/router_entity.dart';
@@ -13,13 +14,16 @@ class VoucherGenerationService {
     required VoucherRepository repository,
     required VoucherCodeGenerator codeGenerator,
     HotspotService? hotspotService,
+    CloudSyncService? cloudSyncService,
   }) : _repository = repository,
        _codeGenerator = codeGenerator,
-       _hotspotService = hotspotService;
+       _hotspotService = hotspotService,
+       _cloudSyncService = cloudSyncService;
 
   final VoucherRepository _repository;
   final VoucherCodeGenerator _codeGenerator;
   final HotspotService? _hotspotService;
+  final CloudSyncService? _cloudSyncService;
 
   Future<List<VoucherEntity>> generate(
     VoucherGenerationRequest request, {
@@ -63,6 +67,13 @@ class VoucherGenerationService {
         );
       }
       await _repository.saveVoucher(voucher);
+      if (_cloudSyncService != null) {
+        await _cloudSyncService!.queueUpsert(
+          resourceType: 'voucher',
+          resourceId: voucher.id,
+          payload: voucher.toJson(),
+        );
+      }
       vouchers.add(voucher);
     }
 

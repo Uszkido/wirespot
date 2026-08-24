@@ -1,5 +1,6 @@
 import 'package:uuid/uuid.dart';
 
+import '../../../cloud/domain/services/cloud_sync_service.dart';
 import '../../../routers/domain/entities/router_entity.dart';
 import '../entities/hotspot_deployment_entity.dart';
 import '../entities/hotspot_setup_inspection.dart';
@@ -12,13 +13,16 @@ class HotspotDeploymentService {
   HotspotDeploymentService({
     required HotspotService hotspotService,
     required HotspotDeploymentRepository repository,
+    CloudSyncService? cloudSyncService,
     Uuid uuid = const Uuid(),
   }) : _hotspotService = hotspotService,
        _repository = repository,
+       _cloudSyncService = cloudSyncService,
        _uuid = uuid;
 
   final HotspotService _hotspotService;
   final HotspotDeploymentRepository _repository;
+  final CloudSyncService? _cloudSyncService;
   final Uuid _uuid;
 
   Future<void> deploy({
@@ -29,12 +33,32 @@ class HotspotDeploymentService {
   }) async {
     try {
       await _hotspotService.setupHotspot(router, input);
-      await _save(
-        router,
-        preset,
-        input,
-        inspection,
-        HotspotDeploymentStatus.succeeded,
+      final entity = HotspotDeploymentEntity(
+        id: _uuid.v4(),
+        routerId: router.id,
+        routerName: router.name,
+        preset: preset.label,
+        serverName: input.serverName,
+        profileName: input.serverProfileName,
+        serverAction: inspection.serverAction,
+        profileAction: inspection.profileAction,
+        status: HotspotDeploymentStatus.succeeded,
+        deployedAt: DateTime.now(),
+      );
+      await _repository.save(entity);
+      await _cloudSyncService?.queueUpsert(
+        resourceType: 'hotspot_deployment',
+        resourceId: entity.id,
+        payload: {
+          'id': entity.id,
+          'routerId': entity.routerId,
+          'routerName': entity.routerName,
+          'preset': entity.preset,
+          'serverName': entity.serverName,
+          'profileName': entity.profileName,
+          'status': entity.status.name,
+          'deployedAt': entity.deployedAt.toUtc().toIso8601String(),
+        },
       );
     } on Object catch (error) {
       await _save(

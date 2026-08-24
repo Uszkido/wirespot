@@ -5,6 +5,11 @@ import 'package:get_it/get_it.dart';
 import '../../features/authentication/domain/services/auth_service.dart';
 import '../../features/authentication/domain/services/biometric_auth_service.dart';
 import '../../features/authentication/domain/services/pin_hash_service.dart';
+import '../../features/cloud/data/cloud_api_client.dart';
+import '../../features/cloud/data/cloud_sync_local_repository.dart';
+import '../../features/cloud/domain/repositories/cloud_sync_repository.dart';
+import '../../features/cloud/domain/services/cloud_settings_service.dart';
+import '../../features/cloud/domain/services/cloud_sync_service.dart';
 import '../../features/hotspot/data/routeros_hotspot_service.dart';
 import '../../features/hotspot/data/hotspot_deployment_local_repository.dart';
 import '../../features/hotspot/domain/repositories/hotspot_deployment_repository.dart';
@@ -89,6 +94,24 @@ Future<void> configureDependencies() async {
         biometricAuthService: sl<BiometricAuthService>(),
       ),
     )
+    ..registerLazySingleton<CloudSettingsService>(
+      () => CloudSettingsService(sl<SecureStorageService>()),
+    )
+    ..registerLazySingleton<CloudApiClient>(
+      () => CloudApiClient(
+        dio: sl<Dio>(),
+        settingsService: sl<CloudSettingsService>(),
+      ),
+    )
+    ..registerLazySingleton<CloudSyncRepository>(
+      () => CloudSyncLocalRepository(sl<AppDatabase>()),
+    )
+    ..registerLazySingleton<CloudSyncService>(
+      () => CloudSyncService(
+        repository: sl<CloudSyncRepository>(),
+        apiClient: sl<CloudApiClient>(),
+      ),
+    )
     ..registerLazySingleton<RouterCredentialStore>(
       () => RouterCredentialStore(sl<SecureStorageService>()),
     )
@@ -149,6 +172,7 @@ Future<void> configureDependencies() async {
       () => HotspotDeploymentService(
         hotspotService: sl<HotspotService>(),
         repository: sl<HotspotDeploymentRepository>(),
+        cloudSyncService: sl<CloudSyncService>(),
       ),
     )
     ..registerLazySingleton<VoucherRepository>(
@@ -170,6 +194,7 @@ Future<void> configureDependencies() async {
         repository: sl<VoucherRepository>(),
         codeGenerator: sl<VoucherCodeGenerator>(),
         hotspotService: sl<HotspotService>(),
+        cloudSyncService: sl<CloudSyncService>(),
       ),
     )
     ..registerLazySingleton<VoucherExportService>(VoucherExportService.new)
@@ -214,6 +239,7 @@ Future<void> configureDependencies() async {
         routerRepository: sl<RouterRepository>(),
         hotspotService: sl<HotspotService>(),
         voucherRepository: sl<VoucherRepository>(),
+        cloudSyncService: sl<CloudSyncService>(),
       ),
     )
     ..registerLazySingleton<WireGuardSettingsService>(

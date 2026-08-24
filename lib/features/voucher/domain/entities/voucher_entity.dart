@@ -26,4 +26,19 @@ class VoucherEntity {
   final DateTime? printedAt;
   final DateTime? soldAt;
   final String? note;
+
+  Map<String, Object?> toJson() => {
+        'id': id,
+        'routerId': routerId,
+        'profileId': profileId,
+        'username': username,
+        'password': password,
+        'priceMinor': priceMinor,
+        'currency': currency,
+        'validityMinutes': validityMinutes,
+        'generatedAt': generatedAt.toUtc().toIso8601String(),
+        'printedAt': printedAt?.toUtc().toIso8601String(),
+        'soldAt': soldAt?.toUtc().toIso8601String(),
+        'note': note,
+      };
 }

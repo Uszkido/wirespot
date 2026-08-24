@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/authentication/domain/services/auth_service.dart';
+import '../../features/cloud/data/cloud_api_client.dart';
+import '../../features/cloud/domain/repositories/cloud_sync_repository.dart';
+import '../../features/cloud/domain/services/cloud_settings_service.dart';
+import '../../features/cloud/domain/services/cloud_sync_service.dart';
 import '../../features/hotspot/domain/services/hotspot_service.dart';
 import '../../features/hotspot/domain/services/hotspot_deployment_service.dart';
 import '../../features/hotspot/domain/repositories/hotspot_deployment_repository.dart';
@@ -40,6 +44,22 @@ import 'service_locator.dart';
 final appDatabaseProvider = Provider<AppDatabase>((ref) => sl<AppDatabase>());
 
 final authServiceProvider = Provider<AuthService>((ref) => sl<AuthService>());
+
+final cloudSettingsServiceProvider = Provider<CloudSettingsService>(
+  (ref) => sl<CloudSettingsService>(),
+);
+
+final cloudApiClientProvider = Provider<CloudApiClient>(
+  (ref) => sl<CloudApiClient>(),
+);
+
+final cloudSyncRepositoryProvider = Provider<CloudSyncRepository>(
+  (ref) => sl<CloudSyncRepository>(),
+);
+
+final cloudSyncServiceProvider = Provider<CloudSyncService>(
+  (ref) => sl<CloudSyncService>(),
+);
 
 final printerServiceProvider = Provider<PrinterService>(
   (ref) => sl<PrinterService>(),

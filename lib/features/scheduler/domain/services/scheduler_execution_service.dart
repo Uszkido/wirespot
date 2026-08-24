@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../cloud/domain/services/cloud_sync_service.dart';
 import '../../../hotspot/domain/entities/hotspot_active_session_entity.dart';
 import '../../../hotspot/domain/services/hotspot_service.dart';
 import '../../../reports/domain/entities/report_period.dart';
@@ -20,12 +21,14 @@ class SchedulerExecutionService {
     required RouterRepository routerRepository,
     required HotspotService hotspotService,
     required VoucherRepository voucherRepository,
+    CloudSyncService? cloudSyncService,
   }) : _settingsService = settingsService,
        _backupService = backupService,
        _reportSummaryService = reportSummaryService,
        _routerRepository = routerRepository,
        _hotspotService = hotspotService,
-       _voucherRepository = voucherRepository;
+       _voucherRepository = voucherRepository,
+       _cloudSyncService = cloudSyncService;
 
   final SchedulerSettingsService _settingsService;
   final BackupService _backupService;
@@ -33,6 +36,7 @@ class SchedulerExecutionService {
   final RouterRepository _routerRepository;
   final HotspotService _hotspotService;
   final VoucherRepository _voucherRepository;
+  final CloudSyncService? _cloudSyncService;
 
   Timer? _timer;
   bool _isRunning = false;
@@ -92,6 +96,7 @@ class SchedulerExecutionService {
         ScheduledTaskType.voucherCleanup => await _voucherCleanup(now),
         ScheduledTaskType.dailySalesSummary => await _dailySalesSummary(now),
         ScheduledTaskType.databaseBackup => await _databaseBackup(),
+        ScheduledTaskType.cloudSync => await _cloudSync(),
       };
       return SchedulerExecutionResult(
         type: task.type,
@@ -176,6 +181,14 @@ class SchedulerExecutionService {
       details: '$disconnectedSessions expired sessions disconnected',
       failures: failures,
     );
+  }
+
+  Future<String> _cloudSync() async {
+    if (_cloudSyncService == null) {
+      return 'Cloud sync service unavailable.';
+    }
+    final count = await _cloudSyncService.syncPending();
+    return 'Cloud sync synchronized $count pending operation(s).';
   }
 
   Future<String> _databaseBackup() async {

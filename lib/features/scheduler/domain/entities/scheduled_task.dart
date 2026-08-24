@@ -4,6 +4,7 @@ enum ScheduledTaskType {
   voucherCleanup,
   dailySalesSummary,
   databaseBackup,
+  cloudSync,
 }
 
 class ScheduledTask {
@@ -28,6 +29,7 @@ class ScheduledTask {
       ScheduledTaskType.voucherCleanup => 'Voucher cleanup',
       ScheduledTaskType.dailySalesSummary => 'Daily sales summary',
       ScheduledTaskType.databaseBackup => 'Database backup',
+      ScheduledTaskType.cloudSync => 'Cloud sync',
     };
   }
 
@@ -83,6 +85,11 @@ class ScheduledTask {
         type: ScheduledTaskType.databaseBackup,
         enabled: false,
         intervalMinutes: 1440,
+      ),
+      ScheduledTask(
+        type: ScheduledTaskType.cloudSync,
+        enabled: false,
+        intervalMinutes: 15,
       ),
     ];
   }

@@ -14,6 +14,7 @@ class AppRoutes {
   static const alerts = '/alerts';
   static const wireGuard = '/wireguard';
   static const permissions = '/permissions';
+  static const cloud = '/cloud';
 
   static String editRouter(String routerId) {
     return '/routers/$routerId/edit';

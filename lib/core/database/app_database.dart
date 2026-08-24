@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import 'database_connection.dart';
 import 'tables/app_settings_table.dart';
+import 'tables/cloud_sync_operations_table.dart';
 import 'tables/hotspot_profiles_table.dart';
 import 'tables/hotspot_deployment_history_table.dart';
 import 'tables/printer_configs_table.dart';
@@ -15,6 +16,7 @@ part 'app_database.g.dart';
 @DriftDatabase(
   tables: [
     Routers,
+    CloudSyncOperations,
     RouterGroups,
     HotspotProfiles,
     HotspotDeploymentHistory,
@@ -30,7 +32,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -47,6 +49,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 5) {
         await migrator.createTable(hotspotDeploymentHistory);
+      }
+      if (from < 6) {
+        await migrator.createTable(cloudSyncOperations);
       }
     },
   );

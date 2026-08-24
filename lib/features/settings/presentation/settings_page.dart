@@ -66,6 +66,8 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 16),
           const _WireGuardSettingsCard(),
           const SizedBox(height: 16),
+          const _CloudSyncSettingsCard(),
+          const SizedBox(height: 16),
           entitlement.when(
             data: (value) => _PremiumLicenseCard(entitlement: value),
             error: (error, stackTrace) =>
@@ -156,6 +158,26 @@ class _WireGuardSettingsCard extends ConsumerWidget {
         subtitle: Text(text.wireGuardVpnSubtitle),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push(AppRoutes.wireGuard),
+      ),
+    );
+  }
+}
+
+class _CloudSyncSettingsCard extends ConsumerWidget {
+  const _CloudSyncSettingsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = AppText(
+      ref.watch(appSettingsProvider).asData?.value.languageCode ?? 'en',
+    );
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.cloud_sync_outlined),
+        title: Text(text.cloudSync),
+        subtitle: Text(text.cloudSyncSubtitle),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push(AppRoutes.cloud),
       ),
     );
   }

@@ -27,7 +27,7 @@ dependencies:
   mobile_scanner: ^7.4.0
   image_picker: ^1.1.2
   esc_pos_utils_plus: ^2.0.0
-  intl: ^0.20.3
+  intl: ^0.20.2
   crypto: ^3.0.0
   uuid: ^4.6.0
   pdf: ^3.12.0
@@ -42,7 +42,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   build_runner: ^2.4.0
-  drift_dev: ^2.34.5
+  drift_dev: 2.34.0
   mocktail: ^1.0.4
 
 flutter:

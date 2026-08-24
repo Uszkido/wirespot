@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../licensing/license_gate.dart';
 import '../../features/authentication/presentation/auth_controller.dart';
 import '../../features/authentication/presentation/login_page.dart';
+import '../../features/cloud/presentation/cloud_settings_page.dart';
 import '../../features/dashboard/presentation/dashboard_page.dart';
 import '../../features/diagnostics/presentation/diagnostics_page.dart';
 import '../../features/hotspot/presentation/csv_import_page.dart';
@@ -104,6 +105,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.settings,
         name: 'settings',
         builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.cloud,
+        name: 'cloud',
+        builder: (context, state) =>
+            const LicenseGate(child: CloudSettingsPage()),
       ),
       GoRoute(
         path: AppRoutes.permissions,

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wirespot/core/storage/router_credentials.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_active_session_entity.dart';
@@ -24,6 +25,10 @@ import 'package:wirespot/features/scheduler/domain/services/scheduler_settings_s
 import 'package:wirespot/features/settings/domain/entities/printer_config_entity.dart';
 import 'package:wirespot/features/settings/domain/repositories/settings_repository.dart';
 import 'package:wirespot/features/settings/domain/services/backup_service.dart';
+import 'package:wirespot/features/cloud/data/cloud_api_client.dart';
+import 'package:wirespot/features/cloud/domain/entities/cloud_sync_operation.dart';
+import 'package:wirespot/features/cloud/domain/repositories/cloud_sync_repository.dart';
+import 'package:wirespot/features/cloud/domain/services/cloud_sync_service.dart';
 import 'package:wirespot/features/voucher/domain/entities/hotspot_profile_entity.dart';
 import 'package:wirespot/features/voucher/domain/entities/voucher_entity.dart';
 import 'package:wirespot/features/voucher/domain/repositories/voucher_repository.dart';
@@ -161,12 +166,39 @@ void main() {
     expect(results.single.message, contains('1 expired unused voucher'));
     expect(voucherRepository.deletedVoucherIds, ['expired-unused']);
   });
+
+  test('triggers background cloud sync when cloudSync task is due', () async {
+    final settings = _FakeSettingsRepository()
+      ..values['scheduler.cloudSync.enabled'] = 'true'
+      ..values['scheduler.cloudSync.intervalMinutes'] = '15';
+    final fakeCloudSyncRepo = _FakeCloudSyncRepository();
+    final fakeApiClient = _FakeCloudApiClient();
+    final cloudSyncService = CloudSyncService(
+      repository: fakeCloudSyncRepo,
+      apiClient: fakeApiClient,
+    );
+    await cloudSyncService.queueUpsert(
+      resourceType: 'router',
+      resourceId: 'r-1',
+      payload: {'name': 'Router 1'},
+    );
+    final service = _service(
+      settings,
+      cloudSyncService: cloudSyncService,
+    );
+
+    final results = await service.runDueTasks(now: DateTime(2026, 7, 13, 12));
+
+    expect(results.single.type, ScheduledTaskType.cloudSync);
+    expect(results.single.message, contains('Cloud sync synchronized 1 pending operation(s)'));
+  });
 }
 
 SchedulerExecutionService _service(
   _FakeSettingsRepository settings, {
   _FakeHotspotService? hotspotService,
   _FakeVoucherRepository? voucherRepository,
+  CloudSyncService? cloudSyncService,
 }) {
   return SchedulerExecutionService(
     settingsService: SchedulerSettingsService(settings),
@@ -175,6 +207,7 @@ SchedulerExecutionService _service(
     routerRepository: _FakeRouterRepository(),
     hotspotService: hotspotService ?? _FakeHotspotService(),
     voucherRepository: voucherRepository ?? _FakeVoucherRepository(),
+    cloudSyncService: cloudSyncService,
   );
 }
 
@@ -415,5 +448,159 @@ class _FakeVoucherRepository implements VoucherRepository {
   @override
   Future<void> saveVoucher(VoucherEntity voucher) async {
     vouchers.add(voucher);
+  }
+}
+
+class _FakeCloudSyncRepository implements CloudSyncRepository {
+  final operations = <CloudSyncOperation>[];
+
+  @override
+  Future<void> enqueue(CloudSyncOperation operation) async {
+    operations.add(operation);
+  }
+
+  @override
+  Future<List<CloudSyncOperation>> pendingOperations() async {
+    return operations
+        .where((op) =>
+            op.status == CloudSyncStatus.pending ||
+            op.status == CloudSyncStatus.failed)
+        .toList();
+  }
+
+  @override
+  Future<void> markSyncing(String id) async {
+    final index = operations.indexWhere((op) => op.id == id);
+    if (index != -1) {
+      final op = operations[index];
+      operations[index] = CloudSyncOperation(
+        id: op.id,
+        operation: op.operation,
+        resourceType: op.resourceType,
+        resourceId: op.resourceId,
+        payload: op.payload,
+        idempotencyKey: op.idempotencyKey,
+        status: CloudSyncStatus.syncing,
+        createdAt: op.createdAt,
+        updatedAt: DateTime.now(),
+        attemptCount: op.attemptCount + 1,
+        lastError: op.lastError,
+      );
+    }
+  }
+
+  @override
+  Future<void> markCompleted(String id) async {
+    final index = operations.indexWhere((op) => op.id == id);
+    if (index != -1) {
+      final op = operations[index];
+      operations[index] = CloudSyncOperation(
+        id: op.id,
+        operation: op.operation,
+        resourceType: op.resourceType,
+        resourceId: op.resourceId,
+        payload: op.payload,
+        idempotencyKey: op.idempotencyKey,
+        status: CloudSyncStatus.completed,
+        createdAt: op.createdAt,
+        updatedAt: DateTime.now(),
+        attemptCount: op.attemptCount,
+        lastError: null,
+      );
+    }
+  }
+
+  @override
+  Future<void> markFailed(String id, String error) async {
+    final index = operations.indexWhere((op) => op.id == id);
+    if (index != -1) {
+      final op = operations[index];
+      operations[index] = CloudSyncOperation(
+        id: op.id,
+        operation: op.operation,
+        resourceType: op.resourceType,
+        resourceId: op.resourceId,
+        payload: op.payload,
+        idempotencyKey: op.idempotencyKey,
+        status: CloudSyncStatus.failed,
+        createdAt: op.createdAt,
+        updatedAt: DateTime.now(),
+        attemptCount: op.attemptCount,
+        lastError: error,
+      );
+    }
+  }
+
+  @override
+  Future<int> clearCompleted() async {
+    final before = operations.length;
+    operations.removeWhere((op) => op.status == CloudSyncStatus.completed);
+    return before - operations.length;
+  }
+
+  @override
+  Future<int> retryFailed() async {
+    var count = 0;
+    for (var i = 0; i < operations.length; i++) {
+      if (operations[i].status == CloudSyncStatus.failed) {
+        final op = operations[i];
+        operations[i] = CloudSyncOperation(
+          id: op.id,
+          operation: op.operation,
+          resourceType: op.resourceType,
+          resourceId: op.resourceId,
+          payload: op.payload,
+          idempotencyKey: op.idempotencyKey,
+          status: CloudSyncStatus.pending,
+          createdAt: op.createdAt,
+          updatedAt: DateTime.now(),
+          attemptCount: op.attemptCount,
+          lastError: op.lastError,
+        );
+        count++;
+      }
+    }
+    return count;
+  }
+}
+
+class _FakeCloudApiClient implements CloudApiClient {
+  @override
+  Future<List<Map<String, dynamic>>> fetchPendingCommands() async => [];
+
+  @override
+  Future<bool> acknowledgeCommand({
+    required String commandId,
+    required String status,
+    Map<String, Object?>? resultPayload,
+    String? errorMessage,
+  }) async => true;
+
+  @override
+  Future<bool> postTelemetry(Map<String, Object?> telemetryData) async => true;
+
+  @override
+  Future<bool> testConnection() async => true;
+
+  @override
+  Future<Response<Map<String, dynamic>>> getJson(String path) async {
+    return Response<Map<String, dynamic>>(
+      requestOptions: RequestOptions(path: path),
+      statusCode: 200,
+      data: {'status': 'ok'},
+    );
+  }
+
+  @override
+  Future<Response<Map<String, dynamic>>> postJson(
+    String path, {
+    Map<String, Object?> data = const {},
+    String? idempotencyKey,
+  }) async {
+    return Response<Map<String, dynamic>>(
+      requestOptions: RequestOptions(path: path),
+      statusCode: 200,
+      data: {'status': 'ok'},
+    );
   }
 }
