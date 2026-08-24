@@ -1,9 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wirespot/core/api/routeros_api_exception.dart';
 import 'package:wirespot/core/api/routeros_api_response.dart';
 import 'package:wirespot/core/api/routeros_models.dart';
+import 'package:wirespot/features/routers/data/generic_router_connection_service.dart';
 import 'package:wirespot/features/routers/data/multi_vendor_router_connection_service.dart';
-import 'package:wirespot/features/routers/data/planned_router_connector.dart';
+import 'package:wirespot/features/routers/data/omada_connection_service.dart';
+import 'package:wirespot/features/routers/data/openwrt_connection_service.dart';
+import 'package:wirespot/features/routers/data/ruijie_cloud_connection_service.dart';
+import 'package:wirespot/features/routers/data/unifi_connection_service.dart';
 import 'package:wirespot/features/routers/domain/entities/router_entity.dart';
 import 'package:wirespot/features/routers/domain/services/router_connector.dart';
 
@@ -26,36 +30,65 @@ void main() {
     expect(mikrotik.commands, ['/system/identity/print']);
   });
 
-  test('planned connectors return an unsupported vendor error', () async {
+  test('all 6 router vendors execute commands on their active connectors', () async {
+    final ruijie = RuijieCloudConnectionService(
+      readCredentials: (_) async => null,
+      requestDevices: (_) async => Response(
+        requestOptions: RequestOptions(path: ''),
+        statusCode: 200,
+        data: {
+          'data': [
+            {'id': 'dev1', 'name': 'Ruijie Gateway'},
+          ],
+        },
+      ),
+    );
+    final openwrt = OpenWrtConnectionService();
+    final omada = OmadaConnectionService();
+    final unifi = UniFiConnectionService();
+    final generic = GenericRouterConnectionService();
+
     final service = MultiVendorRouterConnectionService(
-      connectors: const [PlannedRouterConnector(RouterVendor.ruijie)],
+      connectors: [ruijie, openwrt, omada, unifi, generic],
     );
 
-    await expectLater(
-      service.testConnection(
-        const RouterEntity(
-          id: 'router-ruijie',
-          name: 'Reyee Guest',
-          host: '192.168.110.1',
-          username: 'admin',
-          vendor: RouterVendor.ruijie,
-        ),
-      ),
-      throwsA(
-        isA<RouterOsApiException>()
-            .having((error) => error.category, 'category', 'unsupported_vendor')
-            .having(
-              (error) => error.message,
-              'message',
-              contains('planned connector'),
-            )
-            .having(
-              (error) => error.message,
-              'message',
-              contains('Ruijie Cloud or local controller'),
-            ),
-      ),
-    );
+    final vendors = [
+      RouterVendor.ruijie,
+      RouterVendor.openWrt,
+      RouterVendor.tpLinkOmada,
+      RouterVendor.ubiquitiUniFi,
+      RouterVendor.generic,
+    ];
+
+    for (final vendor in vendors) {
+      final router = RouterEntity(
+        id: 'r_${vendor.name}',
+        name: 'Test ${vendor.label}',
+        host: '192.168.1.1',
+        username: 'admin',
+        vendor: vendor,
+      );
+
+      final isConnected = await service.testConnection(router);
+      expect(isConnected, isTrue);
+
+      final identity = await service.execute(router, '/system/identity/print');
+      expect(identity.records, isNotEmpty);
+
+      final addedUser = await service.execute(
+        router,
+        '/ip/hotspot/user/add',
+        attributes: {'name': 'test_${vendor.name}', 'password': 'pass'},
+      );
+      expect(addedUser.records.single['name'], 'test_${vendor.name}');
+
+      final users = await service.execute(router, '/ip/hotspot/user/print');
+      expect(users.records.any((u) => u['name'] == 'test_${vendor.name}'), isTrue);
+
+      final snapshot = await service.getSnapshot(router);
+      expect(snapshot.identity, isNotEmpty);
+      expect(snapshot.resource.uptime, isNotEmpty);
+    }
   });
 }
 

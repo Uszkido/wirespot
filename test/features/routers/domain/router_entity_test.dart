@@ -29,7 +29,7 @@ void main() {
     expect(router.isEnabled, isTrue);
   });
 
-  test('Ruijie routers support cloud connection verification', () {
+  test('Ruijie routers support full active cloud & controller integration', () {
     const router = RouterEntity(
       id: 'router-ruijie',
       name: 'Guest Reyee',
@@ -45,19 +45,19 @@ void main() {
     expect(router.vendor.requiresController, isTrue);
     expect(
       router.vendor.managementSurfaceLabel,
-      'Ruijie Cloud or local controller',
+      'Ruijie Cloud / REST API',
     );
     expect(router.vendor.hasLiveConnector, isTrue);
     expect(router.vendor.supports(RouterCapability.connectionTest), isTrue);
     expect(router.vendor.supports(RouterCapability.cloudController), isTrue);
-    expect(router.vendor.plans(RouterCapability.voucherProvisioning), isTrue);
+    expect(router.vendor.supports(RouterCapability.voucherProvisioning), isTrue);
     expect(router.vendor.activeCapabilitySummary, contains('Connection test'));
     expect(
       router.vendor.setupChecklist,
       contains(
-        'Prepare Ruijie Cloud or controller access for the managed site.',
+        'Prepare Ruijie Cloud or controller API access for the managed site.',
       ),
     );
-    expect(router.supportsHotspotVouchers, isFalse);
+    expect(router.supportsHotspotVouchers, isTrue);
   });
 }

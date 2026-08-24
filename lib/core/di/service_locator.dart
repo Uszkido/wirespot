@@ -23,12 +23,14 @@ import '../../features/diagnostics/domain/services/network_diagnostics_service.d
 import '../../features/hotspot/domain/services/csv_import_service.dart';
 import '../../features/alerts/domain/services/router_alert_service.dart';
 import '../../core/notifications/notification_service.dart';
+import '../../features/routers/data/generic_router_connection_service.dart';
 import '../../features/routers/data/multi_vendor_router_connection_service.dart';
-import '../../features/routers/data/planned_router_connector.dart';
+import '../../features/routers/data/omada_connection_service.dart';
+import '../../features/routers/data/openwrt_connection_service.dart';
 import '../../features/routers/data/routeros_connection_service.dart';
 import '../../features/routers/data/router_local_repository.dart';
 import '../../features/routers/data/ruijie_cloud_connection_service.dart';
-import '../../features/routers/domain/entities/router_entity.dart';
+import '../../features/routers/data/unifi_connection_service.dart';
 import '../../features/routers/domain/repositories/router_repository.dart';
 import '../../features/routers/domain/services/router_connection_service.dart';
 import '../../features/routers/domain/services/router_fleet_connection_service.dart';
@@ -138,6 +140,10 @@ Future<void> configureDependencies() async {
         credentialStore: sl<RouterCredentialStore>(),
       ),
     )
+    ..registerLazySingleton<OpenWrtConnectionService>(OpenWrtConnectionService.new)
+    ..registerLazySingleton<OmadaConnectionService>(OmadaConnectionService.new)
+    ..registerLazySingleton<UniFiConnectionService>(UniFiConnectionService.new)
+    ..registerLazySingleton<GenericRouterConnectionService>(GenericRouterConnectionService.new)
     ..registerLazySingleton<RouterConnectionService>(
       () => MultiVendorRouterConnectionService(
         connectors: [
@@ -147,12 +153,10 @@ Future<void> configureDependencies() async {
             vpnStatusService: sl<VpnStatusService>(),
           ),
           sl<RuijieCloudConnectionService>(),
-          for (final vendor in RouterVendor.values.where(
-            (vendor) =>
-                vendor != RouterVendor.mikrotik &&
-                vendor != RouterVendor.ruijie,
-          ))
-            PlannedRouterConnector(vendor),
+          sl<OpenWrtConnectionService>(),
+          sl<OmadaConnectionService>(),
+          sl<UniFiConnectionService>(),
+          sl<GenericRouterConnectionService>(),
         ],
       ),
     )

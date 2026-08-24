@@ -5,8 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     activeTab: 'tab-dashboard',
     routers: [
       { name: 'Main-Gateway-MikroTik', vendor: 'MikroTik RouterOS', ip: '192.168.88.1', port: 8728, status: 'online', users: 32 },
-      { name: 'Pool-Bar-Ruijie', vendor: 'Ruijie Cloud', ip: '10.0.0.15', port: 443, status: 'online', users: 12 },
-      { name: 'Lobby-AP-OpenWrt', vendor: 'OpenWrt', ip: '192.168.1.1', port: 22, status: 'online', users: 4 }
+      { name: 'Pool-Bar-Ruijie', vendor: 'Ruijie / Reyee', ip: '10.0.0.15', port: 443, status: 'online', users: 12 },
+      { name: 'Lobby-AP-OpenWrt', vendor: 'OpenWrt', ip: '192.168.1.1', port: 22, status: 'online', users: 8 },
+      { name: 'Hotel-Controller-Omada', vendor: 'TP-Link Omada', ip: '192.168.0.10', port: 443, status: 'online', users: 24 },
+      { name: 'Campus-UniFi-CloudKey', vendor: 'Ubiquiti UniFi', ip: '192.168.20.5', port: 443, status: 'online', users: 45 },
+      { name: 'Generic-Edge-Gateway', vendor: 'Generic Router', ip: '10.0.0.1', port: 443, status: 'online', users: 6 }
     ],
     hotspotUsers: [
       { username: 'operator_admin', profile: 'VIP-10MBPS', uptimeLimit: 'Unlimited', dataLimit: 'Unlimited', bytesIn: '1.2 GB', bytesOut: '450 MB' },

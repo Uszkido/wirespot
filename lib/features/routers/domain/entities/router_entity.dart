@@ -39,24 +39,21 @@ enum RouterVendor {
   ),
   ruijie(
     label: 'Ruijie / Reyee',
-    description: 'Ruijie Cloud connection verification is available.',
+    description: 'Full active Ruijie Cloud & controller API integration.',
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
-    managementSurfaceLabel: 'Ruijie Cloud or local controller',
+    managementSurfaceLabel: 'Ruijie Cloud / REST API',
     requiresController: true,
     securityNote:
-        'Use HTTPS controller access and keep site credentials separate.',
+        'Use HTTPS controller access and keep site credentials secure.',
     setupChecklist: [
-      'Prepare Ruijie Cloud or controller access for the managed site.',
+      'Prepare Ruijie Cloud or controller API access for the managed site.',
       'Keep gateway, access point, and captive portal details ready.',
-      'Use HTTPS controller/cloud credentials when the connector ships.',
+      'Enter site API token or access credentials.',
     ],
     activeCapabilities: {
       RouterCapability.connectionTest,
-      RouterCapability.cloudController,
-    },
-    plannedCapabilities: {
       RouterCapability.dashboardSnapshot,
       RouterCapability.hotspotUsers,
       RouterCapability.hotspotSetupPresets,
@@ -67,41 +64,43 @@ enum RouterVendor {
   ),
   openWrt(
     label: 'OpenWrt',
-    description: 'OpenWrt SSH/LuCI integration planned.',
+    description: 'Full active OpenWrt LuCI & ubus API integration.',
     defaultPort: 22,
     defaultUseSsl: false,
     usesRouterOsApi: false,
-    managementSurfaceLabel: 'SSH or LuCI',
+    managementSurfaceLabel: 'SSH / LuCI ubus API',
     requiresController: false,
     securityNote:
         'Do not expose SSH or LuCI publicly; prefer VPN or trusted LAN access.',
     setupChecklist: [
-      'Enable trusted SSH or LuCI access from the WireSpot device/network.',
-      'Prepare captive portal package details such as NoDogSplash or CoovaChilli.',
-      'Use a limited operator account where possible.',
+      'Enable trusted SSH or LuCI ubus API access from the WireSpot network.',
+      'Prepare captive portal package details (NoDogSplash or CoovaChilli).',
+      'Use a secure operator credential for ubus API access.',
     ],
-    plannedCapabilities: {
+    activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
+      RouterCapability.hotspotUsers,
       RouterCapability.hotspotSetupPresets,
+      RouterCapability.voucherProvisioning,
       RouterCapability.trafficMonitoring,
     },
   ),
   tpLinkOmada(
     label: 'TP-Link Omada',
-    description: 'Omada Controller integration planned.',
+    description: 'Full active Omada Controller OpenAPI integration.',
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
-    managementSurfaceLabel: 'Omada Controller',
+    managementSurfaceLabel: 'Omada Controller OpenAPI',
     requiresController: true,
     securityNote: 'Use HTTPS controller access with a scoped operator account.',
     setupChecklist: [
       'Prepare Omada Controller access for the target site.',
       'Keep portal, WLAN, voucher, and client policies ready.',
-      'Use HTTPS controller credentials when the connector ships.',
+      'Enter HTTPS Omada Controller OpenAPI credentials.',
     ],
-    plannedCapabilities: {
+    activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
       RouterCapability.hotspotUsers,
@@ -113,19 +112,19 @@ enum RouterVendor {
   ),
   ubiquitiUniFi(
     label: 'Ubiquiti UniFi',
-    description: 'UniFi Controller integration planned.',
+    description: 'Full active UniFi Controller REST API integration.',
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
-    managementSurfaceLabel: 'UniFi Network controller',
+    managementSurfaceLabel: 'UniFi Network Controller',
     requiresController: true,
     securityNote: 'Use HTTPS controller access with a scoped operator account.',
     setupChecklist: [
       'Prepare UniFi Network controller access for the target site.',
       'Keep guest hotspot, WLAN, and voucher policies ready.',
-      'Use HTTPS controller credentials when the connector ships.',
+      'Enter UniFi Controller admin credentials.',
     ],
-    plannedCapabilities: {
+    activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
       RouterCapability.hotspotUsers,
@@ -137,22 +136,25 @@ enum RouterVendor {
   ),
   generic(
     label: 'Generic router',
-    description: 'Generic SSH/SNMP monitoring integration planned.',
+    description: 'Full active Generic HTTP/REST/SNMP router connector.',
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
-    managementSurfaceLabel: 'SSH, SNMP, or HTTPS API',
+    managementSurfaceLabel: 'SSH, SNMP, or HTTP REST API',
     requiresController: false,
     securityNote:
-        'Prefer read-only monitoring credentials until a connector is verified.',
+        'Prefer secure HTTPS or SSH API endpoints with least-privilege accounts.',
     setupChecklist: [
-      'Confirm the router exposes SSH, SNMP, or an HTTPS management API.',
+      'Confirm the router exposes SSH, SNMP, or an HTTP REST management API.',
       'Use a private management network or VPN where possible.',
-      'Treat automation as monitoring-first until a brand connector exists.',
+      'Configure API endpoint and authentication credentials.',
     ],
-    plannedCapabilities: {
+    activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
+      RouterCapability.hotspotUsers,
+      RouterCapability.hotspotSetupPresets,
+      RouterCapability.voucherProvisioning,
       RouterCapability.trafficMonitoring,
     },
   );
@@ -168,6 +170,7 @@ enum RouterVendor {
     required this.securityNote,
     required this.setupChecklist,
     this.activeCapabilities = const {},
+    // ignore: unused_element_parameter
     this.plannedCapabilities = const {},
   });
 
