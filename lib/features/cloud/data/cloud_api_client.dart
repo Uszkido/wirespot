@@ -73,7 +73,7 @@ class CloudApiClient {
     }
     final headers = <String, String>{
       'Authorization': 'Bearer ${session.accessToken}',
-      if (idempotencyKey case final key?) 'Idempotency-Key': key,
+      if (idempotencyKey != null) 'Idempotency-Key': idempotencyKey,
     };
     final organizationId = settings.organizationId?.trim();
     if (organizationId != null && organizationId.isNotEmpty) {

@@ -23,15 +23,13 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
   bool _success = false;
 
   Future<void> _pickFile() async {
-    final result = await FilePicker.pickFiles(
+    final file = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: ['csv'],
-      withData: true,
     );
 
-    if (result == null || result.files.isEmpty) return;
+    if (file == null) return;
 
-    final file = result.files.first;
     setState(() {
       _file = file;
       _error = null;

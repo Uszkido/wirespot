@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/di/providers.dart';
 import '../../../core/localization/app_text.dart';
 import '../../settings/presentation/settings_providers.dart';
 import '../domain/entities/cloud_connection_settings.dart';
@@ -193,13 +192,13 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: state.connectionHealthy!
-                      ? Colors.green.withOpacity(0.1)
-                      : Colors.red.withOpacity(0.1),
+                      ? Colors.green.withValues(alpha: 0.1)
+                      : Colors.red.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: state.connectionHealthy!
-                        ? Colors.green.withOpacity(0.5)
-                        : Colors.red.withOpacity(0.5),
+                        ? Colors.green.withValues(alpha: 0.5)
+                        : Colors.red.withValues(alpha: 0.5),
                   ),
                 ),
                 child: Row(
@@ -396,7 +395,7 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: ops.length,
-                separatorBuilder: (_, __) => const Divider(),
+                separatorBuilder: (_, _) => const Divider(),
                 itemBuilder: (context, index) {
                   final op = ops[index];
                   return ListTile(
@@ -445,8 +444,8 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
         status.name.toUpperCase(),
         style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
       ),
-      backgroundColor: color.withOpacity(0.1),
-      side: BorderSide(color: color.withOpacity(0.5)),
+      backgroundColor: color.withValues(alpha: 0.1),
+      side: BorderSide(color: color.withValues(alpha: 0.5)),
     );
   }
 

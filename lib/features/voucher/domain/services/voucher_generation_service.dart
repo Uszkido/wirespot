@@ -68,7 +68,7 @@ class VoucherGenerationService {
       }
       await _repository.saveVoucher(voucher);
       if (_cloudSyncService != null) {
-        await _cloudSyncService!.queueUpsert(
+        await _cloudSyncService.queueUpsert(
           resourceType: 'voucher',
           resourceId: voucher.id,
           payload: voucher.toJson(),

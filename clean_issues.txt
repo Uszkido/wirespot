@@ -1,0 +1,4 @@
+   info - Use the null-aware marker '?' rather than a null check via an 'if'. Try using '?' - lib\features\cloud\data\cloud_api_client.dart:50:9 - use_null_aware_elements
+   info - Use the null-aware marker '?' rather than a null check via an 'if'. Try using '?' - lib\features\cloud\data\cloud_api_client.dart:51:9 - use_null_aware_elements
+   info - Use the null-aware marker '?' rather than a null check via an 'if'. Try using '?' - lib\features\cloud\data\cloud_api_client.dart:76:7 - use_null_aware_elements
+   info - 'allowMultiple' is deprecated and shouldn't be used. use pickFile for single-file selection; this parameter will be removed in a future release. Try replacing the use of the deprecated member with the replacement - lib\features\hotspot\presentation\csv_import_page.dart:29:7 - deprecated_member_use

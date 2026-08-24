@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -12,12 +13,7 @@ class CsvImportService {
   final HotspotService _hotspotService;
 
   Future<List<HotspotUserInput>> parseCsv(PlatformFile file) async {
-    final bytes = file.bytes;
-    if (bytes == null) {
-      throw Exception(
-        'Unable to read the CSV file bytes. Make sure the file exists and is readable.',
-      );
-    }
+    final Uint8List bytes = await file.readAsBytes();
 
     final csvString = utf8.decode(bytes, allowMalformed: true);
     final rows = Csv(lineDelimiter: '\n').decode(csvString);
