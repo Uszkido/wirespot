@@ -498,14 +498,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-wiz-deploy').addEventListener('click', () => {
     const host = document.getElementById('wiz-router-host').value;
     const ssid = document.getElementById('wiz-ssid').value;
-    const vendor = document.getElementById('wiz-router-vendor').value;
+    const vendorLabels = {
+      'mikrotik': 'MikroTik RouterOS',
+      'ruijie': 'Ruijie Cloud',
+      'openwrt': 'OpenWrt LuCI / ubus',
+      'omada': 'TP-Link Omada OpenAPI',
+      'unifi': 'Ubiquiti UniFi REST',
+      'generic': 'Generic Router API'
+    };
 
     // Add new router to state
     state.routers.unshift({
       name: `AutoGateway-${ssid}`,
-      vendor: vendor === 'mikrotik' ? 'MikroTik RouterOS' : vendor === 'ruijie' ? 'Ruijie Cloud' : 'TP-Link Omada',
+      vendor: vendorLabels[vendor] || 'MikroTik RouterOS',
       ip: host,
-      port: 8728,
+      port: vendor === 'mikrotik' ? 8728 : vendor === 'ruijie' ? 443 : vendor === 'openwrt' ? 80 : 8443,
       status: 'online',
       users: 0
     });
@@ -513,14 +520,14 @@ document.addEventListener('DOMContentLoaded', () => {
     state.events.unshift({
       time: new Date().toTimeString().slice(0, 8),
       source: 'AutoSetupWizard',
-      desc: `Deploys preset [${selectedPreset.toUpperCase()}] to router at ${host}`,
+      desc: `Deploys preset [${selectedPreset.toUpperCase()}] (${vendorLabels[vendor] || vendor}) to router at ${host}`,
       status: 'success'
     });
 
     renderRouters();
     renderEvents();
     modalWizard.classList.remove('active');
-    showToast(`Successfully deployed auto-configuration to router at ${host}!`, 'success');
+    showToast(`Successfully deployed auto-configuration to ${vendorLabels[vendor] || vendor} at ${host}!`, 'success');
   });
 
   // CLI TERMINAL CONSOLE LOGIC
@@ -532,21 +539,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const sendCliCmd = () => {
     const cmd = cliInput.value.trim();
     if (!cmd) return;
-    cliOutput.textContent += `\n[admin@MikroTik] > ${cmd}\n`;
+    cliOutput.textContent += `\n[admin@WireSpot-Gateway] > ${cmd}\n`;
 
-    if (cmd.includes('user print')) {
+    if (cmd.includes('user print') || cmd.includes('ubus call hotspot') || cmd.includes('get_users')) {
       cliOutput.textContent += `Flags: X - disabled, A - active
  #   NAME                  PROFILE         UPTIME      BYTES-IN    BYTES-OUT
  0   operator_admin        VIP-10MBPS      0s          1.2GiB      450MiB
  1   guest_user_1          Café-1Hour      45m12s      14.2MiB     1.8MiB\n`;
-    } else if (cmd.includes('resource print')) {
+    } else if (cmd.includes('resource print') || cmd.includes('system status') || cmd.includes('sysinfo')) {
       cliOutput.textContent += ` uptime: 4d18h22m
- version: 7.12 (stable)
+ version: 7.12 / v22.03 (Multi-Vendor API)
  cpu-load: 14%
  free-memory: 412.5MiB
  total-memory: 512.0MiB\n`;
     } else {
-      cliOutput.textContent += ` CommandExecuted: '${cmd}' -> Action successful (200 OK).\n`;
+      cliOutput.textContent += ` API Dispatcher: '${cmd}' -> Action successful (200 OK - Active Connector).\n`;
     }
     cliInput.value = '';
     cliOutput.scrollTop = cliOutput.scrollHeight;
