@@ -20,11 +20,12 @@ generic router integrations.
 
 | Item | Status |
 | --- | --- |
-| Current version | `0.1.26+27` |
+| Current version | `0.1.27+28` |
 | Android debug APK | Builds successfully |
-| Static analysis | Passing |
-| Tests | 58 passing |
-| Latest APK output | `outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk` |
+| Static analysis | Passing (0 issues) |
+| Tests | 82 passing |
+| Web Dashboard | Fully Synchronized & Static Hosting Ready (`web_app/`) |
+| Latest APK output | `outputs\WireSpot-0.1.27+28-brand-collaboration-debug.apk` |
 | Latest pushed commit | See GitHub `main` |
 
 ## Why WireSpot
@@ -89,6 +90,7 @@ WireSpot solves that with a focused Android workflow:
 | Hotspot | Manage users, profiles, sessions, queues, cookies, IP bindings |
 | Vouchers | Generate vouchers, QR payloads, configurable credentials, history, share, print |
 | Reports | Revenue summaries, sales lists, CSV/PDF-text export |
+| Web Dashboard (`web_app/`) | Full web parity: Subscriptions, Auto-Config Wizard, Account Sync, RouterOS CLI, POS Ticket Customizer |
 | Settings | Theme, language, currency, license, co-branding, ticket templates, voucher encoding, scheduler, printer, backup |
 | Permissions | VPN, Bluetooth, camera, and network readiness guidance |
 
@@ -97,13 +99,15 @@ WireSpot solves that with a focused Android workflow:
 | Layer | Stack |
 | --- | --- |
 | App | Flutter, Material 3 |
+| Web Dashboard | HTML5, CSS3 Glassmorphism, Vanilla JS, REST API, LocalStorage |
+| Account Sync | Mobile Pairing Key Engine (`WS-XXXX-SYNC`) |
 | State/navigation | Riverpod, GoRouter |
 | Storage | Drift/SQLite, secure storage |
 | Networking | Original RouterOS API client, Dio where HTTP/cloud APIs are needed |
 | Android | Kotlin platform channels for VPN, Bluetooth, sharing, printing |
 | iOS | Planned Flutter target requiring native iOS channel implementations |
 | VPN | WireGuard Android tunnel backend integration |
-| Printing | ESC/POS Bluetooth thermal printer support |
+| Printing | ESC/POS Bluetooth thermal printer support & Web Ticket Preview |
 | QR | QR generation and WireGuard QR import |
 | Automation | In-app scheduler with configurable due-task execution |
 | Architecture | Clean Architecture, MVVM, repositories, dependency injection |

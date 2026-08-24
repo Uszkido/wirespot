@@ -363,3 +363,20 @@ path, reports, and debug APK build are working.
 Production release readiness still requires release signing, Google Play
 Billing validation, Play Store internal testing, broader Android device
 coverage, and printer model validation.
+
+## 24. WireSpot Cloud Web Dashboard & Mobile Account Sync
+
+WireSpot now includes a standalone Web Dashboard in `web_app/` providing full feature parity with the Flutter mobile app:
+
+- **Mobile Account Sync**: Pair web dashboard sessions with mobile app instances using Pairing Keys (`WS-XXXX-SYNC`).
+- **Guided Setup Wizard**: 4-step wizard for non-technical users covering operator branding, router configuration, hotspot presets, and POS ticket styling.
+- **Subscriptions & Billing**: View active tier status (**Free**, **Pro**, **Enterprise**), billing cycles, feature entitlements, and auto-generated PDF invoices.
+- **Interactive RouterOS CLI**: Execute RouterOS commands directly in browser terminal.
+- **Thermal POS Ticket Customizer**: Customize receipt layouts (58mm, 80mm, QR-compact) with live browser preview.
+- **Local Web Server**:
+  ```bash
+  cd web_app
+  python -m http.server 8080
+  ```
+- **Static Hosting**: Deployable to Vercel, Netlify, GitHub Pages, or any static web server.
+
