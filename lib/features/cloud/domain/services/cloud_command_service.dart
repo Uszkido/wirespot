@@ -28,11 +28,11 @@ class CloudCommandService {
     required RouterConnectionService routerConnectionService,
     required HotspotService hotspotService,
     required CloudSyncService cloudSyncService,
-  })  : _apiClient = apiClient,
-        _routerRepository = routerRepository,
-        _routerConnectionService = routerConnectionService,
-        _hotspotService = hotspotService,
-        _cloudSyncService = cloudSyncService;
+  }) : _apiClient = apiClient,
+       _routerRepository = routerRepository,
+       _routerConnectionService = routerConnectionService,
+       _hotspotService = hotspotService,
+       _cloudSyncService = cloudSyncService;
 
   final CloudApiClient _apiClient;
   final RouterRepository _routerRepository;
@@ -62,7 +62,9 @@ class CloudCommandService {
     return results;
   }
 
-  Future<CloudCommandExecutionResult> _executeCommand(CloudCommand command) async {
+  Future<CloudCommandExecutionResult> _executeCommand(
+    CloudCommand command,
+  ) async {
     try {
       switch (command.type) {
         case 'remote_reboot':
@@ -102,7 +104,10 @@ class CloudCommandService {
             commandId: command.id,
             type: command.type,
             success: true,
-            resultPayload: {'action': 'sync_pull_executed', 'syncedCount': syncCount},
+            resultPayload: {
+              'action': 'sync_pull_executed',
+              'syncedCount': syncCount,
+            },
           );
 
         default:

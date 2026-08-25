@@ -170,26 +170,29 @@ void main() {
     expect(pending.first.operation, equals('upsert'));
   });
 
-  test('CloudSyncService syncPending syncs pending operations via API client', () async {
-    final repository = MemoryCloudSyncRepository();
-    final apiClient = FakeCloudApiClient();
-    final service = CloudSyncService(
-      repository: repository,
-      apiClient: apiClient,
-    );
+  test(
+    'CloudSyncService syncPending syncs pending operations via API client',
+    () async {
+      final repository = MemoryCloudSyncRepository();
+      final apiClient = FakeCloudApiClient();
+      final service = CloudSyncService(
+        repository: repository,
+        apiClient: apiClient,
+      );
 
-    await service.queueUpsert(
-      resourceType: 'voucher',
-      resourceId: 'v-102',
-      payload: {'username': 'user102'},
-    );
+      await service.queueUpsert(
+        resourceType: 'voucher',
+        resourceId: 'v-102',
+        payload: {'username': 'user102'},
+      );
 
-    final syncedCount = await service.syncPending();
-    expect(syncedCount, equals(1));
-    expect(apiClient.postedData.length, equals(1));
-    expect(apiClient.postedData.first['path'], equals('sync/voucher/v-102'));
+      final syncedCount = await service.syncPending();
+      expect(syncedCount, equals(1));
+      expect(apiClient.postedData.length, equals(1));
+      expect(apiClient.postedData.first['path'], equals('sync/voucher/v-102'));
 
-    final pendingAfter = await repository.pendingOperations();
-    expect(pendingAfter.isEmpty, isTrue);
-  });
+      final pendingAfter = await repository.pendingOperations();
+      expect(pendingAfter.isEmpty, isTrue);
+    },
+  );
 }

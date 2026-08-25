@@ -26,7 +26,9 @@ class CloudCommand {
       id: json['id'] as String? ?? '',
       type: json['type'] as String? ?? 'unknown',
       targetResourceId: json['targetResourceId'] as String?,
-      params: (json['params'] as Map<String, dynamic>?)?.cast<String, Object?>() ?? const {},
+      params:
+          (json['params'] as Map<String, dynamic>?)?.cast<String, Object?>() ??
+          const {},
       status: json['status'] as String? ?? 'pending',
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
@@ -34,7 +36,8 @@ class CloudCommand {
       executedAt: json['executedAt'] != null
           ? DateTime.parse(json['executedAt'] as String)
           : null,
-      resultPayload: (json['resultPayload'] as Map<String, dynamic>?)?.cast<String, Object?>(),
+      resultPayload: (json['resultPayload'] as Map<String, dynamic>?)
+          ?.cast<String, Object?>(),
       errorMessage: json['errorMessage'] as String?,
     );
   }

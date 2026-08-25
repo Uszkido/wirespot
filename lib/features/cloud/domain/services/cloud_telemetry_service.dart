@@ -8,9 +8,9 @@ class CloudTelemetryService {
     required CloudApiClient apiClient,
     required RouterRepository routerRepository,
     required HotspotService hotspotService,
-  })  : _apiClient = apiClient,
-        _routerRepository = routerRepository,
-        _hotspotService = hotspotService;
+  }) : _apiClient = apiClient,
+       _routerRepository = routerRepository,
+       _hotspotService = hotspotService;
 
   final CloudApiClient _apiClient;
   final RouterRepository _routerRepository;

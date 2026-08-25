@@ -5,7 +5,8 @@ import '../entities/payment_gateway_entity.dart';
 class PaymentService {
   final List<VoucherPurchaseTransaction> _transactions = [];
 
-  List<VoucherPurchaseTransaction> get transactions => List.unmodifiable(_transactions);
+  List<VoucherPurchaseTransaction> get transactions =>
+      List.unmodifiable(_transactions);
 
   /// Verifies a payment reference against the gateway provider and issues a voucher.
   Future<VoucherPurchaseTransaction> processCheckoutPayment({
@@ -20,7 +21,8 @@ class PaymentService {
     // Simulate gateway verification API response (200 OK)
     await Future<void>.delayed(const Duration(milliseconds: 300));
 
-    final voucherCode = 'WS-P-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+    final voucherCode =
+        'WS-P-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
 
     final transaction = VoucherPurchaseTransaction(
       id: 'tx_${DateTime.now().millisecondsSinceEpoch}',

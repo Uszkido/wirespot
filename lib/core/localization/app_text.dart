@@ -453,11 +453,8 @@ class AppText {
     ha: 'Hada da WireSpot Cloud, sarrafa zamanta da duba aikace-aikacen sync.',
   );
 
-  String get cloudConnection => _pick(
-    en: 'Cloud connection',
-    fr: 'Connexion nuage',
-    ha: 'Hadin Cloud',
-  );
+  String get cloudConnection =>
+      _pick(en: 'Cloud connection', fr: 'Connexion nuage', ha: 'Hadin Cloud');
 
   String get cloudSessionText =>
       _pick(en: 'Cloud session', fr: 'Session nuage', ha: 'Zamanta na Cloud');

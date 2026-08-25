@@ -145,9 +145,7 @@ void main() {
           );
         }),
       ],
-      child: const MaterialApp(
-        home: CloudSettingsPage(),
-      ),
+      child: const MaterialApp(home: CloudSettingsPage()),
     );
   }
 

@@ -83,8 +83,12 @@ class GenericRouterConnectionService implements RouterConnector {
         'name': attributes['name'] ?? 'generic_user',
         'password': attributes['password'] ?? '',
         'profile': attributes['profile'] ?? 'default',
-        'uptime-limit': attributes['limit-uptime'] ?? attributes['uptime-limit'] ?? '0s',
-        'bytes-total-limit': attributes['limit-bytes-total'] ?? attributes['bytes-total-limit'] ?? '0',
+        'uptime-limit':
+            attributes['limit-uptime'] ?? attributes['uptime-limit'] ?? '0s',
+        'bytes-total-limit':
+            attributes['limit-bytes-total'] ??
+            attributes['bytes-total-limit'] ??
+            '0',
         'comment': attributes['comment'] ?? 'Created via Generic REST API',
         'disabled': 'false',
       };
@@ -94,22 +98,26 @@ class GenericRouterConnectionService implements RouterConnector {
 
     if (command == '/ip/hotspot/user/remove') {
       final targetId = attributes['.id'] ?? attributes['numbers'];
-      routerStore.removeWhere((item) => item['.id'] == targetId || item['name'] == targetId);
+      routerStore.removeWhere(
+        (item) => item['.id'] == targetId || item['name'] == targetId,
+      );
       return const RouterOsApiResponse(records: []);
     }
 
     if (command == '/ip/hotspot/active/print') {
       final activeList = routerStore
           .take(5)
-          .map((u) => {
-                '.id': '*act_${u['.id']}',
-                'user': u['name'] ?? '',
-                'address': '10.0.0.${routerStore.indexOf(u) + 10}',
-                'mac-address': 'AA:BB:CC:${routerStore.indexOf(u)}:11:22',
-                'uptime': '30m',
-                'bytes-in': '307200',
-                'bytes-out': '614400',
-              })
+          .map(
+            (u) => {
+              '.id': '*act_${u['.id']}',
+              'user': u['name'] ?? '',
+              'address': '10.0.0.${routerStore.indexOf(u) + 10}',
+              'mac-address': 'AA:BB:CC:${routerStore.indexOf(u)}:11:22',
+              'uptime': '30m',
+              'bytes-in': '307200',
+              'bytes-out': '614400',
+            },
+          )
           .toList();
       return RouterOsApiResponse(records: activeList);
     }
@@ -117,8 +125,18 @@ class GenericRouterConnectionService implements RouterConnector {
     if (command == '/ip/hotspot/user/profile/print') {
       return const RouterOsApiResponse(
         records: [
-          {'.id': '*p1', 'name': 'default', 'shared-users': '1', 'rate-limit': '10M/10M'},
-          {'.id': '*p2', 'name': 'Generic_Standard', 'shared-users': '1', 'rate-limit': '20M/20M'},
+          {
+            '.id': '*p1',
+            'name': 'default',
+            'shared-users': '1',
+            'rate-limit': '10M/10M',
+          },
+          {
+            '.id': '*p2',
+            'name': 'Generic_Standard',
+            'shared-users': '1',
+            'rate-limit': '20M/20M',
+          },
         ],
       );
     }
@@ -133,7 +151,12 @@ class GenericRouterConnectionService implements RouterConnector {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async* {
-    final response = await execute(router, command, attributes: attributes, queries: queries);
+    final response = await execute(
+      router,
+      command,
+      attributes: attributes,
+      queries: queries,
+    );
     for (final record in response.records) {
       yield record;
     }

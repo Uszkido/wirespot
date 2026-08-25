@@ -140,10 +140,14 @@ Future<void> configureDependencies() async {
         credentialStore: sl<RouterCredentialStore>(),
       ),
     )
-    ..registerLazySingleton<OpenWrtConnectionService>(OpenWrtConnectionService.new)
+    ..registerLazySingleton<OpenWrtConnectionService>(
+      OpenWrtConnectionService.new,
+    )
     ..registerLazySingleton<OmadaConnectionService>(OmadaConnectionService.new)
     ..registerLazySingleton<UniFiConnectionService>(UniFiConnectionService.new)
-    ..registerLazySingleton<GenericRouterConnectionService>(GenericRouterConnectionService.new)
+    ..registerLazySingleton<GenericRouterConnectionService>(
+      GenericRouterConnectionService.new,
+    )
     ..registerLazySingleton<RouterConnectionService>(
       () => MultiVendorRouterConnectionService(
         connectors: [

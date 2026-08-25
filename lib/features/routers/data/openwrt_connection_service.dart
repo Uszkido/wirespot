@@ -83,8 +83,12 @@ class OpenWrtConnectionService implements RouterConnector {
         'name': attributes['name'] ?? 'openwrt_guest',
         'password': attributes['password'] ?? '',
         'profile': attributes['profile'] ?? 'default',
-        'uptime-limit': attributes['limit-uptime'] ?? attributes['uptime-limit'] ?? '0s',
-        'bytes-total-limit': attributes['limit-bytes-total'] ?? attributes['bytes-total-limit'] ?? '0',
+        'uptime-limit':
+            attributes['limit-uptime'] ?? attributes['uptime-limit'] ?? '0s',
+        'bytes-total-limit':
+            attributes['limit-bytes-total'] ??
+            attributes['bytes-total-limit'] ??
+            '0',
         'comment': attributes['comment'] ?? 'Created via OpenWrt LuCI API',
         'disabled': 'false',
       };
@@ -94,22 +98,26 @@ class OpenWrtConnectionService implements RouterConnector {
 
     if (command == '/ip/hotspot/user/remove') {
       final targetId = attributes['.id'] ?? attributes['numbers'];
-      routerStore.removeWhere((item) => item['.id'] == targetId || item['name'] == targetId);
+      routerStore.removeWhere(
+        (item) => item['.id'] == targetId || item['name'] == targetId,
+      );
       return const RouterOsApiResponse(records: []);
     }
 
     if (command == '/ip/hotspot/active/print') {
       final activeList = routerStore
           .take(5)
-          .map((u) => {
-                '.id': '*act_${u['.id']}',
-                'user': u['name'] ?? '',
-                'address': '192.168.1.${routerStore.indexOf(u) + 50}',
-                'mac-address': 'DC:9F:DB:${routerStore.indexOf(u)}:AA:BB',
-                'uptime': '25m',
-                'bytes-in': '512000',
-                'bytes-out': '1024000',
-              })
+          .map(
+            (u) => {
+              '.id': '*act_${u['.id']}',
+              'user': u['name'] ?? '',
+              'address': '192.168.1.${routerStore.indexOf(u) + 50}',
+              'mac-address': 'DC:9F:DB:${routerStore.indexOf(u)}:AA:BB',
+              'uptime': '25m',
+              'bytes-in': '512000',
+              'bytes-out': '1024000',
+            },
+          )
           .toList();
       return RouterOsApiResponse(records: activeList);
     }
@@ -117,8 +125,18 @@ class OpenWrtConnectionService implements RouterConnector {
     if (command == '/ip/hotspot/user/profile/print') {
       return const RouterOsApiResponse(
         records: [
-          {'.id': '*p1', 'name': 'default', 'shared-users': '1', 'rate-limit': '10M/10M'},
-          {'.id': '*p2', 'name': 'OpenWrt_Guest', 'shared-users': '1', 'rate-limit': '5M/5M'},
+          {
+            '.id': '*p1',
+            'name': 'default',
+            'shared-users': '1',
+            'rate-limit': '10M/10M',
+          },
+          {
+            '.id': '*p2',
+            'name': 'OpenWrt_Guest',
+            'shared-users': '1',
+            'rate-limit': '5M/5M',
+          },
         ],
       );
     }
@@ -133,7 +151,12 @@ class OpenWrtConnectionService implements RouterConnector {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async* {
-    final response = await execute(router, command, attributes: attributes, queries: queries);
+    final response = await execute(
+      router,
+      command,
+      attributes: attributes,
+      queries: queries,
+    );
     for (final record in response.records) {
       yield record;
     }

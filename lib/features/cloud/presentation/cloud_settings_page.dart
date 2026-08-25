@@ -61,9 +61,9 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
         );
       }
       if (next.successMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.successMessage!)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.successMessage!)));
       }
       if (previous?.connection != next.connection && next.connection != null) {
         _urlController.text = next.connection!.apiBaseUrl;
@@ -120,8 +120,8 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                   child: Text(
                     text.cloudConnection,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
@@ -189,7 +189,10 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
             if (state.connectionHealthy != null) ...[
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: state.connectionHealthy!
                       ? Colors.green.withValues(alpha: 0.1)
@@ -207,7 +210,9 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                       state.connectionHealthy!
                           ? Icons.check_circle_outline
                           : Icons.error_outline,
-                      color: state.connectionHealthy! ? Colors.green : Colors.red,
+                      color: state.connectionHealthy!
+                          ? Colors.green
+                          : Colors.red,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -216,8 +221,9 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                             ? 'Cloud Connection Verified & Reachable'
                             : 'Cloud Connection Failed or Unreachable',
                         style: TextStyle(
-                          color:
-                              state.connectionHealthy! ? Colors.green : Colors.red,
+                          color: state.connectionHealthy!
+                              ? Colors.green
+                              : Colors.red,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -261,9 +267,8 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                     children: [
                       Text(
                         text.cloudSessionText,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       Text(
                         hasSession
@@ -336,19 +341,23 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                     children: [
                       Text(
                         text.pendingOperations,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       Text(
                         '${ops.length} operation(s) in queue',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 FilledButton.icon(
-                  onPressed: state.isSyncing ? null : () => controller.syncPending(),
+                  onPressed: state.isSyncing
+                      ? null
+                      : () => controller.syncPending(),
                   icon: state.isSyncing
                       ? const SizedBox(
                           width: 16,
@@ -403,7 +412,10 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                     leading: Chip(
                       label: Text(
                         op.operation.toUpperCase(),
-                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     title: Text('${op.resourceType} #${op.resourceId}'),
@@ -442,7 +454,11 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
     return Chip(
       label: Text(
         status.name.toUpperCase(),
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       backgroundColor: color.withValues(alpha: 0.1),
       side: BorderSide(color: color.withValues(alpha: 0.5)),

@@ -30,66 +30,75 @@ void main() {
     expect(mikrotik.commands, ['/system/identity/print']);
   });
 
-  test('all 6 router vendors execute commands on their active connectors', () async {
-    final ruijie = RuijieCloudConnectionService(
-      readCredentials: (_) async => null,
-      requestDevices: (_) async => Response(
-        requestOptions: RequestOptions(path: ''),
-        statusCode: 200,
-        data: {
-          'data': [
-            {'id': 'dev1', 'name': 'Ruijie Gateway'},
-          ],
-        },
-      ),
-    );
-    final openwrt = OpenWrtConnectionService();
-    final omada = OmadaConnectionService();
-    final unifi = UniFiConnectionService();
-    final generic = GenericRouterConnectionService();
+  test(
+    'all 6 router vendors execute commands on their active connectors',
+    () async {
+      final ruijie = RuijieCloudConnectionService(
+        readCredentials: (_) async => null,
+        requestDevices: (_) async => Response(
+          requestOptions: RequestOptions(path: ''),
+          statusCode: 200,
+          data: {
+            'data': [
+              {'id': 'dev1', 'name': 'Ruijie Gateway'},
+            ],
+          },
+        ),
+      );
+      final openwrt = OpenWrtConnectionService();
+      final omada = OmadaConnectionService();
+      final unifi = UniFiConnectionService();
+      final generic = GenericRouterConnectionService();
 
-    final service = MultiVendorRouterConnectionService(
-      connectors: [ruijie, openwrt, omada, unifi, generic],
-    );
-
-    final vendors = [
-      RouterVendor.ruijie,
-      RouterVendor.openWrt,
-      RouterVendor.tpLinkOmada,
-      RouterVendor.ubiquitiUniFi,
-      RouterVendor.generic,
-    ];
-
-    for (final vendor in vendors) {
-      final router = RouterEntity(
-        id: 'r_${vendor.name}',
-        name: 'Test ${vendor.label}',
-        host: '192.168.1.1',
-        username: 'admin',
-        vendor: vendor,
+      final service = MultiVendorRouterConnectionService(
+        connectors: [ruijie, openwrt, omada, unifi, generic],
       );
 
-      final isConnected = await service.testConnection(router);
-      expect(isConnected, isTrue);
+      final vendors = [
+        RouterVendor.ruijie,
+        RouterVendor.openWrt,
+        RouterVendor.tpLinkOmada,
+        RouterVendor.ubiquitiUniFi,
+        RouterVendor.generic,
+      ];
 
-      final identity = await service.execute(router, '/system/identity/print');
-      expect(identity.records, isNotEmpty);
+      for (final vendor in vendors) {
+        final router = RouterEntity(
+          id: 'r_${vendor.name}',
+          name: 'Test ${vendor.label}',
+          host: '192.168.1.1',
+          username: 'admin',
+          vendor: vendor,
+        );
 
-      final addedUser = await service.execute(
-        router,
-        '/ip/hotspot/user/add',
-        attributes: {'name': 'test_${vendor.name}', 'password': 'pass'},
-      );
-      expect(addedUser.records.single['name'], 'test_${vendor.name}');
+        final isConnected = await service.testConnection(router);
+        expect(isConnected, isTrue);
 
-      final users = await service.execute(router, '/ip/hotspot/user/print');
-      expect(users.records.any((u) => u['name'] == 'test_${vendor.name}'), isTrue);
+        final identity = await service.execute(
+          router,
+          '/system/identity/print',
+        );
+        expect(identity.records, isNotEmpty);
 
-      final snapshot = await service.getSnapshot(router);
-      expect(snapshot.identity, isNotEmpty);
-      expect(snapshot.resource.uptime, isNotEmpty);
-    }
-  });
+        final addedUser = await service.execute(
+          router,
+          '/ip/hotspot/user/add',
+          attributes: {'name': 'test_${vendor.name}', 'password': 'pass'},
+        );
+        expect(addedUser.records.single['name'], 'test_${vendor.name}');
+
+        final users = await service.execute(router, '/ip/hotspot/user/print');
+        expect(
+          users.records.any((u) => u['name'] == 'test_${vendor.name}'),
+          isTrue,
+        );
+
+        final snapshot = await service.getSnapshot(router);
+        expect(snapshot.identity, isNotEmpty);
+        expect(snapshot.resource.uptime, isNotEmpty);
+      }
+    },
+  );
 }
 
 class _RecordingConnector implements RouterConnector {

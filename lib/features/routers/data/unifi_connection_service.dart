@@ -74,9 +74,14 @@ class UniFiConnectionService implements RouterConnector {
         'name': attributes['name'] ?? 'unifi_guest_voucher',
         'password': attributes['password'] ?? '',
         'profile': attributes['profile'] ?? 'default',
-        'uptime-limit': attributes['limit-uptime'] ?? attributes['uptime-limit'] ?? '0s',
-        'bytes-total-limit': attributes['limit-bytes-total'] ?? attributes['bytes-total-limit'] ?? '0',
-        'comment': attributes['comment'] ?? 'Created via UniFi Controller REST API',
+        'uptime-limit':
+            attributes['limit-uptime'] ?? attributes['uptime-limit'] ?? '0s',
+        'bytes-total-limit':
+            attributes['limit-bytes-total'] ??
+            attributes['bytes-total-limit'] ??
+            '0',
+        'comment':
+            attributes['comment'] ?? 'Created via UniFi Controller REST API',
         'disabled': 'false',
       };
       routerStore.add(newRecord);
@@ -85,22 +90,26 @@ class UniFiConnectionService implements RouterConnector {
 
     if (command == '/ip/hotspot/user/remove') {
       final targetId = attributes['.id'] ?? attributes['numbers'];
-      routerStore.removeWhere((item) => item['.id'] == targetId || item['name'] == targetId);
+      routerStore.removeWhere(
+        (item) => item['.id'] == targetId || item['name'] == targetId,
+      );
       return const RouterOsApiResponse(records: []);
     }
 
     if (command == '/ip/hotspot/active/print') {
       final activeList = routerStore
           .take(5)
-          .map((u) => {
-                '.id': '*act_${u['.id']}',
-                'user': u['name'] ?? '',
-                'address': '192.168.20.${routerStore.indexOf(u) + 10}',
-                'mac-address': 'B4:FBE:${routerStore.indexOf(u)}:EE:FF',
-                'uptime': '1h10m',
-                'bytes-in': '2097152',
-                'bytes-out': '8388608',
-              })
+          .map(
+            (u) => {
+              '.id': '*act_${u['.id']}',
+              'user': u['name'] ?? '',
+              'address': '192.168.20.${routerStore.indexOf(u) + 10}',
+              'mac-address': 'B4:FBE:${routerStore.indexOf(u)}:EE:FF',
+              'uptime': '1h10m',
+              'bytes-in': '2097152',
+              'bytes-out': '8388608',
+            },
+          )
           .toList();
       return RouterOsApiResponse(records: activeList);
     }
@@ -108,8 +117,18 @@ class UniFiConnectionService implements RouterConnector {
     if (command == '/ip/hotspot/user/profile/print') {
       return const RouterOsApiResponse(
         records: [
-          {'.id': '*p1', 'name': 'default', 'shared-users': '1', 'rate-limit': '20M/20M'},
-          {'.id': '*p2', 'name': 'UniFi_Guest_Hotspot', 'shared-users': '1', 'rate-limit': '50M/50M'},
+          {
+            '.id': '*p1',
+            'name': 'default',
+            'shared-users': '1',
+            'rate-limit': '20M/20M',
+          },
+          {
+            '.id': '*p2',
+            'name': 'UniFi_Guest_Hotspot',
+            'shared-users': '1',
+            'rate-limit': '50M/50M',
+          },
         ],
       );
     }
@@ -124,7 +143,12 @@ class UniFiConnectionService implements RouterConnector {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async* {
-    final response = await execute(router, command, attributes: attributes, queries: queries);
+    final response = await execute(
+      router,
+      command,
+      attributes: attributes,
+      queries: queries,
+    );
     for (final record in response.records) {
       yield record;
     }

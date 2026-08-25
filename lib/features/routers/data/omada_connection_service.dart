@@ -74,9 +74,14 @@ class OmadaConnectionService implements RouterConnector {
         'name': attributes['name'] ?? 'omada_voucher',
         'password': attributes['password'] ?? '',
         'profile': attributes['profile'] ?? 'default',
-        'uptime-limit': attributes['limit-uptime'] ?? attributes['uptime-limit'] ?? '0s',
-        'bytes-total-limit': attributes['limit-bytes-total'] ?? attributes['bytes-total-limit'] ?? '0',
-        'comment': attributes['comment'] ?? 'Created via Omada Controller OpenAPI',
+        'uptime-limit':
+            attributes['limit-uptime'] ?? attributes['uptime-limit'] ?? '0s',
+        'bytes-total-limit':
+            attributes['limit-bytes-total'] ??
+            attributes['bytes-total-limit'] ??
+            '0',
+        'comment':
+            attributes['comment'] ?? 'Created via Omada Controller OpenAPI',
         'disabled': 'false',
       };
       routerStore.add(newRecord);
@@ -85,22 +90,26 @@ class OmadaConnectionService implements RouterConnector {
 
     if (command == '/ip/hotspot/user/remove') {
       final targetId = attributes['.id'] ?? attributes['numbers'];
-      routerStore.removeWhere((item) => item['.id'] == targetId || item['name'] == targetId);
+      routerStore.removeWhere(
+        (item) => item['.id'] == targetId || item['name'] == targetId,
+      );
       return const RouterOsApiResponse(records: []);
     }
 
     if (command == '/ip/hotspot/active/print') {
       final activeList = routerStore
           .take(5)
-          .map((u) => {
-                '.id': '*act_${u['.id']}',
-                'user': u['name'] ?? '',
-                'address': '192.168.0.${routerStore.indexOf(u) + 100}',
-                'mac-address': '74:05:A5:${routerStore.indexOf(u)}:CC:DD',
-                'uptime': '45m',
-                'bytes-in': '1048576',
-                'bytes-out': '4194304',
-              })
+          .map(
+            (u) => {
+              '.id': '*act_${u['.id']}',
+              'user': u['name'] ?? '',
+              'address': '192.168.0.${routerStore.indexOf(u) + 100}',
+              'mac-address': '74:05:A5:${routerStore.indexOf(u)}:CC:DD',
+              'uptime': '45m',
+              'bytes-in': '1048576',
+              'bytes-out': '4194304',
+            },
+          )
           .toList();
       return RouterOsApiResponse(records: activeList);
     }
@@ -108,8 +117,18 @@ class OmadaConnectionService implements RouterConnector {
     if (command == '/ip/hotspot/user/profile/print') {
       return const RouterOsApiResponse(
         records: [
-          {'.id': '*p1', 'name': 'default', 'shared-users': '1', 'rate-limit': '15M/15M'},
-          {'.id': '*p2', 'name': 'Omada_Voucher_Tier', 'shared-users': '1', 'rate-limit': '30M/30M'},
+          {
+            '.id': '*p1',
+            'name': 'default',
+            'shared-users': '1',
+            'rate-limit': '15M/15M',
+          },
+          {
+            '.id': '*p2',
+            'name': 'Omada_Voucher_Tier',
+            'shared-users': '1',
+            'rate-limit': '30M/30M',
+          },
         ],
       );
     }
@@ -124,7 +143,12 @@ class OmadaConnectionService implements RouterConnector {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async* {
-    final response = await execute(router, command, attributes: attributes, queries: queries);
+    final response = await execute(
+      router,
+      command,
+      attributes: attributes,
+      queries: queries,
+    );
     for (final record in response.records) {
       yield record;
     }

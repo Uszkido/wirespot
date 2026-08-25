@@ -182,15 +182,15 @@ void main() {
       resourceId: 'r-1',
       payload: {'name': 'Router 1'},
     );
-    final service = _service(
-      settings,
-      cloudSyncService: cloudSyncService,
-    );
+    final service = _service(settings, cloudSyncService: cloudSyncService);
 
     final results = await service.runDueTasks(now: DateTime(2026, 7, 13, 12));
 
     expect(results.single.type, ScheduledTaskType.cloudSync);
-    expect(results.single.message, contains('Cloud sync synchronized 1 pending operation(s)'));
+    expect(
+      results.single.message,
+      contains('Cloud sync synchronized 1 pending operation(s)'),
+    );
   });
 }
 
@@ -462,9 +462,11 @@ class _FakeCloudSyncRepository implements CloudSyncRepository {
   @override
   Future<List<CloudSyncOperation>> pendingOperations() async {
     return operations
-        .where((op) =>
-            op.status == CloudSyncStatus.pending ||
-            op.status == CloudSyncStatus.failed)
+        .where(
+          (op) =>
+              op.status == CloudSyncStatus.pending ||
+              op.status == CloudSyncStatus.failed,
+        )
         .toList();
   }
 

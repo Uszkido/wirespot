@@ -48,8 +48,9 @@ class CloudState {
       pendingOperations: pendingOperations ?? this.pendingOperations,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
-      successMessage:
-          successMessage != null ? successMessage() : this.successMessage,
+      successMessage: successMessage != null
+          ? successMessage()
+          : this.successMessage,
       isSyncing: isSyncing ?? this.isSyncing,
       isTestingConnection: isTestingConnection ?? this.isTestingConnection,
       connectionHealthy: connectionHealthy != null
@@ -163,9 +164,7 @@ class CloudController extends StateNotifier<CloudState> {
       );
       await _settingsService.saveSession(session);
       await load();
-      state = state.copyWith(
-        successMessage: () => 'Cloud session activated.',
-      );
+      state = state.copyWith(successMessage: () => 'Cloud session activated.');
       return true;
     } catch (error) {
       state = state.copyWith(
@@ -222,7 +221,10 @@ class CloudController extends StateNotifier<CloudState> {
   }
 
   Future<void> retryFailed() async {
-    state = state.copyWith(errorMessage: () => null, successMessage: () => null);
+    state = state.copyWith(
+      errorMessage: () => null,
+      successMessage: () => null,
+    );
     try {
       final count = await _syncRepository.retryFailed();
       final pending = await _syncRepository.pendingOperations();
@@ -236,7 +238,10 @@ class CloudController extends StateNotifier<CloudState> {
   }
 
   Future<void> clearCompleted() async {
-    state = state.copyWith(errorMessage: () => null, successMessage: () => null);
+    state = state.copyWith(
+      errorMessage: () => null,
+      successMessage: () => null,
+    );
     try {
       final count = await _syncRepository.clearCompleted();
       final pending = await _syncRepository.pendingOperations();

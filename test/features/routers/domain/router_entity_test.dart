@@ -43,14 +43,14 @@ void main() {
     expect(router.vendor.label, 'Ruijie / Reyee');
     expect(router.vendor.usesRouterOsApi, isFalse);
     expect(router.vendor.requiresController, isTrue);
-    expect(
-      router.vendor.managementSurfaceLabel,
-      'Ruijie Cloud / REST API',
-    );
+    expect(router.vendor.managementSurfaceLabel, 'Ruijie Cloud / REST API');
     expect(router.vendor.hasLiveConnector, isTrue);
     expect(router.vendor.supports(RouterCapability.connectionTest), isTrue);
     expect(router.vendor.supports(RouterCapability.cloudController), isTrue);
-    expect(router.vendor.supports(RouterCapability.voucherProvisioning), isTrue);
+    expect(
+      router.vendor.supports(RouterCapability.voucherProvisioning),
+      isTrue,
+    );
     expect(router.vendor.activeCapabilitySummary, contains('Connection test'));
     expect(
       router.vendor.setupChecklist,

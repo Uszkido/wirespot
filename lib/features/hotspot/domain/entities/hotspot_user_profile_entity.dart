@@ -37,13 +37,13 @@ class HotspotUserProfileEntity {
   }
 
   Map<String, Object?> toJson() => {
-        'id': id,
-        'name': name,
-        'rateLimit': rateLimit,
-        'sessionTimeout': sessionTimeout,
-        'sharedUsers': sharedUsers,
-        'keepaliveTimeout': keepaliveTimeout,
-        'statusAutorefresh': statusAutorefresh,
-        'addMacCookie': addMacCookie,
-      };
+    'id': id,
+    'name': name,
+    'rateLimit': rateLimit,
+    'sessionTimeout': sessionTimeout,
+    'sharedUsers': sharedUsers,
+    'keepaliveTimeout': keepaliveTimeout,
+    'statusAutorefresh': statusAutorefresh,
+    'addMacCookie': addMacCookie,
+  };
 }

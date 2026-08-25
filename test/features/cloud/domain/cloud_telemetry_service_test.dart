@@ -20,24 +20,27 @@ import 'package:wirespot/features/routers/domain/entities/router_group_entity.da
 import 'package:wirespot/features/routers/domain/repositories/router_repository.dart';
 
 void main() {
-  test('CloudTelemetryService collects metrics and posts telemetry frame', () async {
-    final apiClient = _FakeCloudApiClient();
-    final routerRepo = _FakeRouterRepository();
-    final hotspotService = _FakeHotspotService();
+  test(
+    'CloudTelemetryService collects metrics and posts telemetry frame',
+    () async {
+      final apiClient = _FakeCloudApiClient();
+      final routerRepo = _FakeRouterRepository();
+      final hotspotService = _FakeHotspotService();
 
-    final service = CloudTelemetryService(
-      apiClient: apiClient,
-      routerRepository: routerRepo,
-      hotspotService: hotspotService,
-    );
+      final service = CloudTelemetryService(
+        apiClient: apiClient,
+        routerRepository: routerRepo,
+        hotspotService: hotspotService,
+      );
 
-    final count = await service.collectAndPostTelemetry();
+      final count = await service.collectAndPostTelemetry();
 
-    expect(count, 1);
-    expect(apiClient.postedTelemetry.length, 1);
-    expect(apiClient.postedTelemetry.first['routerId'], 'router-1');
-    expect(apiClient.postedTelemetry.first['activeHotspotUsersCount'], 1);
-  });
+      expect(count, 1);
+      expect(apiClient.postedTelemetry.length, 1);
+      expect(apiClient.postedTelemetry.first['routerId'], 'router-1');
+      expect(apiClient.postedTelemetry.first['activeHotspotUsersCount'], 1);
+    },
+  );
 }
 
 class _FakeCloudApiClient implements CloudApiClient {
@@ -89,31 +92,31 @@ class _FakeCloudApiClient implements CloudApiClient {
 class _FakeRouterRepository implements RouterRepository {
   @override
   Stream<List<RouterEntity>> watchRouters() => Stream.value(const [
-        RouterEntity(
-          id: 'router-1',
-          name: 'Main Router',
-          host: '192.168.88.1',
-          username: 'admin',
-        )
-      ]);
+    RouterEntity(
+      id: 'router-1',
+      name: 'Main Router',
+      host: '192.168.88.1',
+      username: 'admin',
+    ),
+  ]);
 
   @override
   Future<List<RouterEntity>> getRouters() async => [
-        const RouterEntity(
-          id: 'router-1',
-          name: 'Main Router',
-          host: '192.168.88.1',
-          username: 'admin',
-        )
-      ];
+    const RouterEntity(
+      id: 'router-1',
+      name: 'Main Router',
+      host: '192.168.88.1',
+      username: 'admin',
+    ),
+  ];
 
   @override
   Future<RouterEntity?> getRouter(String id) async => const RouterEntity(
-        id: 'router-1',
-        name: 'Main Router',
-        host: '192.168.88.1',
-        username: 'admin',
-      );
+    id: 'router-1',
+    name: 'Main Router',
+    host: '192.168.88.1',
+    username: 'admin',
+  );
 
   @override
   Future<void> deleteRouter(String id) async {}
@@ -125,31 +128,42 @@ class _FakeRouterRepository implements RouterRepository {
   Future<void> saveGroup(RouterGroupEntity group) async {}
 
   @override
-  Future<void> saveRouter(RouterEntity router, {RouterCredentials? credentials}) async {}
+  Future<void> saveRouter(
+    RouterEntity router, {
+    RouterCredentials? credentials,
+  }) async {}
 }
 
 class _FakeHotspotService implements HotspotService {
   @override
-  Future<List<HotspotActiveSessionEntity>> getActiveSessions(RouterEntity router) async => [
-        const HotspotActiveSessionEntity(
-          id: 'sess-1',
-          user: 'user1',
-          address: '192.168.88.10',
-          macAddress: 'AA:BB:CC:DD:EE:FF',
-          uptime: '10m',
-          bytesIn: 1000,
-          bytesOut: 500,
-        )
-      ];
+  Future<List<HotspotActiveSessionEntity>> getActiveSessions(
+    RouterEntity router,
+  ) async => [
+    const HotspotActiveSessionEntity(
+      id: 'sess-1',
+      user: 'user1',
+      address: '192.168.88.10',
+      macAddress: 'AA:BB:CC:DD:EE:FF',
+      uptime: '10m',
+      bytesIn: 1000,
+      bytesOut: 500,
+    ),
+  ];
 
   @override
   Future<void> disconnectSession(RouterEntity router, String sessionId) async {}
 
   @override
-  Future<void> createIpBinding(RouterEntity router, HotspotIpBindingInput input) async {}
+  Future<void> createIpBinding(
+    RouterEntity router,
+    HotspotIpBindingInput input,
+  ) async {}
 
   @override
-  Future<void> createProfile(RouterEntity router, HotspotProfileInput input) async {}
+  Future<void> createProfile(
+    RouterEntity router,
+    HotspotProfileInput input,
+  ) async {}
 
   @override
   Future<void> createUser(RouterEntity router, HotspotUserInput input) async {}
@@ -167,36 +181,61 @@ class _FakeHotspotService implements HotspotService {
   Future<void> deleteUser(RouterEntity router, String userId) async {}
 
   @override
-  Future<List<HotspotCookieEntity>> getCookies(RouterEntity router) async => const [];
+  Future<List<HotspotCookieEntity>> getCookies(RouterEntity router) async =>
+      const [];
 
   @override
-  Future<List<HotspotIpBindingEntity>> getIpBindings(RouterEntity router) async => const [];
+  Future<List<HotspotIpBindingEntity>> getIpBindings(
+    RouterEntity router,
+  ) async => const [];
 
   @override
-  Future<List<HotspotUserProfileEntity>> getProfiles(RouterEntity router) async => const [];
+  Future<List<HotspotUserProfileEntity>> getProfiles(
+    RouterEntity router,
+  ) async => const [];
 
   @override
-  Future<List<HotspotQueueEntity>> getQueues(RouterEntity router) async => const [];
+  Future<List<HotspotQueueEntity>> getQueues(RouterEntity router) async =>
+      const [];
 
   @override
-  Future<List<HotspotUserEntity>> getUsers(RouterEntity router) async => const [];
+  Future<List<HotspotUserEntity>> getUsers(RouterEntity router) async =>
+      const [];
 
   @override
-  Future<HotspotSetupInspection> inspectSetup(RouterEntity router, HotspotSetupInput input) async =>
+  Future<HotspotSetupInspection> inspectSetup(
+    RouterEntity router,
+    HotspotSetupInput input,
+  ) async =>
       const HotspotSetupInspection(serverExists: true, profileExists: true);
 
   @override
   Future<void> resetUserCounters(RouterEntity router, String userId) async {}
 
   @override
-  Future<void> setupHotspot(RouterEntity router, HotspotSetupInput input) async {}
+  Future<void> setupHotspot(
+    RouterEntity router,
+    HotspotSetupInput input,
+  ) async {}
 
   @override
-  Future<void> updateIpBinding(RouterEntity router, String bindingId, HotspotIpBindingInput input) async {}
+  Future<void> updateIpBinding(
+    RouterEntity router,
+    String bindingId,
+    HotspotIpBindingInput input,
+  ) async {}
 
   @override
-  Future<void> updateProfile(RouterEntity router, String profileId, HotspotProfileInput input) async {}
+  Future<void> updateProfile(
+    RouterEntity router,
+    String profileId,
+    HotspotProfileInput input,
+  ) async {}
 
   @override
-  Future<void> updateUser(RouterEntity router, String userId, HotspotUserInput input) async {}
+  Future<void> updateUser(
+    RouterEntity router,
+    String userId,
+    HotspotUserInput input,
+  ) async {}
 }

@@ -61,22 +61,22 @@ class CloudSyncLocalRepository implements CloudSyncRepository {
 
   @override
   Future<int> clearCompleted() async {
-    return (_database.delete(_database.cloudSyncOperations)
-          ..where((row) => row.status.equals(CloudSyncStatus.completed.name)))
-        .go();
+    return (_database.delete(
+      _database.cloudSyncOperations,
+    )..where((row) => row.status.equals(CloudSyncStatus.completed.name))).go();
   }
 
   @override
   Future<int> retryFailed() async {
-    return (_database.update(_database.cloudSyncOperations)
-          ..where((row) => row.status.equals(CloudSyncStatus.failed.name)))
-        .write(
-          CloudSyncOperationsCompanion(
-            status: Value(CloudSyncStatus.pending.name),
-            lastError: const Value(null),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
+    return (_database.update(
+      _database.cloudSyncOperations,
+    )..where((row) => row.status.equals(CloudSyncStatus.failed.name))).write(
+      CloudSyncOperationsCompanion(
+        status: Value(CloudSyncStatus.pending.name),
+        lastError: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
   }
 
   Future<void> _update(

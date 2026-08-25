@@ -134,8 +134,12 @@ class RuijieCloudConnectionService implements RouterConnector {
         'name': attributes['name'] ?? 'ruijie_user',
         'password': attributes['password'] ?? '',
         'profile': attributes['profile'] ?? 'default',
-        'uptime-limit': attributes['limit-uptime'] ?? attributes['uptime-limit'] ?? '0s',
-        'bytes-total-limit': attributes['limit-bytes-total'] ?? attributes['bytes-total-limit'] ?? '0',
+        'uptime-limit':
+            attributes['limit-uptime'] ?? attributes['uptime-limit'] ?? '0s',
+        'bytes-total-limit':
+            attributes['limit-bytes-total'] ??
+            attributes['bytes-total-limit'] ??
+            '0',
         'comment': attributes['comment'] ?? 'Created via Ruijie Cloud API',
         'disabled': 'false',
       };
@@ -145,22 +149,26 @@ class RuijieCloudConnectionService implements RouterConnector {
 
     if (command == '/ip/hotspot/user/remove') {
       final targetId = attributes['.id'] ?? attributes['numbers'];
-      routerStore.removeWhere((item) => item['.id'] == targetId || item['name'] == targetId);
+      routerStore.removeWhere(
+        (item) => item['.id'] == targetId || item['name'] == targetId,
+      );
       return const RouterOsApiResponse(records: []);
     }
 
     if (command == '/ip/hotspot/active/print') {
       final activeList = routerStore
           .take(5)
-          .map((u) => {
-                '.id': '*act_${u['.id']}',
-                'user': u['name'] ?? '',
-                'address': '192.168.110.${routerStore.indexOf(u) + 10}',
-                'mac-address': '00:D0:F8:${routerStore.indexOf(u)}:10:20',
-                'uptime': '15m',
-                'bytes-in': '102400',
-                'bytes-out': '204800',
-              })
+          .map(
+            (u) => {
+              '.id': '*act_${u['.id']}',
+              'user': u['name'] ?? '',
+              'address': '192.168.110.${routerStore.indexOf(u) + 10}',
+              'mac-address': '00:D0:F8:${routerStore.indexOf(u)}:10:20',
+              'uptime': '15m',
+              'bytes-in': '102400',
+              'bytes-out': '204800',
+            },
+          )
           .toList();
       return RouterOsApiResponse(records: activeList);
     }
@@ -168,8 +176,18 @@ class RuijieCloudConnectionService implements RouterConnector {
     if (command == '/ip/hotspot/user/profile/print') {
       return const RouterOsApiResponse(
         records: [
-          {'.id': '*p1', 'name': 'default', 'shared-users': '1', 'rate-limit': '5M/5M'},
-          {'.id': '*p2', 'name': 'VIP_Ruijie', 'shared-users': '2', 'rate-limit': '20M/20M'},
+          {
+            '.id': '*p1',
+            'name': 'default',
+            'shared-users': '1',
+            'rate-limit': '5M/5M',
+          },
+          {
+            '.id': '*p2',
+            'name': 'VIP_Ruijie',
+            'shared-users': '2',
+            'rate-limit': '20M/20M',
+          },
         ],
       );
     }
@@ -184,7 +202,12 @@ class RuijieCloudConnectionService implements RouterConnector {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async* {
-    final response = await execute(router, command, attributes: attributes, queries: queries);
+    final response = await execute(
+      router,
+      command,
+      attributes: attributes,
+      queries: queries,
+    );
     for (final record in response.records) {
       yield record;
     }
