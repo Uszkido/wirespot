@@ -1,10 +1,15 @@
 import '../../../core/api/routeros_api_response.dart';
 import '../../../core/api/routeros_models.dart';
+import '../../../core/api/vendor_http_client.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/services/router_connector.dart';
 
 /// Active TP-Link Omada Controller OpenAPI connector.
 class OmadaConnectionService implements RouterConnector {
+  OmadaConnectionService({VendorHttpClient? httpClient})
+      : _http = httpClient ?? VendorHttpClient();
+
+  final VendorHttpClient _http;
   final Map<String, List<Map<String, String>>> _omadaUsersStore = {};
 
   @override
@@ -12,7 +17,16 @@ class OmadaConnectionService implements RouterConnector {
 
   @override
   Future<bool> testConnection(RouterEntity router) async {
-    return router.host.isNotEmpty;
+    try {
+      final result = await _http.sendRequest(
+        router: router,
+        path: '/api/info',
+        method: 'GET',
+      );
+      return result['status'] != 'error';
+    } catch (_) {
+      return false;
+    }
   }
 
   @override

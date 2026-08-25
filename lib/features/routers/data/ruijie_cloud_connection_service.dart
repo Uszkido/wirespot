@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/routeros_api_exception.dart';
 import '../../../core/api/routeros_api_response.dart';
 import '../../../core/api/routeros_models.dart';
+import '../../../core/api/vendor_http_client.dart';
 import '../../../core/storage/router_credential_store.dart';
 import '../../../core/storage/router_credentials.dart';
 import '../domain/entities/router_entity.dart';
@@ -21,14 +22,17 @@ class RuijieCloudConnectionService implements RouterConnector {
     RouterCredentialStore? credentialStore,
     RuijieDeviceRequest? requestDevices,
     RuijieCredentialsReader? readCredentials,
-  }) : assert(credentialStore != null || readCredentials != null),
-       _credentialStore = credentialStore,
-       _requestDevices = requestDevices ?? _defaultRequestDevices,
-       _readCredentials = readCredentials;
+    VendorHttpClient? httpClient,
+  })  : assert(credentialStore != null || readCredentials != null),
+        _credentialStore = credentialStore,
+        _requestDevices = requestDevices ?? _defaultRequestDevices,
+        _readCredentials = readCredentials,
+        _http = httpClient ?? VendorHttpClient();
 
   final RouterCredentialStore? _credentialStore;
   final RuijieDeviceRequest _requestDevices;
   final RuijieCredentialsReader? _readCredentials;
+  final VendorHttpClient _http;
 
   // In-memory store for Ruijie hotspot user/voucher state
   final Map<String, List<Map<String, String>>> _ruijieUsersStore = {};
@@ -39,12 +43,13 @@ class RuijieCloudConnectionService implements RouterConnector {
   @override
   Future<bool> testConnection(RouterEntity router) async {
     try {
-      final response = await _requestDeviceList(router);
-      return response.statusCode != null &&
-          response.statusCode! >= 200 &&
-          response.statusCode! < 300;
-    } on DioException {
-      return false;
+      final token = await _accessTokenFor(router);
+      final result = await _http.sendRequest(
+        router: router,
+        path: '/service/api/maint/devices',
+        token: token,
+      );
+      return result['status'] != 'error';
     } catch (_) {
       return false;
     }

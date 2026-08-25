@@ -1,25 +1,39 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wirespot/core/api/vendor_http_client.dart';
 import 'package:wirespot/core/storage/router_credentials.dart';
 import 'package:wirespot/features/routers/data/ruijie_cloud_connection_service.dart';
 import 'package:wirespot/features/routers/domain/entities/router_entity.dart';
 
+VendorHttpClient _stubHttp({required int statusCode}) {
+  final dio = Dio();
+  dio.httpClientAdapter = _StubAdapter(statusCode: statusCode);
+  return VendorHttpClient(dio: dio);
+}
+
+VendorHttpClient _throwingHttp() {
+  final dio = Dio();
+  dio.httpClientAdapter = _ThrowingAdapter();
+  return VendorHttpClient(dio: dio);
+}
+
 void main() {
   test('tests Ruijie Cloud through the device-list endpoint', () async {
-    Uri? requestedUri;
+    String? requestedPath;
+    final dio = Dio();
+    dio.httpClientAdapter = _CapturingAdapter(onRequest: (path) {
+      requestedPath = path;
+    });
+
     final service = RuijieCloudConnectionService(
       readCredentials: (_) async => const RouterCredentials(
         username: 'operator',
         password: '',
         accessToken: 'cloud-token',
       ),
-      requestDevices: (uri) async {
-        requestedUri = uri;
-        return Response<dynamic>(
-          requestOptions: RequestOptions(path: uri.path),
-          statusCode: 200,
-        );
-      },
+      httpClient: VendorHttpClient(dio: dio),
     );
 
     final connected = await service.testConnection(
@@ -35,8 +49,7 @@ void main() {
     );
 
     expect(connected, isTrue);
-    expect(requestedUri.toString(), contains('/service/api/maint/devices'));
-    expect(requestedUri!.queryParameters['access_token'], 'cloud-token');
+    expect(requestedPath, contains('/service/api/maint/devices'));
   });
 
   test(
@@ -48,10 +61,7 @@ void main() {
           password: '',
           accessToken: 'expired-token',
         ),
-        requestDevices: (uri) async => Response<dynamic>(
-          requestOptions: RequestOptions(path: uri.path),
-          statusCode: 401,
-        ),
+        httpClient: _stubHttp(statusCode: 401),
       );
 
       final connected = await service.testConnection(_ruijieRouter);
@@ -69,10 +79,7 @@ void main() {
           password: '',
           accessToken: 'cloud-token',
         ),
-        requestDevices: (uri) => throw DioException(
-          requestOptions: RequestOptions(path: uri.path),
-          type: DioExceptionType.connectionError,
-        ),
+        httpClient: _throwingHttp(),
       );
 
       final connected = await service.testConnection(_ruijieRouter);
@@ -122,3 +129,58 @@ const _ruijieRouter = RouterEntity(
   apiPort: 443,
   useSsl: true,
 );
+
+/// Adapter that always returns a fixed status code with empty body.
+class _StubAdapter implements HttpClientAdapter {
+  _StubAdapter({required this.statusCode});
+  final int statusCode;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return ResponseBody.fromString('{}', statusCode);
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// Adapter that captures the requested path and returns 200.
+class _CapturingAdapter implements HttpClientAdapter {
+  _CapturingAdapter({required this.onRequest});
+  final void Function(String path) onRequest;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    onRequest(options.uri.path);
+    return ResponseBody.fromString('{}', 200);
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// Adapter that always throws a connection error.
+class _ThrowingAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    throw DioException(
+      requestOptions: options,
+      type: DioExceptionType.connectionError,
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}

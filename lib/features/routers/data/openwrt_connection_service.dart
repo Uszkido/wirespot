@@ -1,10 +1,15 @@
 import '../../../core/api/routeros_api_response.dart';
 import '../../../core/api/routeros_models.dart';
+import '../../../core/api/vendor_http_client.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/services/router_connector.dart';
 
 /// Active OpenWrt router connector (LuCI / ubus JSON-RPC & HTTP API).
 class OpenWrtConnectionService implements RouterConnector {
+  OpenWrtConnectionService({VendorHttpClient? httpClient})
+      : _http = httpClient ?? VendorHttpClient();
+
+  final VendorHttpClient _http;
   final Map<String, List<Map<String, String>>> _openwrtUsersStore = {};
 
   @override
@@ -12,7 +17,22 @@ class OpenWrtConnectionService implements RouterConnector {
 
   @override
   Future<bool> testConnection(RouterEntity router) async {
-    return router.host.isNotEmpty;
+    try {
+      final result = await _http.sendRequest(
+        router: router,
+        path: '/cgi-bin/luci',
+        method: 'POST',
+        data: {
+          'jsonrpc': '2.0',
+          'id': 1,
+          'method': 'call',
+          'params': ['00000000000000000000000000000000', 'system', 'board', {}],
+        },
+      );
+      return result['status'] != 'error';
+    } catch (_) {
+      return false;
+    }
   }
 
   @override

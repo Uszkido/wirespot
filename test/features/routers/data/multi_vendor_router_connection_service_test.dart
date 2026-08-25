@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wirespot/core/api/routeros_api_response.dart';
 import 'package:wirespot/core/api/routeros_models.dart';
+import 'package:wirespot/core/api/vendor_http_client.dart';
 import 'package:wirespot/features/routers/data/generic_router_connection_service.dart';
 import 'package:wirespot/features/routers/data/multi_vendor_router_connection_service.dart';
 import 'package:wirespot/features/routers/data/omada_connection_service.dart';
@@ -10,6 +13,13 @@ import 'package:wirespot/features/routers/data/ruijie_cloud_connection_service.d
 import 'package:wirespot/features/routers/data/unifi_connection_service.dart';
 import 'package:wirespot/features/routers/domain/entities/router_entity.dart';
 import 'package:wirespot/features/routers/domain/services/router_connector.dart';
+
+/// Stub Dio adapter that always returns HTTP 200 with empty JSON body.
+VendorHttpClient _stubHttp200() {
+  final dio = Dio();
+  dio.httpClientAdapter = _StubAdapter();
+  return VendorHttpClient(dio: dio);
+}
 
 void main() {
   test('routes MikroTik commands to the RouterOS connector', () async {
@@ -33,8 +43,10 @@ void main() {
   test(
     'all 6 router vendors execute commands on their active connectors',
     () async {
+      final stubHttp = _stubHttp200();
       final ruijie = RuijieCloudConnectionService(
         readCredentials: (_) async => null,
+        httpClient: stubHttp,
         requestDevices: (_) async => Response(
           requestOptions: RequestOptions(path: ''),
           statusCode: 200,
@@ -45,9 +57,9 @@ void main() {
           },
         ),
       );
-      final openwrt = OpenWrtConnectionService();
-      final omada = OmadaConnectionService();
-      final unifi = UniFiConnectionService();
+      final openwrt = OpenWrtConnectionService(httpClient: stubHttp);
+      final omada = OmadaConnectionService(httpClient: stubHttp);
+      final unifi = UniFiConnectionService(httpClient: stubHttp);
       final generic = GenericRouterConnectionService();
 
       final service = MultiVendorRouterConnectionService(
@@ -141,4 +153,19 @@ class _RecordingConnector implements RouterConnector {
   }) {
     throw UnimplementedError();
   }
+}
+
+/// Stub Dio adapter that always returns HTTP 200 with an empty JSON body.
+class _StubAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return ResponseBody.fromString('{}', 200);
+  }
+
+  @override
+  void close({bool force = false}) {}
 }
