@@ -7,7 +7,7 @@ import '../domain/services/router_connector.dart';
 /// Active OpenWrt router connector (LuCI / ubus JSON-RPC & HTTP API).
 class OpenWrtConnectionService implements RouterConnector {
   OpenWrtConnectionService({VendorHttpClient? httpClient})
-      : _http = httpClient ?? VendorHttpClient();
+    : _http = httpClient ?? VendorHttpClient();
 
   final VendorHttpClient _http;
   final Map<String, List<Map<String, String>>> _openwrtUsersStore = {};

@@ -23,11 +23,11 @@ class RuijieCloudConnectionService implements RouterConnector {
     RuijieDeviceRequest? requestDevices,
     RuijieCredentialsReader? readCredentials,
     VendorHttpClient? httpClient,
-  })  : assert(credentialStore != null || readCredentials != null),
-        _credentialStore = credentialStore,
-        _requestDevices = requestDevices ?? _defaultRequestDevices,
-        _readCredentials = readCredentials,
-        _http = httpClient ?? VendorHttpClient();
+  }) : assert(credentialStore != null || readCredentials != null),
+       _credentialStore = credentialStore,
+       _requestDevices = requestDevices ?? _defaultRequestDevices,
+       _readCredentials = readCredentials,
+       _http = httpClient ?? VendorHttpClient();
 
   final RouterCredentialStore? _credentialStore;
   final RuijieDeviceRequest _requestDevices;

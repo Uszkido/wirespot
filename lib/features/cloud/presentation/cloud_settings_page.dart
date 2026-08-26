@@ -398,7 +398,9 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                             controller.signUp(
                               email: email,
                               password: pass,
-                              organizationName: org.isEmpty ? 'Default Org' : org,
+                              organizationName: org.isEmpty
+                                  ? 'Default Org'
+                                  : org,
                             );
                           }
                         },
@@ -419,7 +421,10 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                 FilledButton.icon(
                   onPressed: () {
                     if (_tokenController.text.trim().isNotEmpty) {
-                      controller.saveSession(_tokenController.text.trim(), 1440);
+                      controller.saveSession(
+                        _tokenController.text.trim(),
+                        1440,
+                      );
                       _tokenController.clear();
                     }
                   },
@@ -433,7 +438,9 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                 decoration: BoxDecoration(
                   color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: Colors.green.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: const Row(
                   children: [

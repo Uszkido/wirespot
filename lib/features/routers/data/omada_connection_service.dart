@@ -7,7 +7,7 @@ import '../domain/services/router_connector.dart';
 /// Active TP-Link Omada Controller OpenAPI connector.
 class OmadaConnectionService implements RouterConnector {
   OmadaConnectionService({VendorHttpClient? httpClient})
-      : _http = httpClient ?? VendorHttpClient();
+    : _http = httpClient ?? VendorHttpClient();
 
   final VendorHttpClient _http;
   final Map<String, List<Map<String, String>>> _omadaUsersStore = {};

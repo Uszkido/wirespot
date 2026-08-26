@@ -23,9 +23,11 @@ void main() {
   test('tests Ruijie Cloud through the device-list endpoint', () async {
     String? requestedPath;
     final dio = Dio();
-    dio.httpClientAdapter = _CapturingAdapter(onRequest: (path) {
-      requestedPath = path;
-    });
+    dio.httpClientAdapter = _CapturingAdapter(
+      onRequest: (path) {
+        requestedPath = path;
+      },
+    );
 
     final service = RuijieCloudConnectionService(
       readCredentials: (_) async => const RouterCredentials(

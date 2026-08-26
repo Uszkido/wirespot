@@ -26,11 +26,7 @@ class FirebaseApiClient {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         '$_authBaseUrl/accounts:signUp?key=$apiKey',
-        data: {
-          'email': email,
-          'password': password,
-          'returnSecureToken': true,
-        },
+        data: {'email': email, 'password': password, 'returnSecureToken': true},
       );
       final data = response.data ?? {};
       final idToken = data['idToken'] as String? ?? '';
@@ -76,11 +72,7 @@ class FirebaseApiClient {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         '$_authBaseUrl/accounts:signInWithPassword?key=$apiKey',
-        data: {
-          'email': email,
-          'password': password,
-          'returnSecureToken': true,
-        },
+        data: {'email': email, 'password': password, 'returnSecureToken': true},
       );
       final data = response.data ?? {};
       final idToken = data['idToken'] as String? ?? '';
@@ -90,11 +82,7 @@ class FirebaseApiClient {
       return {
         'status': 'success',
         'accessToken': idToken,
-        'user': {
-          'email': email,
-          'localId': localId,
-          'organizationId': orgId,
-        },
+        'user': {'email': email, 'localId': localId, 'organizationId': orgId},
       };
     } on DioException catch (e) {
       final errorData = e.response?.data as Map<String, dynamic>?;
@@ -125,9 +113,7 @@ class FirebaseApiClient {
 
       final response = await _dio.patch<Map<String, dynamic>>(
         '$_firestoreBaseUrl/$documentPath',
-        options: Options(
-          headers: {'Authorization': 'Bearer $idToken'},
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $idToken'}),
         data: {'fields': formattedFields},
       );
       return response.statusCode == 200;

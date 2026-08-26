@@ -7,7 +7,7 @@ import '../domain/services/router_connector.dart';
 /// Active Ubiquiti UniFi Controller REST API connector.
 class UniFiConnectionService implements RouterConnector {
   UniFiConnectionService({VendorHttpClient? httpClient})
-      : _http = httpClient ?? VendorHttpClient();
+    : _http = httpClient ?? VendorHttpClient();
 
   final VendorHttpClient _http;
   final Map<String, List<Map<String, String>>> _unifiUsersStore = {};

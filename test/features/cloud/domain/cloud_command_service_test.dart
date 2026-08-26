@@ -158,10 +158,7 @@ class _FakeCloudApiClient implements CloudApiClient {
     required String email,
     required String password,
     required String organizationName,
-  }) async => {
-    'status': 'success',
-    'accessToken': 'token_reg_123',
-  };
+  }) async => {'status': 'success', 'accessToken': 'token_reg_123'};
 
   @override
   Future<Response<Map<String, dynamic>>> getJson(String path) async {

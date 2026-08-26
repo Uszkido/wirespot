@@ -32,15 +32,18 @@ class CloudApiClient {
   }
 
   Future<Map<String, dynamic>> pairDevice(String pairingKey) async {
-    final response = await postJson('auth/pair', data: {'pairingKey': pairingKey});
+    final response = await postJson(
+      'auth/pair',
+      data: {'pairingKey': pairingKey},
+    );
     return response.data ?? {};
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await postJson('auth/login', data: {
-      'email': email,
-      'password': password,
-    });
+    final response = await postJson(
+      'auth/login',
+      data: {'email': email, 'password': password},
+    );
     return response.data ?? {};
   }
 
@@ -49,11 +52,14 @@ class CloudApiClient {
     required String password,
     required String organizationName,
   }) async {
-    final response = await postJson('auth/register', data: {
-      'email': email,
-      'password': password,
-      'organizationName': organizationName,
-    });
+    final response = await postJson(
+      'auth/register',
+      data: {
+        'email': email,
+        'password': password,
+        'organizationName': organizationName,
+      },
+    );
     return response.data ?? {};
   }
 

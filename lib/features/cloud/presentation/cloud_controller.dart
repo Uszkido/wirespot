@@ -192,7 +192,8 @@ class CloudController extends StateNotifier<CloudState> {
       }
 
       if (orgId != null && orgId.isNotEmpty) {
-        final currentConn = state.connection ??
+        final currentConn =
+            state.connection ??
             const CloudConnectionSettings(
               apiBaseUrl: 'https://cloud.wirespot.app/api',
             );
@@ -245,7 +246,8 @@ class CloudController extends StateNotifier<CloudState> {
       }
 
       if (orgId != null && orgId.isNotEmpty) {
-        final currentConn = state.connection ??
+        final currentConn =
+            state.connection ??
             const CloudConnectionSettings(
               apiBaseUrl: 'https://cloud.wirespot.app/api',
             );
