@@ -11,7 +11,12 @@ void main() {
         {'id': 'printer-1', 'name': 'Front desk'},
       ],
       routers: const [
-        {'id': 'r1', 'name': 'MikroTik Core', 'host': '192.168.88.1', 'vendor': 'routeros'},
+        {
+          'id': 'r1',
+          'name': 'MikroTik Core',
+          'host': '192.168.88.1',
+          'vendor': 'routeros',
+        },
       ],
       hotspotProfiles: const [
         {'id': 'p1', 'name': '1-Hour Pass', 'price': 5.0},
@@ -44,7 +49,12 @@ void main() {
         {'id': 'printer-1', 'name': 'Front desk', 'paperWidthMm': 80},
       ],
       'routers': [
-        {'id': 'r1', 'name': 'Ruijie Gateway', 'host': '10.0.0.1', 'vendor': 'ruijie'},
+        {
+          'id': 'r1',
+          'name': 'Ruijie Gateway',
+          'host': '10.0.0.1',
+          'vendor': 'ruijie',
+        },
       ],
       'hotspotProfiles': [
         {'id': 'p1', 'name': 'Daily Unlimited', 'price': 10.0},

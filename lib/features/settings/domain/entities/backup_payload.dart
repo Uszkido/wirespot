@@ -67,10 +67,7 @@ class BackupPayload {
     return [
       for (final item in raw)
         if (item is Map)
-          {
-            for (final entry in item.entries)
-              entry.key.toString(): entry.value,
-          },
+          {for (final entry in item.entries) entry.key.toString(): entry.value},
     ];
   }
 }

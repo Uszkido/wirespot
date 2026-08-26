@@ -108,7 +108,10 @@ class PlatformWireGuardVpnService implements WireGuardVpnService {
 
   @override
   Future<void> importConfigString(String rawConfig) async {
-    final parsed = WireGuardConfig.parse(name: 'Imported Tunnel', config: rawConfig);
+    final parsed = WireGuardConfig.parse(
+      name: 'Imported Tunnel',
+      config: rawConfig,
+    );
     await importConfig(parsed);
   }
 

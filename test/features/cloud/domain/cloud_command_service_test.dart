@@ -106,7 +106,11 @@ void main() {
 }
 
 class _FakeCloudApiClient implements CloudApiClient {
-  @override  Future<bool> uploadCloudBackup(Map<String, Object?> payloadJson) async => true;  @override  Future<Map<String, dynamic>?> fetchLatestCloudBackup() async => null;
+  @override
+  Future<bool> uploadCloudBackup(Map<String, Object?> payloadJson) async =>
+      true;
+  @override
+  Future<Map<String, dynamic>?> fetchLatestCloudBackup() async => null;
   _FakeCloudApiClient({this.pendingCommands = const []});
 
   final List<Map<String, dynamic>> pendingCommands;

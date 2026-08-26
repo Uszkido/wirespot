@@ -13,10 +13,10 @@ class CloudBackupService {
     required BackupService backupService,
     required SettingsRepository settingsRepository,
     required AppDatabase database,
-  })  : _cloudApiClient = cloudApiClient,
-        _backupService = backupService,
-        _settingsRepository = settingsRepository,
-        _database = database;
+  }) : _cloudApiClient = cloudApiClient,
+       _backupService = backupService,
+       _settingsRepository = settingsRepository,
+       _database = database;
 
   final CloudApiClient _cloudApiClient;
   final BackupService _backupService;

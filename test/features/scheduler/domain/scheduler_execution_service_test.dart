@@ -601,7 +601,11 @@ class _FakeCloudSyncRepository implements CloudSyncRepository {
 }
 
 class _FakeCloudApiClient implements CloudApiClient {
-  @override  Future<bool> uploadCloudBackup(Map<String, Object?> payloadJson) async => true;  @override  Future<Map<String, dynamic>?> fetchLatestCloudBackup() async => null;
+  @override
+  Future<bool> uploadCloudBackup(Map<String, Object?> payloadJson) async =>
+      true;
+  @override
+  Future<Map<String, dynamic>?> fetchLatestCloudBackup() async => null;
   @override
   Future<List<Map<String, dynamic>>> fetchPendingCommands() async => [];
 

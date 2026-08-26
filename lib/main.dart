@@ -11,10 +11,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
   sl<SchedulerExecutionService>().start();
-  
+
   // Try local side-loaded backup first
   final localRestored = await sl<BackupService>().autoRestoreIfBackupFound();
-  
+
   // If local backup wasn't found and restored, try cloud backup
   if (!localRestored) {
     // Cloud auto-restore fails silently if no cloud backup exists or user not signed in

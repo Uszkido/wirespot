@@ -18,9 +18,9 @@ class BackupService {
     required SettingsRepository repository,
     required AppDatabase database,
     required WireGuardVpnService wireGuardVpnService,
-  })  : _repository = repository,
-        _database = database,
-        _wireGuardVpnService = wireGuardVpnService;
+  }) : _repository = repository,
+       _database = database,
+       _wireGuardVpnService = wireGuardVpnService;
 
   final SettingsRepository _repository;
   final AppDatabase _database;
@@ -107,11 +107,7 @@ class BackupService {
           },
       ],
       wireGuardConfigs: [
-        for (final wg in wgConfigs)
-          {
-            'name': wg.name,
-            'config': wg.config,
-          },
+        for (final wg in wgConfigs) {'name': wg.name, 'config': wg.config},
       ],
     );
   }
@@ -151,7 +147,9 @@ class BackupService {
       if (id == null || name == null || host == null) {
         continue;
       }
-      await _database.into(_database.routers).insertOnConflictUpdate(
+      await _database
+          .into(_database.routers)
+          .insertOnConflictUpdate(
             RoutersCompanion.insert(
               id: id,
               name: name,
@@ -161,7 +159,9 @@ class BackupService {
               apiPort: Value(_intValue(r['apiPort'] ?? r['port']) ?? 8728),
               useSsl: Value(_boolValue(r['useSsl'])),
               requireVpn: Value(_boolValue(r['requireVpn'])),
-              remoteAccessMode: Value(r['remoteAccessMode']?.toString() ?? 'wireGuard'),
+              remoteAccessMode: Value(
+                r['remoteAccessMode']?.toString() ?? 'wireGuard',
+              ),
               username: r['username']?.toString() ?? 'admin',
               identity: Value(r['identity']?.toString()),
               version: Value(r['version']?.toString()),
@@ -182,7 +182,9 @@ class BackupService {
       if (id == null || name == null) {
         continue;
       }
-      await _database.into(_database.hotspotProfiles).insertOnConflictUpdate(
+      await _database
+          .into(_database.hotspotProfiles)
+          .insertOnConflictUpdate(
             HotspotProfilesCompanion.insert(
               id: id,
               routerId: routerId ?? 'default',
@@ -207,7 +209,9 @@ class BackupService {
       if (id == null || name == null) {
         continue;
       }
-      await _database.into(_database.routerGroups).insertOnConflictUpdate(
+      await _database
+          .into(_database.routerGroups)
+          .insertOnConflictUpdate(
             RouterGroupsCompanion.insert(
               id: id,
               name: name,
@@ -229,7 +233,9 @@ class BackupService {
 
   Future<File> exportBackupToFile() async {
     final payload = await buildBackup();
-    final jsonStr = const JsonEncoder.withIndent('  ').convert(payload.toJson());
+    final jsonStr = const JsonEncoder.withIndent(
+      '  ',
+    ).convert(payload.toJson());
 
     final documentsDir = await getApplicationDocumentsDirectory();
     final backupFile = File(p.join(documentsDir.path, 'wirespot_backup.json'));
@@ -238,7 +244,9 @@ class BackupService {
     try {
       final downloadDir = Directory('/storage/emulated/0/Download');
       if (downloadDir.existsSync()) {
-        final publicBackup = File(p.join(downloadDir.path, 'wirespot_backup.json'));
+        final publicBackup = File(
+          p.join(downloadDir.path, 'wirespot_backup.json'),
+        );
         await publicBackup.writeAsString(jsonStr);
       }
     } on Object {

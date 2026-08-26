@@ -30,8 +30,10 @@ PersistentKeepalive = 25
       expect(parsed.peers.last.persistentKeepalive, 25);
     });
 
-    test('parses config with comments, whitespace, MTU, ListenPort, and PresharedKey', () {
-      const config = '''
+    test(
+      'parses config with comments, whitespace, MTU, ListenPort, and PresharedKey',
+      () {
+        const config = '''
 # WireSpot Standalone Tunnel Config
 [Interface]
 PrivateKey = AAAAA/BBBBB/CCCCCC= # Primary Private Key
@@ -47,18 +49,25 @@ Endpoint = 198.51.100.1:51820
 AllowedIPs = 0.0.0.0/0, ::/0
 ''';
 
-      final parsed = WireGuardConfig.parse(name: 'standalone_test', config: config);
+        final parsed = WireGuardConfig.parse(
+          name: 'standalone_test',
+          config: config,
+        );
 
-      expect(parsed.name, 'standalone_test');
-      expect(parsed.interfaceConfig.privateKey, 'AAAAA/BBBBB/CCCCCC=');
-      expect(parsed.interfaceConfig.addresses, ['10.200.0.2/24', 'fd00::2/64']);
-      expect(parsed.interfaceConfig.listenPort, 51820);
-      expect(parsed.interfaceConfig.mtu, 1420);
-      expect(parsed.peers.first.publicKey, 'XXXXX/YYYYY/ZZZZZ=');
-      expect(parsed.peers.first.presharedKey, 'psk-key-value=');
-      expect(parsed.peers.first.endpoint, '198.51.100.1:51820');
-      expect(parsed.peers.first.allowedIps, ['0.0.0.0/0', '::/0']);
-    });
+        expect(parsed.name, 'standalone_test');
+        expect(parsed.interfaceConfig.privateKey, 'AAAAA/BBBBB/CCCCCC=');
+        expect(parsed.interfaceConfig.addresses, [
+          '10.200.0.2/24',
+          'fd00::2/64',
+        ]);
+        expect(parsed.interfaceConfig.listenPort, 51820);
+        expect(parsed.interfaceConfig.mtu, 1420);
+        expect(parsed.peers.first.publicKey, 'XXXXX/YYYYY/ZZZZZ=');
+        expect(parsed.peers.first.presharedKey, 'psk-key-value=');
+        expect(parsed.peers.first.endpoint, '198.51.100.1:51820');
+        expect(parsed.peers.first.allowedIps, ['0.0.0.0/0', '::/0']);
+      },
+    );
 
     test('throws FormatException on empty name', () {
       expect(
@@ -75,7 +84,13 @@ AllowedIPs = 10.0.0.0/24
 ''';
       expect(
         () => WireGuardConfig.parse(name: 'test', config: config),
-        throwsA(isA<FormatException>().having((e) => e.message, 'message', contains('missing [Interface]'))),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('missing [Interface]'),
+          ),
+        ),
       );
     });
 
@@ -87,7 +102,13 @@ Address = 10.0.0.1/24
 ''';
       expect(
         () => WireGuardConfig.parse(name: 'test', config: config),
-        throwsA(isA<FormatException>().having((e) => e.message, 'message', contains('must include a [Peer]'))),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('must include a [Peer]'),
+          ),
+        ),
       );
     });
   });
