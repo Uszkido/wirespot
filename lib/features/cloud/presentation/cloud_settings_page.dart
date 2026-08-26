@@ -19,7 +19,11 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
   final _urlController = TextEditingController();
   final _orgController = TextEditingController();
   final _tokenController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _regOrgController = TextEditingController();
   bool _allowInsecure = false;
+  int _authTabIndex = 0; // 0: Sign In, 1: Sign Up, 2: Token
 
   @override
   void initState() {
@@ -41,6 +45,9 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
     _urlController.dispose();
     _orgController.dispose();
     _tokenController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _regOrgController.dispose();
     super.dispose();
   }
 
@@ -291,26 +298,160 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
               ],
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _tokenController,
-              decoration: InputDecoration(
-                labelText: text.cloudAccessToken,
-                hintText: 'eyJhbGciOi...',
-                prefixIcon: const Icon(Icons.lock_outline),
+            if (!hasSession) ...[
+              SegmentedButton<int>(
+                segments: const [
+                  ButtonSegment(
+                    value: 0,
+                    label: Text('Sign In'),
+                    icon: Icon(Icons.login),
+                  ),
+                  ButtonSegment(
+                    value: 1,
+                    label: Text('Sign Up'),
+                    icon: Icon(Icons.person_add),
+                  ),
+                  ButtonSegment(
+                    value: 2,
+                    label: Text('Token'),
+                    icon: Icon(Icons.key),
+                  ),
+                ],
+                selected: {_authTabIndex},
+                onSelectionChanged: (newSelection) {
+                  setState(() {
+                    _authTabIndex = newSelection.first;
+                  });
+                },
               ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: () {
-                if (_tokenController.text.trim().isNotEmpty) {
-                  controller.saveSession(_tokenController.text.trim(), 1440);
-                  _tokenController.clear();
-                }
-              },
-              icon: const Icon(Icons.login),
-              label: const Text('Save Access Token'),
-            ),
+              const SizedBox(height: 16),
+              if (_authTabIndex == 0) ...[
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Operator Email',
+                    hintText: 'admin@wirespot.app',
+                    prefixIcon: Icon(Icons.email_outlined),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: Icon(Icons.lock_outline),
+                  ),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: state.isLoading
+                      ? null
+                      : () {
+                          final email = _emailController.text.trim();
+                          final pass = _passwordController.text.trim();
+                          if (email.isNotEmpty && pass.isNotEmpty) {
+                            controller.signIn(email, pass);
+                          }
+                        },
+                  icon: const Icon(Icons.login),
+                  label: const Text('Sign In to WireSpot Cloud'),
+                ),
+              ] else if (_authTabIndex == 1) ...[
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Operator Email',
+                    hintText: 'admin@wirespot.app',
+                    prefixIcon: Icon(Icons.email_outlined),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Password (min 6 chars)',
+                    prefixIcon: Icon(Icons.lock_outline),
+                  ),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _regOrgController,
+                  decoration: const InputDecoration(
+                    labelText: 'Organization / Business Name',
+                    hintText: 'StarCoffee Wifi',
+                    prefixIcon: Icon(Icons.business_outlined),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: state.isLoading
+                      ? null
+                      : () {
+                          final email = _emailController.text.trim();
+                          final pass = _passwordController.text.trim();
+                          final org = _regOrgController.text.trim();
+                          if (email.isNotEmpty && pass.isNotEmpty) {
+                            controller.signUp(
+                              email: email,
+                              password: pass,
+                              organizationName: org.isEmpty ? 'Default Org' : org,
+                            );
+                          }
+                        },
+                  icon: const Icon(Icons.person_add),
+                  label: const Text('Create Operator Account'),
+                ),
+              ] else ...[
+                TextField(
+                  controller: _tokenController,
+                  decoration: InputDecoration(
+                    labelText: text.cloudAccessToken,
+                    hintText: 'ws_session_...',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                  ),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () {
+                    if (_tokenController.text.trim().isNotEmpty) {
+                      controller.saveSession(_tokenController.text.trim(), 1440);
+                      _tokenController.clear();
+                    }
+                  },
+                  icon: const Icon(Icons.key),
+                  label: const Text('Save Access Token'),
+                ),
+              ],
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Authenticated & Ready for Cloud Sync!',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),

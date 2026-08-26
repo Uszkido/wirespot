@@ -175,6 +175,104 @@ class CloudController extends StateNotifier<CloudState> {
     }
   }
 
+  Future<bool> signIn(String email, String password) async {
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: () => null,
+      successMessage: () => null,
+    );
+    try {
+      final data = await _apiClient.login(email, password);
+      final token = data['accessToken'] as String? ?? '';
+      final user = data['user'] as Map<String, dynamic>? ?? {};
+      final orgId = user['organizationId'] as String?;
+
+      if (token.isEmpty) {
+        throw StateError('Invalid credentials or session token missing.');
+      }
+
+      if (orgId != null && orgId.isNotEmpty) {
+        final currentConn = state.connection ??
+            const CloudConnectionSettings(
+              apiBaseUrl: 'https://cloud.wirespot.app/api',
+            );
+        await _settingsService.saveConnection(
+          currentConn.copyWith(organizationId: orgId),
+        );
+      }
+
+      final session = CloudSession(
+        accessToken: token,
+        expiresAt: DateTime.now().add(const Duration(hours: 24)),
+      );
+      await _settingsService.saveSession(session);
+      await load();
+      state = state.copyWith(
+        successMessage: () => 'Welcome back! Signed in as $email.',
+      );
+      return true;
+    } catch (error) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: () => 'Sign in failed: ${error.toString()}',
+      );
+      return false;
+    }
+  }
+
+  Future<bool> signUp({
+    required String email,
+    required String password,
+    required String organizationName,
+  }) async {
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: () => null,
+      successMessage: () => null,
+    );
+    try {
+      final data = await _apiClient.register(
+        email: email,
+        password: password,
+        organizationName: organizationName,
+      );
+      final token = data['accessToken'] as String? ?? '';
+      final user = data['user'] as Map<String, dynamic>? ?? {};
+      final orgId = user['organizationId'] as String?;
+
+      if (token.isEmpty) {
+        throw StateError('Registration failed to yield a valid token.');
+      }
+
+      if (orgId != null && orgId.isNotEmpty) {
+        final currentConn = state.connection ??
+            const CloudConnectionSettings(
+              apiBaseUrl: 'https://cloud.wirespot.app/api',
+            );
+        await _settingsService.saveConnection(
+          currentConn.copyWith(organizationId: orgId),
+        );
+      }
+
+      final session = CloudSession(
+        accessToken: token,
+        expiresAt: DateTime.now().add(const Duration(hours: 24)),
+      );
+      await _settingsService.saveSession(session);
+      await load();
+      state = state.copyWith(
+        successMessage: () => 'Account created! Signed in as $email.',
+      );
+      return true;
+    } catch (error) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: () => 'Sign up failed: ${error.toString()}',
+      );
+      return false;
+    }
+  }
+
   Future<void> clearSession() async {
     state = state.copyWith(
       isLoading: true,

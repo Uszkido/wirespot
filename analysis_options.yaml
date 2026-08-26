@@ -3,6 +3,7 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - archive/**
+    - wirespot_backend/**
   errors:
     use_null_aware_elements: ignore
 

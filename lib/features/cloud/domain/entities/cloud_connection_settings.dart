@@ -26,6 +26,19 @@ class CloudConnectionSettings {
     return Uri.parse(value.endsWith('/') ? value : '$value/');
   }
 
+  CloudConnectionSettings copyWith({
+    String? apiBaseUrl,
+    String? organizationId,
+    bool? allowInsecureDevelopment,
+  }) {
+    return CloudConnectionSettings(
+      apiBaseUrl: apiBaseUrl ?? this.apiBaseUrl,
+      organizationId: organizationId ?? this.organizationId,
+      allowInsecureDevelopment:
+          allowInsecureDevelopment ?? this.allowInsecureDevelopment,
+    );
+  }
+
   Map<String, Object?> toJson() => {
     'apiBaseUrl': apiBaseUrl,
     'organizationId': organizationId,

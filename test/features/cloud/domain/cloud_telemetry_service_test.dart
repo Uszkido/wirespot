@@ -67,6 +67,28 @@ class _FakeCloudApiClient implements CloudApiClient {
   Future<bool> testConnection() async => true;
 
   @override
+  Future<Map<String, dynamic>> pairDevice(String pairingKey) async => {
+    'status': 'success',
+    'accessToken': 'token_pair_123',
+  };
+
+  @override
+  Future<Map<String, dynamic>> login(String email, String password) async => {
+    'status': 'success',
+    'accessToken': 'token_login_123',
+  };
+
+  @override
+  Future<Map<String, dynamic>> register({
+    required String email,
+    required String password,
+    required String organizationName,
+  }) async => {
+    'status': 'success',
+    'accessToken': 'token_reg_123',
+  };
+
+  @override
   Future<Response<Map<String, dynamic>>> getJson(String path) async {
     return Response<Map<String, dynamic>>(
       requestOptions: RequestOptions(path: path),
