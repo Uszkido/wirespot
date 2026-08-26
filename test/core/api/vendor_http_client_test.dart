@@ -5,7 +5,10 @@ import 'package:wirespot/core/api/vendor_http_client.dart';
 import 'package:wirespot/features/routers/domain/entities/router_entity.dart';
 
 class _StubAdapter implements HttpClientAdapter {
-  _StubAdapter({this.statusCode = 200, this.responseBody = '{"status":"success"}'});
+  _StubAdapter({
+    this.statusCode = 200,
+    this.responseBody = '{"status":"success"}',
+  });
   final int statusCode;
   final String responseBody;
 
@@ -65,7 +68,8 @@ void main() {
       () async {
         final dio = Dio();
         dio.httpClientAdapter = _StubAdapter(
-          responseBody: '{"jsonrpc":"2.0", "id": 1, "result": [0, {"board_name": "OpenWrt"}]}',
+          responseBody:
+              '{"jsonrpc":"2.0", "id": 1, "result": [0, {"board_name": "OpenWrt"}]}',
         );
         final client = VendorHttpClient(dio: dio);
 
