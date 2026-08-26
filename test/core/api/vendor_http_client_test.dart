@@ -5,11 +5,7 @@ import 'package:wirespot/core/api/vendor_http_client.dart';
 import 'package:wirespot/features/routers/domain/entities/router_entity.dart';
 
 class _StubAdapter implements HttpClientAdapter {
-  _StubAdapter({
-    this.statusCode = 200,
-    this.responseBody = '{"status":"success"}',
-  });
-  final int statusCode;
+  _StubAdapter({this.responseBody = '{"status":"success"}'});
   final String responseBody;
 
   @override
@@ -20,7 +16,7 @@ class _StubAdapter implements HttpClientAdapter {
   ) async {
     return ResponseBody.fromString(
       responseBody,
-      statusCode,
+      200,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
       },
