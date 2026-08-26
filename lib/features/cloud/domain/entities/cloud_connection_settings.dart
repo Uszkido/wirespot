@@ -46,8 +46,11 @@ class CloudConnectionSettings {
   };
 
   factory CloudConnectionSettings.fromJson(Map<String, Object?> json) {
+    final url = json['apiBaseUrl'] as String? ?? '';
     return CloudConnectionSettings(
-      apiBaseUrl: json['apiBaseUrl'] as String? ?? '',
+      apiBaseUrl: url.isNotEmpty
+          ? url
+          : 'https://firestore.googleapis.com/v1/projects/wirespot-app/databases/(default)/documents',
       organizationId: json['organizationId'] as String?,
       allowInsecureDevelopment:
           json['allowInsecureDevelopment'] as bool? ?? false,

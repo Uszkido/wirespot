@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 /// Uses Firebase Identity Toolkit REST API for Auth and Firestore REST API for Database.
 class FirebaseApiClient {
   FirebaseApiClient({
-    required this.apiKey,
-    required this.projectId,
+    this.apiKey = 'AIzaSyBpbSdludqgorj9_DKIAhUwUIVZN1bzONc',
+    this.projectId = 'wirespot-app',
     Dio? dio,
   }) : _dio = dio ?? Dio();
 
