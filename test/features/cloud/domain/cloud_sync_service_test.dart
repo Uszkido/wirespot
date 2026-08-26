@@ -109,6 +109,7 @@ class MemoryCloudSyncRepository implements CloudSyncRepository {
 }
 
 class FakeCloudApiClient implements CloudApiClient {
+  @override  Future<bool> uploadCloudBackup(Map<String, Object?> payloadJson) async => true;  @override  Future<Map<String, dynamic>?> fetchLatestCloudBackup() async => null;
   final List<Map<String, dynamic>> postedData = [];
 
   @override

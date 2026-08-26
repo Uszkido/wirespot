@@ -78,6 +78,20 @@ class PlatformShareService implements ShareService {
     );
   }
 
+  @override
+  Future<void> shareFile({
+    required String path,
+    String? mimeType,
+    String? subject,
+  }) async {
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(path, mimeType: mimeType)],
+        subject: subject,
+      ),
+    );
+  }
+
   Future<void> _shareText({required String subject, required String text}) {
     return _channel.invokeMethod<void>('shareText', {
       'subject': subject,

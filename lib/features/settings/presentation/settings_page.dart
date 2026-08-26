@@ -117,6 +117,8 @@ class SettingsPage extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           const _BackupCard(),
+          const SizedBox(height: 16),
+          const _CloudBackupCard(),
         ],
       ),
     );
@@ -1739,19 +1741,45 @@ class _BackupCard extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Create a JSON backup of settings and printer profiles.',
+              'Full standalone backup of routers, hotspot profiles, router groups, '
+              'WireGuard configs, printers, and business settings.',
             ),
             const SizedBox(height: 12),
             FilledButton.icon(
-              onPressed: () => _showBackup(context, ref),
-              icon: const Icon(Icons.backup_outlined),
-              label: const Text('Preview backup'),
+              onPressed: () => _exportBackup(context, ref),
+              icon: const Icon(Icons.download_outlined),
+              label: const Text('Export backup file (.json)'),
             ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
-              onPressed: () => _restoreBackup(context, ref),
-              icon: const Icon(Icons.restore_outlined),
-              label: const Text('Restore backup'),
+              onPressed: () => _importBackupFile(context, ref),
+              icon: const Icon(Icons.file_open_outlined),
+              label: const Text('Pick & import backup file'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => _autoDetectBackup(context, ref),
+              icon: const Icon(Icons.find_in_page_outlined),
+              label: const Text('Auto-detect pasted backup file'),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: () => _showBackupPreview(context, ref),
+                    icon: const Icon(Icons.code_outlined),
+                    label: const Text('Preview JSON'),
+                  ),
+                ),
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: () => _restoreRawJson(context, ref),
+                    icon: const Icon(Icons.paste_outlined),
+                    label: const Text('Paste JSON'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1759,11 +1787,89 @@ class _BackupCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _showBackup(BuildContext context, WidgetRef ref) async {
-    final payload = await ref.read(backupServiceProvider).buildBackup();
-    if (!context.mounted) {
-      return;
+  Future<void> _exportBackup(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final file = await ref.read(backupServiceProvider).exportBackupToFile();
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Backup exported to: ${file.path}'),
+          action: SnackBarAction(
+            label: 'Share',
+            onPressed: () async {
+              await ref.read(shareServiceProvider).shareFile(
+                    path: file.path,
+                    mimeType: 'application/json',
+                    subject: 'WireSpot Backup',
+                  );
+            },
+          ),
+        ),
+      );
+    } on Object catch (error) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Export failed: $error')),
+      );
     }
+  }
+
+  Future<void> _importBackupFile(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final restored = await ref.read(backupServiceProvider).importBackupFromFile();
+      if (!context.mounted) return;
+      if (restored) {
+        ref
+          ..invalidate(appSettingsProvider)
+          ..invalidate(printerConfigsProvider)
+          ..invalidate(routerRepositoryProvider);
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Backup file imported and restored successfully!')),
+        );
+      }
+    } on Object catch (error) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Could not import backup file: $error')),
+      );
+    }
+  }
+
+  Future<void> _autoDetectBackup(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final restored = await ref.read(backupServiceProvider).autoRestoreIfBackupFound();
+      if (!context.mounted) return;
+      if (restored) {
+        ref
+          ..invalidate(appSettingsProvider)
+          ..invalidate(printerConfigsProvider)
+          ..invalidate(routerRepositoryProvider);
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Pasted backup file auto-detected and restored!')),
+        );
+      } else {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text(
+              'No pasted wirespot_backup.json found in Downloads or Documents folder.',
+            ),
+          ),
+        );
+      }
+    } on Object catch (error) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Auto-detect error: $error')),
+      );
+    }
+  }
+
+  Future<void> _showBackupPreview(BuildContext context, WidgetRef ref) async {
+    final payload = await ref.read(backupServiceProvider).buildBackup();
+    if (!context.mounted) return;
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -1783,7 +1889,7 @@ class _BackupCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _restoreBackup(BuildContext context, WidgetRef ref) async {
+  Future<void> _restoreRawJson(BuildContext context, WidgetRef ref) async {
     final controller = TextEditingController();
     try {
       String? errorText;
@@ -1792,7 +1898,7 @@ class _BackupCard extends ConsumerWidget {
         builder: (context) => StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Restore backup'),
+              title: const Text('Restore from JSON text'),
               content: TextField(
                 controller: controller,
                 minLines: 8,
@@ -1813,9 +1919,7 @@ class _BackupCard extends ConsumerWidget {
                     try {
                       final decoded = jsonDecode(controller.text);
                       if (decoded is! Map) {
-                        throw const FormatException(
-                          'Backup JSON must be an object.',
-                        );
+                        throw const FormatException('Backup JSON must be an object.');
                       }
                       Navigator.of(context).pop(
                         BackupPayload.fromJson({
@@ -1835,17 +1939,16 @@ class _BackupCard extends ConsumerWidget {
           },
         ),
       );
-      if (payload == null) {
-        return;
-      }
+      if (payload == null) return;
       await ref.read(backupServiceProvider).restoreBackup(payload);
       ref
         ..invalidate(appSettingsProvider)
-        ..invalidate(printerConfigsProvider);
+        ..invalidate(printerConfigsProvider)
+        ..invalidate(routerRepositoryProvider);
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Backup restored.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Backup restored from text.')),
+        );
       }
     } on Object catch (error) {
       if (context.mounted) {
@@ -1858,3 +1961,143 @@ class _BackupCard extends ConsumerWidget {
     }
   }
 }
+
+class _CloudBackupCard extends ConsumerStatefulWidget {
+  const _CloudBackupCard();
+
+  @override
+  ConsumerState<_CloudBackupCard> createState() => _CloudBackupCardState();
+}
+
+class _CloudBackupCardState extends ConsumerState<_CloudBackupCard> {
+  bool _isBackingUp = false;
+  bool _isRestoring = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Cloud Backup',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ),
+                const Icon(Icons.cloud_done_outlined, color: Colors.green),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Back up your data to WireSpot Cloud. You can restore them when you reinstall WireSpot.',
+            ),
+            const SizedBox(height: 12),
+            FutureBuilder<String?>(
+              future: ref.read(cloudBackupServiceProvider).getLastCloudBackupAt(),
+              builder: (context, snapshot) {
+                final dateStr = snapshot.data;
+                if (dateStr == null || dateStr.isEmpty) {
+                  return const Text('Last backup: Never');
+                }
+                final date = DateTime.tryParse(dateStr);
+                if (date == null) return const Text('Last backup: Unknown');
+                return Text('Last backup: ${_formatDate(date)}');
+              },
+            ),
+            const SizedBox(height: 4),
+            FutureBuilder<int?>(
+              future: ref.read(cloudBackupServiceProvider).getLastCloudBackupSize(),
+              builder: (context, snapshot) {
+                final size = snapshot.data;
+                if (size == null) return const SizedBox.shrink();
+                return Text('Size: ${(size / 1024).toStringAsFixed(1)} KB');
+              },
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: _isBackingUp || _isRestoring ? null : _performCloudBackup,
+              icon: _isBackingUp
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cloud_upload_outlined),
+              label: Text(_isBackingUp ? 'Backing up...' : 'Back Up to Cloud Now'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: _isBackingUp || _isRestoring ? null : _performCloudRestore,
+              icon: _isRestoring
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cloud_download_outlined),
+              label: Text(_isRestoring ? 'Restoring...' : 'Restore from Cloud'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _performCloudBackup() async {
+    setState(() => _isBackingUp = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final success = await ref.read(cloudBackupServiceProvider).uploadCloudBackup();
+      if (!mounted) return;
+      if (success) {
+        messenger.showSnackBar(const SnackBar(content: Text('Cloud backup successful!')));
+      } else {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Could not upload cloud backup. Make sure you are signed in to WireSpot Cloud.'),
+          ),
+        );
+      }
+    } on Object catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text('Cloud backup error: $e')));
+    } finally {
+      if (mounted) setState(() => _isBackingUp = false);
+    }
+  }
+
+  Future<void> _performCloudRestore() async {
+    setState(() => _isRestoring = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final success = await ref.read(cloudBackupServiceProvider).restoreFromCloud();
+      if (!mounted) return;
+      if (success) {
+        ref
+          ..invalidate(appSettingsProvider)
+          ..invalidate(printerConfigsProvider)
+          ..invalidate(routerRepositoryProvider);
+        messenger.showSnackBar(const SnackBar(content: Text('Backup restored from Cloud successfully!')));
+      } else {
+        messenger.showSnackBar(const SnackBar(content: Text('No cloud backup found or restore failed.')));
+      }
+    } on Object catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text('Cloud restore error: $e')));
+    } finally {
+      if (mounted) setState(() => _isRestoring = false);
+    }
+  }
+}
+

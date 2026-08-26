@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wirespot/core/storage/router_credentials.dart';
@@ -22,6 +24,7 @@ import 'package:wirespot/features/routers/domain/repositories/router_repository.
 import 'package:wirespot/features/scheduler/domain/entities/scheduled_task.dart';
 import 'package:wirespot/features/scheduler/domain/services/scheduler_execution_service.dart';
 import 'package:wirespot/features/scheduler/domain/services/scheduler_settings_service.dart';
+import 'package:wirespot/features/settings/domain/entities/backup_payload.dart';
 import 'package:wirespot/features/settings/domain/entities/printer_config_entity.dart';
 import 'package:wirespot/features/settings/domain/repositories/settings_repository.dart';
 import 'package:wirespot/features/settings/domain/services/backup_service.dart';
@@ -199,16 +202,47 @@ SchedulerExecutionService _service(
   _FakeHotspotService? hotspotService,
   _FakeVoucherRepository? voucherRepository,
   CloudSyncService? cloudSyncService,
+  BackupService? backupService,
 }) {
   return SchedulerExecutionService(
     settingsService: SchedulerSettingsService(settings),
-    backupService: BackupService(settings),
+    backupService: backupService ?? _FakeBackupService(settings),
     reportSummaryService: ReportSummaryService(_FakeReportRepository()),
     routerRepository: _FakeRouterRepository(),
     hotspotService: hotspotService ?? _FakeHotspotService(),
     voucherRepository: voucherRepository ?? _FakeVoucherRepository(),
     cloudSyncService: cloudSyncService,
   );
+}
+
+class _FakeBackupService implements BackupService {
+  _FakeBackupService(this._settings);
+
+  final _FakeSettingsRepository _settings;
+
+  @override
+  Future<BackupPayload> buildBackup() async {
+    return BackupPayload(
+      version: 1,
+      exportedAt: DateTime.now(),
+      settings: _settings.values,
+      printers: const [],
+    );
+  }
+
+  @override
+  Future<void> restoreBackup(BackupPayload payload) async {}
+
+  @override
+  Future<File> exportBackupToFile() async {
+    return File('wirespot_backup.json');
+  }
+
+  @override
+  Future<bool> importBackupFromFile() async => true;
+
+  @override
+  Future<bool> autoRestoreIfBackupFound() async => false;
 }
 
 class _FakeSettingsRepository implements SettingsRepository {
@@ -567,6 +601,7 @@ class _FakeCloudSyncRepository implements CloudSyncRepository {
 }
 
 class _FakeCloudApiClient implements CloudApiClient {
+  @override  Future<bool> uploadCloudBackup(Map<String, Object?> payloadJson) async => true;  @override  Future<Map<String, dynamic>?> fetchLatestCloudBackup() async => null;
   @override
   Future<List<Map<String, dynamic>>> fetchPendingCommands() async => [];
 

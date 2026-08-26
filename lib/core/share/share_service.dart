@@ -13,4 +13,10 @@ abstract interface class ShareService {
     String fileName, {
     String? subject,
   });
+
+  Future<void> shareFile({
+    required String path,
+    String? mimeType,
+    String? subject,
+  });
 }

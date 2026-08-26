@@ -1,6 +1,7 @@
 import 'vpn_statistics.dart';
 import 'vpn_status.dart';
 import 'wireguard_config.dart';
+import 'wireguard_tunnel.dart';
 
 abstract interface class WireGuardVpnService {
   Future<void> importConfig(WireGuardConfig config);
@@ -21,6 +22,10 @@ abstract interface class WireGuardVpnService {
   Future<VpnStatistics> statistics();
 
   Future<List<String>> logs();
+
+  Future<List<WireGuardTunnel>> getSavedTunnels();
+
+  Future<void> importConfigString(String rawConfig);
 
   Stream<VpnStatus> watchStatus();
 }

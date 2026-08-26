@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/authentication/domain/services/auth_service.dart';
 import '../../features/cloud/data/cloud_api_client.dart';
 import '../../features/cloud/domain/repositories/cloud_sync_repository.dart';
+import '../../features/cloud/domain/services/cloud_backup_service.dart';
 import '../../features/cloud/domain/services/cloud_settings_service.dart';
 import '../../features/cloud/domain/services/cloud_sync_service.dart';
 import '../../features/hotspot/domain/services/hotspot_service.dart';
@@ -59,6 +60,10 @@ final cloudSyncRepositoryProvider = Provider<CloudSyncRepository>(
 
 final cloudSyncServiceProvider = Provider<CloudSyncService>(
   (ref) => sl<CloudSyncService>(),
+);
+
+final cloudBackupServiceProvider = Provider<CloudBackupService>(
+  (ref) => sl<CloudBackupService>(),
 );
 
 final printerServiceProvider = Provider<PrinterService>(

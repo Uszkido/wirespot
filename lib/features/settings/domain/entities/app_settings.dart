@@ -13,6 +13,9 @@ class AppSettingsKeys {
   static const businessWebsite = 'business_website';
   static const businessLogoPath = 'business_logo_path';
   static const activeRouterId = 'active_router_id';
+  static const lastCloudBackupAt = 'last_cloud_backup_at';
+  static const lastCloudBackupSize = 'last_cloud_backup_size';
+  static const cloudBackupFrequency = 'cloud_backup_frequency';
 }
 
 class SupportedLanguage {

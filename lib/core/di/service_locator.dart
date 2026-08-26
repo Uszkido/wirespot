@@ -8,6 +8,7 @@ import '../../features/authentication/domain/services/pin_hash_service.dart';
 import '../../features/cloud/data/cloud_api_client.dart';
 import '../../features/cloud/data/cloud_sync_local_repository.dart';
 import '../../features/cloud/domain/repositories/cloud_sync_repository.dart';
+import '../../features/cloud/domain/services/cloud_backup_service.dart';
 import '../../features/cloud/domain/services/cloud_settings_service.dart';
 import '../../features/cloud/domain/services/cloud_sync_service.dart';
 import '../../features/hotspot/data/routeros_hotspot_service.dart';
@@ -234,7 +235,19 @@ Future<void> configureDependencies() async {
       () => AppSettingsService(sl<SettingsRepository>()),
     )
     ..registerLazySingleton<BackupService>(
-      () => BackupService(sl<SettingsRepository>()),
+      () => BackupService(
+        repository: sl<SettingsRepository>(),
+        database: sl<AppDatabase>(),
+        wireGuardVpnService: sl<WireGuardVpnService>(),
+      ),
+    )
+    ..registerLazySingleton<CloudBackupService>(
+      () => CloudBackupService(
+        cloudApiClient: sl<CloudApiClient>(),
+        backupService: sl<BackupService>(),
+        settingsRepository: sl<SettingsRepository>(),
+        database: sl<AppDatabase>(),
+      ),
     )
     ..registerLazySingleton<SchedulerSettingsService>(
       () => SchedulerSettingsService(sl<SettingsRepository>()),

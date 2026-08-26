@@ -94,6 +94,25 @@ class PlatformWireGuardVpnService implements WireGuardVpnService {
   }
 
   @override
+  Future<List<WireGuardTunnel>> getSavedTunnels() async {
+    final keys = await _secureStorage.readAll();
+    final tunnels = <WireGuardTunnel>[];
+    for (final entry in keys.entries) {
+      if (entry.key.startsWith('wireguard_config_')) {
+        final tunnelName = entry.key.replaceFirst('wireguard_config_', '');
+        tunnels.add(WireGuardTunnel(name: tunnelName, config: entry.value));
+      }
+    }
+    return tunnels;
+  }
+
+  @override
+  Future<void> importConfigString(String rawConfig) async {
+    final parsed = WireGuardConfig.parse(name: 'Imported Tunnel', config: rawConfig);
+    await importConfig(parsed);
+  }
+
+  @override
   Stream<VpnStatus> watchStatus() {
     return _statusChannel.receiveBroadcastStream().map((event) {
       if (event is Map<Object?, Object?>) {

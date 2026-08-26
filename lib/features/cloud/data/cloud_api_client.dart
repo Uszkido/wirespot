@@ -92,6 +92,26 @@ class CloudApiClient {
     return response.statusCode == 200 || response.statusCode == 201;
   }
 
+  Future<bool> uploadCloudBackup(Map<String, Object?> payloadJson) async {
+    final response = await postJson('backup/upload', data: payloadJson);
+    return response.statusCode == 200 || response.statusCode == 201;
+  }
+
+  Future<Map<String, dynamic>?> fetchLatestCloudBackup() async {
+    try {
+      final response = await getJson('backup/latest');
+      if (response.statusCode == 200 && response.data != null) {
+        final backupData = response.data?['backup'] ?? response.data;
+        if (backupData is Map) {
+          return Map<String, dynamic>.from(backupData);
+        }
+      }
+    } catch (_) {
+      // Cloud backup may not exist yet or connection offline
+    }
+    return null;
+  }
+
   Future<Response<Map<String, dynamic>>> _request(
     String method,
     String path, {
