@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../cloud/domain/services/cloud_backup_service.dart';
 import '../../../cloud/domain/services/cloud_sync_service.dart';
 import '../../../hotspot/domain/entities/hotspot_active_session_entity.dart';
 import '../../../hotspot/domain/services/hotspot_service.dart';
@@ -22,13 +23,15 @@ class SchedulerExecutionService {
     required HotspotService hotspotService,
     required VoucherRepository voucherRepository,
     CloudSyncService? cloudSyncService,
+    CloudBackupService? cloudBackupService,
   }) : _settingsService = settingsService,
        _backupService = backupService,
        _reportSummaryService = reportSummaryService,
        _routerRepository = routerRepository,
        _hotspotService = hotspotService,
        _voucherRepository = voucherRepository,
-       _cloudSyncService = cloudSyncService;
+       _cloudSyncService = cloudSyncService,
+       _cloudBackupService = cloudBackupService;
 
   final SchedulerSettingsService _settingsService;
   final BackupService _backupService;
@@ -37,6 +40,7 @@ class SchedulerExecutionService {
   final HotspotService _hotspotService;
   final VoucherRepository _voucherRepository;
   final CloudSyncService? _cloudSyncService;
+  final CloudBackupService? _cloudBackupService;
 
   Timer? _timer;
   bool _isRunning = false;
@@ -193,8 +197,19 @@ class SchedulerExecutionService {
 
   Future<String> _databaseBackup() async {
     final backup = await _backupService.buildBackup();
+    var cloudStatus = '';
+    if (_cloudBackupService != null) {
+      try {
+        final uploaded = await _cloudBackupService.uploadCloudBackup();
+        cloudStatus = uploaded
+            ? ' & uploaded to cloud'
+            : ' (cloud upload failed)';
+      } catch (e) {
+        cloudStatus = ' (cloud upload error)';
+      }
+    }
     return 'Backup snapshot ready: ${backup.printers.length} printers, '
-        '${backup.settings.length} settings.';
+        '${backup.settings.length} settings$cloudStatus.';
   }
 
   Future<String> _voucherCleanup(DateTime now) async {

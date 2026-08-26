@@ -261,6 +261,7 @@ Future<void> configureDependencies() async {
         hotspotService: sl<HotspotService>(),
         voucherRepository: sl<VoucherRepository>(),
         cloudSyncService: sl<CloudSyncService>(),
+        cloudBackupService: sl<CloudBackupService>(),
       ),
     )
     ..registerLazySingleton<WireGuardSettingsService>(

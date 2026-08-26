@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:excel/excel.dart';
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../../core/branding/app_branding.dart';
@@ -28,14 +29,219 @@ class ReportExportService {
           'wirespot-report-${DateTime.now().millisecondsSinceEpoch}.$extension',
       content: content,
       bytes: request.format == ReportExportFormat.pdf
-          ? await _buildPdf(content)
+          ? await _buildPdf(request.summary, settings)
           : _buildExcel(request.summary),
     );
   }
 
-  Future<Uint8List> _buildPdf(String content) async {
+  Future<Uint8List> _buildPdf(
+    RevenueSummary summary,
+    AppSettingsSnapshot? settings,
+  ) async {
     final document = pw.Document();
-    document.addPage(pw.MultiPage(build: (_) => [pw.Text(content)]));
+    final businessName = settings?.businessName ?? AppBranding.companyName;
+    final supportEmail = settings?.businessEmail ?? AppBranding.supportEmail;
+    final supportPhone = settings?.businessPhone ?? AppBranding.supportPhone;
+    final website = settings?.businessWebsite ?? AppBranding.website;
+
+    document.addPage(
+      pw.MultiPage(
+        header: (context) => pw.Container(
+          margin: const pw.EdgeInsets.only(bottom: 12),
+          padding: const pw.EdgeInsets.only(bottom: 8),
+          decoration: pw.BoxDecoration(
+            border: pw.Border(
+              bottom: pw.BorderSide(color: PdfColors.blueGrey800, width: 2),
+            ),
+          ),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    businessName,
+                    style: pw.TextStyle(
+                      fontSize: 18,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.blueGrey900,
+                    ),
+                  ),
+                  pw.Text(
+                    'WireSpot Hotspot Revenue Report',
+                    style: pw.TextStyle(
+                      fontSize: 12,
+                      color: PdfColors.blueGrey600,
+                    ),
+                  ),
+                ],
+              ),
+              pw.Text(
+                AppBranding.appName,
+                style: pw.TextStyle(
+                  fontSize: 20,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.blue800,
+                ),
+              ),
+            ],
+          ),
+        ),
+        footer: (context) => pw.Container(
+          margin: const pw.EdgeInsets.only(top: 12),
+          padding: const pw.EdgeInsets.only(top: 8),
+          decoration: pw.BoxDecoration(
+            border: pw.Border(
+              top: pw.BorderSide(color: PdfColors.grey300, width: 1),
+            ),
+          ),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                '$supportEmail • $supportPhone • $website',
+                style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+              ),
+              pw.Text(
+                'Page ${context.pageNumber} of ${context.pagesCount}',
+                style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+              ),
+            ],
+          ),
+        ),
+        build: (context) => [
+          pw.Container(
+            padding: const pw.EdgeInsets.all(10),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.grey100,
+              borderRadius: pw.BorderRadius.circular(6),
+            ),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+              children: [
+                pw.Column(
+                  children: [
+                    pw.Text(
+                      'PERIOD',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        color: PdfColors.grey700,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      '${_dateTime(summary.from)} - ${_dateTime(summary.to)}',
+                      style: pw.TextStyle(
+                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                pw.Column(
+                  children: [
+                    pw.Text(
+                      'TRANSACTIONS',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        color: PdfColors.grey700,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      '${summary.transactionCount}',
+                      style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.blue800,
+                      ),
+                    ),
+                  ],
+                ),
+                pw.Column(
+                  children: [
+                    pw.Text(
+                      'TOTAL REVENUE',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        color: PdfColors.grey700,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      '${summary.currency} ${summary.totalMajor.toStringAsFixed(2)}',
+                      style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.green800,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          pw.SizedBox(height: 16),
+          pw.Text(
+            'Sales Breakdown',
+            style: pw.TextStyle(
+              fontSize: 14,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.blueGrey800,
+            ),
+          ),
+          pw.SizedBox(height: 8),
+          if (summary.sales.isEmpty)
+            pw.Padding(
+              padding: const pw.EdgeInsets.symmetric(vertical: 20),
+              child: pw.Center(
+                child: pw.Text(
+                  'No sales recorded for this period.',
+                  style: pw.TextStyle(color: PdfColors.grey600),
+                ),
+              ),
+            )
+          else
+            pw.TableHelper.fromTextArray(
+              headers: [
+                'Date & Time',
+                'Router',
+                'Voucher',
+                'Payment',
+                'Amount',
+              ],
+              data: [
+                for (final sale in summary.sales)
+                  [
+                    _dateTime(sale.soldAt),
+                    sale.routerId,
+                    sale.voucherId ?? '-',
+                    sale.paymentMethod ?? 'Cash',
+                    '${sale.currency} ${(sale.amountMinor / 100).toStringAsFixed(2)}',
+                  ],
+              ],
+              headerStyle: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.white,
+                fontSize: 10,
+              ),
+              headerDecoration: pw.BoxDecoration(color: PdfColors.blue800),
+              rowDecoration: pw.BoxDecoration(
+                border: pw.Border(
+                  bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+                ),
+              ),
+              cellAlignment: pw.Alignment.centerLeft,
+              cellStyle: const pw.TextStyle(fontSize: 9),
+              cellPadding: const pw.EdgeInsets.symmetric(
+                horizontal: 6,
+                vertical: 4,
+              ),
+            ),
+        ],
+      ),
+    );
     return document.save();
   }
 
@@ -44,18 +250,24 @@ class ReportExportService {
     final sheet = workbook['Revenue report'];
     sheet.appendRow([
       TextCellValue('Sold at'),
-      TextCellValue('Router'),
-      TextCellValue('Voucher'),
-      TextCellValue('Amount'),
+      TextCellValue('Router ID'),
+      TextCellValue('Voucher ID'),
+      TextCellValue('Payment Method'),
+      TextCellValue('Amount (Minor)'),
+      TextCellValue('Amount (Major)'),
       TextCellValue('Currency'),
+      TextCellValue('Notes'),
     ]);
     for (final sale in summary.sales) {
       sheet.appendRow([
         TextCellValue(sale.soldAt.toIso8601String()),
         TextCellValue(sale.routerId),
         TextCellValue(sale.voucherId ?? ''),
+        TextCellValue(sale.paymentMethod ?? 'Cash'),
         IntCellValue(sale.amountMinor),
+        DoubleCellValue(sale.amountMinor / 100),
         TextCellValue(sale.currency),
+        TextCellValue(sale.note ?? ''),
       ]);
     }
     return Uint8List.fromList(workbook.encode()!);

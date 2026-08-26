@@ -10,6 +10,7 @@ import '../../features/diagnostics/presentation/diagnostics_page.dart';
 import '../../features/hotspot/presentation/csv_import_page.dart';
 import '../../features/alerts/presentation/alert_settings_page.dart';
 import '../../features/hotspot/presentation/hotspot_page.dart';
+import '../../features/onboarding/presentation/onboarding_page.dart';
 import '../../features/permissions/presentation/permission_readiness_page.dart';
 import '../../features/reports/presentation/reports_page.dart';
 import '../../features/routers/presentation/router_form_page.dart';
@@ -53,6 +54,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.login,
         name: 'login',
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.onboarding,
+        name: 'onboarding',
+        builder: (context, state) => const OnboardingPage(),
       ),
       GoRoute(
         path: AppRoutes.dashboard,

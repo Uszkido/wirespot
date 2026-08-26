@@ -16,6 +16,7 @@ class AppSettingsKeys {
   static const lastCloudBackupAt = 'last_cloud_backup_at';
   static const lastCloudBackupSize = 'last_cloud_backup_size';
   static const cloudBackupFrequency = 'cloud_backup_frequency';
+  static const hasCompletedOnboarding = 'has_completed_onboarding';
 }
 
 class SupportedLanguage {
