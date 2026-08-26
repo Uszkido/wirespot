@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -86,6 +89,7 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
               status: resolvedStatus,
               settings: settingsValue,
               onImport: _showImportDialog,
+              onPickFile: _pickFileAndImportConfig,
               onScanQr: _scanQrConfig,
               onConnect: _connect,
               onDisconnect: _disconnect,
@@ -167,6 +171,44 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
     }
   }
 
+  Future<void> _pickFileAndImportConfig() async {
+    try {
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: ['conf', 'txt'],
+      );
+      if (file == null) {
+        return;
+      }
+
+      String content = '';
+      if (file.path != null) {
+        content = await File(file.path!).readAsString();
+      }
+
+      if (content.trim().isEmpty) {
+        _showSnack('Selected .conf file is empty.');
+        return;
+      }
+
+      final defaultName = file.name
+          .replaceAll(RegExp(r'\.(conf|txt)$', caseSensitive: false), '')
+          .trim();
+      final name = defaultName.isEmpty ? 'wirespot' : defaultName;
+
+      final config = WireGuardConfig.parse(name: name, config: content);
+      await ref.read(wireGuardVpnServiceProvider).importConfig(config);
+      _tunnelNameController.text = config.name;
+      await _saveSettings(selectedTunnelName: config.name);
+      _refresh();
+      _showSnack('WireGuard tunnel "${config.name}" imported from file!');
+    } on FormatException catch (error) {
+      _showSnack('Invalid WireGuard file: ${error.message}');
+    } on Object catch (error) {
+      _showSnack('Could not pick .conf file: $error');
+    }
+  }
+
   Future<void> _showImportDialog() async {
     final nameController = TextEditingController(
       text: _tunnelNameController.text.trim().isEmpty
@@ -178,13 +220,37 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
       final config = await showDialog<WireGuardConfig>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Import tunnel'),
+          title: const Text('Import WireGuard tunnel'),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await _pickFileAndImportConfig();
+                    },
+                    icon: const Icon(Icons.file_open_outlined),
+                    label: const Text('Pick .conf File from Phone'),
+                  ),
+                  const SizedBox(height: 12),
+                  const Row(
+                    children: [
+                      Expanded(child: Divider()),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          'OR PASTE TEXT',
+                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                      ),
+                      Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   TextField(
                     controller: nameController,
                     decoration: const InputDecoration(
@@ -195,10 +261,10 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
                   const SizedBox(height: 12),
                   TextField(
                     controller: configController,
-                    minLines: 8,
-                    maxLines: 16,
+                    minLines: 6,
+                    maxLines: 12,
                     decoration: const InputDecoration(
-                      labelText: 'WireGuard config',
+                      labelText: 'WireGuard config text',
                       alignLabelWithHint: true,
                     ),
                   ),
@@ -369,6 +435,7 @@ class _TunnelCard extends StatelessWidget {
     required this.status,
     required this.settings,
     required this.onImport,
+    required this.onPickFile,
     required this.onScanQr,
     required this.onConnect,
     required this.onDisconnect,
@@ -379,6 +446,7 @@ class _TunnelCard extends StatelessWidget {
   final VpnStatus? status;
   final WireGuardSettings? settings;
   final Future<void> Function() onImport;
+  final Future<void> Function() onPickFile;
   final Future<void> Function() onScanQr;
   final Future<void> Function() onConnect;
   final Future<void> Function() onDisconnect;
@@ -438,11 +506,18 @@ class _TunnelCard extends StatelessWidget {
               runSpacing: 8,
               children: [
                 OutlinedButton.icon(
+                  onPressed: () async {
+                    await onPickFile();
+                  },
+                  icon: const Icon(Icons.file_open_outlined),
+                  label: const Text('Pick .conf'),
+                ),
+                OutlinedButton.icon(
                   onPressed: () {
                     onImport();
                   },
                   icon: const Icon(Icons.file_upload_outlined),
-                  label: const Text('Import'),
+                  label: const Text('Text / Manual'),
                 ),
                 OutlinedButton.icon(
                   onPressed: () async {
