@@ -1,9 +1,0 @@
-﻿Analyzing you-are-an-expert-flutter-android...                  
-
-   info - The imported package 'equatable' isn't a dependency of the importing package. Try adding a dependency for 'equatable' in the 'pubspec.yaml' file - lib\features\captive_portal\domain\entities\payment_gateway_entity.dart:1:8 - depend_on_referenced_packages
-  error - Target of URI doesn't exist: '../../../vouchers/domain/entities/voucher_entity.dart'. Try creating the file referenced by the URI, or try using a URI for a file that does exist - lib\features\captive_portal\domain\services\payment_service.dart:2:8 - uri_does_not_exist
-  error - Undefined class 'VoucherEntity'. Try changing the name to the name of an existing class, or creating a class with the name 'VoucherEntity' - lib\features\captive_portal\domain\services\payment_service.dart:43:3 - undefined_class
-  error - The method 'VoucherEntity' isn't defined for the type 'PaymentService'. Try correcting the name to the name of an existing method, or defining a method named 'VoucherEntity' - lib\features\captive_portal\domain\services\payment_service.dart:44:12 - undefined_method
-  error - The named parameter 'username' is required, but there's no corresponding argument. Try adding the required argument - test\core\api\vendor_http_client_test.dart:10:22 - missing_required_argument
-  error - The named parameter 'username' is required, but there's no corresponding argument. Try adding the required argument - test\core\api\vendor_http_client_test.dart:30:22 - missing_required_argument
-
