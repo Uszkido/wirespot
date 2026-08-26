@@ -60,8 +60,8 @@ jobs:
       - name: Build Android release APK
         run: flutter build apk --release --no-tree-shake-icons
 
-      - name: Build Flutter Web dashboard
-        run: flutter build web
+      - name: Validate Web Dashboard static files
+        run: test -f web_app/index.html && test -f web_app/styles.css && test -f web_app/app.js
 
       - name: Upload release APK artifact
         uses: actions/upload-artifact@v4
