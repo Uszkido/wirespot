@@ -9,10 +9,7 @@ on:
 
 permissions:
   contents: read
-
-concurrency:
-  group: wirespot-ci-${{ github.ref }}
-  cancel-in-progress: true
+  actions: read
 
 jobs:
   flutter:
