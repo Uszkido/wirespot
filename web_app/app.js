@@ -1,12 +1,15 @@
-// WireSpot Cloud Web Application Logic
+// ═══════════════════════════════════════════════════════════════
+// WireSpot Cloud Web Application Logic v2.0
+// ═══════════════════════════════════════════════════════════════
+
 document.addEventListener('DOMContentLoaded', () => {
-  // State Store
-  const state = {
+  // ─── Initial State ───
+  const defaultState = {
     activeTab: 'tab-dashboard',
     routers: [
-      { name: 'Main-Gateway-MikroTik', vendor: 'MikroTik RouterOS', ip: '192.168.88.1', port: 8728, status: 'online', users: 32 },
+      { name: 'Main-Gateway-MikroTik', vendor: 'MikroTik RouterOS v7', ip: '192.168.88.1', port: 8728, status: 'online', users: 32 },
       { name: 'Pool-Bar-Ruijie', vendor: 'Ruijie / Reyee', ip: '10.0.0.15', port: 443, status: 'online', users: 12 },
-      { name: 'Lobby-AP-OpenWrt', vendor: 'OpenWrt', ip: '192.168.1.1', port: 22, status: 'online', users: 8 },
+      { name: 'Lobby-AP-OpenWrt', vendor: 'OpenWrt LuCI', ip: '192.168.1.1', port: 22, status: 'online', users: 8 },
       { name: 'Hotel-Controller-Omada', vendor: 'TP-Link Omada', ip: '192.168.0.10', port: 443, status: 'online', users: 24 },
       { name: 'Campus-UniFi-CloudKey', vendor: 'Ubiquiti UniFi', ip: '192.168.20.5', port: 443, status: 'online', users: 45 },
       { name: 'Generic-Edge-Gateway', vendor: 'Generic Router', ip: '10.0.0.1', port: 443, status: 'online', users: 6 }
@@ -39,28 +42,52 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'op_sync_100', resourceType: 'hotspot_profile', resourceId: 'hp_1hour', operation: 'upsert', idempotencyKey: 'idemp_hp_1h', attempts: 2, status: 'completed' }
     ],
     events: [
-      { time: '11:28:10', source: 'CloudSyncService', desc: 'Background sync triggered via automated scheduler', status: 'success' },
-      { time: '11:15:00', source: 'VoucherService', desc: 'Generated batch of 5 vouchers (Profile: 1Hour-5MBPS)', status: 'success' },
+      { time: '11:28:10', source: 'CloudSyncService', desc: 'Background sync triggered via Firebase REST API', status: 'success' },
+      { time: '11:15:00', source: 'VoucherService', desc: 'Generated batch of 5 vouchers (1Hour-5MBPS)', status: 'success' },
       { time: '10:45:12', source: 'RouterOSConnector', desc: 'Connected to MikroTik gateway at 192.168.88.1:8728', status: 'info' }
     ]
   };
 
-  // Toast Helper
+  // Load state from localStorage or use defaults
+  const savedState = localStorage.getItem('wirespot_web_state');
+  const state = savedState ? JSON.parse(savedState) : defaultState;
+
+  const saveState = () => {
+    localStorage.setItem('wirespot_web_state', JSON.stringify(state));
+  };
+
+  // ─── Toast System ───
   const showToast = (message, type = 'success') => {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.style.background = type === 'success' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)';
-    toast.style.transform = 'translateY(0)';
-    toast.style.opacity = '1';
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    const icons = {
+      success: '<i class="fa-solid fa-circle-check"></i>',
+      error: '<i class="fa-solid fa-circle-exclamation"></i>',
+      info: '<i class="fa-solid fa-circle-info"></i>'
+    };
+
+    toast.innerHTML = `
+      ${icons[type] || icons.info}
+      <span>${message}</span>
+      <div class="toast-progress"></div>
+    `;
+
+    container.appendChild(toast);
+
+    // Trigger animation
+    requestAnimationFrame(() => toast.classList.add('show'));
+
     setTimeout(() => {
-      toast.style.transform = 'translateY(100px)';
-      toast.style.opacity = '0';
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
     }, 3000);
   };
 
-  // Navigation Logic
+  // ─── Navigation Logic ───
   document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', (e) => {
+    item.addEventListener('click', () => {
       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
 
@@ -69,12 +96,12 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById(targetTab).classList.add('active');
 
       const titleMap = {
-        'tab-dashboard': 'Dashboard Overview',
+        'tab-dashboard': 'Dashboard',
         'tab-routers': 'Router Fleet Inventory',
-        'tab-users-advanced': 'Advanced Hotspot Users & Profiles',
-        'tab-sessions': 'Hotspot Active Sessions',
+        'tab-users-advanced': 'Hotspot Users & Profiles',
+        'tab-sessions': 'Live Hotspot Sessions',
         'tab-vouchers': 'Voucher Batch & Inventory',
-        'tab-subscriptions': 'Subscriptions & Operator Billing',
+        'tab-subscriptions': 'Subscriptions & Billing',
         'tab-cloud': 'WireSpot Cloud Sync Center',
         'tab-reports': 'Sales Analytics & Export'
       };
@@ -82,12 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Render Tables
+  // ─── Render Functions ───
   const renderEvents = () => {
     const tbody = document.getElementById('events-table-body');
+    if (!tbody) return;
     tbody.innerHTML = state.events.map(ev => `
       <tr>
-        <td>${ev.time}</td>
+        <td><code>${ev.time}</code></td>
         <td><strong>${ev.source}</strong></td>
         <td>${ev.desc}</td>
         <td><span class="badge badge-${ev.status === 'success' ? 'success' : 'info'}">${ev.status}</span></td>
@@ -97,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const renderRouters = () => {
     const tbody = document.getElementById('routers-table-body');
+    if (!tbody) return;
     tbody.innerHTML = state.routers.map(r => `
       <tr>
         <td><strong>${r.name}</strong></td>
@@ -106,8 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> ${r.status}</span></td>
         <td>${r.users} Users</td>
         <td>
-          <button class="btn btn-primary btn-open-cli" data-router="${r.name}" style="padding: 4px 10px; font-size: 12px; margin-right: 6px;"><i class="fa-solid fa-terminal"></i> CLI</button>
-          <button class="btn btn-secondary" onclick="alert('Reboot command sent to ${r.name}')" style="padding: 4px 10px; font-size: 12px;"><i class="fa-solid fa-power-off"></i> Reboot</button>
+          <button class="btn btn-primary btn-open-cli" data-router="${r.name}" style="padding: 4px 10px; font-size: 11px; margin-right: 4px;"><i class="fa-solid fa-terminal"></i> CLI</button>
+          <button class="btn btn-secondary btn-reboot" data-router="${r.name}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-power-off"></i> Reboot</button>
         </td>
       </tr>
     `).join('');
@@ -117,6 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const rName = b.getAttribute('data-router');
         document.getElementById('cli-router-name').textContent = `Connected to ${rName}`;
         document.getElementById('modal-cli').classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.btn-reboot').forEach(b => {
+      b.addEventListener('click', () => {
+        const rName = b.getAttribute('data-router');
+        showToast(`Reboot command sent to ${rName}`, 'info');
       });
     });
   };
@@ -130,12 +166,28 @@ document.addEventListener('DOMContentLoaded', () => {
         <td><span class="badge badge-info">${u.profile}</span></td>
         <td>${u.uptimeLimit}</td>
         <td>${u.dataLimit}</td>
-        <td><button class="btn btn-secondary" onclick="alert('Reset counters for ${u.username}')" style="padding: 4px 10px; font-size: 12px;"><i class="fa-solid fa-rotate-left"></i> Reset</button></td>
+        <td><button class="btn btn-secondary btn-reset-user" data-user="${u.username}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-rotate-left"></i> Reset</button></td>
         <td>
-          <button class="btn btn-danger" onclick="alert('Removed user ${u.username}')" style="padding: 4px 10px; font-size: 12px;"><i class="fa-solid fa-trash"></i> Delete</button>
+          <button class="btn btn-danger btn-del-user" data-idx="${idx}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-trash"></i> Delete</button>
         </td>
       </tr>
     `).join('');
+
+    document.querySelectorAll('.btn-reset-user').forEach(b => {
+      b.addEventListener('click', () => {
+        showToast(`Reset counters for ${b.getAttribute('data-user')}`, 'success');
+      });
+    });
+
+    document.querySelectorAll('.btn-del-user').forEach(b => {
+      b.addEventListener('click', () => {
+        const idx = b.getAttribute('data-idx');
+        const removed = state.hotspotUsers.splice(idx, 1);
+        saveState();
+        renderHotspotUsers();
+        showToast(`Deleted user ${removed[0].username}`, 'info');
+      });
+    });
   };
 
   const renderUserProfiles = () => {
@@ -149,14 +201,21 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${p.sharedUsers} User(s)</td>
         <td>${p.timeout}</td>
         <td>
-          <button class="btn btn-secondary" onclick="alert('Editing profile ${p.name}')" style="padding: 4px 10px; font-size: 12px;"><i class="fa-solid fa-pen"></i> Edit</button>
+          <button class="btn btn-secondary btn-edit-profile" data-profile="${p.name}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-pen"></i> Edit</button>
         </td>
       </tr>
     `).join('');
+
+    document.querySelectorAll('.btn-edit-profile').forEach(b => {
+      b.addEventListener('click', () => {
+        showToast(`Editing profile ${b.getAttribute('data-profile')}`, 'info');
+      });
+    });
   };
 
   const renderSessions = () => {
     const tbody = document.getElementById('sessions-table-body');
+    if (!tbody) return;
     tbody.innerHTML = state.sessions.map((s, idx) => `
       <tr>
         <td><strong>${s.username}</strong></td>
@@ -166,28 +225,30 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${s.bytesIn}</td>
         <td>${s.bytesOut}</td>
         <td>
-          <button class="btn btn-danger btn-kick" data-idx="${idx}" style="padding: 4px 10px; font-size: 12px;"><i class="fa-solid fa-user-xmark"></i> Disconnect</button>
+          <button class="btn btn-danger btn-kick" data-idx="${idx}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-user-xmark"></i> Disconnect</button>
         </td>
       </tr>
     `).join('');
 
     document.querySelectorAll('.btn-kick').forEach(b => {
-      b.addEventListener('click', (e) => {
+      b.addEventListener('click', () => {
         const idx = b.getAttribute('data-idx');
         const user = state.sessions[idx].username;
         state.sessions.splice(idx, 1);
+        saveState();
         renderSessions();
-        showToast(`Disconnected hotspot user ${user}`, 'success');
+        showToast(`Disconnected hotspot user ${user}`, 'info');
       });
     });
   };
 
   const renderVouchers = (filter = '') => {
     const tbody = document.getElementById('vouchers-table-body');
+    if (!tbody) return;
     const filtered = state.vouchers.filter(v => v.code.toLowerCase().includes(filter.toLowerCase()));
     tbody.innerHTML = filtered.map(v => `
       <tr>
-        <td><strong style="font-family: monospace; font-size: 15px; color: var(--primary);">${v.code}</strong></td>
+        <td><strong style="font-family: monospace; font-size: 14px; color: var(--accent);">${v.code}</strong></td>
         <td>${v.profile}</td>
         <td>$${v.price.toFixed(2)}</td>
         <td>${v.createdAt}</td>
@@ -195,405 +256,336 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="badge badge-${v.status === 'unused' ? 'success' : v.status === 'active' ? 'info' : 'danger'}">${v.status}</span>
         </td>
         <td>
-          <button class="btn btn-secondary" onclick="alert('Printing receipt preview for voucher ${v.code}')" style="padding: 4px 10px; font-size: 12px;"><i class="fa-solid fa-print"></i> Print</button>
+          <button class="btn btn-secondary btn-print-v" data-code="${v.code}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-print"></i> Print</button>
         </td>
       </tr>
     `).join('');
 
-    // Summary counters
-    document.getElementById('total-vouchers-count').textContent = state.vouchers.length;
-    document.getElementById('unused-vouchers-count').textContent = state.vouchers.filter(v => v.status === 'unused').length;
-    document.getElementById('active-vouchers-count').textContent = state.vouchers.filter(v => v.status === 'active').length;
-    document.getElementById('expired-vouchers-count').textContent = state.vouchers.filter(v => v.status === 'expired').length;
+    document.querySelectorAll('.btn-print-v').forEach(b => {
+      b.addEventListener('click', () => {
+        const code = b.getAttribute('data-code');
+        document.getElementById('prev-tp-code').textContent = code;
+        document.getElementById('modal-thermal').classList.add('active');
+      });
+    });
   };
 
   const renderCloudQueue = () => {
     const tbody = document.getElementById('cloud-queue-table-body');
+    if (!tbody) return;
     tbody.innerHTML = state.cloudQueue.map(q => `
       <tr>
         <td><code>${q.id}</code></td>
-        <td><strong>${q.resourceType}</strong></td>
+        <td><span class="badge badge-info">${q.resourceType}</span></td>
         <td>${q.resourceId}</td>
-        <td>${q.operation}</td>
+        <td><strong>${q.operation}</strong></td>
         <td><code>${q.idempotencyKey}</code></td>
         <td>${q.attempts}</td>
-        <td>
-          <span class="badge badge-${q.status === 'completed' ? 'success' : q.status === 'pending' ? 'warning' : 'danger'}">${q.status}</span>
-        </td>
+        <td><span class="badge badge-${q.status === 'completed' ? 'success' : 'warning'}">${q.status}</span></td>
       </tr>
     `).join('');
 
-    const pendingCount = state.cloudQueue.filter(q => q.status === 'pending').length;
-    document.getElementById('queue-status-badge').textContent = `${pendingCount} Pending`;
-    document.getElementById('kpi-pending-sync').textContent = pendingCount;
+    const pending = state.cloudQueue.filter(q => q.status === 'pending').length;
+    const badge = document.getElementById('queue-status-badge');
+    if (badge) badge.textContent = `${pending} Pending`;
   };
 
-  // Form Submit: Voucher Generation
-  document.getElementById('voucher-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const qty = parseInt(document.getElementById('v-quantity').value);
-    const profile = document.getElementById('v-profile').value;
-    const price = parseFloat(document.getElementById('v-price').value);
-    const prefix = document.getElementById('v-prefix').value.toUpperCase();
-    const length = parseInt(document.getElementById('v-length').value);
-
-    for (let i = 0; i < qty; i++) {
-      const randomStr = Math.random().toString(36).substring(2, 2 + length).toUpperCase();
-      const code = `${prefix}-${randomStr}`;
-      state.vouchers.unshift({
-        code,
-        profile,
-        price,
-        createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
-        status: 'unused'
-      });
-      // Queue cloud sync
-      state.cloudQueue.unshift({
-        id: `op_sync_${Math.floor(100 + Math.random() * 900)}`,
-        resourceType: 'voucher',
-        resourceId: `v_${code}`,
-        operation: 'upsert',
-        idempotencyKey: `idemp_${code}`,
-        attempts: 0,
-        status: 'pending'
-      });
-    }
-
-    renderVouchers();
-    renderCloudQueue();
-    showToast(`Successfully generated batch of ${qty} vouchers!`, 'success');
-  });
-
-  // Cloud Actions
-  document.getElementById('btn-trigger-sync').addEventListener('click', () => {
-    state.cloudQueue.forEach(q => {
-      if (q.status === 'pending') {
-        q.status = 'completed';
-        q.attempts += 1;
-      }
-    });
-    renderCloudQueue();
-    showToast('WireSpot Cloud Synchronization completed!', 'success');
-  });
-
-  document.getElementById('btn-retry-failed-sync').addEventListener('click', () => {
-    state.cloudQueue.forEach(q => {
-      if (q.status === 'failed') {
-        q.status = 'pending';
-      }
-    });
-    renderCloudQueue();
-    showToast('Failed operations queued for retry.', 'success');
-  });
-
-  document.getElementById('btn-clear-completed-sync').addEventListener('click', () => {
-    const before = state.cloudQueue.length;
-    state.cloudQueue = state.cloudQueue.filter(q => q.status !== 'completed');
-    renderCloudQueue();
-    showToast(`Cleared ${before - state.cloudQueue.length} completed sync operations.`, 'success');
-  });
-
-  document.getElementById('btn-test-cloud').addEventListener('click', () => {
-    showToast('Cloud connection verified! API base URL is healthy (200 OK).', 'success');
-  });
-
-  document.getElementById('btn-save-cloud').addEventListener('click', () => {
-    showToast('Cloud settings saved successfully.', 'success');
-  });
-
-  document.getElementById('voucher-search').addEventListener('input', (e) => {
-    renderVouchers(e.target.value);
-  });
-
-  // Charts Setup
-  const ctxBandwidth = document.getElementById('bandwidthChart').getContext('2d');
-  const bandwidthChart = new Chart(ctxBandwidth, {
-    type: 'line',
-    data: {
-      labels: ['11:20', '11:22', '11:24', '11:26', '11:28', '11:30'],
-      datasets: [
-        { label: 'Download (Mbps)', data: [24, 38, 45, 52, 48, 62], borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' },
-        { label: 'Upload (Mbps)', data: [6, 12, 10, 15, 14, 18], borderColor: '#10b981', tension: 0.4, fill: false }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { labels: { color: '#94a3b8' } } },
-      scales: {
-        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
-        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } }
-      }
-    }
-  });
-
-  const ctxCpu = document.getElementById('cpuChart').getContext('2d');
-  new Chart(ctxCpu, {
-    type: 'line',
-    data: {
-      labels: ['11:20', '11:22', '11:24', '11:26', '11:28', '11:30'],
-      datasets: [
-        { label: 'CPU %', data: [12, 18, 15, 24, 20, 16], borderColor: '#6366f1', tension: 0.4, backgroundColor: 'rgba(99, 102, 241, 0.15)', fill: true }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { labels: { color: '#94a3b8' } } },
-      scales: {
-        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
-        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } }
-      }
-    }
-  });
-
-  const ctxSales = document.getElementById('salesChart').getContext('2d');
-  new Chart(ctxSales, {
-    type: 'bar',
-    data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-      datasets: [
-        { label: 'Voucher Sales ($)', data: [450, 620, 890, 1100, 1350, 1280, 1420, 1485], backgroundColor: '#3b82f6', borderRadius: 6 }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { labels: { color: '#94a3b8' } } },
-      scales: {
-        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
-        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } }
-      }
-    }
-  });
-
-  // Initial Render
+  // Initial Renders
   renderEvents();
   renderRouters();
+  renderHotspotUsers();
+  renderUserProfiles();
   renderSessions();
   renderVouchers();
   renderCloudQueue();
 
-  // AUTH MODAL LOGIC
-  const modalAuth = document.getElementById('modal-auth');
-  document.getElementById('btn-open-auth').addEventListener('click', () => modalAuth.classList.add('active'));
-  document.getElementById('btn-close-auth').addEventListener('click', () => modalAuth.classList.remove('active'));
+  // ─── Live Search Filter ───
+  const vSearch = document.getElementById('voucher-search');
+  if (vSearch) {
+    vSearch.addEventListener('input', (e) => renderVouchers(e.target.value));
+  }
 
-  const tabLogin = document.getElementById('tab-auth-login');
-  const tabReg = document.getElementById('tab-auth-register');
-  const formLogin = document.getElementById('form-auth-login');
-  const formReg = document.getElementById('form-auth-register');
-
-  tabLogin.addEventListener('click', () => {
-    tabLogin.className = 'btn btn-primary';
-    tabReg.className = 'btn btn-secondary';
-    formLogin.style.display = 'block';
-    formReg.style.display = 'none';
-  });
-
-  tabReg.addEventListener('click', () => {
-    tabReg.className = 'btn btn-primary';
-    tabLogin.className = 'btn btn-secondary';
-    formReg.style.display = 'block';
-    formLogin.style.display = 'none';
-  });
-
-  formLogin.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = document.getElementById('auth-email-login').value;
-    modalAuth.classList.remove('active');
-    showToast(`Signed in as ${email}. Mobile pairing active!`, 'success');
-  });
-
-  formReg.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const org = document.getElementById('auth-org-reg').value;
-    const email = document.getElementById('auth-email-reg').value;
-    modalAuth.classList.remove('active');
-    showToast(`Account created for ${org}! Mobile pairing code active.`, 'success');
-  });
-
-  // GUIDED SETUP WIZARD LOGIC
-  const modalWizard = document.getElementById('modal-wizard');
-  let currentStep = 1;
-  let selectedPreset = 'cafe';
-
-  const wizardPresets = {
-    cafe: { ssid: 'StarCoffee_Free_WiFi', packageName: 'Café 1Hour Free Pass', speed: 3, duration: 60 },
-    hotel: { ssid: 'GrandResort_Guest_WiFi', packageName: 'Hotel 24Hour VIP Pass', speed: 10, duration: 1440 },
-    school: { ssid: 'Campus_Student_WiFi', packageName: 'Campus Daily Pass', speed: 5, duration: 480 },
-    retail: { ssid: 'Store_Quick_Pass', packageName: 'Retail 30Min Express Pass', speed: 5, duration: 30 }
-  };
-
-  document.getElementById('btn-open-wizard').addEventListener('click', () => {
-    currentStep = 1;
-    updateWizardUI();
-    modalWizard.classList.add('active');
-  });
-
-  document.getElementById('btn-close-wizard').addEventListener('click', () => modalWizard.classList.remove('active'));
-
-  // Preset Card Selection
-  document.querySelectorAll('.preset-card').forEach(card => {
-    card.addEventListener('click', () => {
-      document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-      selectedPreset = card.getAttribute('data-preset');
-    });
-  });
-
-  const updateWizardUI = () => {
-    // Update step bar
-    for (let i = 1; i <= 4; i++) {
-      const stepEl = document.getElementById(`wiz-step-${i}`);
-      const paneEl = document.getElementById(`pane-step-${i}`);
-      if (i < currentStep) {
-        stepEl.className = 'wizard-step completed';
-      } else if (i === currentStep) {
-        stepEl.className = 'wizard-step active';
-      } else {
-        stepEl.className = 'wizard-step';
-      }
-      paneEl.style.display = i === currentStep ? 'block' : 'none';
-    }
-
-    // Auto-populate preset defaults when entering Step 3
-    if (currentStep === 3) {
-      const p = wizardPresets[selectedPreset];
-      document.getElementById('wiz-ssid').value = p.ssid;
-      document.getElementById('wiz-package-name').value = p.packageName;
-      document.getElementById('wiz-speed-limit').value = p.speed;
-      document.getElementById('wiz-duration').value = p.duration;
-    }
-
-    // Generate RouterOS script when entering Step 4
-    if (currentStep === 4) {
-      const vendor = document.getElementById('wiz-router-vendor').value;
-      const host = document.getElementById('wiz-router-host').value;
-      const ssid = document.getElementById('wiz-ssid').value;
-      const pkg = document.getElementById('wiz-package-name').value;
-      const speed = document.getElementById('wiz-speed-limit').value;
-      const dur = document.getElementById('wiz-duration').value;
-
-      const script = `# WireSpot Auto-Configuration Script
-# Business Template: ${selectedPreset.toUpperCase()}
-# Target Host: ${host} (${vendor})
-/ip hotspot profile add name="${pkg}" rate-limit="${speed}M/${speed}M" session-timeout=${dur}m
-/ip hotspot add name="${ssid}" profile="${pkg}" interface=ether2 disabled=no
-/ip hotspot user profile add name="${pkg}-Profile" rate-limit="${speed}M"
-/system script add name="WireSpotCloudSync" source="/tool fetch url=\\"https://cloud.wirespot.app/api/v1/ping\\""
-:log info "WireSpot Auto-Setup Completed for ${ssid}"`;
-
-      document.getElementById('wiz-script-preview').value = script;
-    }
-  };
-
-  // Step Navigation Handlers
-  document.getElementById('btn-wiz-next-1').addEventListener('click', () => { currentStep = 2; updateWizardUI(); });
-  document.getElementById('btn-wiz-next-2').addEventListener('click', () => { currentStep = 3; updateWizardUI(); });
-  document.getElementById('btn-wiz-next-3').addEventListener('click', () => { currentStep = 4; updateWizardUI(); });
-
-  document.getElementById('btn-wiz-back-2').addEventListener('click', () => { currentStep = 1; updateWizardUI(); });
-  document.getElementById('btn-wiz-back-3').addEventListener('click', () => { currentStep = 2; updateWizardUI(); });
-  document.getElementById('btn-wiz-back-4').addEventListener('click', () => { currentStep = 3; updateWizardUI(); });
-
-  // One-Click Auto Deploy
-  document.getElementById('btn-wiz-deploy').addEventListener('click', () => {
-    const host = document.getElementById('wiz-router-host').value;
-    const ssid = document.getElementById('wiz-ssid').value;
-    const vendorLabels = {
-      'mikrotik': 'MikroTik RouterOS',
-      'ruijie': 'Ruijie Cloud',
-      'openwrt': 'OpenWrt LuCI / ubus',
-      'omada': 'TP-Link Omada OpenAPI',
-      'unifi': 'Ubiquiti UniFi REST',
-      'generic': 'Generic Router API'
-    };
-
-    // Add new router to state
-    state.routers.unshift({
-      name: `AutoGateway-${ssid}`,
-      vendor: vendorLabels[vendor] || 'MikroTik RouterOS',
-      ip: host,
-      port: vendor === 'mikrotik' ? 8728 : vendor === 'ruijie' ? 443 : vendor === 'openwrt' ? 80 : 8443,
-      status: 'online',
-      users: 0
-    });
-
-    state.events.unshift({
-      time: new Date().toTimeString().slice(0, 8),
-      source: 'AutoSetupWizard',
-      desc: `Deploys preset [${selectedPreset.toUpperCase()}] (${vendorLabels[vendor] || vendor}) to router at ${host}`,
-      status: 'success'
-    });
-
-    renderRouters();
-    renderEvents();
-    modalWizard.classList.remove('active');
-    showToast(`Successfully deployed auto-configuration to ${vendorLabels[vendor] || vendor} at ${host}!`, 'success');
-  });
-
-  // CLI TERMINAL CONSOLE LOGIC
-  const modalCli = document.getElementById('modal-cli');
-  document.getElementById('btn-close-cli').addEventListener('click', () => modalCli.classList.remove('active'));
-
-  const cliInput = document.getElementById('cli-command-input');
-  const cliOutput = document.getElementById('cli-output-text');
-  const sendCliCmd = () => {
-    const cmd = cliInput.value.trim();
-    if (!cmd) return;
-    cliOutput.textContent += `\n[admin@WireSpot-Gateway] > ${cmd}\n`;
-
-    if (cmd.includes('user print') || cmd.includes('ubus call hotspot') || cmd.includes('get_users')) {
-      cliOutput.textContent += `Flags: X - disabled, A - active
- #   NAME                  PROFILE         UPTIME      BYTES-IN    BYTES-OUT
- 0   operator_admin        VIP-10MBPS      0s          1.2GiB      450MiB
- 1   guest_user_1          Café-1Hour      45m12s      14.2MiB     1.8MiB\n`;
-    } else if (cmd.includes('resource print') || cmd.includes('system status') || cmd.includes('sysinfo')) {
-      cliOutput.textContent += ` uptime: 4d18h22m
- version: 7.12 / v22.03 (Multi-Vendor API)
- cpu-load: 14%
- free-memory: 412.5MiB
- total-memory: 512.0MiB\n`;
-    } else {
-      cliOutput.textContent += ` API Dispatcher: '${cmd}' -> Action successful (200 OK - Active Connector).\n`;
-    }
-    cliInput.value = '';
-    cliOutput.scrollTop = cliOutput.scrollHeight;
-  };
-
-  document.getElementById('btn-send-cli').addEventListener('click', sendCliCmd);
-  cliInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendCliCmd(); });
-
-  // THERMAL PRINTER CUSTOMIZER LOGIC
-  const modalThermal = document.getElementById('modal-thermal');
-  document.getElementById('btn-open-thermal').addEventListener('click', () => modalThermal.classList.add('active'));
-  document.getElementById('btn-close-thermal').addEventListener('click', () => modalThermal.classList.remove('active'));
-
-  const tpHeader = document.getElementById('tp-header');
-  const tpFooter = document.getElementById('tp-footer');
-  const tpWidth = document.getElementById('tp-width');
-
-  const syncReceiptPreview = () => {
-    document.getElementById('prev-tp-header').textContent = tpHeader.value || 'STARCOFFEE HOTSPOT PASS';
-    document.getElementById('prev-tp-footer').textContent = tpFooter.value || 'Connect & enter code at starcoffee.wifi';
-  };
-
-  tpHeader.addEventListener('input', syncReceiptPreview);
-  tpFooter.addEventListener('input', syncReceiptPreview);
-
-  document.getElementById('btn-print-sample').addEventListener('click', () => {
-    showToast(`Sent test POS receipt (${tpWidth.value}mm width) to thermal printer!`, 'success');
-  });
-
-  // DATE RANGE ANALYTICS FILTER
-  const reportRange = document.getElementById('report-range');
-  if (reportRange) {
-    reportRange.addEventListener('change', () => {
-      showToast(`Updated revenue report filter to: ${reportRange.options[reportRange.selectedIndex].text}`, 'info');
+  const uSearch = document.getElementById('search-hotspot-user');
+  if (uSearch) {
+    uSearch.addEventListener('input', (e) => {
+      const filter = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('#hotspot-users-table-body tr');
+      rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        r.style.display = text.includes(filter) ? '' : 'none';
+      });
     });
   }
 
-  // Render New Components
-  renderHotspotUsers();
-  renderUserProfiles();
+  // ─── Voucher Batch Generation ───
+  const vForm = document.getElementById('voucher-form');
+  if (vForm) {
+    vForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const profile = document.getElementById('v-profile').value;
+      const quantity = parseInt(document.getElementById('v-quantity').value) || 5;
+      const price = parseFloat(document.getElementById('v-price').value) || 2.50;
+      const prefix = document.getElementById('v-prefix').value || 'WS';
+
+      const now = new Date().toISOString().replace('T', ' ').substring(0, 16);
+
+      for (let i = 0; i < quantity; i++) {
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        state.vouchers.unshift({
+          code: `${prefix}-${rand}`,
+          profile: profile,
+          price: price,
+          createdAt: now,
+          status: 'unused'
+        });
+      }
+
+      state.events.unshift({
+        time: new Date().toTimeString().substring(0, 8),
+        source: 'VoucherService',
+        desc: `Generated batch of ${quantity} vouchers (${profile})`,
+        status: 'success'
+      });
+
+      saveState();
+      renderVouchers();
+      renderEvents();
+      showToast(`Successfully generated ${quantity} vouchers!`, 'success');
+    });
+  }
+
+  // ─── Modal Event Handlers ───
+  const setupModal = (btnOpenId, modalId, btnCloseId) => {
+    const btnOpen = document.getElementById(btnOpenId);
+    const modal = document.getElementById(modalId);
+    const btnClose = document.getElementById(btnCloseId);
+
+    if (btnOpen && modal) {
+      btnOpen.addEventListener('click', () => modal.classList.add('active'));
+    }
+    if (btnClose && modal) {
+      btnClose.addEventListener('click', () => modal.classList.remove('active'));
+    }
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+      });
+    }
+  };
+
+  setupModal('btn-open-wizard', 'modal-wizard', 'btn-close-wizard');
+  setupModal('btn-open-auth', 'modal-auth', 'btn-close-auth');
+  setupModal('btn-open-thermal', 'modal-thermal', 'btn-close-thermal');
+  setupModal(null, 'modal-cli', 'btn-close-cli');
+
+  // ─── Auth Form Handler ───
+  const tabAuthLogin = document.getElementById('tab-auth-login');
+  const tabAuthReg = document.getElementById('tab-auth-register');
+  const formLogin = document.getElementById('form-auth-login');
+  const formReg = document.getElementById('form-auth-register');
+
+  if (tabAuthLogin && tabAuthReg) {
+    tabAuthLogin.addEventListener('click', () => {
+      tabAuthLogin.classList.add('active');
+      tabAuthReg.classList.remove('active');
+      formLogin.style.display = 'block';
+      formReg.style.display = 'none';
+    });
+
+    tabAuthReg.addEventListener('click', () => {
+      tabAuthReg.classList.add('active');
+      tabAuthLogin.classList.remove('active');
+      formReg.style.display = 'block';
+      formLogin.style.display = 'none';
+    });
+  }
+
+  if (formLogin) {
+    formLogin.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('auth-email-login').value;
+      document.getElementById('modal-auth').classList.remove('active');
+      showToast(`Signed in as ${email}`, 'success');
+    });
+  }
+
+  if (formReg) {
+    formReg.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const org = document.getElementById('auth-org-reg').value;
+      document.getElementById('modal-auth').classList.remove('active');
+      showToast(`Account created for ${org}!`, 'success');
+    });
+  }
+
+  // ─── Cloud Sync Actions ───
+  const btnTriggerSync = document.getElementById('btn-trigger-sync');
+  if (btnTriggerSync) {
+    btnTriggerSync.addEventListener('click', () => {
+      state.cloudQueue.forEach(q => q.status = 'completed');
+      state.events.unshift({
+        time: new Date().toTimeString().substring(0, 8),
+        source: 'CloudSyncService',
+        desc: 'Manual sync completed via Web App Dashboard',
+        status: 'success'
+      });
+      saveState();
+      renderCloudQueue();
+      renderEvents();
+      showToast('Cloud synchronization complete!', 'success');
+    });
+  }
+
+  const btnRetrySync = document.getElementById('btn-retry-failed-sync');
+  if (btnRetrySync) {
+    btnRetrySync.addEventListener('click', () => {
+      showToast('Retried 0 failed sync operations.', 'info');
+    });
+  }
+
+  const btnClearSync = document.getElementById('btn-clear-completed-sync');
+  if (btnClearSync) {
+    btnClearSync.addEventListener('click', () => {
+      state.cloudQueue = state.cloudQueue.filter(q => q.status !== 'completed');
+      saveState();
+      renderCloudQueue();
+      showToast('Cleared completed sync operations from queue.', 'info');
+    });
+  }
+
+  // ─── Add Router Handler ───
+  const btnAddRouter = document.getElementById('btn-add-router');
+  if (btnAddRouter) {
+    btnAddRouter.addEventListener('click', () => {
+      const name = prompt('Enter Router Name:', 'Branch-Gateway-02');
+      if (!name) return;
+      state.routers.push({
+        name: name,
+        vendor: 'MikroTik RouterOS v7',
+        ip: '192.168.88.254',
+        port: 8728,
+        status: 'online',
+        users: 0
+      });
+      saveState();
+      renderRouters();
+      showToast(`Added router ${name} to fleet inventory!`, 'success');
+    });
+  }
+
+  // ─── Refresh Button ───
+  const btnRefresh = document.getElementById('btn-refresh');
+  if (btnRefresh) {
+    btnRefresh.addEventListener('click', () => {
+      renderEvents();
+      renderRouters();
+      renderSessions();
+      renderVouchers();
+      showToast('Dashboard data refreshed!', 'info');
+    });
+  }
+
+  // ─── PDF / Download Handlers ───
+  ['btn-export-excel', 'btn-export-pdf', 'btn-download-inv-1', 'btn-download-inv-2'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener('click', () => {
+        showToast('Export file downloaded successfully!', 'success');
+      });
+    }
+  });
+
+  // ─── Thermal Receipt Live Preview Sync ───
+  const tpHeader = document.getElementById('tp-header');
+  const tpFooter = document.getElementById('tp-footer');
+
+  if (tpHeader) {
+    tpHeader.addEventListener('input', (e) => {
+      document.getElementById('prev-tp-header').textContent = e.target.value || 'HOTSPOT PASS';
+    });
+  }
+  if (tpFooter) {
+    tpFooter.addEventListener('input', (e) => {
+      document.getElementById('prev-tp-footer').textContent = e.target.value || '';
+    });
+  }
+
+  const btnPrintSample = document.getElementById('btn-print-sample');
+  if (btnPrintSample) {
+    btnPrintSample.addEventListener('click', () => {
+      window.print();
+    });
+  }
+
+  // ─── Chart.js Setup ───
+  const initCharts = () => {
+    const bwCtx = document.getElementById('bandwidthChart');
+    if (bwCtx && typeof Chart !== 'undefined') {
+      new Chart(bwCtx, {
+        type: 'line',
+        data: {
+          labels: ['10:00', '10:15', '10:30', '10:45', '11:00', '11:15', '11:30'],
+          datasets: [
+            {
+              label: 'Download (Mbps)',
+              data: [12.4, 24.8, 45.2, 38.1, 62.5, 54.0, 78.2],
+              borderColor: '#38bdf8',
+              backgroundColor: 'rgba(56, 189, 248, 0.1)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Upload (Mbps)',
+              data: [3.1, 6.2, 11.5, 8.4, 14.2, 12.1, 18.5],
+              borderColor: '#818cf8',
+              backgroundColor: 'rgba(129, 140, 248, 0.1)',
+              fill: true,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { labels: { color: '#94a3b8' } } },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } }
+          }
+        }
+      });
+    }
+
+    const cpuCtx = document.getElementById('cpuChart');
+    if (cpuCtx && typeof Chart !== 'undefined') {
+      new Chart(cpuCtx, {
+        type: 'bar',
+        data: {
+          labels: ['MikroTik', 'Ruijie', 'OpenWrt', 'Omada', 'UniFi', 'Generic'],
+          datasets: [{
+            label: 'CPU Load %',
+            data: [18, 12, 8, 24, 32, 15],
+            backgroundColor: [
+              'rgba(56, 189, 248, 0.7)',
+              'rgba(52, 211, 153, 0.7)',
+              'rgba(129, 140, 248, 0.7)',
+              'rgba(251, 191, 36, 0.7)',
+              'rgba(251, 113, 133, 0.7)',
+              'rgba(167, 139, 250, 0.7)'
+            ],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#64748b' } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' }, max: 100 }
+          }
+        }
+      });
+    }
+  };
+
+  initCharts();
 });
-
-
