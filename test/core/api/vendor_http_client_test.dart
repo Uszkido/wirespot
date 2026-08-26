@@ -1,15 +1,45 @@
+import 'dart:typed_data';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wirespot/core/api/vendor_http_client.dart';
 import 'package:wirespot/features/routers/domain/entities/router_entity.dart';
 
+class _StubAdapter implements HttpClientAdapter {
+  _StubAdapter({this.statusCode = 200, this.responseBody = '{"status":"success"}'});
+  final int statusCode;
+  final String responseBody;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return ResponseBody.fromString(
+      responseBody,
+      statusCode,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
 void main() {
   group('VendorHttpClient tests', () {
-    final client = VendorHttpClient();
-
     test(
       'sendRequest returns normalized map response for Ruijie Cloud',
       () async {
-        final router = RouterEntity(
+        final dio = Dio();
+        dio.httpClientAdapter = _StubAdapter(
+          responseBody: '{"status":"success", "data": []}',
+        );
+        final client = VendorHttpClient(dio: dio);
+
+        final router = const RouterEntity(
           id: 'r_ruijie',
           name: 'Ruijie Cloud Gateway',
           host: 'cloud.ruijienetworks.com',
@@ -33,7 +63,13 @@ void main() {
     test(
       'sendRequest returns normalized map response for OpenWrt ubus',
       () async {
-        final router = RouterEntity(
+        final dio = Dio();
+        dio.httpClientAdapter = _StubAdapter(
+          responseBody: '{"jsonrpc":"2.0", "id": 1, "result": [0, {"board_name": "OpenWrt"}]}',
+        );
+        final client = VendorHttpClient(dio: dio);
+
+        final router = const RouterEntity(
           id: 'r_openwrt',
           name: 'OpenWrt LuCI Gateway',
           host: '192.168.1.1',
@@ -61,6 +97,7 @@ void main() {
         );
 
         expect(response, isNotNull);
+        expect(response['jsonrpc'], equals('2.0'));
       },
     );
   });
