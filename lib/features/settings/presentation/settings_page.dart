@@ -937,11 +937,43 @@ class _VoucherEncodingCard extends ConsumerWidget {
   }
 }
 
-class _SecurityCard extends ConsumerWidget {
+class _SecurityCard extends ConsumerStatefulWidget {
   const _SecurityCard();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_SecurityCard> createState() => _SecurityCardState();
+}
+
+class _SecurityCardState extends ConsumerState<_SecurityCard> {
+  AppLockMode _lockMode = AppLockMode.never;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final value = await ref
+          .read(settingsRepositoryProvider)
+          .readSetting(AppSettingsKeys.appLockMode);
+      if (!mounted) return;
+      setState(() {
+        _lockMode = AppLockMode.values.firstWhere(
+          (mode) => mode.name == value,
+          orElse: () => AppLockMode.never,
+        );
+      });
+    });
+  }
+
+  Future<void> _saveLockMode(AppLockMode mode) async {
+    setState(() => _lockMode = mode);
+    await ref.read(settingsRepositoryProvider).writeSetting(
+      AppSettingsKeys.appLockMode,
+      mode.name,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final settings = ref.watch(appSettingsProvider).asData?.value;
     final text = AppText(settings?.languageCode ?? 'en');
     return Card(
@@ -958,6 +990,38 @@ class _SecurityCard extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             const Text('Local PIN and biometric unlock protect this device.'),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<AppLockMode>(
+              initialValue: _lockMode,
+              decoration: const InputDecoration(
+                labelText: 'Automatic app lock',
+                prefixIcon: Icon(Icons.lock_clock_outlined),
+              ),
+              items: const [
+                DropdownMenuItem(
+                  value: AppLockMode.never,
+                  child: Text('Never (manual sign out only)'),
+                ),
+                DropdownMenuItem(
+                  value: AppLockMode.onBackground,
+                  child: Text('When app goes to background'),
+                ),
+                DropdownMenuItem(
+                  value: AppLockMode.afterFiveMinutes,
+                  child: Text('After 5 minutes away'),
+                ),
+              ],
+              onChanged: (mode) {
+                if (mode != null) _saveLockMode(mode);
+              },
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Choose how aggressively WireSpot should require your PIN or biometrics again.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () async {

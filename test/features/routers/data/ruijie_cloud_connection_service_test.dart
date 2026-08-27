@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wirespot/core/api/routeros_api_exception.dart';
 import 'package:wirespot/core/api/vendor_http_client.dart';
 import 'package:wirespot/core/storage/router_credentials.dart';
 import 'package:wirespot/features/routers/data/ruijie_cloud_connection_service.dart';
@@ -89,6 +90,22 @@ void main() {
       expect(connected, isFalse);
     },
   );
+
+  test('rejects a Ruijie connection without credentials', () async {
+    final service = RuijieCloudConnectionService(
+      readCredentials: (_) async => const RouterCredentials(
+        username: 'operator',
+        password: '',
+        accessToken: '',
+      ),
+      httpClient: _throwingHttp(),
+    );
+
+    expect(
+      () => service.testConnection(_ruijieRouter),
+      throwsA(isA<RouterOsApiException>()),
+    );
+  });
 
   test('discovers devices from a Ruijie Cloud data response', () async {
     final service = RuijieCloudConnectionService(

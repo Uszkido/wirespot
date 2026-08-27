@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/branding/app_branding.dart';
+import '../../../core/di/providers.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/brand_logo.dart';
+import '../../settings/domain/entities/app_settings.dart';
 import 'auth_controller.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -167,7 +169,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         return;
       }
       if (ok) {
-        context.go(AppRoutes.dashboard);
+        await _continueAfterAuth();
       } else {
         _showMessage('Invalid PIN.');
       }
@@ -190,7 +192,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         return;
       }
       if (ok) {
-        context.go(AppRoutes.dashboard);
+        await _continueAfterAuth();
       } else {
         _showMessage('Biometric authentication was not completed.');
       }
@@ -203,6 +205,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         setState(() => _isBusy = false);
       }
     }
+  }
+
+  Future<void> _continueAfterAuth() async {
+    final onboarding = await ref
+        .read(settingsRepositoryProvider)
+        .readSetting(AppSettingsKeys.hasCompletedOnboarding);
+    if (!mounted) return;
+    context.go(
+      onboarding == 'true' ? AppRoutes.dashboard : AppRoutes.onboarding,
+    );
   }
 
   String? _validatePin(String? value) {

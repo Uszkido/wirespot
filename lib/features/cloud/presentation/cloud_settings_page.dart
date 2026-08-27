@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/app_text.dart';
 import '../../settings/presentation/settings_providers.dart';
@@ -50,6 +50,35 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
     _passwordController.dispose();
     _regOrgController.dispose();
     super.dispose();
+  }
+
+  CloudConnectionSettings _settingsFromForm() {
+    final settings = CloudConnectionSettings(
+      apiBaseUrl: _urlController.text.trim(),
+      organizationId: _orgController.text.trim().isEmpty
+          ? null
+          : _orgController.text.trim(),
+      allowInsecureDevelopment: _allowInsecure,
+    );
+    settings.apiBaseUri; // Validate before persisting or testing.
+    return settings;
+  }
+
+  Future<void> _saveAndTest(
+    BuildContext context,
+    CloudController controller,
+  ) async {
+    try {
+      final saved = await controller.saveConnection(_settingsFromForm());
+      if (saved && context.mounted) await controller.testConnection();
+    } on ArgumentError catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message?.toString() ?? 'Invalid cloud URL.'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   @override
@@ -164,25 +193,18 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
               children: [
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: () {
-                      final settings = CloudConnectionSettings(
-                        apiBaseUrl: _urlController.text.trim(),
-                        organizationId: _orgController.text.trim().isEmpty
-                            ? null
-                            : _orgController.text.trim(),
-                        allowInsecureDevelopment: _allowInsecure,
-                      );
-                      controller.saveConnection(settings);
-                    },
+                    onPressed: state.isLoading
+                        ? null
+                        : () => _saveAndTest(context, controller),
                     icon: const Icon(Icons.save),
                     label: Text(text.save),
                   ),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton.icon(
-                  onPressed: state.isTestingConnection
+                  onPressed: state.isLoading || state.isTestingConnection
                       ? null
-                      : () => controller.testConnection(),
+                      : () => _saveAndTest(context, controller),
                   icon: state.isTestingConnection
                       ? const SizedBox(
                           width: 16,
@@ -300,6 +322,10 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
             ),
             if (hasSession) ...[
               const SizedBox(height: 12),
+              _CredentialRow(
+                label: 'API Base URL',
+                value: state.connection?.apiBaseUrl ?? 'Not configured',
+              ),
               _CredentialRow(
                 label: 'Organization ID',
                 value: state.connection?.organizationId ?? 'Not assigned',

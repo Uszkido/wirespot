@@ -1,5 +1,7 @@
 enum AppThemePreference { system, light, dark }
 
+enum AppLockMode { never, onBackground, afterFiveMinutes }
+
 class AppSettingsKeys {
   const AppSettingsKeys._();
 
@@ -17,6 +19,7 @@ class AppSettingsKeys {
   static const lastCloudBackupSize = 'last_cloud_backup_size';
   static const cloudBackupFrequency = 'cloud_backup_frequency';
   static const hasCompletedOnboarding = 'has_completed_onboarding';
+  static const appLockMode = 'app_lock_mode';
 }
 
 class SupportedLanguage {

@@ -259,7 +259,10 @@ class RuijieCloudConnectionService implements RouterConnector {
             _credentialStore!.read(router.id));
     final token = credentials?.accessToken ?? credentials?.password ?? '';
     if (token.isEmpty) {
-      return 'ruijie_demo_access_token';
+      throw RouterOsApiException(
+        'Ruijie Cloud access token is missing. Add the token in router credentials before testing this connection.',
+        category: 'authentication',
+      );
     }
     return token;
   }
