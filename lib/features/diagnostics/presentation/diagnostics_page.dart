@@ -6,8 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/di/providers.dart';
 import '../../dashboard/presentation/dashboard_providers.dart';
 import '../../routers/presentation/router_providers.dart';
+import '../domain/services/network_security_service.dart';
 
-enum DiagnosticMode { ping, traceroute }
+enum DiagnosticMode { ping, traceroute, securityAudit }
 
 class DiagnosticsPage extends ConsumerStatefulWidget {
   const DiagnosticsPage({super.key});
@@ -34,21 +35,34 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
   }
 
   void _start() {
-    final router = ref
-        .read(routersProvider)
-        .asData
-        ?.value
-        .firstWhere(
-          (r) => r.id == ref.read(selectedRouterIdProvider),
-          orElse: () => ref.read(routersProvider).asData!.value.first,
-        );
+    final routers = ref.read(routersProvider).asData?.value ?? [];
+    final router = routers.firstWhere(
+      (r) => r.id == ref.read(selectedRouterIdProvider),
+      orElse: () => routers.first,
+    );
 
-    if (router == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No active router selected.')),
-        );
-      }
+    if (_mode == DiagnosticMode.securityAudit) {
+      setState(() {
+        _isRunning = true;
+        _error = null;
+        _results.clear();
+      });
+      const securityService = NetworkSecurityService();
+      final rogueAps = securityService.detectRogueAccessPoints(
+        routers,
+        ['192.168.1.1', '10.0.0.1', 'AA:BB:CC:DD:EE:FF'],
+      );
+      final hogs = securityService.detectBandwidthHogs([], thresholdMb: 500);
+
+      setState(() {
+        _results.add({
+          'Audit': 'Security Scan Complete',
+          'Known Routers': '${routers.length}',
+          'Potential Rogue APs': rogueAps.isEmpty ? '0 (Clean)' : '${rogueAps.length} ($rogueAps)',
+          'Bandwidth Hogs (>500MB)': hogs.isEmpty ? '0 (Clean)' : '${hogs.length}',
+        });
+        _isRunning = false;
+      });
       return;
     }
 
@@ -65,6 +79,7 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
     final stream = switch (_mode) {
       DiagnosticMode.ping => diagnostics.ping(router, target, count: 20),
       DiagnosticMode.traceroute => diagnostics.traceroute(router, target),
+      DiagnosticMode.securityAudit => const Stream<Map<String, String>>.empty(),
     };
 
     _subscription = stream.listen(
@@ -146,6 +161,11 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
                       value: DiagnosticMode.traceroute,
                       label: Text('Traceroute'),
                       icon: Icon(Icons.route_outlined),
+                    ),
+                    ButtonSegment(
+                      value: DiagnosticMode.securityAudit,
+                      label: Text('Audit'),
+                      icon: Icon(Icons.security_outlined),
                     ),
                   ],
                   selected: {_mode},

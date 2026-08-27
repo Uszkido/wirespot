@@ -125,14 +125,22 @@ class _HotspotRouterScope extends ConsumerWidget {
                 const SizedBox(height: 8),
                 _HotspotCapabilityBanner(router: router),
                 const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: OutlinedButton.icon(
-                    onPressed: () =>
-                        _showSetupHotspotDialog(context, ref, router),
-                    icon: const Icon(Icons.settings_input_antenna_outlined),
-                    label: const Text('Setup hotspot'),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () => context.push(AppRoutes.portalCustomizer),
+                      icon: const Icon(Icons.palette_outlined),
+                      label: const Text('Portal templates'),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      onPressed: () =>
+                          _showSetupHotspotDialog(context, ref, router),
+                      icon: const Icon(Icons.settings_input_antenna_outlined),
+                      label: const Text('Setup hotspot'),
+                    ),
+                  ],
                 ),
               ],
             ),

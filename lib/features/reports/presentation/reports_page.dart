@@ -5,9 +5,11 @@ import '../../../core/di/providers.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../routers/domain/entities/router_entity.dart';
 import '../../routers/presentation/router_providers.dart';
+import '../../voucher/domain/entities/voucher_entity.dart';
 import '../domain/entities/report_export.dart';
 import '../domain/entities/report_period.dart';
 import '../domain/entities/revenue_summary.dart';
+import '../domain/services/telemetry_analytics_service.dart';
 import 'report_providers.dart';
 
 class ReportsPage extends ConsumerWidget {
@@ -154,9 +156,42 @@ class _ReportContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    const analyticsService = TelemetryAnalyticsService();
+    final analytics = analyticsService.analyze(
+      summary: summary,
+      vouchers: const <VoucherEntity>[],
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (analytics.lowVoucherWarnings.isNotEmpty) ...[
+          Card(
+            color: Theme.of(context).colorScheme.errorContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      analytics.lowVoucherWarnings.join('\n'),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         Wrap(
           spacing: 12,
           runSpacing: 12,
@@ -171,6 +206,17 @@ class _ReportContent extends ConsumerWidget {
               icon: Icons.receipt_long_outlined,
               label: 'Transactions',
               value: summary.transactionCount.toString(),
+            ),
+            _SummaryTile(
+              icon: Icons.person_outline,
+              label: 'ARPU',
+              value:
+                  '${summary.currency} ${analytics.arpuMajor.toStringAsFixed(0)}',
+            ),
+            _SummaryTile(
+              icon: Icons.access_time_outlined,
+              label: 'Peak Hours',
+              value: analytics.peakHourLabel,
             ),
           ],
         ),

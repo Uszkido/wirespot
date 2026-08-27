@@ -24,6 +24,7 @@ import '../../authentication/presentation/auth_controller.dart';
 import '../../scheduler/domain/entities/scheduled_task.dart';
 import '../../voucher/domain/entities/ticket_template.dart';
 import '../../voucher/domain/entities/voucher_encoding_settings.dart';
+import '../../voucher/domain/entities/voucher_entity.dart';
 import '../../voucher/presentation/voucher_providers.dart';
 import '../domain/entities/app_settings.dart';
 import '../domain/entities/backup_payload.dart';
@@ -1557,21 +1558,82 @@ class _PrinterCard extends ConsumerWidget {
                   subtitle: Text(
                     '${printer.address} - ${printer.paperWidthMm}mm',
                   ),
-                  trailing: IconButton(
-                    tooltip: 'Delete printer',
-                    onPressed: () async {
-                      await ref
-                          .read(settingsRepositoryProvider)
-                          .deletePrinter(printer.id);
-                      ref.invalidate(printerConfigsProvider);
-                    },
-                    icon: const Icon(Icons.delete_outline),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: 'Test print',
+                        onPressed: () => _testPrint(context, ref, printer),
+                        icon: const Icon(Icons.print),
+                      ),
+                      IconButton(
+                        tooltip: 'Delete printer',
+                        onPressed: () async {
+                          await ref
+                              .read(settingsRepositoryProvider)
+                              .deletePrinter(printer.id);
+                          ref.invalidate(printerConfigsProvider);
+                        },
+                        icon: const Icon(Icons.delete_outline),
+                      ),
+                    ],
                   ),
                 ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _testPrint(
+    BuildContext context,
+    WidgetRef ref,
+    PrinterConfigEntity printer,
+  ) async {
+    final settings = await ref.read(appSettingsServiceProvider).load();
+    final template = await ref
+        .read(ticketTemplateSettingsServiceProvider)
+        .loadSelected();
+    final testVoucher = VoucherEntity(
+      id: 'test-123',
+      routerId: 'r-1',
+      username: 'WS-8899',
+      password: '99',
+      currency: settings.currencyCode,
+      priceMinor: 50000,
+      generatedAt: DateTime.now(),
+      validityMinutes: 60,
+      profileId: 'default',
+    );
+    final receipt = ref
+        .read(voucherReceiptTemplateServiceProvider)
+        .build(voucher: testVoucher, settings: settings, template: template);
+    final printerDevice = BluetoothPrinterDevice(
+      name: printer.name,
+      address: printer.address,
+    );
+    try {
+      final result = await ref
+          .read(printerServiceProvider)
+          .printVoucherReceipt(
+            printer: printerDevice,
+            receipt: receipt,
+            paperWidth: printer.paperWidthMm == 80
+                ? PrinterPaperWidth.mm80
+                : PrinterPaperWidth.mm58,
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.message ?? 'Test print sent.')),
+        );
+      }
+    } on Object catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Test print error: $error')),
+        );
+      }
+    }
   }
 
   Future<void> _showPrinterDialog(BuildContext context, WidgetRef ref) async {

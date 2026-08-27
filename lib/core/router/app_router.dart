@@ -7,6 +7,7 @@ import '../../features/authentication/presentation/login_page.dart';
 import '../../features/cloud/presentation/cloud_settings_page.dart';
 import '../../features/dashboard/presentation/dashboard_page.dart';
 import '../../features/diagnostics/presentation/diagnostics_page.dart';
+import '../../features/hotspot/presentation/captive_portal_customizer_page.dart';
 import '../../features/hotspot/presentation/csv_import_page.dart';
 import '../../features/alerts/presentation/alert_settings_page.dart';
 import '../../features/hotspot/presentation/hotspot_page.dart';
@@ -96,6 +97,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/hotspot/import',
         name: 'csv-import',
         builder: (context, state) => const LicenseGate(child: CsvImportPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.portalCustomizer,
+        name: 'portal-customizer',
+        builder: (context, state) =>
+            const LicenseGate(child: CaptivePortalCustomizerPage()),
       ),
       GoRoute(
         path: AppRoutes.vouchers,
