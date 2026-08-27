@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../authentication/presentation/auth_controller.dart';
 import '../../../core/branding/app_branding.dart';
+import '../../../core/di/providers.dart';
 import '../../../core/router/app_routes.dart';
+import '../../settings/domain/entities/app_settings.dart';
 import '../../../shared/widgets/brand_logo.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -22,11 +24,19 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   @override
   void initState() {
     super.initState();
-    _navigationTimer = Timer(const Duration(milliseconds: 700), () {
+    _navigationTimer = Timer(const Duration(milliseconds: 700), () async {
       if (mounted) {
         final auth = ref.read(authControllerProvider);
+        if (!auth.isAuthenticated) {
+          context.go(AppRoutes.login);
+          return;
+        }
+        final onboarding = await ref
+            .read(settingsRepositoryProvider)
+            .readSetting(AppSettingsKeys.hasCompletedOnboarding);
+        if (!mounted) return;
         context.go(
-          auth.isAuthenticated ? AppRoutes.dashboard : AppRoutes.login,
+          onboarding == 'true' ? AppRoutes.dashboard : AppRoutes.onboarding,
         );
       }
     });

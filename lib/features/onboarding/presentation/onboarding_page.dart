@@ -225,12 +225,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'WireSpot features a fully standalone WireGuard VPN engine. '
-            'Import raw .conf configuration files to manage remote router tunnels directly.',
+            'Use a private tunnel when the router is outside your local network. '
+            'WireSpot keeps the configuration on this device and uses it only for router management.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyLarge,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+          _buildSetupChecklist(theme),
+          const SizedBox(height: 24),
           OutlinedButton.icon(
             onPressed: () => context.push(AppRoutes.wireGuard),
             icon: const Icon(Icons.tune),
@@ -238,6 +240,35 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSetupChecklist(ThemeData theme) {
+    const steps = [
+      'Import a .conf file or scan a WireGuard QR code.',
+      'Grant Android VPN permission when prompted.',
+      'Connect the tunnel, then add the router using its VPN address.',
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var index = 0; index < steps.length; index++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  child: Text('${index + 1}', style: theme.textTheme.labelMedium),
+                ),
+                const SizedBox(width: 10),
+                Expanded(child: Text(steps[index])),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
