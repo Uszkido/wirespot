@@ -416,6 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (modal) {
       modal.addEventListener('click', (e) => {
+        if (modal.id === 'modal-auth' && !localStorage.getItem('wirespot_web_session')) return;
         if (e.target === modal) modal.classList.remove('active');
       });
     }
@@ -444,6 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       tabAuthLogin?.click();
       if (authSubtitle) authSubtitle.textContent = 'Sign in to sync your workspace.';
+      if (authClose && !localStorage.getItem('wirespot_web_session')) authClose.style.display = 'none';
     }
     authModal?.classList.add('active');
   };

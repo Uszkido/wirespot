@@ -13,10 +13,10 @@
   --border-hover: rgba(99, 179, 237, 0.25);
   --border-glow: rgba(56, 189, 248, 0.4);
 
-  --accent: #38bdf8;
-  --accent-glow: rgba(56, 189, 248, 0.3);
-  --accent-deep: #0284c7;
-  --indigo: #818cf8;
+  --accent: #0b8fff;
+  --accent-glow: rgba(11, 143, 255, 0.28);
+  --accent-deep: #086dcc;
+  --indigo: #18bfff;
   --indigo-glow: rgba(129, 140, 248, 0.3);
   --emerald: #34d399;
   --emerald-glow: rgba(52, 211, 153, 0.25);
@@ -32,9 +32,9 @@
 
   --sidebar-w: 260px;
   --header-h: 64px;
-  --radius-xl: 20px;
-  --radius-lg: 16px;
-  --radius-md: 12px;
+  --radius-xl: 16px;
+  --radius-lg: 12px;
+  --radius-md: 8px;
   --radius-sm: 8px;
   --font: 'Inter', system-ui, -apple-system, sans-serif;
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -267,6 +267,13 @@ body::before {
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.3px;
+}
+
+.brand-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
 }
 
 .empty-state {
