@@ -383,7 +383,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.btn-print-v').forEach(b => {
       b.addEventListener('click', () => {
         const code = b.getAttribute('data-code');
+        const voucher = state.vouchers.find(item => item.code === code);
         document.getElementById('prev-tp-code').textContent = code;
+        document.getElementById('prev-tp-profile').textContent = `Profile: ${voucher?.profile || '—'}`;
+        document.getElementById('prev-tp-price').textContent = `Price: ${formatMoney(voucher?.price || 0)}`;
+        document.getElementById('prev-tp-date').textContent = `Date: ${voucher?.createdAt || new Date().toLocaleString()}`;
         document.getElementById('modal-thermal').classList.add('active');
       });
     });
