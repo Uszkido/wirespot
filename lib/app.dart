@@ -56,7 +56,8 @@ class _WireSpotAppState extends ConsumerState<WireSpotApp>
       orElse: () => AppLockMode.never,
     );
     final elapsed = DateTime.now().difference(_backgroundAt!);
-    final shouldLock = mode == AppLockMode.onBackground ||
+    final shouldLock =
+        mode == AppLockMode.onBackground ||
         (mode == AppLockMode.afterFiveMinutes &&
             elapsed >= const Duration(minutes: 5));
     if (!shouldLock) return;

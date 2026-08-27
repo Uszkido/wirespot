@@ -520,9 +520,9 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                 obscured && value.length > 8
                     ? '${value.substring(0, 4)}••••${value.substring(value.length - 4)}'
                     : value,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontFamily: 'monospace',
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
               ),
             ),
             IconButton(
@@ -531,9 +531,9 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
               onPressed: () async {
                 await Clipboard.setData(ClipboardData(text: value));
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('$label copied.')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('$label copied.')));
                 }
               },
             ),

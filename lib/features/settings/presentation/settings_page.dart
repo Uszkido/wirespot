@@ -966,10 +966,9 @@ class _SecurityCardState extends ConsumerState<_SecurityCard> {
 
   Future<void> _saveLockMode(AppLockMode mode) async {
     setState(() => _lockMode = mode);
-    await ref.read(settingsRepositoryProvider).writeSetting(
-      AppSettingsKeys.appLockMode,
-      mode.name,
-    );
+    await ref
+        .read(settingsRepositoryProvider)
+        .writeSetting(AppSettingsKeys.appLockMode, mode.name);
   }
 
   @override
