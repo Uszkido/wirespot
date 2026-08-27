@@ -404,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td><strong>${q.operation}</strong></td>
         <td><code>${q.idempotencyKey}</code></td>
         <td>${q.attempts}</td>
-        <td><span class="badge badge-${q.status === 'completed' ? 'success' : 'warning'}">${q.status}</span></td>
+        <td><span class="badge badge-${q.status === 'completed' ? 'success' : q.status === 'failed' ? 'danger' : 'warning'}">${q.status}</span></td>
       </tr>
     `).join('') : emptyRow(7, 'Sync queue is empty.');
 
@@ -798,6 +798,13 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Cloud synchronization complete.', 'success');
       } catch (error) {
         updateSyncIndicator(false);
+        state.cloudQueue.filter(q => q.status === 'pending').forEach(q => {
+          q.status = 'failed';
+          q.attempts = (Number(q.attempts) || 0) + 1;
+        });
+        saveState();
+        renderCloudQueue();
+        renderSummary();
         showToast(error.message, 'error');
       } finally {
         btnTriggerSync.disabled = false;
@@ -834,7 +841,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnRetrySync = document.getElementById('btn-retry-failed-sync');
   if (btnRetrySync) {
     btnRetrySync.addEventListener('click', () => {
-      showToast('Retried 0 failed sync operations.', 'info');
+      const failed = state.cloudQueue.filter(q => q.status === 'failed');
+      if (!failed.length) {
+        showToast('There are no failed sync operations to retry.', 'info');
+        return;
+      }
+      failed.forEach(q => { q.status = 'pending'; });
+      saveState();
+      renderCloudQueue();
+      renderSummary();
+      showToast(`Queued ${failed.length} failed operation${failed.length === 1 ? '' : 's'} for retry.`, 'success');
     });
   }
 
