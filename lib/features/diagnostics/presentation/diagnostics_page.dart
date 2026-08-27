@@ -48,18 +48,23 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
         _results.clear();
       });
       const securityService = NetworkSecurityService();
-      final rogueAps = securityService.detectRogueAccessPoints(
-        routers,
-        ['192.168.1.1', '10.0.0.1', 'AA:BB:CC:DD:EE:FF'],
-      );
+      final rogueAps = securityService.detectRogueAccessPoints(routers, [
+        '192.168.1.1',
+        '10.0.0.1',
+        'AA:BB:CC:DD:EE:FF',
+      ]);
       final hogs = securityService.detectBandwidthHogs([], thresholdMb: 500);
 
       setState(() {
         _results.add({
           'Audit': 'Security Scan Complete',
           'Known Routers': '${routers.length}',
-          'Potential Rogue APs': rogueAps.isEmpty ? '0 (Clean)' : '${rogueAps.length} ($rogueAps)',
-          'Bandwidth Hogs (>500MB)': hogs.isEmpty ? '0 (Clean)' : '${hogs.length}',
+          'Potential Rogue APs': rogueAps.isEmpty
+              ? '0 (Clean)'
+              : '${rogueAps.length} ($rogueAps)',
+          'Bandwidth Hogs (>500MB)': hogs.isEmpty
+              ? '0 (Clean)'
+              : '${hogs.length}',
         });
         _isRunning = false;
       });

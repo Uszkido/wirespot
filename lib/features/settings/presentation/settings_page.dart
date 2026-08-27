@@ -1629,9 +1629,9 @@ class _PrinterCard extends ConsumerWidget {
       }
     } on Object catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Test print error: $error')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Test print error: $error')));
       }
     }
   }
