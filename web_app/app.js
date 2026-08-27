@@ -312,7 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${p.sharedUsers} User(s)</td>
         <td>${p.timeout}</td>
         <td>
-          <button class="btn btn-secondary btn-edit-profile" data-profile="${p.name}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-pen"></i> Edit</button>
+          <button class="btn btn-secondary btn-edit-profile" data-profile="${p.name}" style="padding: 4px 10px; font-size: 11px; margin-right: 4px;"><i class="fa-solid fa-pen"></i> Edit</button>
+          <button class="btn btn-danger btn-delete-profile" data-profile="${p.name}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-trash"></i> Delete</button>
         </td>
       </tr>
     `).join('') : emptyRow(6, 'No profiles configured yet.');
@@ -328,6 +329,22 @@ document.addEventListener('DOMContentLoaded', () => {
         profile.downSpeed = speed.trim(); profile.timeout = timeout.trim();
         saveState(); renderUserProfiles();
         showToast(`Profile ${profile.name} updated.`, 'success');
+      });
+    });
+
+    document.querySelectorAll('.btn-delete-profile').forEach(b => {
+      b.addEventListener('click', () => {
+        const name = b.getAttribute('data-profile');
+        const inUse = state.hotspotUsers.some(user => user.profile === name);
+        if (inUse) {
+          showToast(`Cannot delete ${name} while hotspot users still use it.`, 'error');
+          return;
+        }
+        if (!confirm(`Delete profile ${name}?`)) return;
+        state.userProfiles = state.userProfiles.filter(profile => profile.name !== name);
+        saveState();
+        renderUserProfiles();
+        showToast(`Profile ${name} deleted.`, 'info');
       });
     });
   };
