@@ -20,14 +20,14 @@ UniFi (Controller REST API), and Generic Routers (HTTP/REST/SNMP).
 
 | Item | Status |
 | --- | --- |
-| Current version | `0.1.27+28` |
+| Current version | `0.1.26+27` |
 | Android debug APK | Builds successfully |
 | Static analysis | Passing (0 issues) |
 | Tests | 82 passing |
 | Multi-Vendor Connectors | 6 Full Active Connectors (MikroTik, Ruijie, OpenWrt, Omada, UniFi, Generic) |
 | Web Dashboard | Fully Synchronized & Static Hosting Ready (`web_app/`) |
 | Latest APK output | `outputs\WireSpot-0.1.27+28-brand-collaboration-debug.apk` |
-| Latest pushed commit | See GitHub `main` (`6cd64e52`) |
+| Latest pushed commit | See GitHub `main` |
 
 ## Why WireSpot
 
@@ -90,7 +90,7 @@ WireSpot solves that with a focused Android workflow:
 | Hotspot | Manage users, profiles, sessions, queues, cookies, IP bindings |
 | Vouchers | Generate vouchers, QR payloads, configurable credentials, history, share, print |
 | Reports | Revenue summaries, sales lists, CSV/PDF-text export |
-| Web Dashboard (`web_app/`) | Full web parity: Subscriptions, Auto-Config Wizard, Account Sync, RouterOS CLI, POS Ticket Customizer |
+| Web Dashboard (`web_app/`) | Responsive static dashboard with signup/login, router fleet, vouchers, cloud sync, reports, and setup wizard |
 | Settings | Theme, language, currency, license, co-branding, ticket templates, voucher encoding, scheduler, printer, backup |
 | Permissions | VPN, Bluetooth, camera, and network readiness guidance |
 
@@ -99,7 +99,7 @@ WireSpot solves that with a focused Android workflow:
 | Layer | Stack |
 | --- | --- |
 | App | Flutter, Material 3 |
-| Web Dashboard | HTML5, CSS3 Glassmorphism, Vanilla JS, REST API, LocalStorage |
+| Web Dashboard | HTML5, CSS3, Vanilla JS, REST API, LocalStorage |
 | Account Sync | Mobile Pairing Key Engine (`WS-XXXX-SYNC`) |
 | State/navigation | Riverpod, GoRouter |
 | Storage | Drift/SQLite, secure storage |
@@ -161,13 +161,15 @@ outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
 
 1. Install the APK on an Android phone.
 2. Open WireSpot and create/sign in with local PIN.
-3. Add a router in **Routers** and choose its brand.
-4. Use local LAN mode when on-site, or import/connect WireGuard for remote
+3. On first launch, follow the four-page onboarding guide. Use **Next** to
+   continue, or **Skip** to go directly to the dashboard.
+4. Add a router in **Routers** and choose its brand.
+5. Use local LAN mode when on-site, or import/connect WireGuard for remote
    router management.
-5. Test the RouterOS API connection for MikroTik routers. For Ruijie/Reyee,
+6. Test the RouterOS API connection for MikroTik routers. For Ruijie/Reyee,
    enter the Ruijie Cloud host and a vendor-issued access token, then test the
    cloud connection. Other brands remain planned connectors.
-6. Configure Settings:
+7. Configure Settings:
    - language and currency
    - license
    - professional co-branding
@@ -175,7 +177,20 @@ outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
    - optional scheduled operations
    - Bluetooth printer
    - WireGuard and permission readiness
-7. Generate vouchers, print tickets, manage users, and review reports.
+8. Generate vouchers, print tickets, manage users, and review reports.
+
+### First-time VPN setup
+
+For a remote router, open **WireGuard** during onboarding or from the VPN
+screen. Import the `.conf` file supplied by the VPN administrator or scan its
+QR code, grant Android VPN permission, and connect the tunnel. Add the router
+using its private VPN address, then run the connection test.
+
+### Web Dashboard cloud connection
+
+Open **Cloud Sync → Cloud Settings**, enter the deployed API base URL, save it,
+test `/health`, and use **Sync Now**. Voucher uploads and router refreshes
+require a valid bearer token from signup/login or mobile pairing.
 
 ## Licensing
 

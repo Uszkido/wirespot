@@ -1,6 +1,9 @@
 # WireSpot 100% Free Cloud Backend (`wirespot_backend/`)
 
-This directory contains the production **Dart Frog API Server** for WireSpot, pre-configured for **Firebase Firestore** and **Koyeb Container Hosting** (100% Free, **0 Credit Card Required**).
+This directory contains the lightweight **Dart Frog API Server** for WireSpot.
+It provides the mobile/web API contract and a process-local store suitable for
+local and single-instance testing. Firestore persistence is required before
+production or multi-instance hosting.
 
 ---
 
@@ -28,8 +31,16 @@ This directory contains the production **Dart Frog API Server** for WireSpot, pr
 
 - `GET /health`: Health probe check returning database & backend status.
 - `POST /api/v1/auth/pair`: Validate mobile-web device pairing keys (`WS-XXXX-SYNC`).
+- `POST /api/v1/auth/login` and `/api/v1/auth/register`: Create a development session.
 - `GET /api/v1/sync/vouchers` & `POST /api/v1/sync/vouchers`: Sync generated voucher batches across devices.
 - `GET /api/v1/routers`: Sync router fleet inventory (MikroTik, Ruijie, OpenWrt, Omada, UniFi, Generic).
+- `GET /api/v1/commands/pending`: Return pending cloud commands.
+- `POST /api/v1/telemetry`: Accept telemetry frames.
+- `POST /api/v1/backup/upload` & `GET /api/v1/backup/latest`: Upload and retrieve the latest backup.
+
+All `/api/v1` data endpoints require `Authorization: Bearer ws_...`. Health
+and authentication endpoints are public. The current token implementation is
+for development only; use signed, expiring tokens before production.
 
 ---
 
