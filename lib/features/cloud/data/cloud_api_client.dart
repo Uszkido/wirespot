@@ -32,17 +32,21 @@ class CloudApiClient {
   }
 
   Future<Map<String, dynamic>> pairDevice(String pairingKey) async {
-    final response = await postJson(
+    final response = await _request(
+      'POST',
       'auth/pair',
       data: {'pairingKey': pairingKey},
+      requireSession: false,
     );
     return response.data ?? {};
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await postJson(
+    final response = await _request(
+      'POST',
       'auth/login',
       data: {'email': email, 'password': password},
+      requireSession: false,
     );
     return response.data ?? {};
   }
@@ -52,13 +56,15 @@ class CloudApiClient {
     required String password,
     required String organizationName,
   }) async {
-    final response = await postJson(
+    final response = await _request(
+      'POST',
       'auth/register',
       data: {
         'email': email,
         'password': password,
         'organizationName': organizationName,
       },
+      requireSession: false,
     );
     return response.data ?? {};
   }
@@ -117,14 +123,19 @@ class CloudApiClient {
     String path, {
     Map<String, Object?>? data,
     String? idempotencyKey,
+    bool requireSession = true,
   }) async {
     final settings = await _settingsService.loadConnection();
     final session = await _settingsService.loadSession();
-    if (settings == null || session == null || session.accessToken.isEmpty) {
+    if (settings == null) {
+      throw StateError('Configure a WireSpot Cloud API connection first.');
+    }
+    if (requireSession && (session == null || session.accessToken.isEmpty)) {
       throw StateError('Connect to WireSpot Cloud and sign in before syncing.');
     }
     final headers = <String, String>{
-      'Authorization': 'Bearer ${session.accessToken}',
+      if (session != null && session.accessToken.isNotEmpty)
+        'Authorization': 'Bearer ${session.accessToken}',
       if (idempotencyKey != null) 'Idempotency-Key': idempotencyKey,
     };
     final organizationId = settings.organizationId?.trim();

@@ -106,7 +106,16 @@ document.addEventListener('DOMContentLoaded', () => {
         'tab-reports': 'Sales Analytics & Export'
       };
       document.getElementById('page-title').textContent = titleMap[targetTab] || 'Dashboard';
+      document.querySelector('.sidebar')?.classList.remove('mobile-open');
+      document.getElementById('btn-mobile-menu')?.setAttribute('aria-expanded', 'false');
     });
+  });
+
+  const mobileMenuButton = document.getElementById('btn-mobile-menu');
+  mobileMenuButton?.addEventListener('click', () => {
+    const sidebar = document.querySelector('.sidebar');
+    const isOpen = sidebar?.classList.toggle('mobile-open') ?? false;
+    mobileMenuButton.setAttribute('aria-expanded', String(isOpen));
   });
 
   // ─── Render Functions ───
