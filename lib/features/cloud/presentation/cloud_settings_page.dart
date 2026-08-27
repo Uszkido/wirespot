@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/localization/app_text.dart';
 import '../../settings/presentation/settings_providers.dart';
@@ -297,6 +298,18 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                   ),
               ],
             ),
+            if (hasSession) ...[
+              const SizedBox(height: 12),
+              _CredentialRow(
+                label: 'Organization ID',
+                value: state.connection?.organizationId ?? 'Not assigned',
+              ),
+              _CredentialRow(
+                label: 'Mobile access code',
+                value: session.accessToken,
+                obscured: true,
+              ),
+            ],
             const SizedBox(height: 16),
             if (!hasSession) ...[
               SegmentedButton<int>(
@@ -459,6 +472,45 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                 ),
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _CredentialRow({
+    required String label,
+    required String value,
+    bool obscured = false,
+  }) {
+    return Builder(
+      builder: (context) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          children: [
+            SizedBox(width: 132, child: Text(label)),
+            Expanded(
+              child: SelectableText(
+                obscured && value.length > 8
+                    ? '${value.substring(0, 4)}••••${value.substring(value.length - 4)}'
+                    : value,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontFamily: 'monospace',
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Copy $label',
+              icon: const Icon(Icons.copy_outlined, size: 18),
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: value));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('$label copied.')),
+                  );
+                }
+              },
+            ),
           ],
         ),
       ),

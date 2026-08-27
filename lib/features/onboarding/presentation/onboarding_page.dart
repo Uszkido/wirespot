@@ -301,6 +301,34 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyLarge,
           ),
+          const SizedBox(height: 24),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Connect your mobile app',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Open Cloud Sync after onboarding and enter the API Base URL, Organization ID, and access code from your WireSpot web account.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push(AppRoutes.cloud),
+                    icon: const Icon(Icons.cloud_sync_outlined),
+                    label: const Text('Configure Cloud Sync'),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
