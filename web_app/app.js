@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${r.vendor}</td>
         <td><code>${r.ip}</code></td>
         <td>${r.port}</td>
-        <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> ${r.status}</span></td>
+        <td><span class="badge badge-${r.status === 'online' ? 'success' : r.status === 'restarting' ? 'warning' : 'info'}"><i class="fa-solid fa-${r.status === 'online' ? 'check' : r.status === 'restarting' ? 'rotate' : 'circle-info'}"></i> ${r.status}</span></td>
         <td>${r.users} Users</td>
         <td>
           <button class="btn btn-primary btn-open-cli" data-router="${r.name}" style="padding: 4px 10px; font-size: 11px; margin-right: 4px;"><i class="fa-solid fa-terminal"></i> CLI</button>
@@ -200,15 +200,28 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.btn-reboot').forEach(b => {
       b.addEventListener('click', () => {
         const rName = b.getAttribute('data-router');
-        showToast(`Reboot command sent to ${rName}`, 'info');
+        const router = state.routers.find(item => item.name === rName);
+        if (!router) return;
+        router.status = 'restarting';
+        saveState(); renderRouters();
+        showToast(`Restarting ${rName}...`, 'info');
+        setTimeout(() => {
+          router.status = 'online';
+          saveState(); renderRouters();
+          showToast(`${rName} is online again.`, 'success');
+        }, 1500);
       });
     });
   };
 
+  let hotspotUserSearch = '';
   const renderHotspotUsers = () => {
     const tbody = document.getElementById('hotspot-users-table-body');
     if (!tbody) return;
-    tbody.innerHTML = state.hotspotUsers.length ? state.hotspotUsers.map((u, idx) => `
+    const users = state.hotspotUsers.filter(user => `${user.username} ${user.profile}`.toLowerCase().includes(hotspotUserSearch));
+    tbody.innerHTML = users.length ? users.map((u) => {
+      const idx = state.hotspotUsers.indexOf(u);
+      return `
       <tr>
         <td><strong>${u.username}</strong></td>
         <td><span class="badge badge-info">${u.profile}</span></td>
@@ -219,11 +232,17 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn btn-danger btn-del-user" data-idx="${idx}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-trash"></i> Delete</button>
         </td>
       </tr>
-    `).join('') : emptyRow(6, 'No hotspot users yet.');
+    `;
+    }).join('') : emptyRow(6, state.hotspotUsers.length ? 'No users match your search.' : 'No hotspot users yet.');
 
     document.querySelectorAll('.btn-reset-user').forEach(b => {
       b.addEventListener('click', () => {
-        showToast(`Reset counters for ${b.getAttribute('data-user')}`, 'success');
+        const username = b.getAttribute('data-user');
+        const user = state.hotspotUsers.find(item => item.username === username);
+        if (!user) return;
+        user.bytesIn = '0 B'; user.bytesOut = '0 B';
+        saveState(); renderHotspotUsers();
+        showToast(`Counters reset for ${username}.`, 'success');
       });
     });
 
@@ -256,7 +275,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.btn-edit-profile').forEach(b => {
       b.addEventListener('click', () => {
-        showToast(`Editing profile ${b.getAttribute('data-profile')}`, 'info');
+        const profile = state.userProfiles.find(item => item.name === b.getAttribute('data-profile'));
+        if (!profile) return;
+        const speed = prompt('Download speed:', profile.downSpeed);
+        if (!speed) return;
+        const timeout = prompt('Session timeout:', profile.timeout);
+        if (!timeout) return;
+        profile.downSpeed = speed.trim(); profile.timeout = timeout.trim();
+        saveState(); renderUserProfiles();
+        showToast(`Profile ${profile.name} updated.`, 'success');
       });
     });
   };
@@ -389,6 +416,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('router-vendor-filter')?.addEventListener('change', event => {
     routerVendor = event.target.value;
     renderRouters();
+  });
+  document.getElementById('search-hotspot-user')?.addEventListener('input', event => {
+    hotspotUserSearch = event.target.value.trim().toLowerCase();
+    renderHotspotUsers();
   });
 
   // ─── Live Search Filter ───
@@ -759,21 +790,53 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnAddRouter = document.getElementById('btn-add-router');
   if (btnAddRouter) {
     btnAddRouter.addEventListener('click', () => {
-      const name = prompt('Enter Router Name:', 'Branch-Gateway-02');
-      if (!name) return;
-      state.routers.push({
-        name: name,
-        vendor: 'MikroTik RouterOS v7',
-        ip: '192.168.88.254',
-        port: 8728,
-        status: 'online',
-        users: 0
-      });
-      saveState();
-      renderRouters();
-      showToast(`Added router ${name} to fleet inventory!`, 'success');
+      document.getElementById('modal-wizard')?.classList.add('active');
+      showWizardStep(2);
     });
   }
+
+  document.getElementById('btn-refresh-sessions')?.addEventListener('click', () => {
+    renderSessions();
+    showToast('Live session list refreshed.', 'info');
+  });
+
+  document.getElementById('btn-add-hotspot-user')?.addEventListener('click', () => {
+    const username = prompt('Username:', `guest_${Date.now().toString().slice(-4)}`)?.trim();
+    if (!username) return;
+    const profile = prompt('Profile:', state.userProfiles[0]?.name || 'Guest')?.trim() || 'Guest';
+    state.hotspotUsers.push({ username, profile, uptimeLimit: 'Unlimited', dataLimit: 'Unlimited', bytesIn: '0 B', bytesOut: '0 B' });
+    saveState(); renderHotspotUsers(); renderSummary();
+    showToast(`Hotspot user ${username} added.`, 'success');
+  });
+
+  document.getElementById('btn-add-user-profile')?.addEventListener('click', () => {
+    const name = prompt('Profile name:', `Guest-${state.userProfiles.length + 1}`)?.trim();
+    if (!name) return;
+    state.userProfiles.push({ name, downSpeed: '5 Mbps', upSpeed: '2 Mbps', sharedUsers: 1, timeout: '60m' });
+    saveState(); renderUserProfiles();
+    showToast(`Profile ${name} added.`, 'success');
+  });
+
+  document.getElementById('btn-send-cli')?.addEventListener('click', () => {
+    const input = document.getElementById('cli-command-input');
+    const output = document.getElementById('cli-output-text');
+    const command = input?.value.trim();
+    if (!command || !output) return;
+    output.textContent += `\n[operator] > ${command}\nCommand queued for the selected router. Connect Cloud Sync to execute remote commands.`;
+    input.value = '';
+    output.parentElement?.scrollTo(0, output.parentElement.scrollHeight);
+  });
+
+  document.getElementById('btn-current-plan')?.addEventListener('click', () => {
+    showToast('Enterprise Cloud is the active workspace plan.', 'info');
+  });
+  document.getElementById('btn-manage-subscription')?.addEventListener('click', () => {
+    document.querySelector('[data-tab="tab-cloud"]')?.click();
+    showToast('Manage billing and cloud sync from the Cloud Sync tab.', 'info');
+  });
+  document.getElementById('btn-switch-pro')?.addEventListener('click', () => {
+    showToast('Plan changes will be available when billing is connected.', 'info');
+  });
 
   // ─── Refresh Button ───
   const btnRefresh = document.getElementById('btn-refresh');
