@@ -61,18 +61,30 @@ class MikroTikScriptGeneratorService {
 
   static void _validate(String username, String password, int apiPort) {
     if (username.trim().isEmpty || username.contains(RegExp(r'[\r\n]'))) {
-      throw ArgumentError.value(username, 'username', 'must be a non-empty single line');
+      throw ArgumentError.value(
+        username,
+        'username',
+        'must be a non-empty single line',
+      );
     }
     if (password.isEmpty || password.contains(RegExp(r'[\r\n]'))) {
-      throw ArgumentError.value(password, 'password', 'must be a non-empty single line');
+      throw ArgumentError.value(
+        password,
+        'password',
+        'must be a non-empty single line',
+      );
     }
     if (apiPort < 1 || apiPort > 65535) {
-      throw ArgumentError.value(apiPort, 'apiPort', 'must be between 1 and 65535');
+      throw ArgumentError.value(
+        apiPort,
+        'apiPort',
+        'must be between 1 and 65535',
+      );
     }
   }
 
   static String _quote(String value) => value
       .replaceAll('\\', '\\\\')
       .replaceAll('"', '\\"')
-      .replaceAll('\$', '\\$');
+      .replaceAll(r'$', r'\$');
 }

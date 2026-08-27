@@ -57,6 +57,27 @@ void main() {
 
       expect(script, contains('port=9000'));
     });
+
+    test('escapes command-sensitive credentials', () {
+      final script = service.generateSetupScript(
+        username: 'wire"spot',
+        password: r'p\$"ass',
+      );
+
+      expect(script, contains(r'name="wire\"spot"'));
+      expect(script, contains(r'password="p\\\$\"ass"'));
+    });
+
+    test('rejects invalid API ports', () {
+      expect(
+        () => service.generateSetupScript(
+          username: 'wirespot',
+          password: 'securePass123',
+          apiPort: 70000,
+        ),
+        throwsArgumentError,
+      );
+    });
   });
 
   group('generateOneLiner', () {
