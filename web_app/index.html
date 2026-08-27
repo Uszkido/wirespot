@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/jpeg" href="wirespot_mark.jpg">
 </head>
 
 <body>
@@ -61,8 +62,8 @@
       <div class="user-badge">
         <div class="avatar">WS</div>
         <div>
-          <div style="font-weight: 600; font-size: 12px;">Operator Admin</div>
-          <div style="font-size: 10px; color: var(--text-muted);">wirespot-app</div>
+          <div style="font-weight: 600; font-size: 12px;" id="current-user-name">WireSpot Operator</div>
+          <div style="font-size: 10px; color: var(--text-muted);" id="current-user-email">Not signed in</div>
         </div>
       </div>
     </div>
@@ -81,7 +82,7 @@
         <button class="btn btn-secondary" id="btn-open-auth"><i class="fa-solid fa-user-gear"></i> Account</button>
         <div class="status-indicator">
           <div class="status-dot"></div>
-          <span>Sync Active</span>
+          <span id="sync-status-label">Cloud not connected</span>
         </div>
         <button class="btn btn-secondary" id="btn-refresh"><i class="fa-solid fa-rotate-right"></i></button>
       </div>
@@ -126,6 +127,34 @@
           </div>
         </div>
 
+        <div class="getting-started-card glass" id="getting-started-card">
+          <div class="getting-started-heading">
+            <div>
+              <span class="eyebrow">FIRST RUN</span>
+              <h2>Finish setting up WireSpot</h2>
+              <p>Complete these steps to connect your operation and start serving customers.</p>
+            </div>
+            <button class="btn btn-secondary" id="btn-dismiss-getting-started" aria-label="Dismiss setup guide"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="getting-started-steps">
+            <button class="getting-started-step" data-setup-tab="tab-routers">
+              <span class="setup-step-icon"><i class="fa-solid fa-router"></i></span>
+              <span><strong>Add your first router</strong><small>Connect a MikroTik, Ruijie, OpenWrt, Omada, UniFi, or generic gateway.</small></span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button class="getting-started-step" data-setup-tab="tab-cloud">
+              <span class="setup-step-icon"><i class="fa-solid fa-cloud"></i></span>
+              <span><strong>Connect WireSpot Cloud</strong><small>Save your API URL and test the secure cloud connection.</small></span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button class="getting-started-step" data-setup-tab="tab-vouchers">
+              <span class="setup-step-icon"><i class="fa-solid fa-ticket"></i></span>
+              <span><strong>Create your first voucher</strong><small>Choose a plan, generate a pass, and print or export it.</small></span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
         <div class="dashboard-grid">
           <div class="chart-card glass">
             <div class="card-header">
@@ -167,7 +196,15 @@
       <section id="tab-routers" class="tab-content">
         <div class="card-header" style="margin-bottom: 20px;">
           <h2>Router Fleet Inventory</h2>
-          <button class="btn btn-primary" id="btn-add-router"><i class="fa-solid fa-plus"></i> Add Router</button>
+          <div class="fleet-toolbar">
+            <input class="form-control" id="router-search" placeholder="Search routers..." aria-label="Search routers">
+            <select class="form-control" id="router-vendor-filter" aria-label="Filter by vendor">
+              <option value="all">All vendors</option>
+              <option>MikroTik</option><option>Ruijie</option><option>OpenWrt</option>
+              <option>Omada</option><option>UniFi</option><option>Generic</option>
+            </select>
+            <button class="btn btn-primary" id="btn-add-router"><i class="fa-solid fa-plus"></i> Add Router</button>
+          </div>
         </div>
         <div class="glass" style="padding: 22px;">
           <div class="table-container">
@@ -337,6 +374,12 @@
                   Test</button>
               </div>
             </form>
+            <div class="cloud-credentials" id="cloud-credentials">
+              <div><span class="eyebrow">MOBILE SYNC</span><strong>Workspace credentials</strong></div>
+              <p>Use these values in the WireSpot mobile app. They are created for this signed-in workspace.</p>
+              <div class="credential-row"><span>Organization ID</span><code id="cloud-org-display">Sign in to generate</code><button class="btn btn-secondary btn-copy-credential" data-copy-target="cloud-org-display">Copy</button></div>
+              <div class="credential-row"><span>Access code</span><code id="cloud-token-display">Sign in to generate</code><button class="btn btn-secondary btn-copy-credential" data-copy-target="cloud-token-display">Copy</button></div>
+            </div>
           </div>
 
           <div class="glass" style="padding: 22px;">
@@ -349,6 +392,8 @@
             <div style="display: flex; flex-direction: column; gap: 12px;">
               <button class="btn btn-primary" id="btn-trigger-sync"><i class="fa-solid fa-cloud-arrow-up"></i> Sync
                 Now</button>
+              <button class="btn btn-secondary" id="btn-restore-backup"><i class="fa-solid fa-cloud-arrow-down"></i>
+                Restore Latest Backup</button>
               <button class="btn btn-secondary" id="btn-retry-failed-sync"><i class="fa-solid fa-rotate-right"></i>
                 Retry Failed</button>
               <button class="btn btn-danger" id="btn-clear-completed-sync"><i class="fa-solid fa-trash-can"></i> Clear
@@ -556,16 +601,40 @@
               <option value="30d" selected>Last 30 Days</option>
               <option value="ytd">Year To Date</option>
             </select>
+            <select class="form-control" id="report-currency" style="width: 115px;" aria-label="Report currency">
+              <option value="NGN">₦ NGN</option>
+              <option value="KES">KSh KES</option>
+              <option value="GHS">GH₵ GHS</option>
+              <option value="USD">$ USD</option>
+            </select>
             <button class="btn btn-secondary" id="btn-export-excel"><i class="fa-solid fa-file-excel"></i>
-              Excel</button>
+              CSV / Excel</button>
+            <button class="btn btn-secondary" id="btn-export-json"><i class="fa-solid fa-file-code"></i>
+              JSON</button>
             <button class="btn btn-primary" id="btn-export-pdf"><i class="fa-solid fa-file-pdf"></i> PDF</button>
           </div>
         </div>
+        <div id="report-summary" class="report-summary" aria-live="polite"></div>
         <div class="glass" style="padding: 22px;">
           <div class="card-header">
             <h2>Monthly Sales</h2>
           </div>
           <canvas id="salesChart" height="90"></canvas>
+        </div>
+        <div class="glass report-table-card" style="padding: 22px; margin-top: 20px;">
+          <div class="card-header">
+            <div>
+              <h2>Voucher sales detail</h2>
+              <span class="text-muted" id="report-period-label">Select a period to refresh the report.</span>
+            </div>
+            <span class="badge badge-info" id="report-row-count">0 records</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead><tr><th>Voucher</th><th>Profile</th><th>Created</th><th>Status</th><th>Amount</th></tr></thead>
+              <tbody id="report-table-body"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -666,9 +735,12 @@
   <div class="modal-overlay" id="modal-auth">
     <div class="modal-card glass">
       <div class="card-header">
-        <div>
+        <div class="auth-heading">
+          <img class="auth-logo" src="wirespot_mark.jpg" alt="WireSpot logo">
+          <div>
           <h2>WireSpot Account</h2>
           <span class="auth-subtitle" id="auth-subtitle">Sign in to sync your workspace.</span>
+        </div>
         </div>
         <button class="btn btn-secondary" style="padding: 4px 10px;" id="btn-close-auth"><i
             class="fa-solid fa-xmark"></i></button>
@@ -709,6 +781,10 @@
         <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-user-plus"></i> Create
           Account</button>
       </form>
+
+      <button type="button" class="btn btn-danger auth-signout" id="btn-signout">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign out
+      </button>
 
     </div>
   </div>
@@ -849,7 +925,7 @@
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="app.js?v=20260827.3"></script>
+  <script src="app.js?v=20260827.5"></script>
 </body>
 
 </html>

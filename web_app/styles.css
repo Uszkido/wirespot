@@ -293,6 +293,99 @@ body::before {
   font-size: 13px;
 }
 
+.report-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.report-metric {
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(15, 27, 48, .72);
+}
+
+.report-metric .metric-label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 8px;
+}
+
+.report-metric strong {
+  display: block;
+  color: var(--text-main);
+  font-size: 25px;
+  line-height: 1.1;
+}
+
+.report-metric small {
+  display: block;
+  color: var(--text-muted);
+  margin-top: 7px;
+}
+
+.report-table-card .card-header { align-items: flex-start; }
+
+.cloud-credentials {
+  margin-top: 22px;
+  padding: 16px;
+  border: 1px dashed rgba(24, 191, 255, .45);
+  border-radius: 12px;
+  background: rgba(11, 143, 255, .06);
+}
+.cloud-credentials strong { display: block; margin-top: 4px; }
+.cloud-credentials p { color: var(--text-muted); font-size: 12px; line-height: 1.5; margin: 10px 0 14px; }
+.credential-row { display: grid; grid-template-columns: 120px 1fr auto; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; }
+.credential-row span { color: var(--text-secondary); }
+.credential-row code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent); }
+.btn-copy-credential { padding: 5px 9px; font-size: 11px; }
+
+@media (max-width: 800px) {
+  .report-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 500px) {
+  .report-summary { grid-template-columns: 1fr; }
+  .credential-row { grid-template-columns: 1fr auto; }
+  .credential-row code { grid-column: 1 / -1; }
+}
+
+.getting-started-card {
+  padding: 22px;
+  margin: 18px 0;
+  border-color: rgba(11, 143, 255, 0.28);
+}
+
+.getting-started-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.getting-started-heading h2 { margin: 4px 0; font-size: 17px; }
+.getting-started-heading p { color: var(--text-secondary); font-size: 12px; }
+.eyebrow { color: var(--accent); font-size: 10px; font-weight: 800; letter-spacing: 1.4px; }
+.getting-started-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.getting-started-step { display: flex; align-items: center; gap: 10px; padding: 14px; text-align: left; color: var(--text-primary); background: rgba(255,255,255,.025); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); cursor: pointer; }
+.getting-started-step:hover { border-color: var(--accent); background: rgba(11,143,255,.07); }
+.getting-started-step > span:nth-child(2) { flex: 1; }
+.getting-started-step strong, .getting-started-step small { display: block; }
+.getting-started-step small { margin-top: 4px; color: var(--text-muted); font-size: 11px; line-height: 1.35; }
+.setup-step-icon { width: 32px; height: 32px; display: grid; place-items: center; flex: none; border-radius: 50%; color: var(--accent); background: rgba(11,143,255,.12); }
+.getting-started-step > i { color: var(--text-muted); font-size: 12px; }
+.fleet-toolbar { display: flex; align-items: center; gap: 8px; }
+.fleet-toolbar .form-control { width: 155px; padding: 9px 10px; }
+@media (max-width: 768px) {
+  .fleet-toolbar { width: 100%; flex-wrap: wrap; }
+  .fleet-toolbar .form-control { flex: 1; min-width: 130px; }
+}
+
 .header-title {
   display: flex;
   align-items: center;
@@ -1198,6 +1291,8 @@ select.form-control {
   .preset-grid {
     grid-template-columns: 1fr;
   }
+
+  .getting-started-steps { grid-template-columns: 1fr; }
 }
 
 .auth-subtitle {
@@ -1205,4 +1300,24 @@ select.form-control {
   margin-top: 4px;
   color: var(--text-muted);
   font-size: 12px;
+}
+
+.auth-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid rgba(11, 143, 255, 0.35);
+}
+
+.auth-signout {
+  display: none;
+  width: 100%;
+  margin-top: 14px;
 }

@@ -35,7 +35,10 @@ The **WireSpot Cloud Web Dashboard** provides a feature-complete web management 
   - Custom logo upload, header/footer text, and price formatting.
 
 - **Analytics & Export Engine**:
-  - Sales charts, revenue breakdown, active session tracking with date-range filters.
+  - Sales charts, revenue breakdown, and voucher detail with date-range filters.
+  - Live CSV export (opens in Excel), JSON workspace backup, and branded browser
+    print-to-PDF reports. Reports use the selected WireSpot currency (NGN,
+    KES, GHS, or USD) and never fabricate records when the workspace is empty.
 
 ---
 
