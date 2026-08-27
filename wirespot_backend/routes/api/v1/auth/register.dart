@@ -11,7 +11,8 @@ Future<Response> onRequest(RequestContext context) async {
     final json = jsonDecode(bodyText) as Map<String, dynamic>;
     final email = json['email'] as String? ?? '';
     final password = json['password'] as String? ?? '';
-    final organizationName = json['organizationName'] as String? ?? 'Default Org';
+    final organizationName =
+        json['organizationName'] as String? ?? 'Default Org';
 
     if (email.isEmpty || !email.contains('@') || password.length < 6) {
       return Response.json(
@@ -20,8 +21,10 @@ Future<Response> onRequest(RequestContext context) async {
       );
     }
 
-    final orgId = 'org_${organizationName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}';
-    final token = 'ws_jwt_${DateTime.now().millisecondsSinceEpoch}_${email.hashCode.abs()}';
+    final orgId =
+        'org_${organizationName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}';
+    final token =
+        'ws_jwt_${DateTime.now().millisecondsSinceEpoch}_${email.hashCode.abs()}';
 
     return Response.json(
       body: {

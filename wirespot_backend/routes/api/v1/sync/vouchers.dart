@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:dart_frog/dart_frog.dart';
+import 'package:wirespot_backend/auth.dart';
 import 'package:wirespot_backend/backend_store.dart';
 
 Future<Response> onRequest(RequestContext context) async {
+  if (!isAuthenticated(context)) return unauthorized();
   if (context.request.method == HttpMethod.get) {
     final vouchers = BackendStore.vouchers.isEmpty
         ? [

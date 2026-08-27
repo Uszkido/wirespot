@@ -1,6 +1,8 @@
 import 'package:dart_frog/dart_frog.dart';
+import 'package:wirespot_backend/auth.dart';
 
 Response onRequest(RequestContext context) {
+  if (!isAuthenticated(context)) return unauthorized();
   return Response.json(
     body: {
       'status': 'success',

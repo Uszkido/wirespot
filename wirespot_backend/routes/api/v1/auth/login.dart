@@ -19,7 +19,8 @@ Future<Response> onRequest(RequestContext context) async {
       );
     }
 
-    final token = 'ws_jwt_${DateTime.now().millisecondsSinceEpoch}_${email.hashCode.abs()}';
+    final token =
+        'ws_jwt_${DateTime.now().millisecondsSinceEpoch}_${email.hashCode.abs()}';
     final orgId = 'org_${email.split('@').first}';
 
     return Response.json(

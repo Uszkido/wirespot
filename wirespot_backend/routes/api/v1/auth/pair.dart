@@ -18,7 +18,8 @@ Future<Response> onRequest(RequestContext context) async {
       );
     }
 
-    final token = 'ws_session_${DateTime.now().millisecondsSinceEpoch}_${pairingKey.replaceAll('-', '_')}';
+    final token =
+        'ws_session_${DateTime.now().millisecondsSinceEpoch}_${pairingKey.replaceAll('-', '_')}';
 
     return Response.json(
       body: {
