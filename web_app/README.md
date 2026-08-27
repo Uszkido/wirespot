@@ -7,7 +7,8 @@ The **WireSpot Cloud Web Dashboard** provides a feature-complete web management 
 ## 🚀 Key Features & Capabilities
 
 - **Account Sync & Mobile Pairing**:
-  - Connect web sessions with mobile devices using Pairing Keys (`WS-XXXX-SYNC`).
+  - Signup creates a workspace Organization ID and access code, then opens Cloud Sync setup so the same values can be entered in the mobile app.
+  - The API Base URL is operator-supplied (your deployed WireSpot backend); credentials can be copied directly from the Cloud Sync panel.
   - Keep accounts, active hotspot profiles, router credentials, and voucher configurations in sync.
 
 - **4-Step Guided Auto-Configuration Wizard**:
