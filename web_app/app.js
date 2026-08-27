@@ -50,11 +50,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load state from localStorage or use defaults
   const savedState = localStorage.getItem('wirespot_web_state');
-  const state = savedState ? JSON.parse(savedState) : defaultState;
+  // Start with an honest empty workspace instead of presenting sample records
+  // as if they were connected customer data. Records appear after pairing or
+  // after the operator creates them in this browser.
+  const emptyWorkspace = {
+    ...defaultState,
+    routers: [],
+    hotspotUsers: [],
+    userProfiles: [],
+    sessions: [],
+    vouchers: [],
+    cloudQueue: [],
+    events: []
+  };
+  const state = savedState ? JSON.parse(savedState) : emptyWorkspace;
+
+  // Clear the records shipped by the earlier demo build, but preserve any
+  // records an operator has created locally.
+  const hasDemoRecords = state.routers?.some(r => r.name === 'Main-Gateway-MikroTik') &&
+    state.vouchers?.some(v => v.code === 'WS-8A2F');
+  if (hasDemoRecords) {
+    Object.assign(state, emptyWorkspace);
+    localStorage.removeItem('wirespot_web_state');
+  }
 
   const saveState = () => {
     localStorage.setItem('wirespot_web_state', JSON.stringify(state));
   };
+
+  const emptyRow = (columns, message) =>
+    `<tr><td colspan="${columns}" class="empty-state"><i class="fa-regular fa-folder-open"></i><span>${message}</span></td></tr>`;
 
   // ─── Toast System ───
   const showToast = (message, type = 'success') => {
@@ -122,20 +147,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const renderEvents = () => {
     const tbody = document.getElementById('events-table-body');
     if (!tbody) return;
-    tbody.innerHTML = state.events.map(ev => `
+    tbody.innerHTML = state.events.length ? state.events.map(ev => `
       <tr>
         <td><code>${ev.time}</code></td>
         <td><strong>${ev.source}</strong></td>
         <td>${ev.desc}</td>
         <td><span class="badge badge-${ev.status === 'success' ? 'success' : 'info'}">${ev.status}</span></td>
       </tr>
-    `).join('');
+    `).join('') : emptyRow(4, 'No events yet. Connect a router to begin monitoring.');
   };
 
   const renderRouters = () => {
     const tbody = document.getElementById('routers-table-body');
     if (!tbody) return;
-    tbody.innerHTML = state.routers.map(r => `
+    tbody.innerHTML = state.routers.length ? state.routers.map(r => `
       <tr>
         <td><strong>${r.name}</strong></td>
         <td>${r.vendor}</td>
@@ -148,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn btn-secondary btn-reboot" data-router="${r.name}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-power-off"></i> Reboot</button>
         </td>
       </tr>
-    `).join('');
+    `).join('') : emptyRow(7, 'No routers connected. Use Add Router or pair a device.');
 
     document.querySelectorAll('.btn-open-cli').forEach(b => {
       b.addEventListener('click', () => {
@@ -169,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const renderHotspotUsers = () => {
     const tbody = document.getElementById('hotspot-users-table-body');
     if (!tbody) return;
-    tbody.innerHTML = state.hotspotUsers.map((u, idx) => `
+    tbody.innerHTML = state.hotspotUsers.length ? state.hotspotUsers.map((u, idx) => `
       <tr>
         <td><strong>${u.username}</strong></td>
         <td><span class="badge badge-info">${u.profile}</span></td>
@@ -180,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn btn-danger btn-del-user" data-idx="${idx}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-trash"></i> Delete</button>
         </td>
       </tr>
-    `).join('');
+    `).join('') : emptyRow(6, 'No hotspot users yet.');
 
     document.querySelectorAll('.btn-reset-user').forEach(b => {
       b.addEventListener('click', () => {
@@ -202,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const renderUserProfiles = () => {
     const tbody = document.getElementById('user-profiles-table-body');
     if (!tbody) return;
-    tbody.innerHTML = state.userProfiles.map(p => `
+    tbody.innerHTML = state.userProfiles.length ? state.userProfiles.map(p => `
       <tr>
         <td><strong>${p.name}</strong></td>
         <td>${p.downSpeed}</td>
@@ -213,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn btn-secondary btn-edit-profile" data-profile="${p.name}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-pen"></i> Edit</button>
         </td>
       </tr>
-    `).join('');
+    `).join('') : emptyRow(6, 'No profiles configured yet.');
 
     document.querySelectorAll('.btn-edit-profile').forEach(b => {
       b.addEventListener('click', () => {
@@ -225,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const renderSessions = () => {
     const tbody = document.getElementById('sessions-table-body');
     if (!tbody) return;
-    tbody.innerHTML = state.sessions.map((s, idx) => `
+    tbody.innerHTML = state.sessions.length ? state.sessions.map((s, idx) => `
       <tr>
         <td><strong>${s.username}</strong></td>
         <td><code>${s.mac}</code></td>
@@ -237,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn btn-danger btn-kick" data-idx="${idx}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-user-xmark"></i> Disconnect</button>
         </td>
       </tr>
-    `).join('');
+    `).join('') : emptyRow(7, 'No live sessions.');
 
     document.querySelectorAll('.btn-kick').forEach(b => {
       b.addEventListener('click', () => {
@@ -255,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tbody = document.getElementById('vouchers-table-body');
     if (!tbody) return;
     const filtered = state.vouchers.filter(v => v.code.toLowerCase().includes(filter.toLowerCase()));
-    tbody.innerHTML = filtered.map(v => `
+    tbody.innerHTML = filtered.length ? filtered.map(v => `
       <tr>
         <td><strong style="font-family: monospace; font-size: 14px; color: var(--accent);">${v.code}</strong></td>
         <td>${v.profile}</td>
@@ -268,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn btn-secondary btn-print-v" data-code="${v.code}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-print"></i> Print</button>
         </td>
       </tr>
-    `).join('');
+    `).join('') : emptyRow(6, filter ? 'No vouchers match your search.' : 'No vouchers generated yet.');
 
     document.querySelectorAll('.btn-print-v').forEach(b => {
       b.addEventListener('click', () => {
@@ -282,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const renderCloudQueue = () => {
     const tbody = document.getElementById('cloud-queue-table-body');
     if (!tbody) return;
-    tbody.innerHTML = state.cloudQueue.map(q => `
+    tbody.innerHTML = state.cloudQueue.length ? state.cloudQueue.map(q => `
       <tr>
         <td><code>${q.id}</code></td>
         <td><span class="badge badge-info">${q.resourceType}</span></td>
@@ -292,11 +317,24 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${q.attempts}</td>
         <td><span class="badge badge-${q.status === 'completed' ? 'success' : 'warning'}">${q.status}</span></td>
       </tr>
-    `).join('');
+    `).join('') : emptyRow(7, 'Sync queue is empty.');
 
     const pending = state.cloudQueue.filter(q => q.status === 'pending').length;
     const badge = document.getElementById('queue-status-badge');
     if (badge) badge.textContent = `${pending} Pending`;
+  };
+
+  const renderSummary = () => {
+    const onlineRouters = state.routers.filter(r => r.status === 'online').length;
+    const revenue = state.vouchers.reduce((total, voucher) => total + (Number(voucher.price) || 0), 0);
+    const set = (id, value) => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value;
+    };
+    set('kpi-revenue', `$${revenue.toFixed(2)}`);
+    set('kpi-routers', `${onlineRouters} / ${state.routers.length}`);
+    set('kpi-users', String(state.hotspotUsers.length));
+    set('kpi-pending-sync', String(state.cloudQueue.filter(q => q.status === 'pending').length));
   };
 
   // Initial Renders
@@ -307,6 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSessions();
   renderVouchers();
   renderCloudQueue();
+  renderSummary();
 
   // ─── Live Search Filter ───
   const vSearch = document.getElementById('voucher-search');
@@ -393,6 +432,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const formLogin = document.getElementById('form-auth-login');
   const formReg = document.getElementById('form-auth-register');
 
+  const savedAccount = localStorage.getItem('wirespot_web_account');
+  const authModal = document.getElementById('modal-auth');
+  const authClose = document.getElementById('btn-close-auth');
+  const authSubtitle = document.getElementById('auth-subtitle');
+  const openAuth = (firstRun) => {
+    if (firstRun) {
+      tabAuthReg?.click();
+      if (authSubtitle) authSubtitle.textContent = 'Create an account to get started.';
+      if (authClose) authClose.style.display = 'none';
+    } else {
+      tabAuthLogin?.click();
+      if (authSubtitle) authSubtitle.textContent = 'Sign in to sync your workspace.';
+    }
+    authModal?.classList.add('active');
+  };
+
+  if (!savedAccount) openAuth(true);
+
   if (tabAuthLogin && tabAuthReg) {
     tabAuthLogin.addEventListener('click', () => {
       tabAuthLogin.classList.add('active');
@@ -413,6 +470,11 @@ document.addEventListener('DOMContentLoaded', () => {
     formLogin.addEventListener('submit', (e) => {
       e.preventDefault();
       const email = document.getElementById('auth-email-login').value;
+      if (!savedAccount || JSON.parse(savedAccount).email !== email) {
+        showToast('No account found for this email. Create an account first.', 'error');
+        return;
+      }
+      localStorage.setItem('wirespot_web_session', JSON.stringify({ email, signedInAt: Date.now() }));
       document.getElementById('modal-auth').classList.remove('active');
       showToast(`Signed in as ${email}`, 'success');
     });
@@ -422,26 +484,81 @@ document.addEventListener('DOMContentLoaded', () => {
     formReg.addEventListener('submit', (e) => {
       e.preventDefault();
       const org = document.getElementById('auth-org-reg').value;
+      const email = document.getElementById('auth-email-reg').value;
+      localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: org, email }));
+      localStorage.setItem('wirespot_web_session', JSON.stringify({ email, signedInAt: Date.now() }));
+      localStorage.setItem('wirespot_web_cloud_config', JSON.stringify({
+        url: document.getElementById('cloud-api-url')?.value.trim() || '',
+        organizationId: `org_${org.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`,
+        token: `ws_web_${Date.now()}`
+      }));
       document.getElementById('modal-auth').classList.remove('active');
       showToast(`Account created for ${org}!`, 'success');
     });
   }
 
   // ─── Cloud Sync Actions ───
+  const cloudConfigKey = 'wirespot_web_cloud_config';
+  const cloudConfig = JSON.parse(localStorage.getItem(cloudConfigKey) || '{}');
+  const cloudUrlInput = document.getElementById('cloud-api-url');
+  const cloudOrgInput = document.getElementById('cloud-org-id');
+  const cloudTokenInput = document.getElementById('cloud-token');
+  if (cloudUrlInput) cloudUrlInput.value = cloudConfig.url || '';
+  if (cloudOrgInput) cloudOrgInput.value = cloudConfig.organizationId || '';
+  if (cloudTokenInput) cloudTokenInput.value = cloudConfig.token || '';
+
+  const readCloudConfig = () => ({
+    url: cloudUrlInput?.value.trim().replace(/\/$/, '') || '',
+    organizationId: cloudOrgInput?.value.trim() || '',
+    token: cloudTokenInput?.value.trim() || ''
+  });
+  const cloudRequest = async (path, options = {}) => {
+    const config = readCloudConfig();
+    if (!config.url) throw new Error('Set the Cloud API Base URL first.');
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (config.token) headers.Authorization = `Bearer ${config.token}`;
+    if (config.organizationId) headers['X-WireSpot-Organization'] = config.organizationId;
+    const response = await fetch(`${config.url}/${path.replace(/^\//, '')}`, { ...options, headers });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || `Cloud request failed (${response.status}).`);
+    return payload;
+  };
+
+  document.getElementById('btn-save-cloud')?.addEventListener('click', () => {
+    const config = readCloudConfig();
+    localStorage.setItem(cloudConfigKey, JSON.stringify(config));
+    showToast('Cloud connection saved.', 'success');
+  });
+
+  document.getElementById('btn-test-cloud')?.addEventListener('click', async () => {
+    try {
+      const result = await cloudRequest('health');
+      showToast(`Cloud online (${result.status || 'ok'}).`, 'success');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  });
+
   const btnTriggerSync = document.getElementById('btn-trigger-sync');
   if (btnTriggerSync) {
-    btnTriggerSync.addEventListener('click', () => {
-      state.cloudQueue.forEach(q => q.status = 'completed');
-      state.events.unshift({
-        time: new Date().toTimeString().substring(0, 8),
-        source: 'CloudSyncService',
-        desc: 'Manual sync completed via Web App Dashboard',
-        status: 'success'
-      });
-      saveState();
-      renderCloudQueue();
-      renderEvents();
-      showToast('Cloud synchronization complete!', 'success');
+    btnTriggerSync.addEventListener('click', async () => {
+      btnTriggerSync.disabled = true;
+      try {
+        await cloudRequest('api/v1/sync/vouchers', {
+          method: 'POST',
+          body: JSON.stringify({ vouchers: state.vouchers })
+        });
+        const remote = await cloudRequest('api/v1/routers');
+        if (Array.isArray(remote.routers)) state.routers = remote.routers;
+        state.cloudQueue.forEach(q => q.status = 'completed');
+        state.events.unshift({ time: new Date().toTimeString().substring(0, 8), source: 'CloudSyncService', desc: 'Synchronized vouchers and router inventory with WireSpot Cloud', status: 'success' });
+        saveState(); renderCloudQueue(); renderEvents(); renderRouters(); renderSummary();
+        showToast('Cloud synchronization complete.', 'success');
+      } catch (error) {
+        showToast(error.message, 'error');
+      } finally {
+        btnTriggerSync.disabled = false;
+      }
     });
   }
 

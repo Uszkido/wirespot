@@ -81,8 +81,8 @@ body {
 /* ─── Glassmorphism Cards ─── */
 .glass {
   background: var(--bg-card);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
@@ -267,6 +267,23 @@ body::before {
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.3px;
+}
+
+.empty-state {
+  padding: 42px 20px !important;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-state i {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 22px;
+  color: var(--text-secondary);
+}
+
+.empty-state span {
+  font-size: 13px;
 }
 
 .header-title {
@@ -1174,4 +1191,11 @@ select.form-control {
   .preset-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.auth-subtitle {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
 }
