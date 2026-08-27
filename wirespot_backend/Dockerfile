@@ -7,12 +7,15 @@ RUN dart pub get
 
 COPY . .
 RUN dart pub get --offline
-RUN dart compile exe bin/server.dart -o bin/server
+# Dart Frog generates the production server from the routes directory.
+RUN dart pub global activate dart_frog_cli
+ENV PATH="/root/.pub-cache/bin:${PATH}"
+RUN dart_frog build
 
 # Ultra-lightweight runtime image (< 50MB RAM footprint)
-FROM subosito/dart:latest AS runtime
+FROM dart:stable AS runtime
 WORKDIR /app
-COPY --from=build /app/bin/server /app/bin/server
+COPY --from=build /app/build /app/build
 
 EXPOSE 8080
-CMD ["/app/bin/server"]
+CMD ["dart", "/app/build/bin/server.dart"]

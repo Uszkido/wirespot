@@ -40,7 +40,8 @@ Run locally on port 8080:
 ```bash
 cd wirespot_backend
 dart pub get
-dart bin/server.dart
+dart pub global activate dart_frog_cli
+dart_frog dev
 ```
 
 Test health check:
