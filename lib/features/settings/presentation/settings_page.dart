@@ -601,6 +601,37 @@ class _PremiumLicenseCard extends ConsumerWidget {
               icon: const Icon(Icons.workspace_premium_outlined),
               label: const Text('Apply license'),
             ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: entitlement.isPremium
+                  ? () async {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Deactivate this device?'),
+                          content: const Text(
+                            'This removes the local activation from this device. It does not cancel a subscription.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            FilledButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Deactivate'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirmed != true) return;
+                      await ref.read(entitlementServiceProvider).deactivateDevice();
+                      ref.invalidate(entitlementSnapshotProvider);
+                    }
+                  : null,
+              icon: const Icon(Icons.no_accounts_outlined),
+              label: const Text('Deactivate this device'),
+            ),
             const SizedBox(height: 16),
             Text(
               'Subscription plans',

@@ -35,6 +35,7 @@ WireSpot is a modern Flutter Android/iOS application for hotspot operators, tech
 - [[Hotspot Management]] — Users, profiles, sessions, and setup presets
 - [[Voucher System]] — Generation, encoding, QR, and printing
 - [[WireGuard VPN]] — Secure remote access configuration
+- [[Cloud Sync]] — Mobile/web cloud connection and synchronization
 
 ### Tools & Output
 - [[Printing]] — Bluetooth thermal printer setup and receipt formatting

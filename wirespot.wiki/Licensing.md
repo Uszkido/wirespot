@@ -32,6 +32,13 @@ dart run tools/license_generator.dart <DEVICE_ID>
 4. Paste the generated key into WireSpot.
 5. Tap **Apply license**.
 
+### Deactivate a device
+
+To remove a local activation from the current phone, open **Settings → Premium
+license** and choose **Deactivate this device**, then confirm. This clears the
+local device license so the device can be reissued or reassigned. It does not
+cancel a Google Play subscription or revoke a server-side entitlement.
+
 ### Key Format
 
 License keys follow the format:
@@ -52,8 +59,8 @@ WireSpot tracks how a user's access was granted:
 |--------|-------------|
 | **Trial** | 7-day automatic trial |
 | **Device license** | Local device-bound key |
-| **Google Play** | Play Store subscription (planned) |
-| **Server license** | Server-validated license (planned) |
+| **Google Play** | Play Store subscription entitlement |
+| **Server license** | Server-validated entitlement |
 | **Development** | Dev/testing access |
 
 ---

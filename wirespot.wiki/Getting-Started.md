@@ -79,8 +79,18 @@ outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
 1. **Open WireSpot** on your Android device.
 2. **Create a local PIN** — this is your app access code (stored as a salted hash).
 3. **Enable biometric login** if your device supports it.
-4. **Add a router** from the Dashboard → Routers.
-5. **Review Settings** for language, currency, license, VPN, and printer.
+4. **Follow the onboarding guide**. Tap **Next** to move through router setup,
+   WireGuard, and cloud backup guidance, or tap **Skip** to go straight to the
+   dashboard. The guide appears automatically only for a new installation.
+5. **Add a router** from the Dashboard → Routers.
+6. **Review Settings** for language, currency, license, VPN, and printer.
+
+### Cloud sync from the web dashboard
+
+The web dashboard starts with signup/login. Open **Cloud Sync → Cloud Settings**,
+enter the deployed WireSpot API base URL, save it, test `/health`, and select
+**Sync Now**. Voucher uploads and router refreshes use the authenticated cloud
+session; the dashboard does not ship with fake router records.
 
 ---
 

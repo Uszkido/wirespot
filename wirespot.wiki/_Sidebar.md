@@ -12,6 +12,7 @@
 - [[Hotspot Management]]
 - [[Voucher System]]
 - [[WireGuard VPN]]
+- [[Cloud Sync]]
 
 **Tools & Output**
 - [[Printing]]

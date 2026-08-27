@@ -56,6 +56,15 @@ class EntitlementService {
     );
   }
 
+  /// Removes the locally activated license from this device.
+  ///
+  /// This does not revoke a server or Play Store purchase; it only deactivates
+  /// the current device so the key can be issued or applied elsewhere.
+  Future<void> deactivateDevice() async {
+    await _settingsRepository.writeSetting(licenseKeySetting, '');
+    await clearBillingEntitlement();
+  }
+
   Future<void> setPremiumOverride(bool enabled) async {
     await _settingsRepository.writeSetting(
       premiumOverrideSetting,

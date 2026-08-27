@@ -103,5 +103,16 @@ Local licenses are useful for offline/direct distribution, but they are not a
 replacement for production billing security. For public paid release, validate
 entitlements with Google Play Billing or a Vexel license server.
 
+## Plans and deactivation
+
+WireSpot supports lifetime device licenses plus monthly and yearly subscription
+plans. The local generator creates device-bound lifetime keys; monthly and
+yearly plans are handled through Google Play or a future server licensing
+service.
+
+To remove a local activation, open **Settings → Premium license** and choose
+**Deactivate this device**. This clears the activation from the current device;
+it does not cancel a Google Play subscription or revoke a server-side license.
+
 Never publish private signing keys, billing secrets, or server license signing
 secrets in the GitHub repository.
