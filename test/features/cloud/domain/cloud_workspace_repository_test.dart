@@ -7,6 +7,22 @@ class FakeCloudWorkspaceRepository implements CloudWorkspaceRepository {
   final Map<String, Map<String, dynamic>> settingsDocs = {};
 
   @override
+  Future<Map<String, dynamic>?> readRouterDocument({
+    required String idToken,
+    required String orgId,
+    required String routerId,
+  }) async => routerDocs['$orgId/$routerId'];
+
+  @override
+  Future<bool> deleteRouterDocument({
+    required String idToken,
+    required String orgId,
+    required String routerId,
+  }) async {
+    return routerDocs.remove('$orgId/$routerId') != null;
+  }
+
+  @override
   Future<bool> saveRouterDocument({
     required String idToken,
     required String orgId,

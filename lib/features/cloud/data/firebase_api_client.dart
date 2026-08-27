@@ -157,8 +157,9 @@ Map<String, dynamic> _toFirestoreValue(Object? value) {
   if (value is int) return {'integerValue': value.toString()};
   if (value is num) return {'doubleValue': value.toDouble()};
   if (value is String) return {'stringValue': value};
-  if (value is DateTime)
+  if (value is DateTime) {
     return {'timestampValue': value.toUtc().toIso8601String()};
+  }
   if (value is List) {
     return {
       'arrayValue': {'values': value.map(_toFirestoreValue).toList()},
@@ -181,13 +182,15 @@ dynamic _fromFirestoreValue(Object? value) {
   if (value.containsKey('nullValue')) return null;
   if (value.containsKey('stringValue')) return value['stringValue'];
   if (value.containsKey('booleanValue')) return value['booleanValue'];
-  if (value.containsKey('integerValue'))
+  if (value.containsKey('integerValue')) {
     return int.tryParse('${value['integerValue']}') ?? 0;
+  }
   if (value.containsKey('doubleValue')) return value['doubleValue'];
   if (value.containsKey('timestampValue')) return value['timestampValue'];
   final array = value['arrayValue'];
-  if (array is Map && array['values'] is List)
+  if (array is Map && array['values'] is List) {
     return (array['values'] as List).map(_fromFirestoreValue).toList();
+  }
   final map = value['mapValue'];
   if (map is Map && map['fields'] is Map) {
     final fields = map['fields'] as Map;
