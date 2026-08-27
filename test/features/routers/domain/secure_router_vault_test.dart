@@ -33,18 +33,53 @@ void main() {
     });
 
     test('stores and reads router password securely', () async {
-      await vault.storeRouterSecret(routerId: 'r-1', secret: 'superSecret123');
-      final secret = await vault.readRouterSecret('r-1');
+      await vault.storeRouterSecret(
+        organizationId: 'org-a',
+        routerId: 'r-1',
+        secret: 'superSecret123',
+      );
+      final secret = await vault.readRouterSecret(
+        organizationId: 'org-a',
+        routerId: 'r-1',
+      );
 
       expect(secret, equals('superSecret123'));
     });
 
     test('deletes router password securely', () async {
-      await vault.storeRouterSecret(routerId: 'r-1', secret: 'superSecret123');
-      await vault.deleteRouterSecret('r-1');
-      final secret = await vault.readRouterSecret('r-1');
+      await vault.storeRouterSecret(
+        organizationId: 'org-a',
+        routerId: 'r-1',
+        secret: 'superSecret123',
+      );
+      await vault.deleteRouterSecret(organizationId: 'org-a', routerId: 'r-1');
+      final secret = await vault.readRouterSecret(
+        organizationId: 'org-a',
+        routerId: 'r-1',
+      );
 
       expect(secret, isNull);
+    });
+
+    test('isolates identical router IDs across organizations', () async {
+      await vault.storeRouterSecret(
+        organizationId: 'org-a',
+        routerId: 'r-1',
+        secret: 'a',
+      );
+      await vault.storeRouterSecret(
+        organizationId: 'org-b',
+        routerId: 'r-1',
+        secret: 'b',
+      );
+      expect(
+        await vault.readRouterSecret(organizationId: 'org-a', routerId: 'r-1'),
+        'a',
+      );
+      expect(
+        await vault.readRouterSecret(organizationId: 'org-b', routerId: 'r-1'),
+        'b',
+      );
     });
   });
 }

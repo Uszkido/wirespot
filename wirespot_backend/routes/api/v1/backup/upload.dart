@@ -6,6 +6,12 @@ import 'package:wirespot_backend/backend_store.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   if (!isAuthenticated(context)) return unauthorized();
+  if (!hasRole(context, {'owner', 'admin'})) {
+    return Response.json(
+      statusCode: 403,
+      body: {'error': 'Cloud backup management permission required.'},
+    );
+  }
   if (context.request.method != HttpMethod.post) {
     return Response(statusCode: 405, body: 'Method Not Allowed');
   }

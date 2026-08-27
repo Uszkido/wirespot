@@ -100,15 +100,7 @@ class FirebaseApiClient {
     try {
       final formattedFields = <String, dynamic>{};
       fields.forEach((key, value) {
-        if (value is String) {
-          formattedFields[key] = {'stringValue': value};
-        } else if (value is int) {
-          formattedFields[key] = {'integerValue': value.toString()};
-        } else if (value is double) {
-          formattedFields[key] = {'doubleValue': value};
-        } else if (value is bool) {
-          formattedFields[key] = {'booleanValue': value};
-        }
+        formattedFields[key] = _toFirestoreValue(value);
       });
 
       final response = await _dio.patch<Map<String, dynamic>>(
@@ -121,4 +113,87 @@ class FirebaseApiClient {
       return false;
     }
   }
+
+  Future<Map<String, dynamic>?> getFirestoreDocument({
+    required String idToken,
+    required String documentPath,
+  }) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '$_firestoreBaseUrl/$documentPath',
+        options: Options(headers: {'Authorization': 'Bearer $idToken'}),
+      );
+      final fields = response.data?['fields'];
+      if (fields is! Map) return {};
+      return Map<String, dynamic>.from(
+        fields.map(
+          (key, value) => MapEntry(key.toString(), _fromFirestoreValue(value)),
+        ),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<bool> deleteFirestoreDocument({
+    required String idToken,
+    required String documentPath,
+  }) async {
+    try {
+      final response = await _dio.delete<void>(
+        '$_firestoreBaseUrl/$documentPath',
+        options: Options(headers: {'Authorization': 'Bearer $idToken'}),
+      );
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+}
+
+Map<String, dynamic> _toFirestoreValue(Object? value) {
+  if (value == null) return {'nullValue': null};
+  if (value is bool) return {'booleanValue': value};
+  if (value is int) return {'integerValue': value.toString()};
+  if (value is num) return {'doubleValue': value.toDouble()};
+  if (value is String) return {'stringValue': value};
+  if (value is DateTime)
+    return {'timestampValue': value.toUtc().toIso8601String()};
+  if (value is List) {
+    return {
+      'arrayValue': {'values': value.map(_toFirestoreValue).toList()},
+    };
+  }
+  if (value is Map) {
+    return {
+      'mapValue': {
+        'fields': value.map(
+          (key, nested) => MapEntry(key.toString(), _toFirestoreValue(nested)),
+        ),
+      },
+    };
+  }
+  return {'stringValue': value.toString()};
+}
+
+dynamic _fromFirestoreValue(Object? value) {
+  if (value is! Map) return null;
+  if (value.containsKey('nullValue')) return null;
+  if (value.containsKey('stringValue')) return value['stringValue'];
+  if (value.containsKey('booleanValue')) return value['booleanValue'];
+  if (value.containsKey('integerValue'))
+    return int.tryParse('${value['integerValue']}') ?? 0;
+  if (value.containsKey('doubleValue')) return value['doubleValue'];
+  if (value.containsKey('timestampValue')) return value['timestampValue'];
+  final array = value['arrayValue'];
+  if (array is Map && array['values'] is List)
+    return (array['values'] as List).map(_fromFirestoreValue).toList();
+  final map = value['mapValue'];
+  if (map is Map && map['fields'] is Map) {
+    final fields = map['fields'] as Map;
+    return fields.map(
+      (key, nested) => MapEntry(key.toString(), _fromFirestoreValue(nested)),
+    );
+  }
+  return null;
 }

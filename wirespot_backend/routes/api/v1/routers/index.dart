@@ -13,6 +13,12 @@ Future<Response> onRequest(RequestContext context) async {
   }
 
   if (context.request.method == HttpMethod.post) {
+    if (!hasRole(context, {'owner', 'admin', 'manager'})) {
+      return Response.json(
+        statusCode: 403,
+        body: {'error': 'Router management permission required.'},
+      );
+    }
     try {
       final payload = jsonDecode(await context.request.body());
       if (payload is! Map || payload['routers'] is! List) {
