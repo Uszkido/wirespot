@@ -1,55 +1,62 @@
+import 'dart:convert';
+
 import 'package:dart_frog/dart_frog.dart';
 import 'package:wirespot_backend/auth.dart';
+import 'package:wirespot_backend/backend_store.dart';
 
-Response onRequest(RequestContext context) {
+Future<Response> onRequest(RequestContext context) async {
   if (!isAuthenticated(context)) return unauthorized();
-  return Response.json(
-    body: {
-      'status': 'success',
-      'routers': [
-        {
-          'name': 'Main-Gateway-MikroTik',
-          'vendor': 'MikroTik RouterOS',
-          'ip': '192.168.88.1',
-          'port': 8728,
-          'status': 'online',
+  if (context.request.method == HttpMethod.get) {
+    return Response.json(
+      body: {'status': 'success', 'routers': BackendStore.routers},
+    );
+  }
+
+  if (context.request.method == HttpMethod.post) {
+    try {
+      final payload = jsonDecode(await context.request.body());
+      if (payload is! Map || payload['routers'] is! List) {
+        return Response.json(
+          statusCode: 400,
+          body: {'error': 'Expected a routers list.'},
+        );
+      }
+      final incoming = (payload['routers'] as List)
+          .whereType<Map>()
+          .map((router) => Map<String, dynamic>.from(router))
+          .where(_isValidRouter)
+          .toList();
+      BackendStore.routers
+        ..clear()
+        ..addAll(incoming);
+      return Response.json(
+        body: {
+          'status': 'success',
+          'syncedCount': incoming.length,
+          'timestamp': DateTime.now().toUtc().toIso8601String(),
         },
-        {
-          'name': 'Pool-Bar-Ruijie',
-          'vendor': 'Ruijie / Reyee',
-          'ip': '10.0.0.15',
-          'port': 443,
-          'status': 'online',
-        },
-        {
-          'name': 'Lobby-AP-OpenWrt',
-          'vendor': 'OpenWrt',
-          'ip': '192.168.1.1',
-          'port': 22,
-          'status': 'online',
-        },
-        {
-          'name': 'Hotel-Controller-Omada',
-          'vendor': 'TP-Link Omada',
-          'ip': '192.168.0.10',
-          'port': 443,
-          'status': 'online',
-        },
-        {
-          'name': 'Campus-UniFi-CloudKey',
-          'vendor': 'Ubiquiti UniFi',
-          'ip': '192.168.20.5',
-          'port': 443,
-          'status': 'online',
-        },
-        {
-          'name': 'Generic-Edge-Gateway',
-          'vendor': 'Generic Router',
-          'ip': '10.0.0.1',
-          'port': 443,
-          'status': 'online',
-        },
-      ],
-    },
-  );
+      );
+    } catch (_) {
+      return Response.json(
+        statusCode: 400,
+        body: {'error': 'Invalid router sync payload.'},
+      );
+    }
+  }
+
+  return Response(statusCode: 405, body: 'Method Not Allowed');
+}
+
+bool _isValidRouter(Map<String, dynamic> router) {
+  final name = router['name'];
+  final vendor = router['vendor'];
+  final ip = router['ip'];
+  final port = router['port'];
+  return name is String &&
+      name.trim().isNotEmpty &&
+      vendor is String &&
+      vendor.trim().isNotEmpty &&
+      ip is String &&
+      ip.trim().isNotEmpty &&
+      (port is int || port is num);
 }

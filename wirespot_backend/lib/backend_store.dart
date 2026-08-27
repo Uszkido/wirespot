@@ -6,6 +6,7 @@ class BackendStore {
   BackendStore._();
 
   static final vouchers = <Map<String, dynamic>>[];
+  static final routers = <Map<String, dynamic>>[];
   static Map<String, dynamic>? latestBackup;
   static DateTime? latestBackupAt;
   static int telemetryEvents = 0;
