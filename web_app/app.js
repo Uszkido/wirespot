@@ -438,6 +438,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (element) element.textContent = value;
     };
     set('kpi-revenue', formatMoney(revenue));
+    const revenueStatus = document.getElementById('kpi-revenue-change');
+    if (revenueStatus) revenueStatus.innerHTML = `<i class="fa-solid fa-coins"></i> ${state.vouchers.length ? `${state.vouchers.length} voucher${state.vouchers.length === 1 ? '' : 's'} issued` : 'No vouchers issued'}`;
     set('kpi-routers', `${onlineRouters} / ${state.routers.length}`);
     set('kpi-users', String(state.hotspotUsers.length));
     const pendingSync = state.cloudQueue.filter(q => q.status === 'pending').length;

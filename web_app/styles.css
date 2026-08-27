@@ -1345,6 +1345,14 @@ table tbody tr:hover { background: rgba(24, 191, 255, .045); }
 .form-control { border-radius: 9px; transition: border-color .18s var(--ease), box-shadow .18s var(--ease), background .18s var(--ease); }
 .form-control:focus { background: rgba(10, 18, 34, .95); border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(24, 191, 255, .12); }
 
+.main-wrapper { background: linear-gradient(145deg, rgba(7, 13, 25, .9), rgba(6, 10, 19, .98)); }
+.header { border-bottom-color: rgba(148, 163, 184, .12); background: rgba(8, 14, 28, .72); backdrop-filter: blur(14px); }
+.status-indicator { border: 1px solid rgba(52, 211, 153, .18); background: rgba(52, 211, 153, .06); border-radius: 999px; padding: 7px 12px; }
+.kpi-card { box-shadow: 0 14px 32px rgba(0, 0, 0, .14); }
+.getting-started-card { background: linear-gradient(120deg, rgba(14, 30, 55, .95), rgba(12, 20, 37, .88)); border-color: rgba(24, 191, 255, .16); }
+.getting-started-step { border: 1px solid rgba(148, 163, 184, .1); background: rgba(6, 12, 25, .42); transition: transform .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease); }
+.getting-started-step:hover { transform: translateY(-2px); border-color: rgba(24, 191, 255, .38); background: rgba(24, 191, 255, .08); }
+
 @media (max-width: 768px) {
   .header { min-height: 64px; height: auto; gap: 10px; }
   .header-actions { gap: 6px; }
