@@ -184,7 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${r.users} Users</td>
         <td>
           <button class="btn btn-primary btn-open-cli" data-router="${r.name}" style="padding: 4px 10px; font-size: 11px; margin-right: 4px;"><i class="fa-solid fa-terminal"></i> CLI</button>
-          <button class="btn btn-secondary btn-reboot" data-router="${r.name}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-power-off"></i> Reboot</button>
+          <button class="btn btn-secondary btn-edit-router" data-router="${r.name}" style="padding: 4px 10px; font-size: 11px; margin-right: 4px;"><i class="fa-solid fa-pen"></i> Edit</button>
+          <button class="btn btn-secondary btn-reboot" data-router="${r.name}" style="padding: 4px 10px; font-size: 11px; margin-right: 4px;"><i class="fa-solid fa-power-off"></i> Reboot</button>
+          <button class="btn btn-danger btn-delete-router" data-router="${r.name}" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-trash"></i> Remove</button>
         </td>
       </tr>
     `).join('') : emptyRow(7, state.routers.length ? 'No routers match these filters.' : 'No routers connected. Use Add Router or pair a device.');
@@ -210,6 +212,48 @@ document.addEventListener('DOMContentLoaded', () => {
           saveState(); renderRouters();
           showToast(`${rName} is online again.`, 'success');
         }, 1500);
+      });
+    });
+
+    document.querySelectorAll('.btn-edit-router').forEach(b => {
+      b.addEventListener('click', () => {
+        const router = state.routers.find(item => item.name === b.getAttribute('data-router'));
+        if (!router) return;
+        const name = prompt('Router name:', router.name)?.trim();
+        if (!name) return;
+        const ip = prompt('Management address:', router.ip)?.trim();
+        if (!ip) return;
+        const port = Number(prompt('Management port:', router.port));
+        if (!Number.isInteger(port) || port < 1 || port > 65535) {
+          showToast('Enter a valid port between 1 and 65535.', 'error');
+          return;
+        }
+        const duplicate = state.routers.some(item => item !== router && item.name.toLowerCase() === name.toLowerCase());
+        if (duplicate) {
+          showToast('A router with that name already exists.', 'error');
+          return;
+        }
+        router.name = name;
+        router.ip = ip;
+        router.port = port;
+        saveState();
+        renderRouters();
+        renderSummary();
+        showToast(`${name} updated.`, 'success');
+      });
+    });
+
+    document.querySelectorAll('.btn-delete-router').forEach(b => {
+      b.addEventListener('click', () => {
+        const name = b.getAttribute('data-router');
+        const index = state.routers.findIndex(item => item.name === name);
+        if (index < 0 || !confirm(`Remove ${name} from this workspace?`)) return;
+        state.routers.splice(index, 1);
+        saveState();
+        renderRouters();
+        renderSummary();
+        renderSetupGuide();
+        showToast(`${name} removed.`, 'info');
       });
     });
   };
