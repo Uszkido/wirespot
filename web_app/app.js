@@ -375,7 +375,21 @@ document.addEventListener('DOMContentLoaded', () => {
     set('kpi-revenue', formatMoney(revenue));
     set('kpi-routers', `${onlineRouters} / ${state.routers.length}`);
     set('kpi-users', String(state.hotspotUsers.length));
-    set('kpi-pending-sync', String(state.cloudQueue.filter(q => q.status === 'pending').length));
+    const pendingSync = state.cloudQueue.filter(q => q.status === 'pending').length;
+    set('kpi-pending-sync', String(pendingSync));
+    const setStatus = (id, icon, value) => {
+      const element = document.getElementById(id);
+      if (element) element.innerHTML = `<i class="fa-solid ${icon}"></i> ${value}`;
+    };
+    setStatus('kpi-router-health', 'fa-circle-check', state.routers.length === 0
+      ? 'No routers connected'
+      : `${onlineRouters} online`);
+    setStatus('kpi-user-change', 'fa-users', state.hotspotUsers.length === 0
+      ? 'No users yet'
+      : `${state.hotspotUsers.length} provisioned`);
+    setStatus('kpi-sync-health', 'fa-clock', pendingSync === 0
+      ? 'Queue is clear'
+      : `${pendingSync} pending`);
     const priceLabel = document.getElementById('voucher-price-label');
     if (priceLabel) priceLabel.textContent = `Price (${currentCurrency()})`;
   };
@@ -589,7 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
     authModal?.classList.add('active');
   };
 
-  if (!savedAccount) openAuth(true);
+  if (!localStorage.getItem('wirespot_web_session')) openAuth(!savedAccount);
 
   if (tabAuthLogin && tabAuthReg) {
     tabAuthLogin.addEventListener('click', () => {
