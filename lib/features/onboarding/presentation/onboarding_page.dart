@@ -261,7 +261,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 CircleAvatar(
                   radius: 12,
                   backgroundColor: theme.colorScheme.primaryContainer,
-                  child: Text('${index + 1}', style: theme.textTheme.labelMedium),
+                  child: Text(
+                    '${index + 1}',
+                    style: theme.textTheme.labelMedium,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(child: Text(steps[index])),
