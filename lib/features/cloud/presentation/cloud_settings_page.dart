@@ -64,10 +64,7 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
     return settings;
   }
 
-  Future<void> _saveAndTest(
-    BuildContext context,
-    CloudController controller,
-  ) async {
+  Future<void> _saveAndTest(CloudController controller) async {
     try {
       final saved = await controller.saveConnection(_settingsFromForm());
       if (!mounted || !saved) return;
@@ -197,7 +194,7 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                   child: FilledButton.icon(
                     onPressed: state.isLoading
                         ? null
-                        : () => _saveAndTest(context, controller),
+                        : () => _saveAndTest(controller),
                     icon: const Icon(Icons.save),
                     label: Text(text.save),
                   ),
@@ -206,7 +203,7 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                 OutlinedButton.icon(
                   onPressed: state.isLoading || state.isTestingConnection
                       ? null
-                      : () => _saveAndTest(context, controller),
+                      : () => _saveAndTest(controller),
                   icon: state.isTestingConnection
                       ? const SizedBox(
                           width: 16,
