@@ -615,16 +615,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('btn-wiz-back-3')?.addEventListener('click', () => showWizardStep(2));
   document.getElementById('btn-wiz-next-3')?.addEventListener('click', () => {
+    const vendorKey = document.getElementById('wiz-router-vendor').value;
     const vendor = document.getElementById('wiz-router-vendor').selectedOptions[0].text;
     const host = document.getElementById('wiz-router-host').value.trim();
     const port = document.getElementById('wiz-router-port').value || '8728';
     const ssid = document.getElementById('wiz-ssid').value.trim() || 'WireSpot_Guest_WiFi';
     const profile = document.getElementById('wiz-package-name').value.trim() || 'WireSpot Guest Pass';
-    document.getElementById('wiz-script-preview').value = `# WireSpot ${vendor} hotspot setup\n# Target: ${host}:${port}\n/interface wireless set [ find default-name=wlan1 ] ssid="${ssid}"\n/ip hotspot user profile add name="${profile}" rate-limit="${document.getElementById('wiz-speed-limit').value}M/${document.getElementById('wiz-speed-limit').value}M" session-timeout=${document.getElementById('wiz-duration').value}m\n# Review these commands on the router before applying.`;
+    const speed = document.getElementById('wiz-speed-limit').value || '3';
+    const duration = document.getElementById('wiz-duration').value || '60';
+    const script = vendorKey === 'mikrotik'
+      ? `# WireSpot MikroTik RouterOS hotspot setup\n# Target: ${host}:${port}\n# Review commands and apply them in a trusted RouterOS terminal.\n/interface wireless set [ find default-name=wlan1 ] ssid="${ssid}"\n/ip hotspot user profile add name="${profile}" rate-limit="${speed}M/${speed}M" session-timeout=${duration}m\n/ip service set api disabled=no port=${port}`
+      : `# WireSpot ${vendor} connection profile\n# Target: ${host}:${port}\n# This vendor is managed through its controller/API connector.\n# Save this router, then configure credentials in the secure mobile app or cloud backend.\n# Hotspot profile: ${profile}\n# Speed: ${speed} Mbps · Duration: ${duration} minutes`;
+    document.getElementById('wiz-script-preview').value = script;
     showWizardStep(4);
   });
   document.getElementById('btn-wiz-back-4')?.addEventListener('click', () => showWizardStep(3));
-  document.getElementById('btn-wiz-deploy')?.addEventListener('click', () => {
+  document.getElementById('btn-wiz-deploy')?.addEventListener('click', async () => {
     const vendor = document.getElementById('wiz-router-vendor').selectedOptions[0].text;
     const host = document.getElementById('wiz-router-host').value.trim();
     const router = { name: `${vendor.split(' / ')[0]}-${host}`, vendor, ip: host, port: Number(document.getElementById('wiz-router-port').value) || 8728, status: 'configured', users: 0, hotspotProfile: document.getElementById('wiz-package-name').value.trim() };
@@ -633,9 +639,21 @@ document.addEventListener('DOMContentLoaded', () => {
     else state.routers.push(router);
     state.events.unshift({ time: new Date().toTimeString().substring(0, 8), source: 'SetupWizard', desc: `Saved ${vendor} router configuration for ${host}`, status: 'success' });
     saveState(); renderRouters(); renderEvents(); renderSummary(); renderSetupGuide();
+    const cloudConfig = readCloudConfig?.();
+    if (cloudConfig?.url && cloudConfig.token) {
+      try {
+        await cloudRequest('api/v1/routers', {
+          method: 'POST',
+          body: JSON.stringify({ routers: state.routers })
+        });
+        showToast(`Router saved locally and synced to WireSpot Cloud.`, 'success');
+      } catch (error) {
+        showToast(`Router saved locally; cloud sync failed: ${error.message}`, 'error');
+      }
+    }
     document.getElementById('modal-wizard').classList.remove('active');
     showWizardStep(1);
-    showToast(`Router configuration saved for ${host}.`, 'success');
+    if (!cloudConfig?.url || !cloudConfig.token) showToast(`Router configuration saved for ${host}.`, 'success');
   });
 
   // ─── Auth Form Handler ───
