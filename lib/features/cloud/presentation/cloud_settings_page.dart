@@ -70,8 +70,10 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
   ) async {
     try {
       final saved = await controller.saveConnection(_settingsFromForm());
-      if (saved && context.mounted) await controller.testConnection();
+      if (!mounted || !saved) return;
+      await controller.testConnection();
     } on ArgumentError catch (error) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error.message?.toString() ?? 'Invalid cloud URL.'),
@@ -322,15 +324,15 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
             ),
             if (hasSession) ...[
               const SizedBox(height: 12),
-              _CredentialRow(
+              _buildCredentialRow(
                 label: 'API Base URL',
                 value: state.connection?.apiBaseUrl ?? 'Not configured',
               ),
-              _CredentialRow(
+              _buildCredentialRow(
                 label: 'Organization ID',
                 value: state.connection?.organizationId ?? 'Not assigned',
               ),
-              _CredentialRow(
+              _buildCredentialRow(
                 label: 'Mobile access code',
                 value: session.accessToken,
                 obscured: true,
@@ -504,7 +506,7 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
     );
   }
 
-  Widget _CredentialRow({
+  Widget _buildCredentialRow({
     required String label,
     required String value,
     bool obscured = false,
