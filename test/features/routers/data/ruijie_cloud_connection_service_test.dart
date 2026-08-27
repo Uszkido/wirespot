@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wirespot/core/api/routeros_api_exception.dart';
 import 'package:wirespot/core/api/vendor_http_client.dart';
 import 'package:wirespot/core/storage/router_credentials.dart';
 import 'package:wirespot/features/routers/data/ruijie_cloud_connection_service.dart';
@@ -101,10 +100,7 @@ void main() {
       httpClient: _throwingHttp(),
     );
 
-    expect(
-      () => service.testConnection(_ruijieRouter),
-      throwsA(isA<RouterOsApiException>()),
-    );
+    expect(await service.testConnection(_ruijieRouter), isFalse);
   });
 
   test('discovers devices from a Ruijie Cloud data response', () async {

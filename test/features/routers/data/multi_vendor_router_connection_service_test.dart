@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wirespot/core/api/routeros_api_response.dart';
 import 'package:wirespot/core/api/routeros_models.dart';
 import 'package:wirespot/core/api/vendor_http_client.dart';
+import 'package:wirespot/core/storage/router_credentials.dart';
 import 'package:wirespot/features/routers/data/generic_router_connection_service.dart';
 import 'package:wirespot/features/routers/data/multi_vendor_router_connection_service.dart';
 import 'package:wirespot/features/routers/data/omada_connection_service.dart';
@@ -45,7 +46,11 @@ void main() {
     () async {
       final stubHttp = _stubHttp200();
       final ruijie = RuijieCloudConnectionService(
-        readCredentials: (_) async => null,
+        readCredentials: (_) async => const RouterCredentials(
+          username: 'operator',
+          password: '',
+          accessToken: 'stub-cloud-token',
+        ),
         httpClient: stubHttp,
         requestDevices: (_) async => Response(
           requestOptions: RequestOptions(path: ''),
