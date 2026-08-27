@@ -1366,3 +1366,55 @@ table tbody tr:hover { background: rgba(24, 191, 255, .045); }
   table { min-width: 680px; }
   .modal-content { width: calc(100vw - 24px); max-height: calc(100vh - 24px); }
 }
+
+/* ═══ WireSpot Operations Console — visual redefinition ═══ */
+:root {
+  --bg-deep: #eef3f8;
+  --bg-surface: #f7f9fc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fbff;
+  --bg-elevated: #ffffff;
+  --border-subtle: #dce5ef;
+  --border-hover: #9bc8ea;
+  --border-glow: rgba(20, 139, 214, .32);
+  --accent: #087fca;
+  --accent-glow: rgba(8, 127, 202, .22);
+  --accent-deep: #075b95;
+  --indigo: #0e9bd6;
+  --indigo-glow: rgba(14, 155, 214, .2);
+  --text-primary: #10253d;
+  --text-secondary: #536b84;
+  --text-muted: #7d91a6;
+}
+
+body { background: var(--bg-deep); }
+body::before {
+  background: radial-gradient(ellipse 70% 45% at 75% 0%, rgba(14, 155, 214, .11), transparent),
+    radial-gradient(ellipse 55% 45% at 20% 100%, rgba(52, 211, 153, .07), transparent);
+}
+.sidebar {
+  background: #10253d;
+  border-right: 0;
+  box-shadow: 10px 0 30px rgba(16, 37, 61, .12);
+}
+.brand { border-bottom-color: rgba(255, 255, 255, .12); }
+.brand-text h2 { background: linear-gradient(135deg, #fff, #7bd7ff); -webkit-background-clip: text; }
+.brand-text span { color: #7bd7ff; }
+.nav-item { color: #a9bfd3; }
+.nav-item:hover, .nav-item.active { color: #fff; background: rgba(123, 215, 255, .13); }
+.user-badge { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .12); }
+.user-badge > div:last-child { color: #e9f3fb; }
+.main-wrapper { background: #eef3f8; }
+.header { background: rgba(255, 255, 255, .86); border-bottom: 1px solid #dce5ef; backdrop-filter: blur(16px); }
+.glass { background: #fff; border-color: #dce5ef; box-shadow: 0 8px 24px rgba(16, 37, 61, .045); }
+.glass:hover { border-color: #9bc8ea; box-shadow: 0 12px 30px rgba(16, 37, 61, .08); }
+.kpi-card::after { background: linear-gradient(90deg, transparent, rgba(8, 127, 202, .2), transparent); }
+.form-control { background: #f8fafc; color: var(--text-primary); border-color: #d5e0eb; }
+.form-control:focus { background: #fff; }
+.table-container { border-color: #dce5ef; }
+table th { background: #f1f6fa; color: #536b84; }
+table tbody tr:hover { background: #f3f9fd; }
+.getting-started-card { background: linear-gradient(120deg, #f4fbff, #fff); border-color: #b9def2; }
+.getting-started-step { background: #fff; border-color: #dce5ef; }
+.getting-started-step:hover { background: #f1faff; border-color: #7cc6eb; }
+.status-indicator { background: #effaf6; border-color: #b7ead7; }
