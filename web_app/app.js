@@ -979,10 +979,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const reportCurrency = document.getElementById('report-currency');
   const savedCurrency = localStorage.getItem('wirespot_currency') || 'NGN';
+  const renderInvoiceAmounts = () => document.querySelectorAll('.invoice-amount').forEach(cell => {
+    cell.textContent = formatMoney(cell.dataset.amount);
+  });
+  renderInvoiceAmounts();
   if (reportCurrency) reportCurrency.value = ['NGN', 'KES', 'GHS', 'USD'].includes(savedCurrency) ? savedCurrency : 'NGN';
   reportCurrency?.addEventListener('change', event => {
     localStorage.setItem('wirespot_currency', event.target.value);
-    renderReport(); renderSummary(); renderVouchers();
+    renderReport(); renderSummary(); renderVouchers(); renderInvoiceAmounts();
   });
 
   const renderReport = () => {
@@ -1030,7 +1034,16 @@ document.addEventListener('DOMContentLoaded', () => {
     popup.document.close();
   };
   document.getElementById('btn-export-pdf')?.addEventListener('click', () => { const { rows } = renderReport(); printReport('WireSpot Sales Report', rows); });
-  ['btn-download-inv-1', 'btn-download-inv-2'].forEach(id => document.getElementById(id)?.addEventListener('click', () => printReport('WireSpot Invoice', [])));
+  ['btn-download-inv-1', 'btn-download-inv-2'].forEach(id => document.getElementById(id)?.addEventListener('click', event => {
+    const button = event.currentTarget;
+    printReport(`WireSpot Invoice ${button.dataset.invoice}`, [{
+      code: button.dataset.invoice,
+      profile: 'Enterprise Cloud',
+      createdAt: button.dataset.invoiceDate,
+      status: 'paid',
+      price: 49
+    }]);
+  }));
   renderReport();
 
   // ─── Thermal Receipt Live Preview Sync ───
