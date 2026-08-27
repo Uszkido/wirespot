@@ -625,7 +625,9 @@ class _PremiumLicenseCard extends ConsumerWidget {
                         ),
                       );
                       if (confirmed != true) return;
-                      await ref.read(entitlementServiceProvider).deactivateDevice();
+                      await ref
+                          .read(entitlementServiceProvider)
+                          .deactivateDevice();
                       ref.invalidate(entitlementSnapshotProvider);
                     }
                   : null,
