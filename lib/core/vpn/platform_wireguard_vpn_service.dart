@@ -101,6 +101,14 @@ class PlatformWireGuardVpnService implements WireGuardVpnService {
       if (entry.key.startsWith('wireguard_config_')) {
         final tunnelName = entry.key.replaceFirst('wireguard_config_', '');
         tunnels.add(WireGuardTunnel(name: tunnelName, config: entry.value));
+      } else if (entry.key.startsWith('wireguard.') &&
+          entry.key.endsWith('.config')) {
+        final tunnelName = entry.key
+            .replaceFirst('wireguard.', '')
+            .replaceFirst('.config', '');
+        if (!tunnels.any((t) => t.name == tunnelName)) {
+          tunnels.add(WireGuardTunnel(name: tunnelName, config: entry.value));
+        }
       }
     }
     return tunnels;

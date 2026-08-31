@@ -21,13 +21,14 @@ class WireGuardTunnelManager(private val activity: Activity) {
 
     fun importConfig(name: String, config: String) {
         val tunnelName = normalizeTunnelName(name)
-        require(config.contains("[Interface]")) { "WireGuard config is missing [Interface]." }
-        require(config.contains("[Peer]")) { "WireGuard config is missing [Peer]." }
+        require(config.lowercase().contains("[interface]")) { "WireGuard config is missing [Interface]." }
+        require(config.lowercase().contains("[peer]")) { "WireGuard config is missing [Peer]." }
         parseConfig(config)
 
         importedConfigs[tunnelName] = config
         preferences.edit()
             .putString(KEY_ACTIVE_TUNNEL, tunnelName)
+            .putString(KEY_CONFIG_PREFIX + tunnelName, config)
             .apply()
         activeTunnelName = tunnelName
         message = "Tunnel config imported."
@@ -36,8 +37,16 @@ class WireGuardTunnelManager(private val activity: Activity) {
 
     fun connect(name: String): Map<String, Any?> {
         val tunnelName = normalizeTunnelName(name)
-        val rawConfig = importedConfigs[tunnelName]
-            ?: throw IllegalArgumentException("No imported WireGuard config found for $tunnelName.")
+        var rawConfig = importedConfigs[tunnelName]
+        if (rawConfig == null) {
+            rawConfig = preferences.getString(KEY_CONFIG_PREFIX + tunnelName, null)
+            if (rawConfig != null) {
+                importedConfigs[tunnelName] = rawConfig
+            }
+        }
+        if (rawConfig == null) {
+            throw IllegalArgumentException("No imported WireGuard config found for $tunnelName.")
+        }
 
         activeTunnelName = tunnelName
         preferences.edit().putString(KEY_ACTIVE_TUNNEL, tunnelName).apply()
@@ -192,6 +201,7 @@ class WireGuardTunnelManager(private val activity: Activity) {
         const val VPN_PERMISSION_REQUEST_CODE = 7012
         private const val PREFERENCES_NAME = "wirespot_wireguard"
         private const val KEY_ACTIVE_TUNNEL = "active_tunnel"
+        private const val KEY_CONFIG_PREFIX = "tunnel_config_"
         private const val MAX_LOG_LINES = 200
     }
 }

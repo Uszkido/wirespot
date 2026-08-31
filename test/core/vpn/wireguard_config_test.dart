@@ -94,6 +94,30 @@ AllowedIPs = 10.0.0.0/24
       );
     });
 
+    test('parses config with lowercase section names and lowercase keys', () {
+      const config = '''
+[interface]
+privatekey = lower-private-key
+address = 10.8.0.2/24
+dns = 8.8.4.4
+
+[peer]
+publickey = lower-public-key
+allowedips = 0.0.0.0/0
+endpoint = 203.0.113.5:51820
+''';
+
+      final parsed = WireGuardConfig.parse(name: 'lowercase_test', config: config);
+
+      expect(parsed.name, 'lowercase_test');
+      expect(parsed.interfaceConfig.privateKey, 'lower-private-key');
+      expect(parsed.interfaceConfig.addresses, ['10.8.0.2/24']);
+      expect(parsed.interfaceConfig.dnsServers, ['8.8.4.4']);
+      expect(parsed.peers.first.publicKey, 'lower-public-key');
+      expect(parsed.peers.first.allowedIps, ['0.0.0.0/0']);
+      expect(parsed.peers.first.endpoint, '203.0.113.5:51820');
+    });
+
     test('throws FormatException on missing [Peer]', () {
       const config = '''
 [Interface]

@@ -57,8 +57,11 @@ class WireGuardInterfaceConfig {
   final int? mtu;
 
   factory WireGuardInterfaceConfig.fromValues(Map<String, String> values) {
-    final privateKey = values['PrivateKey'];
-    final address = values['Address'];
+    final normalized = {
+      for (final entry in values.entries) entry.key.toLowerCase(): entry.value,
+    };
+    final privateKey = normalized['privatekey'];
+    final address = normalized['address'];
     if (privateKey == null || privateKey.isEmpty) {
       throw const FormatException(
         'WireGuard interface private key is missing.',
@@ -71,9 +74,9 @@ class WireGuardInterfaceConfig {
     return WireGuardInterfaceConfig(
       privateKey: privateKey,
       addresses: _splitCsv(address),
-      dnsServers: _splitCsv(values['DNS']),
-      listenPort: int.tryParse(values['ListenPort'] ?? ''),
-      mtu: int.tryParse(values['MTU'] ?? ''),
+      dnsServers: _splitCsv(normalized['dns']),
+      listenPort: int.tryParse(normalized['listenport'] ?? ''),
+      mtu: int.tryParse(normalized['mtu'] ?? ''),
     );
   }
 }
@@ -94,8 +97,11 @@ class WireGuardPeerConfig {
   final int? persistentKeepalive;
 
   factory WireGuardPeerConfig.fromValues(Map<String, String> values) {
-    final publicKey = values['PublicKey'];
-    final allowedIps = values['AllowedIPs'];
+    final normalized = {
+      for (final entry in values.entries) entry.key.toLowerCase(): entry.value,
+    };
+    final publicKey = normalized['publickey'];
+    final allowedIps = normalized['allowedips'];
     if (publicKey == null || publicKey.isEmpty) {
       throw const FormatException('WireGuard peer public key is missing.');
     }
@@ -106,9 +112,9 @@ class WireGuardPeerConfig {
     return WireGuardPeerConfig(
       publicKey: publicKey,
       allowedIps: _splitCsv(allowedIps),
-      endpoint: values['Endpoint'],
-      presharedKey: values['PresharedKey'],
-      persistentKeepalive: int.tryParse(values['PersistentKeepalive'] ?? ''),
+      endpoint: normalized['endpoint'],
+      presharedKey: normalized['presharedkey'],
+      persistentKeepalive: int.tryParse(normalized['persistentkeepalive'] ?? ''),
     );
   }
 }
@@ -120,18 +126,18 @@ _ParsedWireGuardSections _parseSections(String config) {
   String? currentSection;
 
   for (final rawLine in config.split(RegExp(r'\r?\n'))) {
-    final line = rawLine.split('#').first.trim();
+    final line = rawLine.split('#').first.split(';').first.trim();
     if (line.isEmpty) {
       continue;
     }
 
     if (line.startsWith('[') && line.endsWith(']')) {
       final sectionName = line.substring(1, line.length - 1).trim();
-      currentSection = sectionName;
+      currentSection = sectionName.toLowerCase();
       currentValues = <String, String>{};
-      if (sectionName == 'Interface') {
+      if (currentSection == 'interface') {
         interfaceValues = currentValues;
-      } else if (sectionName == 'Peer') {
+      } else if (currentSection == 'peer') {
         peerValues.add(currentValues);
       }
       continue;
@@ -139,10 +145,10 @@ _ParsedWireGuardSections _parseSections(String config) {
 
     final separator = line.indexOf('=');
     if (separator < 1 || currentSection == null || currentValues == null) {
-      throw FormatException('Invalid WireGuard config line: $rawLine');
+      continue;
     }
 
-    if (currentSection == 'Interface' || currentSection == 'Peer') {
+    if (currentSection == 'interface' || currentSection == 'peer') {
       currentValues[line.substring(0, separator).trim()] = line
           .substring(separator + 1)
           .trim();

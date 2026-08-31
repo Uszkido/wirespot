@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import '../domain/services/mikrotik_script_generator_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -701,6 +703,19 @@ class _RouterFormBody extends StatelessWidget {
                     prefixIcon: const Icon(Icons.password_outlined),
                   ),
                 ),
+                if (vendor == RouterVendor.mikrotik) ...[
+                  const SizedBox(height: 16),
+                  _MikroTikSetupCommandCard(
+                    username: usernameController.text.isEmpty
+                        ? 'wirespot'
+                        : usernameController.text,
+                    password: passwordController.text.isEmpty
+                        ? '<YOUR_PASSWORD>'
+                        : passwordController.text,
+                    apiPort: int.tryParse(portController.text) ?? 8728,
+                    useSsl: useSsl,
+                  ),
+                ],
                 const SizedBox(height: 24),
                 FilledButton.icon(
                   onPressed: isSaving ? null : onSave,
@@ -737,5 +752,119 @@ class _RouterFormBody extends StatelessWidget {
       return 'Enter a valid port from 1 to 65535';
     }
     return null;
+  }
+}
+
+class _MikroTikSetupCommandCard extends StatelessWidget {
+  const _MikroTikSetupCommandCard({
+    required this.username,
+    required this.password,
+    required this.apiPort,
+    required this.useSsl,
+  });
+
+  final String username;
+  final String password;
+  final int apiPort;
+  final bool useSsl;
+
+  static const _scriptService = MikroTikScriptGeneratorService();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final fullScript = _scriptService.generateSetupScript(
+      username: username,
+      password: password,
+      apiPort: apiPort,
+      enableSsl: useSsl,
+    );
+    final oneLiner = _scriptService.generateOneLiner(
+      username: username,
+      password: password,
+      apiPort: apiPort,
+    );
+
+    return Card(
+      color: colorScheme.secondaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.terminal, color: colorScheme.onSecondaryContainer),
+                const SizedBox(width: 8),
+                Text(
+                  'MikroTik Auto-Setup Command',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: colorScheme.onSecondaryContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Paste this into WinBox Terminal or SSH to bind this router to WireSpot:',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSecondaryContainer,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SelectableText(
+                fullScript,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontFamily: 'monospace',
+                  fontSize: 11,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: oneLiner));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Setup command copied to clipboard!'),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.copy, size: 18),
+                    label: const Text('Copy 1-liner'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: fullScript));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Full script copied to clipboard!'),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.content_copy, size: 18),
+                    label: const Text('Copy full script'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
