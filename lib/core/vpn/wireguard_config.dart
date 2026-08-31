@@ -114,7 +114,9 @@ class WireGuardPeerConfig {
       allowedIps: _splitCsv(allowedIps),
       endpoint: normalized['endpoint'],
       presharedKey: normalized['presharedkey'],
-      persistentKeepalive: int.tryParse(normalized['persistentkeepalive'] ?? ''),
+      persistentKeepalive: int.tryParse(
+        normalized['persistentkeepalive'] ?? '',
+      ),
     );
   }
 }

@@ -107,7 +107,10 @@ allowedips = 0.0.0.0/0
 endpoint = 203.0.113.5:51820
 ''';
 
-      final parsed = WireGuardConfig.parse(name: 'lowercase_test', config: config);
+      final parsed = WireGuardConfig.parse(
+        name: 'lowercase_test',
+        config: config,
+      );
 
       expect(parsed.name, 'lowercase_test');
       expect(parsed.interfaceConfig.privateKey, 'lower-private-key');
