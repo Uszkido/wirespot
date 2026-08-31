@@ -61,7 +61,7 @@ jobs:
         run: test -f web_app/index.html && test -f web_app/styles.css && test -f web_app/app.js
 
       - name: Upload release APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: WireSpot-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
