@@ -33,8 +33,8 @@ class WireGuardChannelHandler(
     }
 
     fun onVpnPermissionResult(resultCode: Int) {
-        manager.onPermissionResult(resultCode)?.let { status ->
-            emitStatus(status)
+        manager.onPermissionResult(resultCode) { status, _ ->
+            status?.let { emitStatus(it) }
         }
     }
 
@@ -50,9 +50,15 @@ class WireGuardChannelHandler(
                 }
                 "connect" -> {
                     val name = call.argument<String>("name").orEmpty()
-                    val status = manager.connect(name)
-                    emitStatus(status)
-                    result.success(null)
+                    manager.connect(name) { status, error ->
+                        if (error != null) {
+                            val msg = error.message ?: error.localizedMessage ?: error.toString()
+                            result.error("WIREGUARD_ERROR", msg, null)
+                        } else {
+                            emitStatus(status)
+                            result.success(null)
+                        }
+                    }
                 }
                 "requestPermission" -> {
                     val status = manager.requestPermission()
@@ -60,9 +66,15 @@ class WireGuardChannelHandler(
                     result.success(null)
                 }
                 "disconnect" -> {
-                    val status = manager.disconnect()
-                    emitStatus(status)
-                    result.success(null)
+                    manager.disconnect { status, error ->
+                        if (error != null) {
+                            val msg = error.message ?: error.localizedMessage ?: error.toString()
+                            result.error("WIREGUARD_ERROR", msg, null)
+                        } else {
+                            emitStatus(status)
+                            result.success(null)
+                        }
+                    }
                 }
                 "status" -> result.success(manager.statusMap())
                 "statistics" -> result.success(manager.statisticsMap())

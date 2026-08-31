@@ -3,14 +3,19 @@ package com.wirespot.app.vpn
 import android.app.Activity
 import android.content.Context
 import android.net.VpnService
+import android.os.Handler
+import android.os.Looper
 import com.wireguard.android.backend.GoBackend
 import com.wireguard.android.backend.Tunnel
 import com.wireguard.config.Config
 import java.io.ByteArrayInputStream
+import java.util.concurrent.Executors
 
 class WireGuardTunnelManager(private val activity: Activity) {
     private val preferences = activity.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
     private val backend by lazy { GoBackend(activity.applicationContext) }
+    private val executor = Executors.newSingleThreadExecutor()
+    private val mainHandler = Handler(Looper.getMainLooper())
     private val importedConfigs = mutableMapOf<String, String>()
     private val logBuffer = ArrayDeque<String>()
     private var state = WireGuardTunnelState.DISCONNECTED
@@ -35,7 +40,7 @@ class WireGuardTunnelManager(private val activity: Activity) {
         appendLog(message!!)
     }
 
-    fun connect(name: String): Map<String, Any?> {
+    fun connect(name: String, callback: (Map<String, Any?>, Exception?) -> Unit) {
         val tunnelName = normalizeTunnelName(name)
         var rawConfig = importedConfigs[tunnelName]
         if (rawConfig == null) {
@@ -45,7 +50,8 @@ class WireGuardTunnelManager(private val activity: Activity) {
             }
         }
         if (rawConfig == null) {
-            throw IllegalArgumentException("No imported WireGuard config found for $tunnelName.")
+            callback(emptyMap(), IllegalArgumentException("No imported WireGuard config found for $tunnelName."))
+            return
         }
 
         activeTunnelName = tunnelName
@@ -58,27 +64,35 @@ class WireGuardTunnelManager(private val activity: Activity) {
             appendLog(message!!)
             pendingPermissionTunnelName = tunnelName
             activity.startActivityForResult(permissionIntent, VPN_PERMISSION_REQUEST_CODE)
-            return statusMap(extra = mapOf("permissionRequired" to true))
+            callback(statusMap(extra = mapOf("permissionRequired" to true)), null)
+            return
         }
 
-        return try {
-            state = WireGuardTunnelState.CONNECTING
-            message = "Connecting tunnel."
-            appendLog("Connect requested for $tunnelName (${rawConfig.length} config bytes).")
-            val tunnel = activeTunnel?.takeIf { it.tunnelName == tunnelName } ?: WireSpotTunnel(tunnelName)
-            val parsedConfig = parseConfig(rawConfig)
-            val nextState = backend.setState(tunnel, Tunnel.State.UP, parsedConfig)
-            activeTunnel = tunnel
-            state = nextState.toWireSpotState()
-            message = "Tunnel ${state.platformName}."
-            appendLog(message!!)
-            statusMap()
-        } catch (error: Exception) {
-            state = WireGuardTunnelState.ERROR
-            val detailMsg = error.message ?: error.localizedMessage ?: "Failed to connect WireGuard tunnel (${error.javaClass.simpleName})"
-            message = detailMsg
-            appendLog("ERROR: $detailMsg")
-            throw Exception(detailMsg, error)
+        state = WireGuardTunnelState.CONNECTING
+        message = "Connecting tunnel."
+        appendLog("Connect requested for $tunnelName (${rawConfig.length} config bytes).")
+
+        executor.execute {
+            try {
+                val tunnel = activeTunnel?.takeIf { it.tunnelName == tunnelName } ?: WireSpotTunnel(tunnelName)
+                val parsedConfig = parseConfig(rawConfig)
+                val nextState = backend.setState(tunnel, Tunnel.State.UP, parsedConfig)
+                activeTunnel = tunnel
+                mainHandler.post {
+                    state = nextState.toWireSpotState()
+                    message = "Tunnel ${state.platformName}."
+                    appendLog(message!!)
+                    callback(statusMap(), null)
+                }
+            } catch (error: Exception) {
+                mainHandler.post {
+                    state = WireGuardTunnelState.ERROR
+                    val detailMsg = error.message ?: error.localizedMessage ?: "Failed to connect WireGuard tunnel (${error.javaClass.simpleName})"
+                    message = detailMsg
+                    appendLog("ERROR: $detailMsg")
+                    callback(emptyMap(), Exception(detailMsg, error))
+                }
+            }
         }
     }
 
@@ -96,37 +110,60 @@ class WireGuardTunnelManager(private val activity: Activity) {
         }
     }
 
-    fun onPermissionResult(resultCode: Int): Map<String, Any?>? {
+    fun onPermissionResult(resultCode: Int, callback: ((Map<String, Any?>?, Exception?) -> Unit)? = null) {
         if (resultCode != Activity.RESULT_OK) {
             pendingPermissionTunnelName = null
             state = WireGuardTunnelState.DISCONNECTED
             message = "Android VPN permission was not granted."
             appendLog(message!!)
-            return statusMap(extra = mapOf("permissionRequired" to true))
+            callback?.invoke(statusMap(extra = mapOf("permissionRequired" to true)), null)
+            return
         }
 
         val tunnelName = pendingPermissionTunnelName
         pendingPermissionTunnelName = null
         message = "Android VPN permission granted."
         appendLog(message!!)
-        return if (tunnelName != null) {
-            connect(tunnelName)
+        if (tunnelName != null) {
+            connect(tunnelName) { status, error ->
+                callback?.invoke(status, error)
+            }
         } else {
-            statusMap(extra = mapOf("permissionRequired" to false))
+            callback?.invoke(statusMap(extra = mapOf("permissionRequired" to false)), null)
         }
     }
 
-    fun disconnect(): Map<String, Any?> {
+    fun disconnect(callback: (Map<String, Any?>, Exception?) -> Unit) {
         val tunnel = activeTunnel
-        if (tunnel != null) {
-            state = WireGuardTunnelState.DISCONNECTING
-            backend.setState(tunnel, Tunnel.State.DOWN, null)
+        if (tunnel == null) {
+            state = WireGuardTunnelState.DISCONNECTED
+            message = "Tunnel disconnected."
+            appendLog(message!!)
+            callback(statusMap(), null)
+            return
         }
-        activeTunnel = null
-        state = WireGuardTunnelState.DISCONNECTED
-        message = "Tunnel disconnected."
-        appendLog(message!!)
-        return statusMap()
+
+        state = WireGuardTunnelState.DISCONNECTING
+        executor.execute {
+            try {
+                backend.setState(tunnel, Tunnel.State.DOWN, null)
+                activeTunnel = null
+                mainHandler.post {
+                    state = WireGuardTunnelState.DISCONNECTED
+                    message = "Tunnel disconnected."
+                    appendLog(message!!)
+                    callback(statusMap(), null)
+                }
+            } catch (error: Exception) {
+                mainHandler.post {
+                    activeTunnel = null
+                    state = WireGuardTunnelState.DISCONNECTED
+                    message = "Tunnel disconnected."
+                    appendLog(message!!)
+                    callback(statusMap(), null)
+                }
+            }
+        }
     }
 
     fun statusMap(extra: Map<String, Any?> = emptyMap()): Map<String, Any?> {
@@ -141,15 +178,19 @@ class WireGuardTunnelManager(private val activity: Activity) {
     fun statisticsMap(): Map<String, Any?> {
         val tunnel = activeTunnel
         if (tunnel != null) {
-            val statistics = backend.getStatistics(tunnel)
-            val latestHandshakeAtMillis = statistics.peers()
-                .mapNotNull { peer -> statistics.peer(peer)?.latestHandshakeEpochMillis() }
-                .maxOrNull()
-            return mapOf(
-                "rxBytes" to statistics.totalRx(),
-                "txBytes" to statistics.totalTx(),
-                "latestHandshakeAtMillis" to latestHandshakeAtMillis,
-            )
+            return try {
+                val statistics = backend.getStatistics(tunnel)
+                val latestHandshakeAtMillis = statistics.peers()
+                    .mapNotNull { peer -> statistics.peer(peer)?.latestHandshakeEpochMillis() }
+                    .maxOrNull()
+                mapOf(
+                    "rxBytes" to statistics.totalRx(),
+                    "txBytes" to statistics.totalTx(),
+                    "latestHandshakeAtMillis" to latestHandshakeAtMillis,
+                )
+            } catch (e: Exception) {
+                mapOf("rxBytes" to 0L, "txBytes" to 0L, "latestHandshakeAtMillis" to null)
+            }
         }
         return mapOf(
             "rxBytes" to 0L,
@@ -193,9 +234,11 @@ class WireGuardTunnelManager(private val activity: Activity) {
         override fun getName(): String = tunnelName
 
         override fun onStateChange(newState: Tunnel.State) {
-            state = newState.toWireSpotState()
-            message = "Tunnel ${state.platformName}."
-            appendLog(message!!)
+            mainHandler.post {
+                state = newState.toWireSpotState()
+                message = "Tunnel ${state.platformName}."
+                appendLog(message!!)
+            }
         }
     }
 
