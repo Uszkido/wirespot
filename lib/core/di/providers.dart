@@ -38,6 +38,7 @@ import '../database/app_database.dart';
 import '../licensing/entitlement_service.dart';
 import '../printer/printer_service.dart';
 import '../share/share_service.dart';
+import '../vpn/unified_vpn_service.dart';
 import '../vpn/wireguard_auto_reconnect_service.dart';
 import '../vpn/wireguard_vpn_service.dart';
 import 'service_locator.dart';
@@ -76,6 +77,10 @@ final shareServiceProvider = Provider<ShareService>(
 
 final wireGuardVpnServiceProvider = Provider<WireGuardVpnService>(
   (ref) => sl<WireGuardVpnService>(),
+);
+
+final unifiedVpnServiceProvider = Provider<UnifiedVpnService>(
+  (ref) => sl<UnifiedVpnService>(),
 );
 
 final wireGuardAutoReconnectServiceProvider =

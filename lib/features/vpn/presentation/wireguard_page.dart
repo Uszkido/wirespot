@@ -175,7 +175,7 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
     try {
       final file = await FilePicker.pickFile(
         type: FileType.custom,
-        allowedExtensions: ['conf', 'txt'],
+        allowedExtensions: ['conf', 'ovpn', 'txt'],
       );
       if (file == null) {
         return;
@@ -187,25 +187,35 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
       }
 
       if (content.trim().isEmpty) {
-        _showSnack('Selected .conf file is empty.');
+        _showSnack('Selected VPN config file is empty.');
         return;
       }
 
       final defaultName = file.name
-          .replaceAll(RegExp(r'\.(conf|txt)$', caseSensitive: false), '')
+          .replaceAll(RegExp(r'\.(conf|ovpn|txt)$', caseSensitive: false), '')
           .trim();
       final name = defaultName.isEmpty ? 'wirespot' : defaultName;
 
-      final config = WireGuardConfig.parse(name: name, config: content);
-      await ref.read(wireGuardVpnServiceProvider).importConfig(config);
-      _tunnelNameController.text = config.name;
-      await _saveSettings(selectedTunnelName: config.name);
-      _refresh();
-      _showSnack('WireGuard tunnel "${config.name}" imported from file!');
+      if (content.contains('[Interface]') || content.contains('[interface]')) {
+        final config = WireGuardConfig.parse(name: name, config: content);
+        await ref.read(wireGuardVpnServiceProvider).importConfig(config);
+        _tunnelNameController.text = config.name;
+        await _saveSettings(selectedTunnelName: config.name);
+        _refresh();
+        _showSnack('WireGuard tunnel "${config.name}" imported!');
+      } else {
+        await ref
+            .read(unifiedVpnServiceProvider)
+            .importConfigText(name: name, configText: content);
+        _tunnelNameController.text = name;
+        await _saveSettings(selectedTunnelName: name);
+        _refresh();
+        _showSnack('OpenVPN profile "$name" imported from .ovpn file!');
+      }
     } on FormatException catch (error) {
-      _showSnack('Invalid WireGuard file: ${error.message}');
+      _showSnack('Invalid VPN config file: ${error.message}');
     } on Object catch (error) {
-      _showSnack('Could not pick .conf file: $error');
+      _showSnack('Could not pick VPN file: $error');
     }
   }
 
