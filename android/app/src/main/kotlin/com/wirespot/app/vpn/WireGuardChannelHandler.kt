@@ -70,9 +70,11 @@ class WireGuardChannelHandler(
                 else -> result.notImplemented()
             }
         } catch (error: IllegalArgumentException) {
-            result.error("INVALID_ARGUMENT", error.message, null)
+            val msg = error.message ?: error.toString()
+            result.error("INVALID_ARGUMENT", msg, null)
         } catch (error: Exception) {
-            result.error("WIREGUARD_ERROR", error.message, null)
+            val msg = error.message ?: error.localizedMessage ?: error.toString()
+            result.error("WIREGUARD_ERROR", msg, null)
         }
     }
 

@@ -66,7 +66,8 @@ class WireGuardTunnelManager(private val activity: Activity) {
             message = "Connecting tunnel."
             appendLog("Connect requested for $tunnelName (${rawConfig.length} config bytes).")
             val tunnel = activeTunnel?.takeIf { it.tunnelName == tunnelName } ?: WireSpotTunnel(tunnelName)
-            val nextState = backend.setState(tunnel, Tunnel.State.UP, parseConfig(rawConfig))
+            val parsedConfig = parseConfig(rawConfig)
+            val nextState = backend.setState(tunnel, Tunnel.State.UP, parsedConfig)
             activeTunnel = tunnel
             state = nextState.toWireSpotState()
             message = "Tunnel ${state.platformName}."
@@ -74,9 +75,10 @@ class WireGuardTunnelManager(private val activity: Activity) {
             statusMap()
         } catch (error: Exception) {
             state = WireGuardTunnelState.ERROR
-            message = error.message ?: "Could not connect WireGuard tunnel."
-            appendLog(message!!)
-            throw error
+            val detailMsg = error.message ?: error.localizedMessage ?: "Failed to connect WireGuard tunnel (${error.javaClass.simpleName})"
+            message = detailMsg
+            appendLog("ERROR: $detailMsg")
+            throw Exception(detailMsg, error)
         }
     }
 

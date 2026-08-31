@@ -144,7 +144,7 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
         ref.read(wireGuardAutoReconnectServiceProvider).start(tunnelName: name);
       }
       _refresh();
-      _showSnack('WireGuard connect requested.');
+      _showSnack('WireGuard connect requested. Grant VPN access if prompted.');
     } on Object catch (error) {
       _showSnack('Could not connect WireGuard: $error');
     }
