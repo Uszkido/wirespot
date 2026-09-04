@@ -1,18 +1,3 @@
-# WireSpot
-
-Secure multi-brand hotspot operations built by
-Vexel Innovations in collaboration with TechNova Technologies.
-
-![WireSpot logo](assets/images/wirespot_readme_logo.png)
-
-WireSpot is a modern Flutter application for hotspot operators,
-technicians, and small ISPs who manage business Wi-Fi and voucher networks. It
-brings router management, hotspot users, voucher generation, thermal printing,
-reporting, WireGuard remote access, backup, and licensing into one mobile app.
-
-This codebase is original work. It does not copy Mikhmon, WireNex, or any
-proprietary application. Active connectors are built for 6 router brands:
-MikroTik RouterOS (socket/TLS API), Ruijie / Reyee (Cloud & REST API),
 OpenWrt (LuCI & ubus API), TP-Link Omada (Controller OpenAPI), Ubiquiti
 UniFi (Controller REST API), and Generic Routers (HTTP/REST/SNMP).
 
