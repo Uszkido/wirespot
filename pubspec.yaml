@@ -16,7 +16,7 @@ dependencies:
   go_router: ^18.0.1
   get_it: ^9.3.0
   dio: ^5.11.1
-  drift: ^2.34.4
+  drift: ^2.35.0
   sqlite3: ^3.6.0
   sqlite3_flutter_libs: ^0.6.0+eol
   path: ^1.9.1
