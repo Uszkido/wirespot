@@ -5,6 +5,11 @@ bool isAuthenticated(RequestContext context) {
   return value != null && value.startsWith('Bearer ws_');
 }
 
+String organizationId(RequestContext context) {
+  final value = context.request.headers['x-wirespot-organization']?.trim();
+  return value == null || value.isEmpty ? 'org_default' : value;
+}
+
 /// Role-aware authorization for API mutations. Existing operator tokens that
 /// do not send a role remain owner-compatible until role claims are available.
 bool hasRole(RequestContext context, Set<String> allowed) {

@@ -6,6 +6,7 @@ import 'package:wirespot_backend/backend_store.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   if (!isAuthenticated(context)) return unauthorized();
+  final orgId = organizationId(context);
   if (!hasRole(context, {'owner', 'admin'})) {
     return Response.json(
       statusCode: 403,
@@ -23,13 +24,13 @@ Future<Response> onRequest(RequestContext context) async {
         body: {'error': 'Backup must be a JSON object.'},
       );
     }
-    BackendStore.latestBackup = Map<String, dynamic>.from(payload);
-    BackendStore.latestBackupAt = DateTime.now().toUtc();
+    BackendStore.saveBackup(orgId, Map<String, dynamic>.from(payload));
     return Response.json(
       statusCode: 201,
       body: {
         'status': 'accepted',
-        'uploadedAt': BackendStore.latestBackupAt!.toIso8601String(),
+        'organizationId': orgId,
+        'uploadedAt': BackendStore.latestBackupAtFor(orgId)!.toIso8601String(),
       },
     );
   } catch (_) {

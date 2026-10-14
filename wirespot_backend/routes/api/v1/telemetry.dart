@@ -11,8 +11,16 @@ Future<Response> onRequest(RequestContext context) async {
   }
   try {
     await context.request.body().then(jsonDecode);
-    BackendStore.telemetryEvents++;
-    return Response.json(statusCode: 201, body: {'status': 'accepted'});
+    final orgId = organizationId(context);
+    final eventCount = BackendStore.incrementTelemetry(orgId);
+    return Response.json(
+      statusCode: 201,
+      body: {
+        'status': 'accepted',
+        'organizationId': orgId,
+        'received': eventCount,
+      },
+    );
   } catch (_) {
     return Response.json(
       statusCode: 400,

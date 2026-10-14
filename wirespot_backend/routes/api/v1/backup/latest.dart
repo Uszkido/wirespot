@@ -4,14 +4,16 @@ import 'package:wirespot_backend/backend_store.dart';
 
 Response onRequest(RequestContext context) {
   if (!isAuthenticated(context)) return unauthorized();
+  final orgId = organizationId(context);
   if (context.request.method != HttpMethod.get) {
     return Response(statusCode: 405, body: 'Method Not Allowed');
   }
   return Response.json(
     body: {
       'status': 'success',
-      'backup': BackendStore.latestBackup,
-      'uploadedAt': BackendStore.latestBackupAt?.toIso8601String(),
+      'organizationId': orgId,
+      'backup': BackendStore.latestBackupFor(orgId),
+      'uploadedAt': BackendStore.latestBackupAtFor(orgId)?.toIso8601String(),
     },
   );
 }

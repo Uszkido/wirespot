@@ -6,9 +6,14 @@ import 'package:wirespot_backend/backend_store.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   if (!isAuthenticated(context)) return unauthorized();
+  final orgId = organizationId(context);
   if (context.request.method == HttpMethod.get) {
     return Response.json(
-      body: {'status': 'success', 'routers': BackendStore.routers},
+      body: {
+        'status': 'success',
+        'organizationId': orgId,
+        'routers': BackendStore.routersFor(orgId),
+      },
     );
   }
 
@@ -32,7 +37,7 @@ Future<Response> onRequest(RequestContext context) async {
           .map((router) => Map<String, dynamic>.from(router))
           .where(_isValidRouter)
           .toList();
-      BackendStore.routers
+      BackendStore.routersFor(orgId)
         ..clear()
         ..addAll(incoming);
       return Response.json(

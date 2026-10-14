@@ -5,8 +5,10 @@ import 'package:wirespot_backend/backend_store.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   if (!isAuthenticated(context)) return unauthorized();
+  final orgId = organizationId(context);
   if (context.request.method == HttpMethod.get) {
-    final vouchers = BackendStore.vouchers.isEmpty
+    final scoped = BackendStore.vouchersFor(orgId);
+    final vouchers = scoped.isEmpty
         ? [
             {
               'code': 'WS-8A2F',
@@ -23,8 +25,14 @@ Future<Response> onRequest(RequestContext context) async {
               'createdAt': DateTime.now().toIso8601String(),
             },
           ]
-        : BackendStore.vouchers;
-    return Response.json(body: {'status': 'success', 'vouchers': vouchers});
+        : scoped;
+    return Response.json(
+      body: {
+        'status': 'success',
+        'organizationId': orgId,
+        'vouchers': vouchers,
+      },
+    );
   }
 
   if (context.request.method == HttpMethod.post) {
@@ -34,7 +42,9 @@ Future<Response> onRequest(RequestContext context) async {
       final vouchers = json['vouchers'] as List<dynamic>? ?? [];
       for (final voucher in vouchers) {
         if (voucher is Map) {
-          BackendStore.vouchers.add(Map<String, dynamic>.from(voucher));
+          BackendStore.vouchersFor(
+            orgId,
+          ).add(Map<String, dynamic>.from(voucher));
         }
       }
 
