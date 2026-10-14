@@ -52,7 +52,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       color: theme.colorScheme.primary,
                     ),
                   ),
-                  if (_currentPage < 3)
+                  if (_currentPage < 5)
                     TextButton(
                       onPressed: _completeOnboarding,
                       child: const Text('Skip'),
@@ -67,8 +67,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 children: [
                   _buildWelcomePage(theme),
                   _buildRouterSetupPage(theme),
+                  _buildDiscoveryPage(theme),
                   _buildVpnSetupPage(theme),
                   _buildCloudBackupPage(theme),
+                  _buildHotspotPage(theme),
                 ],
               ),
             ),
@@ -79,7 +81,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 children: [
                   Row(
                     children: List.generate(
-                      4,
+                      6,
                       (index) => AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         margin: const EdgeInsets.only(right: 6),
@@ -94,23 +96,37 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       ),
                     ),
                   ),
-                  FilledButton.icon(
-                    onPressed: () {
-                      if (_currentPage < 3) {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      } else {
-                        _completeOnboarding();
-                      }
-                    },
-                    icon: Icon(
-                      _currentPage == 3
-                          ? Icons.check_circle_outline
-                          : Icons.arrow_forward,
-                    ),
-                    label: Text(_currentPage == 3 ? 'Get Started' : 'Next'),
+                  Row(
+                    children: [
+                      if (_currentPage > 0)
+                        OutlinedButton.icon(
+                          onPressed: () => _pageController.previousPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          ),
+                          icon: const Icon(Icons.arrow_back),
+                          label: const Text('Back'),
+                        ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: () {
+                          if (_currentPage < 5) {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          } else {
+                            _completeOnboarding();
+                          }
+                        },
+                        icon: Icon(
+                          _currentPage == 5
+                              ? Icons.check_circle_outline
+                              : Icons.arrow_forward,
+                        ),
+                        label: Text(_currentPage == 5 ? 'Get Started' : 'Next'),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -239,6 +255,93 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             label: const Text('Manage WireGuard Tunnels'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDiscoveryPage(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.wifi_find_outlined,
+            size: 64,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 32),
+          Text(
+            'Find Your Router Automatically',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'On the Routers screen, tap the Wi-Fi discovery button to find MikroTik routers on your local network. Select a result, verify the details, and save your secure credentials.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 24),
+          _buildGuideCard(
+            theme,
+            Icons.verified_user_outlined,
+            'Always verify the identity and IP before saving a router.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHotspotPage(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.wifi_tethering_outlined,
+            size: 64,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 32),
+          Text(
+            'Run Your Hotspot',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Create vouchers, manage sessions, and configure a hotspot preset. Enable RADIUS in setup to authenticate users through FreeRADIUS or another compatible server.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 24),
+          _buildGuideCard(
+            theme,
+            Icons.cloud_done_outlined,
+            'Cloud Sync keeps router, voucher, and report data available across devices.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGuideCard(ThemeData theme, IconData icon, String text) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(icon, color: theme.colorScheme.primary),
+            const SizedBox(width: 12),
+            Expanded(child: Text(text)),
+          ],
+        ),
       ),
     );
   }
