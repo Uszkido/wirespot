@@ -6,12 +6,18 @@ import '../../../core/storage/router_credentials.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/entities/router_group_entity.dart';
 import '../domain/repositories/router_repository.dart';
+import '../../cloud/domain/services/cloud_workspace_sync_service.dart';
 
 class RouterLocalRepository implements RouterRepository {
-  const RouterLocalRepository(this._database, this._credentialStore);
+  const RouterLocalRepository(
+    this._database,
+    this._credentialStore, {
+    CloudWorkspaceSyncService? cloudWorkspaceSyncService,
+  }) : _cloudWorkspaceSyncService = cloudWorkspaceSyncService;
 
   final AppDatabase _database;
   final RouterCredentialStore _credentialStore;
+  final CloudWorkspaceSyncService? _cloudWorkspaceSyncService;
 
   @override
   Stream<List<RouterEntity>> watchRouters() {
@@ -69,6 +75,14 @@ class RouterLocalRepository implements RouterRepository {
 
     if (credentials != null) {
       await _credentialStore.write(router.id, credentials);
+    }
+    try {
+      await _cloudWorkspaceSyncService?.saveRouter(
+        routerId: router.id,
+        routerData: router.toJson(),
+      );
+    } catch (_) {
+      // Local persistence must remain available while cloud sync is offline.
     }
   }
 

@@ -6,11 +6,14 @@ import '../../features/authentication/domain/services/auth_service.dart';
 import '../../features/authentication/domain/services/biometric_auth_service.dart';
 import '../../features/authentication/domain/services/pin_hash_service.dart';
 import '../../features/cloud/data/cloud_api_client.dart';
+import '../../features/cloud/data/firebase_api_client.dart';
 import '../../features/cloud/data/cloud_sync_local_repository.dart';
+import '../../features/cloud/domain/repositories/cloud_workspace_repository.dart';
 import '../../features/cloud/domain/repositories/cloud_sync_repository.dart';
 import '../../features/cloud/domain/services/cloud_backup_service.dart';
 import '../../features/cloud/domain/services/cloud_settings_service.dart';
 import '../../features/cloud/domain/services/cloud_sync_service.dart';
+import '../../features/cloud/domain/services/cloud_workspace_sync_service.dart';
 import '../../features/hotspot/data/routeros_hotspot_service.dart';
 import '../../features/hotspot/data/hotspot_deployment_local_repository.dart';
 import '../../features/hotspot/domain/repositories/hotspot_deployment_repository.dart';
@@ -69,6 +72,8 @@ import '../vpn/unified_vpn_service.dart';
 import '../vpn/vpn_status_service.dart';
 import '../vpn/wireguard_auto_reconnect_service.dart';
 import '../vpn/wireguard_vpn_service.dart';
+import '../features/cloud/domain/repositories/cloud_workspace_repository.dart';
+import '../features/cloud/domain/services/cloud_workspace_sync_service.dart';
 
 final sl = GetIt.instance;
 
@@ -107,6 +112,17 @@ Future<void> configureDependencies() async {
         settingsService: sl<CloudSettingsService>(),
       ),
     )
+    ..registerLazySingleton<FirebaseApiClient>(FirebaseApiClient.new)
+    ..registerLazySingleton<CloudWorkspaceRepository>(
+      () =>
+          FirebaseCloudWorkspaceRepository(apiClient: sl<FirebaseApiClient>()),
+    )
+    ..registerLazySingleton<CloudWorkspaceSyncService>(
+      () => CloudWorkspaceSyncService(
+        repository: sl<CloudWorkspaceRepository>(),
+        settingsService: sl<CloudSettingsService>(),
+      ),
+    )
     ..registerLazySingleton<CloudSyncRepository>(
       () => CloudSyncLocalRepository(sl<AppDatabase>()),
     )
@@ -140,8 +156,11 @@ Future<void> configureDependencies() async {
       () => WireGuardAutoReconnectService(sl<WireGuardVpnService>()),
     )
     ..registerLazySingleton<RouterRepository>(
-      () =>
-          RouterLocalRepository(sl<AppDatabase>(), sl<RouterCredentialStore>()),
+      () => RouterLocalRepository(
+        sl<AppDatabase>(),
+        sl<RouterCredentialStore>(),
+        cloudWorkspaceSyncService: sl<CloudWorkspaceSyncService>(),
+      ),
     )
     ..registerLazySingleton<RuijieCloudConnectionService>(
       () => RuijieCloudConnectionService(
