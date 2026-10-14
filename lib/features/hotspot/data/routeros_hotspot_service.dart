@@ -35,10 +35,19 @@ class RouterOsHotspotService implements HotspotService {
         '/ip/hotspot/print',
         queries: ['=name=${input.serverName.trim()}'],
       ),
+      if (input.useRadius && input.radiusSettings != null)
+        _routerConnectionService.execute(
+          router,
+          '/radius/print',
+          queries: ['=address=${input.radiusSettings!.address.trim()}'],
+        ),
     ]);
     return HotspotSetupInspection(
       profileExists: responses[0].records.isNotEmpty,
       serverExists: responses[1].records.isNotEmpty,
+      radiusExists: input.useRadius && responses.length > 2
+          ? responses[2].records.isNotEmpty
+          : false,
     );
   }
 

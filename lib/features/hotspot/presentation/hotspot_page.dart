@@ -1200,7 +1200,8 @@ Future<bool> _showSetupPlanDialog(
               Text('${router.vendor.label} • ${preset.label}'),
               const SizedBox(height: 12),
               Text(
-                '${inspection.profileAction} • ${inspection.serverAction}',
+                '${inspection.profileAction} • ${inspection.serverAction}'
+                '${input.useRadius ? ' • ${inspection.radiusAction}' : ''}',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 12),
