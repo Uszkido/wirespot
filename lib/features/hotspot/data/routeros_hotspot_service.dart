@@ -69,6 +69,16 @@ class RouterOsHotspotService implements HotspotService {
         '/ip/hotspot/profile/add',
         attributes: input.toServerProfileAttributes(),
       );
+    } else {
+      final profileId = existingProfile.records.first['.id'];
+      if (profileId == null || profileId.trim().isEmpty) {
+        throw StateError('RouterOS returned a hotspot profile without an id.');
+      }
+      await _routerConnectionService.execute(
+        router,
+        '/ip/hotspot/profile/set',
+        attributes: {'.id': profileId, ...input.toServerProfileAttributes()},
+      );
     }
     final existingServer = await _routerConnectionService.execute(
       router,

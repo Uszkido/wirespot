@@ -76,6 +76,41 @@ void main() {
       containsPair('secret', 'shared-secret'),
     );
   });
+
+  test('updates an existing hotspot profile when enabling RADIUS', () async {
+    final connection = _RecordingConnectionService(
+      profileRecords: [
+        {'.id': '*1', 'name': 'guest-profile'},
+      ],
+      serverRecords: const [],
+    );
+    final service = RouterOsHotspotService(connection);
+    const router = RouterEntity(
+      id: 'router-1',
+      name: 'Guest router',
+      host: '10.0.0.1',
+      username: 'operator',
+    );
+    const input = HotspotSetupInput(
+      serverName: 'guest-hotspot',
+      interfaceName: 'bridge',
+      serverProfileName: 'guest-profile',
+      addressPool: 'guest-pool',
+      useRadius: true,
+      radiusSettings: RadiusServerSettings(
+        address: '10.0.0.10',
+        secret: 'shared-secret',
+      ),
+    );
+
+    await service.setupHotspot(router, input);
+
+    expect(connection.commands, contains('/ip/hotspot/profile/set'));
+    expect(
+      connection.recordedAttributes['/ip/hotspot/profile/set'],
+      containsPair('use-radius', 'yes'),
+    );
+  });
 }
 
 class _RecordingConnectionService implements RouterConnectionService {
