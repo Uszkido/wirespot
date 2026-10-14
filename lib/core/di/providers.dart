@@ -35,6 +35,7 @@ import '../../features/voucher/domain/services/ticket_template_settings_service.
 import '../../features/voucher/domain/services/voucher_qr_service.dart';
 import '../../features/voucher/domain/services/voucher_receipt_template_service.dart';
 import '../database/app_database.dart';
+import '../storage/router_credential_store.dart';
 import '../licensing/entitlement_service.dart';
 import '../printer/printer_service.dart';
 import '../share/share_service.dart';
@@ -98,6 +99,10 @@ final routerRepositoryProvider = Provider<RouterRepository>(
 
 final routerConnectionServiceProvider = Provider<RouterConnectionService>(
   (ref) => sl<RouterConnectionService>(),
+);
+
+final routerCredentialStoreProvider = Provider<RouterCredentialStore>(
+  (ref) => sl<RouterCredentialStore>(),
 );
 
 final routerFleetConnectionServiceProvider =

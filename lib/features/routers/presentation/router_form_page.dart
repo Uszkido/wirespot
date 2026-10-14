@@ -44,6 +44,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
   RouterRemoteAccessMode _remoteAccessMode = RouterRemoteAccessMode.wireGuard;
   String? _groupId;
   bool _isSaving = false;
+  bool _isTestingConnection = false;
   bool _didHydrate = false;
 
   bool get _isEditing => widget.routerId != null;
@@ -130,12 +131,14 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
             groupId: _groupId,
             isEditing: _isEditing,
             isSaving: _isSaving,
+            isTestingConnection: _isTestingConnection,
             onVendorChanged: _setVendor,
             onUseSslChanged: (value) => setState(() => _useSsl = value),
             onRemoteAccessModeChanged: _setRemoteAccessMode,
             onGroupChanged: (value) => setState(() => _groupId = value),
             onCreateGroup: _createGroup,
             onSave: () => _save(existingRouter),
+            onTestConnection: _testConnection,
             onCancel: _returnToRouters,
           );
         },
@@ -277,6 +280,56 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
       if (mounted) {
         setState(() => _isSaving = false);
       }
+    }
+  }
+
+  Future<void> _testConnection() async {
+    if (_isSaving || _isTestingConnection) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final password = _passwordController.text.trim();
+    if (password.isEmpty) {
+      _showMessage('Enter the password or access token before testing.');
+      return;
+    }
+    final testId = 'connection-test-${DateTime.now().microsecondsSinceEpoch}';
+    final router = RouterEntity(
+      id: testId,
+      name: _nameController.text.trim(),
+      host: _hostController.text.trim(),
+      vendor: _vendor,
+      apiPort: int.parse(_portController.text.trim()),
+      useSsl: _useSsl,
+      requireVpn: _requireVpn,
+      remoteAccessMode: _remoteAccessMode,
+      username: _usernameController.text.trim(),
+    );
+    setState(() => _isTestingConnection = true);
+    try {
+      await ref
+          .read(routerCredentialStoreProvider)
+          .write(
+            testId,
+            RouterCredentials(
+              username: router.username,
+              password: _vendor.usesCloudAccessToken ? '' : password,
+              accessToken: _vendor.usesCloudAccessToken ? password : null,
+            ),
+          );
+      final connected = await ref
+          .read(routerConnectionServiceProvider)
+          .testConnection(router);
+      if (mounted) {
+        _showMessage(
+          connected
+              ? 'Connection verified. You can save this router.'
+              : 'The router did not respond. Check address, credentials, VPN, and port.',
+        );
+      }
+    } on Object catch (error) {
+      if (mounted) _showMessage('Connection test failed: $error');
+    } finally {
+      await ref.read(routerCredentialStoreProvider).delete(testId);
+      if (mounted) setState(() => _isTestingConnection = false);
     }
   }
 
@@ -481,12 +534,14 @@ class _RouterFormBody extends StatelessWidget {
     required this.groupId,
     required this.isEditing,
     required this.isSaving,
+    required this.isTestingConnection,
     required this.onVendorChanged,
     required this.onUseSslChanged,
     required this.onRemoteAccessModeChanged,
     required this.onGroupChanged,
     required this.onCreateGroup,
     required this.onSave,
+    required this.onTestConnection,
     required this.onCancel,
   });
 
@@ -504,12 +559,14 @@ class _RouterFormBody extends StatelessWidget {
   final String? groupId;
   final bool isEditing;
   final bool isSaving;
+  final bool isTestingConnection;
   final ValueChanged<RouterVendor> onVendorChanged;
   final ValueChanged<bool> onUseSslChanged;
   final ValueChanged<RouterRemoteAccessMode> onRemoteAccessModeChanged;
   final ValueChanged<String?> onGroupChanged;
   final Future<void> Function() onCreateGroup;
   final VoidCallback onSave;
+  final VoidCallback onTestConnection;
   final VoidCallback onCancel;
 
   @override
@@ -740,6 +797,23 @@ class _RouterFormBody extends StatelessWidget {
                         )
                       : const Icon(Icons.save_outlined),
                   label: Text(isSaving ? 'Saving...' : 'Save router'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: isSaving || isTestingConnection
+                      ? null
+                      : onTestConnection,
+                  icon: isTestingConnection
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.network_check_outlined),
+                  label: Text(
+                    isTestingConnection
+                        ? 'Testing connection...'
+                        : 'Test connection',
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextButton.icon(
