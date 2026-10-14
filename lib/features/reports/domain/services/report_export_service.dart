@@ -100,7 +100,7 @@ class ReportExportService {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
-                '$supportEmail • $supportPhone • $website',
+                '$supportEmail - $supportPhone - $website',
                 style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
               ),
               pw.Text(
