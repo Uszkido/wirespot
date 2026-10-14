@@ -1,4 +1,5 @@
 import 'hotspot_setup_plan.dart';
+import 'radius_server_settings.dart';
 
 class HotspotSetupInput {
   const HotspotSetupInput({
@@ -24,6 +25,7 @@ class HotspotSetupInput {
     this.loginByHttpPap = true,
     this.loginByHttps = false,
     this.useRadius = false,
+    this.radiusSettings,
     this.disabled = false,
   });
 
@@ -49,6 +51,7 @@ class HotspotSetupInput {
   final bool loginByHttpPap;
   final bool loginByHttps;
   final bool useRadius;
+  final RadiusServerSettings? radiusSettings;
   final bool disabled;
 
   List<String> get validationErrors {
@@ -82,7 +85,19 @@ class HotspotSetupInput {
         errors.add('Enter the NAT source network.');
       }
     }
+    if (useRadius) {
+      if (radiusSettings == null) {
+        errors.add('Add the RADIUS server settings.');
+      } else {
+        errors.addAll(radiusSettings!.validationErrors);
+      }
+    }
     return errors;
+  }
+
+  Map<String, String>? toRadiusAttributes() {
+    if (!useRadius || radiusSettings == null) return null;
+    return radiusSettings!.toRouterOsAttributes();
   }
 
   Map<String, String> toServerProfileAttributes() {

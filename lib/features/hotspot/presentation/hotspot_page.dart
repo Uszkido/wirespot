@@ -19,6 +19,7 @@ import '../domain/entities/hotspot_queue_entity.dart';
 import '../domain/entities/hotspot_setup_inspection.dart';
 import '../domain/entities/hotspot_setup_input.dart';
 import '../domain/entities/hotspot_setup_preset.dart';
+import '../domain/entities/radius_server_settings.dart';
 import '../domain/entities/hotspot_user_entity.dart';
 import '../domain/entities/hotspot_user_input.dart';
 import '../domain/entities/hotspot_user_profile_entity.dart';
@@ -664,6 +665,18 @@ Future<void> _showSetupHotspotDialog(
     text: initialInput.natSrcAddress,
   );
   final natOutInterfaceController = TextEditingController();
+  final radiusAddressController = TextEditingController(
+    text: initialInput.radiusSettings?.address,
+  );
+  final radiusSecretController = TextEditingController(
+    text: initialInput.radiusSettings?.secret,
+  );
+  final radiusAuthPortController = TextEditingController(
+    text: '${initialInput.radiusSettings?.authenticationPort ?? 1812}',
+  );
+  final radiusAccountingPortController = TextEditingController(
+    text: '${initialInput.radiusSettings?.accountingPort ?? 1813}',
+  );
   var provisionNetwork = initialInput.provisionNetwork;
   var enableNatMasquerade = initialInput.enableNatMasquerade;
   var loginByCookie = initialInput.loginByCookie;
@@ -687,6 +700,12 @@ Future<void> _showSetupHotspotDialog(
     dnsServersController.text = input.dnsServers ?? '';
     natSrcAddressController.text = input.natSrcAddress ?? '';
     natOutInterfaceController.text = input.natOutInterface ?? '';
+    radiusAddressController.text = input.radiusSettings?.address ?? '';
+    radiusSecretController.text = input.radiusSettings?.secret ?? '';
+    radiusAuthPortController.text =
+        '${input.radiusSettings?.authenticationPort ?? 1812}';
+    radiusAccountingPortController.text =
+        '${input.radiusSettings?.accountingPort ?? 1813}';
     provisionNetwork = input.provisionNetwork;
     enableNatMasquerade = input.enableNatMasquerade;
     loginByCookie = input.loginByCookie;
@@ -718,6 +737,16 @@ Future<void> _showSetupHotspotDialog(
       loginByHttpPap: loginByHttpPap,
       loginByHttps: loginByHttps,
       useRadius: useRadius,
+      radiusSettings: useRadius
+          ? RadiusServerSettings(
+              address: radiusAddressController.text.trim(),
+              secret: radiusSecretController.text,
+              authenticationPort:
+                  int.tryParse(radiusAuthPortController.text.trim()) ?? 0,
+              accountingPort:
+                  int.tryParse(radiusAccountingPortController.text.trim()) ?? 0,
+            )
+          : null,
     );
   }
 
@@ -878,6 +907,54 @@ Future<void> _showSetupHotspotDialog(
                     ),
                     contentPadding: EdgeInsets.zero,
                   ),
+                  if (useRadius) ...[
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: radiusAddressController,
+                      decoration: const InputDecoration(
+                        labelText: 'RADIUS server address',
+                        helperText: 'FreeRADIUS host or IP, e.g. 10.5.50.10',
+                        prefixIcon: Icon(Icons.security_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: radiusSecretController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'RADIUS shared secret',
+                        helperText:
+                            'Sent securely to the router; never stored in reports.',
+                        prefixIcon: Icon(Icons.key_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: radiusAuthPortController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: 'Auth port',
+                              hintText: '1812',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: radiusAccountingPortController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: 'Accounting port',
+                              hintText: '1813',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   if (provisionNetwork) ...[
                     const SizedBox(height: 8),
                     TextField(

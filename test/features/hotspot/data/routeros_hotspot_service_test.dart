@@ -3,6 +3,7 @@ import 'package:wirespot/core/api/routeros_api_response.dart';
 import 'package:wirespot/core/api/routeros_models.dart';
 import 'package:wirespot/features/hotspot/data/routeros_hotspot_service.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_setup_input.dart';
+import 'package:wirespot/features/hotspot/domain/entities/radius_server_settings.dart';
 import 'package:wirespot/features/routers/domain/entities/router_entity.dart';
 import 'package:wirespot/features/routers/domain/services/router_connection_service.dart';
 
@@ -42,6 +43,39 @@ void main() {
       expect(connection.queries, contains('=name=guest-profile'));
     },
   );
+
+  test('configures the RADIUS server during hotspot setup', () async {
+    final connection = _RecordingConnectionService(
+      profileRecords: const [],
+      serverRecords: const [],
+    );
+    final service = RouterOsHotspotService(connection);
+    const router = RouterEntity(
+      id: 'router-1',
+      name: 'Guest router',
+      host: '10.0.0.1',
+      username: 'operator',
+    );
+    const input = HotspotSetupInput(
+      serverName: 'guest-hotspot',
+      interfaceName: 'bridge',
+      serverProfileName: 'guest-profile',
+      addressPool: 'guest-pool',
+      useRadius: true,
+      radiusSettings: RadiusServerSettings(
+        address: '10.0.0.10',
+        secret: 'shared-secret',
+      ),
+    );
+
+    await service.setupHotspot(router, input);
+
+    expect(connection.commands, contains('/radius/add'));
+    expect(
+      connection.recordedAttributes['/radius/add'],
+      containsPair('secret', 'shared-secret'),
+    );
+  });
 }
 
 class _RecordingConnectionService implements RouterConnectionService {
@@ -53,6 +87,8 @@ class _RecordingConnectionService implements RouterConnectionService {
   final List<Map<String, String>> profileRecords;
   final List<Map<String, String>> serverRecords;
   final queries = <String>[];
+  final commands = <String>[];
+  final recordedAttributes = <String, Map<String, String>>{};
 
   @override
   Future<RouterOsApiResponse> execute(
@@ -61,6 +97,8 @@ class _RecordingConnectionService implements RouterConnectionService {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async {
+    commands.add(command);
+    recordedAttributes[command] = attributes;
     this.queries.addAll(queries);
     return RouterOsApiResponse(
       records: switch (command) {

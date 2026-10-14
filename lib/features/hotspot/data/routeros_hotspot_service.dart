@@ -83,6 +83,37 @@ class RouterOsHotspotService implements HotspotService {
         attributes: {'.id': serverId, ...input.toServerAttributes()},
       );
     }
+    await _configureRadius(router, input);
+  }
+
+  Future<void> _configureRadius(
+    RouterEntity router,
+    HotspotSetupInput input,
+  ) async {
+    final attributes = input.toRadiusAttributes();
+    if (attributes == null) return;
+    final existing = await _routerConnectionService.execute(
+      router,
+      '/radius/print',
+      queries: ['=address=${attributes['address']}'],
+    );
+    if (existing.isEmpty) {
+      await _routerConnectionService.execute(
+        router,
+        '/radius/add',
+        attributes: attributes,
+      );
+      return;
+    }
+    final id = existing.records.first['.id'];
+    if (id == null || id.trim().isEmpty) {
+      throw StateError('RouterOS returned a RADIUS server without an id.');
+    }
+    await _routerConnectionService.execute(
+      router,
+      '/radius/set',
+      attributes: {'.id': id, ...attributes},
+    );
   }
 
   Future<void> _provisionNetwork(

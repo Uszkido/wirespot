@@ -16,8 +16,10 @@ dependencies:
   go_router: ^18.0.2
   get_it: ^9.3.0
   dio: ^5.11.1
-  drift: ^2.35.1
-  sqlite3: ^3.6.0
+  drift: ^2.31.0
+  # sqlite3 3.x pulls hooks/record_use versions newer than Flutter's pinned
+  # flutter_test meta package. Drift works with the 2.x API used by WireSpot.
+  sqlite3: ^2.9.4
   sqlite3_flutter_libs: ^0.6.0+eol
   path: ^1.9.1
   path_provider: ^2.1.0
@@ -41,8 +43,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  build_runner: ^2.16.1
-  drift_dev: 2.35.1
+  build_runner: ^2.15.1
+  drift_dev: 2.31.0
   mocktail: ^1.0.4
 
 flutter:

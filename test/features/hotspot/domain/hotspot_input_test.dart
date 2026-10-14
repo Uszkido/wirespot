@@ -4,6 +4,7 @@ import 'package:wirespot/features/hotspot/domain/entities/hotspot_profile_input.
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_setup_input.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_setup_preset.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_user_input.dart';
+import 'package:wirespot/features/hotspot/domain/entities/radius_server_settings.dart';
 
 void main() {
   test('HotspotUserInput maps to RouterOS attributes', () {
@@ -108,6 +109,10 @@ void main() {
 
   test('business setup presets pass local setup validation', () {
     for (final preset in HotspotSetupPreset.values) {
+      if (preset == HotspotSetupPreset.radiusManaged) {
+        // RADIUS credentials are intentionally supplied by the operator.
+        continue;
+      }
       expect(preset.toInput().validationErrors, isEmpty, reason: preset.name);
     }
   });
@@ -211,5 +216,36 @@ void main() {
 
     expect(input.useRadius, isTrue);
     expect(input.toServerProfileAttributes()['use-radius'], 'yes');
+  });
+
+  test('RADIUS settings are required and mapped to RouterOS attributes', () {
+    const incomplete = HotspotSetupInput(
+      serverName: 'radius-hotspot',
+      interfaceName: 'bridge',
+      serverProfileName: 'radius-managed',
+      addressPool: 'radius-pool',
+      useRadius: true,
+    );
+    expect(
+      incomplete.validationErrors,
+      contains('Add the RADIUS server settings.'),
+    );
+
+    const input = HotspotSetupInput(
+      serverName: 'radius-hotspot',
+      interfaceName: 'bridge',
+      serverProfileName: 'radius-managed',
+      addressPool: 'radius-pool',
+      useRadius: true,
+      radiusSettings: RadiusServerSettings(
+        address: '10.0.0.10',
+        secret: 'shared-secret',
+      ),
+    );
+    expect(input.validationErrors, isEmpty);
+    expect(
+      input.toRadiusAttributes(),
+      containsPair('authentication-port', '1812'),
+    );
   });
 }
