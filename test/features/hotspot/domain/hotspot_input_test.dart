@@ -250,5 +250,32 @@ void main() {
     final radiusStep = input.toPlan().steps.last;
     expect(radiusStep.command, '/radius/add (or /radius/set)');
     expect(radiusStep.attributes['secret'], '••••••••');
+    expect(
+      input.toPlan().toLines().join('\n'),
+      isNot(contains('shared-secret')),
+    );
+  });
+
+  test('RADIUS settings reject invalid ports and timeouts', () {
+    const settings = RadiusServerSettings(
+      address: 'radius.example.test',
+      secret: 'secret',
+      authenticationPort: 0,
+      accountingPort: 65536,
+      timeoutSeconds: 0,
+    );
+
+    expect(
+      settings.validationErrors,
+      contains('Authentication port must be between 1 and 65535.'),
+    );
+    expect(
+      settings.validationErrors,
+      contains('Accounting port must be between 1 and 65535.'),
+    );
+    expect(
+      settings.validationErrors,
+      contains('RADIUS timeout must be positive.'),
+    );
   });
 }
