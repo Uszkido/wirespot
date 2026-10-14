@@ -42,6 +42,55 @@ class CloudWorkspaceSyncService {
     );
   }
 
+  Future<Map<String, dynamic>?> readRouter(String routerId) async {
+    final context = await _cloudContext();
+    if (context == null) return null;
+    return _repository.readRouterDocument(
+      idToken: context.$1,
+      orgId: context.$2,
+      routerId: routerId,
+    );
+  }
+
+  Future<Map<String, dynamic>?> readVoucher(String voucherId) async {
+    final context = await _cloudContext();
+    if (context == null) return null;
+    return _repository.readVoucherDocument(
+      idToken: context.$1,
+      orgId: context.$2,
+      voucherId: voucherId,
+    );
+  }
+
+  Future<Map<String, dynamic>?> readSettings() async {
+    final context = await _cloudContext();
+    if (context == null) return null;
+    return _repository.readSettingsDocument(
+      idToken: context.$1,
+      orgId: context.$2,
+    );
+  }
+
+  Future<bool> deleteRouter(String routerId) async {
+    final context = await _cloudContext();
+    if (context == null) return false;
+    return _repository.deleteRouterDocument(
+      idToken: context.$1,
+      orgId: context.$2,
+      routerId: routerId,
+    );
+  }
+
+  Future<bool> deleteVoucher(String voucherId) async {
+    final context = await _cloudContext();
+    if (context == null) return false;
+    return _repository.deleteVoucherDocument(
+      idToken: context.$1,
+      orgId: context.$2,
+      voucherId: voucherId,
+    );
+  }
+
   Future<(String, String)?> _cloudContext() async {
     final session = await _settingsService.loadSession();
     final connection = await _settingsService.loadConnection();

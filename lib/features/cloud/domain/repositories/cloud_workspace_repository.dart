@@ -7,6 +7,17 @@ abstract class CloudWorkspaceRepository {
     required String routerId,
   }) => throw UnimplementedError();
 
+  Future<Map<String, dynamic>?> readVoucherDocument({
+    required String idToken,
+    required String orgId,
+    required String voucherId,
+  }) => throw UnimplementedError();
+
+  Future<Map<String, dynamic>?> readSettingsDocument({
+    required String idToken,
+    required String orgId,
+  }) => throw UnimplementedError();
+
   Future<bool> saveRouterDocument({
     required String idToken,
     required String orgId,
@@ -32,6 +43,12 @@ abstract class CloudWorkspaceRepository {
     required String orgId,
     required String routerId,
   }) => throw UnimplementedError();
+
+  Future<bool> deleteVoucherDocument({
+    required String idToken,
+    required String orgId,
+    required String voucherId,
+  }) => throw UnimplementedError();
 }
 
 class FirebaseCloudWorkspaceRepository implements CloudWorkspaceRepository {
@@ -49,6 +66,29 @@ class FirebaseCloudWorkspaceRepository implements CloudWorkspaceRepository {
     return _apiClient.getFirestoreDocument(
       idToken: idToken,
       documentPath: 'organizations/$orgId/routers/$routerId',
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>?> readVoucherDocument({
+    required String idToken,
+    required String orgId,
+    required String voucherId,
+  }) {
+    return _apiClient.getFirestoreDocument(
+      idToken: idToken,
+      documentPath: 'organizations/$orgId/vouchers/$voucherId',
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>?> readSettingsDocument({
+    required String idToken,
+    required String orgId,
+  }) {
+    return _apiClient.getFirestoreDocument(
+      idToken: idToken,
+      documentPath: 'organizations/$orgId/settings/config',
     );
   }
 
@@ -102,6 +142,18 @@ class FirebaseCloudWorkspaceRepository implements CloudWorkspaceRepository {
     return _apiClient.deleteFirestoreDocument(
       idToken: idToken,
       documentPath: 'organizations/$orgId/routers/$routerId',
+    );
+  }
+
+  @override
+  Future<bool> deleteVoucherDocument({
+    required String idToken,
+    required String orgId,
+    required String voucherId,
+  }) {
+    return _apiClient.deleteFirestoreDocument(
+      idToken: idToken,
+      documentPath: 'organizations/$orgId/vouchers/$voucherId',
     );
   }
 }

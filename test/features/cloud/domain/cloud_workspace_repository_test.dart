@@ -14,12 +14,34 @@ class FakeCloudWorkspaceRepository implements CloudWorkspaceRepository {
   }) async => routerDocs['$orgId/$routerId'];
 
   @override
+  Future<Map<String, dynamic>?> readVoucherDocument({
+    required String idToken,
+    required String orgId,
+    required String voucherId,
+  }) async => voucherDocs['$orgId/$voucherId'];
+
+  @override
+  Future<Map<String, dynamic>?> readSettingsDocument({
+    required String idToken,
+    required String orgId,
+  }) async => settingsDocs[orgId];
+
+  @override
   Future<bool> deleteRouterDocument({
     required String idToken,
     required String orgId,
     required String routerId,
   }) async {
     return routerDocs.remove('$orgId/$routerId') != null;
+  }
+
+  @override
+  Future<bool> deleteVoucherDocument({
+    required String idToken,
+    required String orgId,
+    required String voucherId,
+  }) async {
+    return voucherDocs.remove('$orgId/$voucherId') != null;
   }
 
   @override
@@ -103,5 +125,42 @@ void main() {
       expect(success, isTrue);
       expect(repo.settingsDocs['org_1'], {'currency': 'NGN'});
     });
+
+    test(
+      'read and delete operations stay scoped to the organization',
+      () async {
+        await repo.saveVoucherDocument(
+          idToken: 'token123',
+          orgId: 'org_1',
+          voucherId: 'v-200',
+          voucherData: {'code': 'WS-100'},
+        );
+
+        expect(
+          await repo.readVoucherDocument(
+            idToken: 'token123',
+            orgId: 'org_1',
+            voucherId: 'v-200',
+          ),
+          {'code': 'WS-100'},
+        );
+        expect(
+          await repo.readVoucherDocument(
+            idToken: 'token123',
+            orgId: 'org_2',
+            voucherId: 'v-200',
+          ),
+          isNull,
+        );
+        expect(
+          await repo.deleteVoucherDocument(
+            idToken: 'token123',
+            orgId: 'org_1',
+            voucherId: 'v-200',
+          ),
+          isTrue,
+        );
+      },
+    );
   });
 }
