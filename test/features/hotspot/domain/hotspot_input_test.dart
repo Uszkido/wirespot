@@ -247,5 +247,8 @@ void main() {
       input.toRadiusAttributes(),
       containsPair('authentication-port', '1812'),
     );
+    final radiusStep = input.toPlan().steps.last;
+    expect(radiusStep.command, '/radius/add (or /radius/set)');
+    expect(radiusStep.attributes['secret'], '••••••••');
   });
 }

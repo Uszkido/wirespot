@@ -249,6 +249,22 @@ class HotspotSetupInput {
         ),
       );
 
+    final radiusAttributes = toRadiusAttributes();
+    if (radiusAttributes != null) {
+      steps.add(
+        HotspotSetupStep(
+          title: 'Create or update external RADIUS server',
+          command: '/radius/add (or /radius/set)',
+          // Never expose the shared secret in the review dialog, logs, or
+          // generated setup plan. The live RouterOS request still receives it.
+          attributes: {
+            for (final entry in radiusAttributes.entries)
+              entry.key: entry.key == 'secret' ? '••••••••' : entry.value,
+          },
+        ),
+      );
+    }
+
     return HotspotSetupPlan(steps: steps);
   }
 
