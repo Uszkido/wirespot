@@ -72,8 +72,8 @@ import '../vpn/unified_vpn_service.dart';
 import '../vpn/vpn_status_service.dart';
 import '../vpn/wireguard_auto_reconnect_service.dart';
 import '../vpn/wireguard_vpn_service.dart';
-import '../features/cloud/domain/repositories/cloud_workspace_repository.dart';
-import '../features/cloud/domain/services/cloud_workspace_sync_service.dart';
+import '../../features/cloud/domain/repositories/cloud_workspace_repository.dart';
+import '../../features/cloud/domain/services/cloud_workspace_sync_service.dart';
 
 final sl = GetIt.instance;
 
