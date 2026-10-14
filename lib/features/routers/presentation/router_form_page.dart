@@ -15,9 +15,16 @@ import '../domain/entities/router_group_entity.dart';
 import 'router_providers.dart';
 
 class RouterFormPage extends ConsumerStatefulWidget {
-  const RouterFormPage({this.routerId, super.key});
+  const RouterFormPage({
+    this.routerId,
+    this.initialHost,
+    this.initialName,
+    super.key,
+  });
 
   final String? routerId;
+  final String? initialHost;
+  final String? initialName;
 
   @override
   ConsumerState<RouterFormPage> createState() => _RouterFormPageState();
@@ -137,7 +144,14 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
   }
 
   void _hydrate(RouterEntity? router) {
-    if (_didHydrate || router == null) {
+    if (_didHydrate) {
+      return;
+    }
+
+    if (router == null) {
+      _nameController.text = widget.initialName ?? '';
+      _hostController.text = widget.initialHost ?? '';
+      _didHydrate = true;
       return;
     }
 

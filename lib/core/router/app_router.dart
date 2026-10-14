@@ -143,7 +143,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.newRouter,
         name: 'new-router',
-        builder: (context, state) => const LicenseGate(child: RouterFormPage()),
+        builder: (context, state) => LicenseGate(
+          child: RouterFormPage(
+            initialHost: state.uri.queryParameters['host'],
+            initialName: state.uri.queryParameters['name'],
+          ),
+        ),
       ),
       GoRoute(
         path: '/routers/:routerId/edit',

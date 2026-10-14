@@ -10,8 +10,10 @@ import '../../dashboard/presentation/dashboard_providers.dart';
 import '../../settings/presentation/settings_providers.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/entities/router_group_entity.dart';
+import '../domain/entities/router_discovery_result.dart';
 import '../domain/entities/ruijie_cloud_device.dart';
 import '../domain/services/router_fleet_connection_service.dart';
+import '../domain/services/router_discovery_service.dart';
 import 'router_providers.dart';
 
 class RoutersPage extends ConsumerWidget {
@@ -42,6 +44,11 @@ class RoutersPage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(text.routers),
         actions: [
+          IconButton(
+            tooltip: 'Discover routers on this network',
+            onPressed: () => _discoverLanRouters(context),
+            icon: const Icon(Icons.wifi_find_outlined),
+          ),
           if (filteredItems.isNotEmpty)
             IconButton(
               tooltip: 'Test visible router connections',
@@ -117,6 +124,69 @@ class RoutersPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
+  }
+
+  Future<void> _discoverLanRouters(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('Scanning this network for MikroTik routers...'),
+      ),
+    );
+    try {
+      final results = await const RouterDiscoveryService().discover();
+      if (!context.mounted) return;
+      if (results.isEmpty) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('No MikroTik routers were found on this network.'),
+          ),
+        );
+        return;
+      }
+      final selected = await showDialog<RouterDiscoveryResult>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Routers found on this network'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: results.length,
+              itemBuilder: (context, index) {
+                final result = results[index];
+                return ListTile(
+                  leading: const Icon(Icons.router_outlined),
+                  title: Text(result.displayName),
+                  subtitle: Text(
+                    '${result.host}${result.macAddress == null ? '' : '\n${result.macAddress}'}',
+                  ),
+                  isThreeLine: result.macAddress != null,
+                  onTap: () => Navigator.of(context).pop(result),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        ),
+      );
+      if (selected == null || !context.mounted) return;
+      final query = Uri(
+        path: AppRoutes.newRouter,
+        queryParameters: {'host': selected.host, 'name': selected.displayName},
+      ).toString();
+      await context.push(query);
+    } on Object catch (error) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Router discovery failed: $error')),
+      );
+    }
   }
 
   Future<void> _testAllConnections(
