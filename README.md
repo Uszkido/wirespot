@@ -196,6 +196,13 @@ Generate a local device-bound license:
 C:\tmp\wirespot_flutter\flutter\bin\dart.bat run tools/license_generator.dart DEVICE_ID
 ```
 
+Repository operators can generate the same mobile activation from GitHub:
+open **Actions → Generate mobile device activation → Run workflow**, enter the
+device ID shown in WireSpot Settings, and download the short-lived activation
+artifact. The workflow's lifetime option produces the offline device-bound key;
+monthly and yearly plans must be issued by the authenticated cloud billing
+service so they can expire and be revoked safely.
+
 Play Billing/server validation is planned for production release and documented
 in [docs/payment-and-licensing.md](docs/payment-and-licensing.md).
 

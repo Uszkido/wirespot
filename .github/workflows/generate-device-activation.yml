@@ -1,0 +1,81 @@
+name: Generate mobile device activation
+
+on:
+  workflow_dispatch:
+    inputs:
+      device_id:
+        description: Device ID shown in WireSpot Settings
+        required: true
+        type: string
+      plan:
+        description: Activation plan (monthly/yearly require server billing)
+        required: true
+        default: lifetime
+        type: choice
+        options:
+          - lifetime
+          - monthly
+          - yearly
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    name: Generate activation code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Validate request
+        shell: bash
+        env:
+          DEVICE_ID: ${{ inputs.device_id }}
+        run: |
+          set -euo pipefail
+          normalized="$(printf '%s' "$DEVICE_ID" | tr '[:lower:]' '[:upper:]' | tr -d '[:space:]')"
+          if [[ "${#normalized}" -lt 8 || ! "$normalized" =~ ^[A-Z0-9:_-]+$ ]]; then
+            echo "Device ID must contain at least 8 letters, digits, ':', '_' or '-'." >&2
+            exit 1
+          fi
+          echo "DEVICE_ID=$normalized" >> "$GITHUB_ENV"
+
+      - name: Generate activation code
+        env:
+          PLAN: ${{ inputs.plan }}
+        run: |
+          set -euo pipefail
+          code="$(dart run tools/license_generator.dart "$DEVICE_ID" | awk -F'=> ' '{print $2}')"
+          if [[ -z "$code" ]]; then
+            echo "The license generator did not return an activation code." >&2
+            exit 1
+          fi
+          {
+            echo "## WireSpot mobile activation"
+            echo
+            echo "- Device ID: `$DEVICE_ID`"
+            echo "- Requested plan: `$PLAN`"
+            echo "- Activation code: `$code`"
+            echo
+            if [[ "$PLAN" == "lifetime" ]]; then
+              echo "This is an offline device-bound lifetime activation. Enter it in WireSpot Settings > Premium license."
+            else
+              echo "Monthly and yearly access must be issued and expired by the authenticated cloud billing service; this workflow does not create an offline time-limited key."
+            fi
+          } | tee activation-summary.md >> "$GITHUB_STEP_SUMMARY"
+          printf '%s\n' "$code" > activation-code.txt
+
+      - name: Upload activation record
+        uses: actions/upload-artifact@v4
+        with:
+          name: wirespot-activation-${{ inputs.device_id }}
+          path: |
+            activation-code.txt
+            activation-summary.md
+          retention-days: 7
