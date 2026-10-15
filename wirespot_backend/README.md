@@ -37,6 +37,9 @@ production or multi-instance hosting.
 - `GET /api/v1/commands/pending`: Return pending cloud commands.
 - `POST /api/v1/telemetry`: Accept telemetry frames.
 - `POST /api/v1/backup/upload` & `GET /api/v1/backup/latest`: Upload and retrieve the latest backup.
+- `GET /api/v1/license/entitlement`: Read the organization's verified entitlement.
+- `POST /api/v1/license/entitlement`: Issue an entitlement only when the
+  server-only `WIRESPOT_ENTITLEMENT_ADMIN_TOKEN` is configured.
 
 All `/api/v1` data endpoints require `Authorization: Bearer ws_...`. Health
 and authentication endpoints are public. The current token implementation is

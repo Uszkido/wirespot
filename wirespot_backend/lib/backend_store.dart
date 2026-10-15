@@ -8,6 +8,7 @@ class BackendStore {
   static final _backups = <String, Map<String, dynamic>>{};
   static final _backupTimes = <String, DateTime>{};
   static final _telemetryEvents = <String, int>{};
+  static final _entitlements = <String, Map<String, dynamic>>{};
 
   static List<Map<String, dynamic>> vouchersFor(String orgId) =>
       _vouchers.putIfAbsent(orgId, () => <Map<String, dynamic>>[]);
@@ -28,5 +29,12 @@ class BackendStore {
     final count = (_telemetryEvents[orgId] ?? 0) + 1;
     _telemetryEvents[orgId] = count;
     return count;
+  }
+
+  static Map<String, dynamic>? entitlementFor(String orgId) =>
+      _entitlements[orgId];
+
+  static void saveEntitlement(String orgId, Map<String, dynamic> value) {
+    _entitlements[orgId] = value;
   }
 }
