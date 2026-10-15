@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/licensing/entitlement_service.dart';
 import '../domain/services/cloud_settings_service.dart';
 
-class CloudApiClient implements ServerEntitlementReader {
+class CloudApiClient {
   const CloudApiClient({
     required Dio dio,
     required CloudSettingsService settingsService,
@@ -29,17 +29,6 @@ class CloudApiClient implements ServerEntitlementReader {
       return response.statusCode == 200;
     } catch (_) {
       return false;
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>?> fetchEntitlement() async {
-    try {
-      final response = await getJson('license/entitlement');
-      final entitlement = response.data?['entitlement'];
-      return entitlement is Map ? Map<String, dynamic>.from(entitlement) : null;
-    } on Object {
-      return null;
     }
   }
 
@@ -162,5 +151,24 @@ class CloudApiClient implements ServerEntitlementReader {
       options: Options(method: method, headers: headers),
     );
     return response;
+  }
+}
+
+/// Adapter keeps entitlement concerns out of the broad CloudApiClient
+/// contract, so existing API fakes and platform clients remain compatible.
+class CloudServerEntitlementReader implements ServerEntitlementReader {
+  const CloudServerEntitlementReader(this._client);
+
+  final CloudApiClient _client;
+
+  @override
+  Future<Map<String, dynamic>?> fetchEntitlement() async {
+    try {
+      final response = await _client.getJson('license/entitlement');
+      final entitlement = response.data?['entitlement'];
+      return entitlement is Map ? Map<String, dynamic>.from(entitlement) : null;
+    } on Object {
+      return null;
+    }
   }
 }

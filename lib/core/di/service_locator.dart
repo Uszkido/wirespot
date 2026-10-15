@@ -110,6 +110,9 @@ Future<void> configureDependencies() async {
         settingsService: sl<CloudSettingsService>(),
       ),
     )
+    ..registerLazySingleton<CloudServerEntitlementReader>(
+      () => CloudServerEntitlementReader(sl<CloudApiClient>()),
+    )
     ..registerLazySingleton<FirebaseApiClient>(FirebaseApiClient.new)
     ..registerLazySingleton<CloudWorkspaceRepository>(
       () =>
@@ -294,7 +297,7 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<EntitlementService>(
       () => EntitlementService(
         sl<SettingsRepository>(),
-        serverEntitlementReader: sl<CloudApiClient>(),
+        serverEntitlementReader: sl<CloudServerEntitlementReader>(),
       ),
     );
 }
