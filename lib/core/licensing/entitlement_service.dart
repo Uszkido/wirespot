@@ -26,6 +26,7 @@ class EntitlementService {
     final billingEntitlement = await _billingEntitlement(now);
     final trialStartedAt = await _trialStartedAt(now);
     final deviceId = await _deviceId(now);
+    final localLicense = _localLicense(licenseKey, deviceId, now);
     final licenseSource = _licenseSource(
       licenseKey: licenseKey,
       deviceId: deviceId,
@@ -43,8 +44,10 @@ class EntitlementService {
           : licenseSource,
       plan: billingEntitlement.isActive
           ? billingEntitlement.plan
-          : _planForLicenseSource(licenseSource),
-      entitlementEndsAt: billingEntitlement.endsAt,
+          : localLicense?.plan ?? _planForLicenseSource(licenseSource),
+      entitlementEndsAt: billingEntitlement.isActive
+          ? billingEntitlement.endsAt
+          : localLicense?.endsAt,
       licenseKey: licenseKey,
     );
   }
@@ -114,7 +117,8 @@ class EntitlementService {
       return false;
     }
     if (normalized == generateDeviceLicense(deviceId) ||
-        _isLegacyDeviceLicense(normalized, deviceId)) {
+        _isLegacyDeviceLicense(normalized, deviceId) ||
+        _localLicense(normalized, deviceId, DateTime.now()) != null) {
       return true;
     }
     return normalized == 'WIRESPOT-DEV-PREMIUM' ||
@@ -134,7 +138,8 @@ class EntitlementService {
       return EntitlementSource.none;
     }
     if (normalized == generateDeviceLicense(deviceId) ||
-        _isLegacyDeviceLicense(normalized, deviceId)) {
+        _isLegacyDeviceLicense(normalized, deviceId) ||
+        _localLicense(normalized, deviceId, DateTime.now()) != null) {
       return EntitlementSource.deviceLicense;
     }
     if (_isRecognizedLicense(normalized, deviceId)) {
@@ -206,6 +211,29 @@ class EntitlementService {
     return 'WS-${normalizedDevice.substring(0, 8)}-${digest.substring(0, 16)}';
   }
 
+  /// Generates a time-limited offline key for direct/enterprise installs.
+  /// The expiry is checked locally, so server-issued entitlements remain the
+  /// stronger option when revocation or clock tamper resistance is required.
+  static String generateTimedDeviceLicense({
+    required String deviceId,
+    required BillingPlan plan,
+    required DateTime endsAt,
+  }) {
+    if (plan != BillingPlan.smallMonthly &&
+        plan != BillingPlan.proMonthly &&
+        plan != BillingPlan.proYearly) {
+      throw ArgumentError.value(plan, 'plan', 'Use a monthly or yearly plan');
+    }
+    final normalizedDevice = deviceId.trim().toUpperCase();
+    if (normalizedDevice.length < 8) {
+      throw ArgumentError.value(deviceId, 'deviceId', 'Use at least 8 chars');
+    }
+    final date = _licenseDate(endsAt);
+    final planCode = plan == BillingPlan.proYearly ? 'Y' : 'M';
+    final digest = _licenseDigest('$normalizedDevice:$planCode:$date');
+    return 'VEXEL-$planCode-${normalizedDevice.substring(0, 4)}-$date-${digest.substring(0, 8)}';
+  }
+
   static bool _isLegacyDeviceLicense(String licenseKey, String deviceId) {
     final normalizedDevice = deviceId.trim().toUpperCase();
     if (normalizedDevice.length < 8) {
@@ -213,6 +241,41 @@ class EntitlementService {
     }
     return licenseKey.startsWith('WS-${normalizedDevice.substring(0, 8)}-') &&
         licenseKey.length == 28;
+  }
+
+  _LocalLicense? _localLicense(
+    String? licenseKey,
+    String deviceId,
+    DateTime now,
+  ) {
+    final normalized = licenseKey?.trim().toUpperCase();
+    if (normalized == null) return null;
+    final match = RegExp(
+      r'^VEXEL-([MY])-([A-Z0-9]{4})-(\d{8})-([A-F0-9]{8})$',
+    ).firstMatch(normalized);
+    if (match == null || !deviceId.toUpperCase().startsWith(match.group(2)!)) {
+      return null;
+    }
+    final dateText = match.group(3)!;
+    final endsAt = DateTime.tryParse(
+      '${dateText.substring(0, 4)}-${dateText.substring(4, 6)}-${dateText.substring(6, 8)}T23:59:59Z',
+    );
+    if (endsAt == null || !endsAt.isAfter(now.toUtc())) return null;
+    final plan = match.group(1) == 'Y'
+        ? BillingPlan.proYearly
+        : BillingPlan.proMonthly;
+    final expected = _licenseDigest(
+      '${deviceId.toUpperCase()}:${match.group(1)}:$dateText',
+    ).substring(0, 8);
+    if (expected != match.group(4)) return null;
+    return _LocalLicense(plan: plan, endsAt: endsAt);
+  }
+
+  static String _licenseDate(DateTime value) {
+    final utc = value.toUtc();
+    return '${utc.year.toString().padLeft(4, '0')}'
+        '${utc.month.toString().padLeft(2, '0')}'
+        '${utc.day.toString().padLeft(2, '0')}';
   }
 
   Future<DateTime> _trialStartedAt(DateTime now) async {
@@ -252,6 +315,13 @@ class EntitlementService {
         .padLeft(8, '0');
     return '$first$second'.toUpperCase();
   }
+}
+
+class _LocalLicense {
+  const _LocalLicense({required this.plan, required this.endsAt});
+
+  final BillingPlan plan;
+  final DateTime endsAt;
 }
 
 class _BillingEntitlement {

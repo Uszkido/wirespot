@@ -51,7 +51,13 @@ jobs:
           PLAN: ${{ inputs.plan }}
         run: |
           set -euo pipefail
-          code="$(dart run tools/license_generator.dart "$DEVICE_ID" | awk -F'=> ' '{print $2}')"
+          args=("$DEVICE_ID" --plan "$PLAN")
+          if [[ "$PLAN" == "monthly" ]]; then
+            args+=(--expires "$(date -u -d '+30 days' +%Y-%m-%d)")
+          elif [[ "$PLAN" == "yearly" ]]; then
+            args+=(--expires "$(date -u -d '+365 days' +%Y-%m-%d)")
+          fi
+          code="$(dart run tools/license_generator.dart "${args[@]}" | awk -F'=> ' '{print $2}')"
           if [[ -z "$code" ]]; then
             echo "The license generator did not return an activation code." >&2
             exit 1
@@ -63,11 +69,7 @@ jobs:
             echo "- Requested plan: `$PLAN`"
             echo "- Activation code: `$code`"
             echo
-            if [[ "$PLAN" == "lifetime" ]]; then
-              echo "This is an offline device-bound lifetime activation. Enter it in WireSpot Settings > Premium license."
-            else
-              echo "Monthly and yearly access must be issued and expired by the authenticated cloud billing service; this workflow does not create an offline time-limited key."
-            fi
+            echo "Enter this activation in WireSpot Settings > Premium license. Local timed licenses rely on the device clock and cannot be remotely revoked."
           } | tee activation-summary.md >> "$GITHUB_STEP_SUMMARY"
           printf '%s\n' "$code" > activation-code.txt
 

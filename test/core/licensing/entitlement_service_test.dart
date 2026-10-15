@@ -54,6 +54,26 @@ void main() {
     expect(license, hasLength(28));
   });
 
+  test('monthly and yearly local licenses carry an expiry and plan', () async {
+    final settings = _FakeSettingsRepository();
+    final service = EntitlementService(settings);
+    await settings.writeSetting(
+      EntitlementService.deviceIdSetting,
+      '1234567890ABCDEF',
+    );
+    final endsAt = DateTime.now().toUtc().add(const Duration(days: 30));
+    final license = EntitlementService.generateTimedDeviceLicense(
+      deviceId: '1234567890ABCDEF',
+      plan: BillingPlan.proMonthly,
+      endsAt: endsAt,
+    );
+    await service.saveDevLicense(license);
+    final snapshot = await service.load();
+    expect(snapshot.isPremium, isTrue);
+    expect(snapshot.plan, BillingPlan.proMonthly);
+    expect(snapshot.entitlementEndsAt, isNotNull);
+  });
+
   test('active Play Billing entitlement grants premium access', () async {
     final repository = _FakeSettingsRepository();
     final service = EntitlementService(repository);

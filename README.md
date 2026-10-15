@@ -196,6 +196,16 @@ Generate a local device-bound license:
 C:\tmp\wirespot_flutter\flutter\bin\dart.bat run tools/license_generator.dart DEVICE_ID
 ```
 
+For a direct/offline time-limited activation, include a plan and UTC expiry:
+
+```powershell
+dart run tools/license_generator.dart DEVICE_ID --plan monthly --expires 2026-11-14
+dart run tools/license_generator.dart DEVICE_ID --plan yearly --expires 2027-10-15
+```
+
+Local timed keys rely on the device clock and cannot be remotely revoked;
+server-verified entitlements remain the safer choice for paid subscriptions.
+
 Repository operators can generate the same mobile activation from GitHub:
 open **Actions → Generate mobile device activation → Run workflow**, enter the
 device ID shown in WireSpot Settings, and download the short-lived activation
