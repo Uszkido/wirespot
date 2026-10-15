@@ -91,6 +91,32 @@ void main() {
     expect(snapshot.plan, BillingPlan.proMonthly);
   });
 
+  test('verified server entitlement grants the matching device', () async {
+    final repository = _FakeSettingsRepository();
+    await repository.writeSetting(
+      EntitlementService.deviceIdSetting,
+      '1234567890ABCDEF',
+    );
+    final service = EntitlementService(
+      repository,
+      serverEntitlementReader: _FakeServerEntitlementReader({
+        'verified': true,
+        'revoked': false,
+        'deviceId': '1234567890abcdef',
+        'plan': BillingPlan.proYearly.id,
+        'endsAt': DateTime.now()
+            .add(const Duration(days: 365))
+            .toIso8601String(),
+      }),
+    );
+
+    final snapshot = await service.load();
+
+    expect(snapshot.isPremium, isTrue);
+    expect(snapshot.source, EntitlementSource.serverLicense);
+    expect(snapshot.plan, BillingPlan.proYearly);
+  });
+
   test(
     'expired billing entitlement falls back to trial/license state',
     () async {
@@ -130,4 +156,13 @@ class _FakeSettingsRepository implements SettingsRepository {
   Future<void> writeSetting(String key, String value) async {
     _settings[key] = value;
   }
+}
+
+class _FakeServerEntitlementReader implements ServerEntitlementReader {
+  const _FakeServerEntitlementReader(this.value);
+
+  final Map<String, dynamic> value;
+
+  @override
+  Future<Map<String, dynamic>?> fetchEntitlement() async => value;
 }

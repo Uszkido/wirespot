@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/licensing/entitlement_service.dart';
 import '../domain/services/cloud_settings_service.dart';
 
-class CloudApiClient {
+class CloudApiClient implements ServerEntitlementReader {
   const CloudApiClient({
     required Dio dio,
     required CloudSettingsService settingsService,
@@ -28,6 +29,17 @@ class CloudApiClient {
       return response.statusCode == 200;
     } catch (_) {
       return false;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>?> fetchEntitlement() async {
+    try {
+      final response = await getJson('license/entitlement');
+      final entitlement = response.data?['entitlement'];
+      return entitlement is Map ? Map<String, dynamic>.from(entitlement) : null;
+    } on Object {
+      return null;
     }
   }
 

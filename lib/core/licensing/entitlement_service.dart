@@ -2,8 +2,15 @@ import '../../features/settings/domain/repositories/settings_repository.dart';
 import 'billing_plan.dart';
 import 'entitlement_snapshot.dart';
 
+abstract interface class ServerEntitlementReader {
+  Future<Map<String, dynamic>?> fetchEntitlement();
+}
+
 class EntitlementService {
-  const EntitlementService(this._settingsRepository);
+  const EntitlementService(
+    this._settingsRepository, {
+    ServerEntitlementReader? serverEntitlementReader,
+  }) : _serverEntitlementReader = serverEntitlementReader;
 
   static const licenseKeySetting = 'license.key';
   static const premiumOverrideSetting = 'license.premiumOverride';
@@ -16,6 +23,7 @@ class EntitlementService {
   static const trialDuration = Duration(days: 7);
 
   final SettingsRepository _settingsRepository;
+  final ServerEntitlementReader? _serverEntitlementReader;
 
   Future<EntitlementSnapshot> load() async {
     final now = DateTime.now();
@@ -27,29 +35,69 @@ class EntitlementService {
     final trialStartedAt = await _trialStartedAt(now);
     final deviceId = await _deviceId(now);
     final localLicense = _localLicense(licenseKey, deviceId, now);
+    final serverEntitlement = await _loadServerEntitlement(deviceId, now);
     final licenseSource = _licenseSource(
       licenseKey: licenseKey,
       deviceId: deviceId,
       premiumOverride: premiumOverride == 'true',
     );
     final isLicensePremium = licenseSource != EntitlementSource.none;
+    final premium =
+        serverEntitlement != null ||
+        isLicensePremium ||
+        billingEntitlement.isActive;
     return EntitlementSnapshot(
-      isPremium: isLicensePremium || billingEntitlement.isActive,
+      isPremium: premium,
       trialStartedAt: trialStartedAt,
       trialEndsAt: trialStartedAt.add(trialDuration),
       now: now,
       deviceId: deviceId,
       source: billingEntitlement.isActive
           ? billingEntitlement.source
+          : serverEntitlement != null
+          ? EntitlementSource.serverLicense
           : licenseSource,
       plan: billingEntitlement.isActive
           ? billingEntitlement.plan
-          : localLicense?.plan ?? _planForLicenseSource(licenseSource),
+          : serverEntitlement?.plan ??
+                localLicense?.plan ??
+                _planForLicenseSource(licenseSource),
       entitlementEndsAt: billingEntitlement.isActive
           ? billingEntitlement.endsAt
-          : localLicense?.endsAt,
+          : serverEntitlement?.endsAt ?? localLicense?.endsAt,
       licenseKey: licenseKey,
     );
+  }
+
+  Future<_LocalLicense?> _loadServerEntitlement(
+    String deviceId,
+    DateTime now,
+  ) async {
+    final reader = _serverEntitlementReader;
+    if (reader == null) return null;
+    try {
+      final payload = await reader.fetchEntitlement();
+      if (payload == null ||
+          payload['verified'] != true ||
+          payload['revoked'] == true) {
+        return null;
+      }
+      final licensedDevice = (payload['deviceId'] as String?)
+          ?.trim()
+          .toUpperCase();
+      final endsAt = DateTime.tryParse(payload['endsAt'] as String? ?? '');
+      final plan = BillingPlan.fromId(payload['plan'] as String?);
+      if (licensedDevice != deviceId.toUpperCase() ||
+          endsAt == null ||
+          !endsAt.isAfter(now) ||
+          plan == BillingPlan.trial ||
+          plan == BillingPlan.lifetimeDevice) {
+        return null;
+      }
+      return _LocalLicense(plan: plan, endsAt: endsAt);
+    } on Object {
+      return null;
+    }
   }
 
   Future<void> saveDevLicense(String licenseKey) async {

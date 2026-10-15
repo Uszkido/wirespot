@@ -292,6 +292,9 @@ Future<void> configureDependencies() async {
       () => WireGuardSettingsService(sl<SettingsRepository>()),
     )
     ..registerLazySingleton<EntitlementService>(
-      () => EntitlementService(sl<SettingsRepository>()),
+      () => EntitlementService(
+        sl<SettingsRepository>(),
+        serverEntitlementReader: sl<CloudApiClient>(),
+      ),
     );
 }
