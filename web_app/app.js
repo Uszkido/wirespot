@@ -3,6 +3,12 @@
 // ═══════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Use the local API during development and the hosted API from Firebase.
+  // This lets first-time Firebase users sign up without entering localhost.
+  const defaultApiBaseUrl = ['127.0.0.1', 'localhost'].includes(window.location.hostname)
+    ? 'http://127.0.0.1:8080'
+    : 'https://wirespot-api.onrender.com';
+
   // ─── Initial State ───
   const defaultState = {
     activeTab: 'tab-dashboard',
@@ -723,7 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = document.getElementById('auth-email-login').value;
       const password = document.getElementById('auth-pass-login').value;
       const configured = JSON.parse(localStorage.getItem('wirespot_web_cloud_config') || '{}');
-      const baseUrl = (configured.url || 'http://127.0.0.1:8080').replace(/\/$/, '');
+      const baseUrl = (configured.url || defaultApiBaseUrl).replace(/\/$/, '');
       try {
         const response = await fetch(`${baseUrl}/api/v1/auth/login`, {
           method: 'POST',
@@ -758,7 +764,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = document.getElementById('auth-email-reg').value;
       const password = document.getElementById('auth-pass-reg').value;
       const configured = JSON.parse(localStorage.getItem('wirespot_web_cloud_config') || '{}');
-      const baseUrl = (configured.url || 'http://127.0.0.1:8080').replace(/\/$/, '');
+      const baseUrl = (configured.url || defaultApiBaseUrl).replace(/\/$/, '');
       try {
         const response = await fetch(`${baseUrl}/api/v1/auth/register`, {
           method: 'POST',
@@ -792,7 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const organizationId = document.getElementById('auth-org-token').value.trim();
       const token = document.getElementById('auth-access-token').value.trim();
       const configured = JSON.parse(localStorage.getItem('wirespot_web_cloud_config') || '{}');
-      const baseUrl = (configured.url || 'http://127.0.0.1:8080').replace(/\/$/, '');
+      const baseUrl = (configured.url || defaultApiBaseUrl).replace(/\/$/, '');
       try {
         const response = await fetch(`${baseUrl}/api/v1/routers`, {
           headers: { Authorization: `Bearer ${token}`, 'X-WireSpot-Organization': organizationId }
@@ -815,7 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const email = document.getElementById('auth-email-recovery').value.trim();
       const configured = JSON.parse(localStorage.getItem('wirespot_web_cloud_config') || '{}');
-      const baseUrl = (configured.url || 'http://127.0.0.1:8080').replace(/\/$/, '');
+      const baseUrl = (configured.url || defaultApiBaseUrl).replace(/\/$/, '');
       try {
         const response = await fetch(`${baseUrl}/api/v1/auth/recover`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
         const payload = await response.json().catch(() => ({}));
