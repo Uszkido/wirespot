@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 import 'app.dart';
 import 'core/di/service_locator.dart';
@@ -11,6 +12,15 @@ import 'features/settings/domain/services/backup_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Ensure the bundled SQLite shared library is loaded before Drift spawns
+  // its database isolate. This is required on Android versions that cannot
+  // resolve APK-provided native libraries through the default loader.
+  try {
+    await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();
+  } on Object {
+    // Keep the app launchable so a useful error can be shown if the platform
+    // cannot load SQLite; normal Android versions load the bundled library.
+  }
   await configureDependencies();
   sl<SchedulerExecutionService>().start();
 
