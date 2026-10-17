@@ -22,7 +22,7 @@ RUN rm -rf build/.dart_tool
 FROM dart:stable AS runtime
 WORKDIR /app
 COPY pubspec.* ./
-RUN dart pub get --offline
+RUN dart pub get
 COPY --from=build /app/build /app/build
 
 EXPOSE 8080
