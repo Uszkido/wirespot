@@ -24,6 +24,7 @@ WORKDIR /app
 COPY pubspec.* ./
 RUN dart pub get
 COPY --from=build /app/build /app/build
+COPY --from=build /app/lib /app/lib
 
 EXPOSE 8080
 CMD ["dart", "run", "build/bin/server.dart"]
