@@ -1,5 +1,13 @@
 {
   "projects": {
     "default": "wirespot-app"
+  },
+  "targets": {
+    "wirespot-app": {
+      "hosting": {
+        "main": ["wirespot-app"],
+        "wirespot": ["wirespot"]
+      }
+    }
   }
 }
