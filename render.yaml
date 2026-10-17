@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: wirespot-api
+    runtime: docker
+    plan: free
+    branch: main
+    rootDir: wirespot_backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: WIRESPOT_CORS_ORIGINS
+        value: https://wirespot.web.app,https://wirespot-app.web.app

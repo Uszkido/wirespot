@@ -18,12 +18,28 @@ production or multi-instance hosting.
 
 ---
 
-### 2. Free Hosting Deployment: Koyeb (0 Card Required)
-1. Create a free account on [koyeb.com](https://www.koyeb.com/) using your GitHub account (No credit card asked).
-2. Click **Create App** > Select **GitHub**.
-3. Select this repository and set the root directory to `wirespot_backend`.
-4. Koyeb automatically detects `wirespot_backend/Dockerfile`, builds the lightweight Dart container (< 50MB RAM footprint), and issues a free SSL HTTPS domain:
-   - Example API URL: `https://wirespot-cloud-xxx.koyeb.app`
+### 2. Git-based hosting deployment: Render
+
+The repository includes a root-level [`render.yaml`](../render.yaml) Blueprint.
+It keeps deployment configuration in Git and builds the existing Docker image
+from `wirespot_backend/`.
+
+1. Create a free account at [render.com](https://render.com/) and connect GitHub.
+2. Choose **New > Blueprint**, select `Uszkido/wirespot`, and choose the `main`
+   branch.
+3. Render detects `render.yaml`. Review the `wirespot-api` service and click
+   **Apply**.
+4. Wait for the first build, then copy the generated HTTPS URL, for example
+   `https://wirespot-api.onrender.com`.
+5. Set that URL as the API Base URL in the WireSpot web or mobile setup screen.
+
+The service is configured with `/health` for health checks and CORS for both
+Firebase hosting sites. Render's free web services sleep after inactivity, so
+the first request after idle may take longer. The free tier is suitable for
+testing and small pilots, not guaranteed production availability.
+
+For another Git provider, use the same Docker settings: root directory
+`wirespot_backend`, Dockerfile `Dockerfile`, context `.`, and port `8080`.
 
 ---
 
