@@ -3,6 +3,7 @@ import '../../../core/api/routeros_models.dart';
 import '../../../core/api/vendor_http_client.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/services/router_connector.dart';
+import 'vendor_mutation_support.dart';
 
 /// Active TP-Link Omada Controller OpenAPI connector.
 class OmadaConnectionService implements RouterConnector {
@@ -36,6 +37,9 @@ class OmadaConnectionService implements RouterConnector {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async {
+    if (command.startsWith('/ip/hotspot/')) {
+      throw unsupportedVendorMutation(router, command);
+    }
     final routerStore = _omadaUsersStore.putIfAbsent(router.id, () => []);
 
     if (command == '/system/identity/print') {

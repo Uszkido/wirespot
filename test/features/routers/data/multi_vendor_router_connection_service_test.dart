@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wirespot/core/api/routeros_api_response.dart';
+import 'package:wirespot/core/api/routeros_api_exception.dart';
 import 'package:wirespot/core/api/routeros_models.dart';
 import 'package:wirespot/core/api/vendor_http_client.dart';
 import 'package:wirespot/core/storage/router_credentials.dart';
@@ -97,17 +98,13 @@ void main() {
         );
         expect(identity.records, isNotEmpty);
 
-        final addedUser = await service.execute(
-          router,
-          '/ip/hotspot/user/add',
-          attributes: {'name': 'test_${vendor.name}', 'password': 'pass'},
-        );
-        expect(addedUser.records.single['name'], 'test_${vendor.name}');
-
-        final users = await service.execute(router, '/ip/hotspot/user/print');
         expect(
-          users.records.any((u) => u['name'] == 'test_${vendor.name}'),
-          isTrue,
+          () => service.execute(
+            router,
+            '/ip/hotspot/user/add',
+            attributes: {'name': 'test_${vendor.name}', 'password': 'pass'},
+          ),
+          throwsA(isA<RouterOsApiException>()),
         );
 
         final snapshot = await service.getSnapshot(router);

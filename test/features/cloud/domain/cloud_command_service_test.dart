@@ -67,6 +67,39 @@ void main() {
     expect(apiClient.acknowledgedCommands.single['status'], 'completed');
   });
 
+  test('CloudCommandService executes queued router commands', () async {
+    final apiClient = _FakeCloudApiClient(
+      pendingCommands: [
+        {
+          'id': 'cmd-router-1',
+          'type': 'router_command',
+          'targetResourceId': 'router-1',
+          'params': {'command': '/system/identity/print'},
+          'status': 'pending',
+          'createdAt': DateTime.now().toIso8601String(),
+        },
+      ],
+    );
+    final routerConnection = _FakeRouterConnectionService();
+    final cloudSyncService = CloudSyncService(
+      repository: _FakeCloudSyncRepository(),
+      apiClient: apiClient,
+    );
+    final service = CloudCommandService(
+      apiClient: apiClient,
+      routerRepository: _FakeRouterRepository(),
+      routerConnectionService: routerConnection,
+      hotspotService: _FakeHotspotService(),
+      cloudSyncService: cloudSyncService,
+    );
+
+    final results = await service.processPendingCommands();
+
+    expect(results.single.success, isTrue);
+    expect(routerConnection.executedCommands, ['/system/identity/print']);
+    expect(apiClient.acknowledgedCommands.single['status'], 'completed');
+  });
+
   test('CloudCommandService processes kick session command', () async {
     final apiClient = _FakeCloudApiClient(
       pendingCommands: [

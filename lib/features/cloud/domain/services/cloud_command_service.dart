@@ -98,6 +98,40 @@ class CloudCommandService {
             resultPayload: {'action': 'session_removed', 'mac': mac},
           );
 
+        case 'router_command':
+          final routerId = command.targetResourceId;
+          final rawCommand = command.params['command'] as String?;
+          if (routerId == null ||
+              routerId.isEmpty ||
+              rawCommand == null ||
+              rawCommand.trim().isEmpty) {
+            throw StateError(
+              'Router command requires a target router and command text.',
+            );
+          }
+          final router = await _routerRepository.getRouter(routerId);
+          if (router == null) throw StateError('Target router was not found.');
+          final rawAttributes = command.params['attributes'];
+          final attributes = rawAttributes is Map
+              ? rawAttributes.map(
+                  (key, value) => MapEntry(key.toString(), value.toString()),
+                )
+              : const <String, String>{};
+          final response = await _routerConnectionService.execute(
+            router,
+            rawCommand.trim(),
+            attributes: attributes,
+          );
+          return CloudCommandExecutionResult(
+            commandId: command.id,
+            type: command.type,
+            success: true,
+            resultPayload: {
+              'action': 'router_command_executed',
+              'records': response.records,
+            },
+          );
+
         case 'sync_pull':
           final syncCount = await _cloudSyncService.syncPending();
           return CloudCommandExecutionResult(

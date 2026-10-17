@@ -1,9 +1,19 @@
 import 'dart:convert';
 import 'package:dart_frog/dart_frog.dart';
+import 'package:wirespot_backend/auth.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   if (context.request.method != HttpMethod.post) {
     return Response(statusCode: 405, body: 'Method Not Allowed');
+  }
+  if (productionMode) {
+    return Response.json(
+      statusCode: 501,
+      body: {
+        'error':
+            'Configure a hosted identity provider for production registration.',
+      },
+    );
   }
 
   try {

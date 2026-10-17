@@ -2,6 +2,7 @@ import '../../../core/api/routeros_api_response.dart';
 import '../../../core/api/routeros_models.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/services/router_connector.dart';
+import 'vendor_mutation_support.dart';
 
 /// Active Generic Router connector (HTTP REST / SNMP / SSH API).
 class GenericRouterConnectionService implements RouterConnector {
@@ -22,6 +23,9 @@ class GenericRouterConnectionService implements RouterConnector {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async {
+    if (command.startsWith('/ip/hotspot/')) {
+      throw unsupportedVendorMutation(router, command);
+    }
     final routerStore = _genericUsersStore.putIfAbsent(router.id, () => []);
 
     if (command == '/system/identity/print') {

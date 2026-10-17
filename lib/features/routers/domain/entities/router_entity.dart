@@ -39,7 +39,7 @@ enum RouterVendor {
   ),
   ruijie(
     label: 'Ruijie / Reyee',
-    description: 'Full active Ruijie Cloud & controller API integration.',
+    description: 'Ruijie Cloud connection and device discovery integration.',
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
@@ -55,16 +55,12 @@ enum RouterVendor {
     activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
-      RouterCapability.hotspotUsers,
-      RouterCapability.hotspotSetupPresets,
-      RouterCapability.voucherProvisioning,
-      RouterCapability.trafficMonitoring,
       RouterCapability.cloudController,
     },
   ),
   openWrt(
     label: 'OpenWrt',
-    description: 'Full active OpenWrt LuCI & ubus API integration.',
+    description: 'OpenWrt LuCI/ubus connection and dashboard foundation.',
     defaultPort: 22,
     defaultUseSsl: false,
     usesRouterOsApi: false,
@@ -80,15 +76,11 @@ enum RouterVendor {
     activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
-      RouterCapability.hotspotUsers,
-      RouterCapability.hotspotSetupPresets,
-      RouterCapability.voucherProvisioning,
-      RouterCapability.trafficMonitoring,
     },
   ),
   tpLinkOmada(
     label: 'TP-Link Omada',
-    description: 'Full active Omada Controller OpenAPI integration.',
+    description: 'Omada Controller connection and dashboard foundation.',
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
@@ -103,16 +95,12 @@ enum RouterVendor {
     activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
-      RouterCapability.hotspotUsers,
-      RouterCapability.hotspotSetupPresets,
-      RouterCapability.voucherProvisioning,
-      RouterCapability.trafficMonitoring,
       RouterCapability.cloudController,
     },
   ),
   ubiquitiUniFi(
     label: 'Ubiquiti UniFi',
-    description: 'Full active UniFi Controller REST API integration.',
+    description: 'UniFi Controller connection and dashboard foundation.',
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
@@ -127,16 +115,12 @@ enum RouterVendor {
     activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
-      RouterCapability.hotspotUsers,
-      RouterCapability.hotspotSetupPresets,
-      RouterCapability.voucherProvisioning,
-      RouterCapability.trafficMonitoring,
       RouterCapability.cloudController,
     },
   ),
   generic(
     label: 'Generic router',
-    description: 'Full active Generic HTTP/REST/SNMP router connector.',
+    description: 'Generic HTTP/REST/SNMP connection foundation.',
     defaultPort: 443,
     defaultUseSsl: true,
     usesRouterOsApi: false,
@@ -152,10 +136,6 @@ enum RouterVendor {
     activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
-      RouterCapability.hotspotUsers,
-      RouterCapability.hotspotSetupPresets,
-      RouterCapability.voucherProvisioning,
-      RouterCapability.trafficMonitoring,
     },
   );
 

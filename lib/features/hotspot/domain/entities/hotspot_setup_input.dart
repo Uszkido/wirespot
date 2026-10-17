@@ -26,6 +26,19 @@ class HotspotSetupInput {
     this.loginByHttps = false,
     this.useRadius = false,
     this.radiusSettings,
+    this.configurePppoe = false,
+    this.pppoeInterface = 'ether1',
+    this.pppoeUsername,
+    this.pppoePassword,
+    this.pppoeClientName = 'pppoe-wan',
+    this.configurePppoeServer = false,
+    this.pppoeServerInterface,
+    this.pppoeServiceName = 'WireSpot-PPPoE',
+    this.pppoeProfileName = 'WireSpot-PPPoE-Profile',
+    this.pppoeLocalAddress,
+    this.pppoeRemotePool,
+    this.pppoeRemotePoolRanges = '10.50.0.10-10.50.0.254',
+    this.pppoeRadiusSettings,
     this.disabled = false,
   });
 
@@ -52,6 +65,19 @@ class HotspotSetupInput {
   final bool loginByHttps;
   final bool useRadius;
   final RadiusServerSettings? radiusSettings;
+  final bool configurePppoe;
+  final String? pppoeInterface;
+  final String? pppoeUsername;
+  final String? pppoePassword;
+  final String pppoeClientName;
+  final bool configurePppoeServer;
+  final String? pppoeServerInterface;
+  final String pppoeServiceName;
+  final String pppoeProfileName;
+  final String? pppoeLocalAddress;
+  final String? pppoeRemotePool;
+  final String pppoeRemotePoolRanges;
+  final RadiusServerSettings? pppoeRadiusSettings;
   final bool disabled;
 
   List<String> get validationErrors {
@@ -92,6 +118,33 @@ class HotspotSetupInput {
         errors.addAll(radiusSettings!.validationErrors);
       }
     }
+    if (configurePppoe) {
+      if (!_hasText(pppoeInterface))
+        errors.add('Enter the PPPoE WAN interface.');
+      if (!_hasText(pppoeUsername)) errors.add('Enter the ISP PPPoE username.');
+      if (!_hasText(pppoePassword)) errors.add('Enter the ISP PPPoE password.');
+      if (!_hasText(pppoeClientName))
+        errors.add('Enter the PPPoE client name.');
+    }
+    if (configurePppoeServer) {
+      if (!_hasText(pppoeServerInterface))
+        errors.add('Enter the PPPoE server interface.');
+      if (!_hasText(pppoeServiceName))
+        errors.add('Enter the PPPoE service name.');
+      if (!_hasText(pppoeProfileName))
+        errors.add('Enter the PPPoE profile name.');
+      if (!_hasText(pppoeLocalAddress))
+        errors.add('Enter the PPPoE local address.');
+      if (!_hasText(pppoeRemotePool))
+        errors.add('Enter the PPPoE remote address pool.');
+      if (!_hasText(pppoeRemotePoolRanges))
+        errors.add('Enter the PPPoE pool ranges.');
+      if (pppoeRadiusSettings == null) {
+        errors.add('Add RADIUS settings for PPPoE authentication.');
+      } else {
+        errors.addAll(pppoeRadiusSettings!.validationErrors);
+      }
+    }
     return errors;
   }
 
@@ -119,6 +172,62 @@ class HotspotSetupInput {
       'profile': serverProfileName.trim(),
       if (_hasText(resolvedPool)) 'address-pool': resolvedPool!.trim(),
       'disabled': disabled ? 'yes' : 'no',
+    };
+  }
+
+  Map<String, String>? toPppoeAttributes() {
+    if (!configurePppoe) return null;
+    return {
+      'name': pppoeClientName.trim(),
+      'interface': pppoeInterface!.trim(),
+      'user': pppoeUsername!.trim(),
+      'password': pppoePassword!,
+      'add-default-route': 'yes',
+      'use-peer-dns': 'yes',
+      'disabled': 'no',
+      'comment': _comment('pppoe'),
+    };
+  }
+
+  Map<String, String>? toPppoeNatAttributes() {
+    if (!configurePppoe) return null;
+    return {
+      'chain': 'srcnat',
+      'out-interface': pppoeClientName.trim(),
+      'action': 'masquerade',
+      'comment': _comment('pppoe-nat'),
+    };
+  }
+
+  Map<String, String>? toPppoeProfileAttributes() {
+    if (!configurePppoeServer) return null;
+    return {
+      'name': pppoeProfileName.trim(),
+      'local-address': pppoeLocalAddress!.trim(),
+      'remote-address': pppoeRemotePool!.trim(),
+      'use-radius': 'yes',
+      'comment': _comment('pppoe-profile'),
+    };
+  }
+
+  Map<String, String>? toPppoePoolAttributes() {
+    if (!configurePppoeServer) return null;
+    return {
+      'name': pppoeRemotePool!.trim(),
+      'ranges': pppoeRemotePoolRanges.trim(),
+      'comment': _comment('pppoe-pool'),
+    };
+  }
+
+  Map<String, String>? toPppoeServerAttributes() {
+    if (!configurePppoeServer) return null;
+    return {
+      'interface': pppoeServerInterface!.trim(),
+      'service-name': pppoeServiceName.trim(),
+      'default-profile': pppoeProfileName.trim(),
+      'authentication': 'pap,chap,mschap1,mschap2',
+      'one-session-per-host': 'yes',
+      'disabled': 'no',
     };
   }
 
@@ -183,6 +292,64 @@ class HotspotSetupInput {
 
   HotspotSetupPlan toPlan() {
     final steps = <HotspotSetupStep>[];
+    final pppoeAttributes = toPppoeAttributes();
+    if (pppoeAttributes != null) {
+      steps.add(
+        HotspotSetupStep(
+          title: 'Create or update PPPoE WAN client',
+          command:
+              '/interface/pppoe-client/add (or /interface/pppoe-client/set)',
+          attributes: {
+            for (final entry in pppoeAttributes.entries)
+              entry.key: entry.key == 'password' ? '••••••••' : entry.value,
+          },
+        ),
+      );
+      steps.add(
+        HotspotSetupStep(
+          title: 'Add PPPoE Internet NAT masquerade',
+          command: '/ip/firewall/nat/add',
+          attributes: toPppoeNatAttributes()!,
+        ),
+      );
+    }
+    final pppoeProfile = toPppoeProfileAttributes();
+    if (pppoeProfile != null) {
+      steps.add(
+        HotspotSetupStep(
+          title: 'Create or update PPPoE subscriber address pool',
+          command: '/ip/pool/add (or /ip/pool/set)',
+          attributes: toPppoePoolAttributes()!,
+        ),
+      );
+      steps.add(
+        HotspotSetupStep(
+          title: 'Create or update PPPoE subscriber profile',
+          command: '/ppp/profile/add (or /ppp/profile/set)',
+          attributes: pppoeProfile,
+        ),
+      );
+      steps.add(
+        HotspotSetupStep(
+          title: 'Create PPPoE server',
+          command: '/interface/pppoe-server/server/add',
+          attributes: toPppoeServerAttributes()!,
+        ),
+      );
+      final radius = pppoeRadiusSettings!.toRouterOsAttributes();
+      steps.add(
+        HotspotSetupStep(
+          title: 'Enable FreeRADIUS for PPPoE authentication and accounting',
+          command: '/radius/add (service=ppp) and /ppp/aaa/set',
+          attributes: {
+            for (final entry in radius.entries)
+              entry.key: entry.key == 'secret' ? '••••••••' : entry.value,
+            'use-radius': 'yes',
+            'accounting': 'yes',
+          },
+        ),
+      );
+    }
     final addressAttributes = toAddressAttributes();
     if (addressAttributes != null) {
       steps.add(

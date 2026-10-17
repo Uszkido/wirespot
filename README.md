@@ -9,7 +9,7 @@ UniFi (Controller REST API), and Generic Routers (HTTP/REST/SNMP).
 | Android debug APK | Builds successfully |
 | Static analysis | Passing (0 issues) |
 | Tests | 82 passing |
-| Multi-Vendor Connectors | 6 Full Active Connectors (MikroTik, Ruijie, OpenWrt, Omada, UniFi, Generic) |
+| Multi-Vendor Connectors | MikroTik hotspot/voucher connector plus authenticated connection/discovery foundations for Ruijie, OpenWrt, Omada, UniFi, and Generic |
 | Web Dashboard | Fully Synchronized & Static Hosting Ready (`web_app/`) |
 | Latest APK output | `outputs\WireSpot-0.1.27+28-brand-collaboration-debug.apk` |
 | Latest pushed commit | See GitHub `main` |
@@ -44,6 +44,13 @@ WireSpot solves that with a focused Android workflow:
   RouterOS API ports directly to the internet.
 - **Business hotspot presets**: quick voucher, small business, hotel guest
   Wi-Fi, and RADIUS-managed setup templates.
+- **PPPoE subscriber access**: configure RouterOS PPPoE server profiles with
+  FreeRADIUS authentication and accounting, alongside an optional PPPoE ISP
+  client for WAN uplink. PPPoE/RADIUS authenticates subscribers; the cloud
+  agent remains the secure remote-management path.
+- **FreeRADIUS deployment bundle**: `radius/` contains a Docker Compose service,
+  RouterOS client configuration, starter subscriber policy, and production
+  hardening guidance for PPPoE authentication/accounting.
 - **Hotspot operations**: users, profiles, sessions, cookies, queues, IP
   bindings, disconnect, reset counters, delete, search/filter foundations.
 - **Voucher workflow**: plans, random credentials, PIN-style vouchers, price,
@@ -242,11 +249,11 @@ collaboration with TechNova Technologies.
 | Brand / connector | Current support | Notes |
 | --- | --- | --- |
 | MikroTik RouterOS | Full active connector | RouterOS API, hotspot users, vouchers, dashboard snapshots, setup presets |
-| Ruijie / Reyee | Limited active connector | Secure token-based Ruijie Cloud connection test via device discovery; hotspot and voucher changes remain planned |
-| OpenWrt | Planned connector foundation | Future SSH/LuCI/ubus integration |
-| TP-Link Omada | Planned connector foundation | Future Omada Controller integration |
-| Ubiquiti UniFi | Planned connector foundation | Future UniFi Controller integration |
-| Generic router | Planned limited connector | Future SSH/SNMP/basic monitoring where supported |
+| Ruijie / Reyee | Connection and discovery foundation | Secure token-based Ruijie Cloud connection test and device discovery; hotspot and voucher mutations are rejected until vendor API mapping is implemented |
+| OpenWrt | Connection and dashboard foundation | LuCI/ubus connection path; hotspot and voucher mutations require authenticated package-specific mapping |
+| TP-Link Omada | Controller connection foundation | Controller health path; site/portal/voucher mutations require controller-version mapping |
+| Ubiquiti UniFi | Controller connection foundation | Controller health path; site/guest/voucher mutations require controller-version mapping |
+| Generic router | Connection foundation | No universal mutation API exists; configure a vendor-specific adapter before enabling mutations |
 
 ## Multi-Router Fleet Operations
 

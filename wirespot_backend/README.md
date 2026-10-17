@@ -32,9 +32,13 @@ production or multi-instance hosting.
 - `GET /health`: Health probe check returning database & backend status.
 - `POST /api/v1/auth/pair`: Validate mobile-web device pairing keys (`WS-XXXX-SYNC`).
 - `POST /api/v1/auth/login` and `/api/v1/auth/register`: Create a development session.
+- `POST /api/v1/auth/recover`: Start account recovery (requires a hosted identity provider for delivery in production).
 - `GET /api/v1/sync/vouchers` & `POST /api/v1/sync/vouchers`: Sync generated voucher batches across devices.
 - `GET /api/v1/routers`: Sync router fleet inventory (MikroTik, Ruijie, OpenWrt, Omada, UniFi, Generic).
-- `GET /api/v1/commands/pending`: Return pending cloud commands.
+- `GET /api/v1/commands/pending`: Return organization-scoped pending cloud commands.
+- `POST /api/v1/commands/pending`: Queue a `remote_reboot` or `router_command`
+  for an online mobile agent; the agent executes it and acknowledges the result.
+- `POST /api/v1/commands/<id>/ack`: Record command completion or failure.
 - `POST /api/v1/telemetry`: Accept telemetry frames.
 - `POST /api/v1/backup/upload` & `GET /api/v1/backup/latest`: Upload and retrieve the latest backup.
 - `GET /api/v1/license/entitlement`: Read the organization's verified entitlement.
@@ -42,8 +46,14 @@ production or multi-instance hosting.
   server-only `WIRESPOT_ENTITLEMENT_ADMIN_TOKEN` is configured.
 
 All `/api/v1` data endpoints require `Authorization: Bearer ws_...`. Health
-and authentication endpoints are public. The current token implementation is
-for development only; use signed, expiring tokens before production.
+and authentication endpoints are public. Development login/register tokens are
+intentionally not production credentials. For a production deployment, set
+`WIRESPOT_ENV=production` and configure
+`WIRESPOT_OPERATOR_TOKENS` as comma-separated `token|organizationId|role`
+entries. In production, organization and role claims come only from the
+server-side token allow-list; client-provided role/organization headers are
+ignored. Replace this allow-list with a hosted identity provider before
+multi-tenant public launch.
 
 ---
 

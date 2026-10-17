@@ -24,6 +24,7 @@ import '../domain/entities/hotspot_user_entity.dart';
 import '../domain/entities/hotspot_user_input.dart';
 import '../domain/entities/hotspot_user_profile_entity.dart';
 import 'hotspot_providers.dart';
+import 'pppoe_radius_guide.dart';
 
 class HotspotPage extends ConsumerWidget {
   const HotspotPage({this.initialTabIndex = 0, super.key});
@@ -126,8 +127,10 @@ class _HotspotRouterScope extends ConsumerWidget {
                 const SizedBox(height: 8),
                 _HotspotCapabilityBanner(router: router),
                 const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     OutlinedButton.icon(
                       onPressed: () => context.push(AppRoutes.portalCustomizer),
@@ -140,6 +143,18 @@ class _HotspotRouterScope extends ConsumerWidget {
                           _showSetupHotspotDialog(context, ref, router),
                       icon: const Icon(Icons.settings_input_antenna_outlined),
                       label: const Text('Setup hotspot'),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      onPressed: () => showPppoeRadiusGuide(context),
+                      icon: const Icon(Icons.menu_book_outlined),
+                      label: const Text('PPPoE guide'),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () =>
+                          context.push(AppRoutes.radiusSubscribers),
+                      icon: const Icon(Icons.manage_accounts_outlined),
+                      label: const Text('PPPoE subscribers'),
                     ),
                   ],
                 ),
@@ -677,12 +692,50 @@ Future<void> _showSetupHotspotDialog(
   final radiusAccountingPortController = TextEditingController(
     text: '${initialInput.radiusSettings?.accountingPort ?? 1813}',
   );
+  final pppoeInterfaceController = TextEditingController(
+    text: initialInput.pppoeInterface ?? 'ether1',
+  );
+  final pppoeUsernameController = TextEditingController(
+    text: initialInput.pppoeUsername,
+  );
+  final pppoePasswordController = TextEditingController(
+    text: initialInput.pppoePassword,
+  );
+  final pppoeClientNameController = TextEditingController(
+    text: initialInput.pppoeClientName,
+  );
+  final pppoeServerInterfaceController = TextEditingController(
+    text: initialInput.pppoeServerInterface,
+  );
+  final pppoeServiceNameController = TextEditingController(
+    text: initialInput.pppoeServiceName,
+  );
+  final pppoeProfileNameController = TextEditingController(
+    text: initialInput.pppoeProfileName,
+  );
+  final pppoeLocalAddressController = TextEditingController(
+    text: initialInput.pppoeLocalAddress,
+  );
+  final pppoeRemotePoolController = TextEditingController(
+    text: initialInput.pppoeRemotePool,
+  );
+  final pppoeRemotePoolRangesController = TextEditingController(
+    text: initialInput.pppoeRemotePoolRanges,
+  );
+  final pppoeRadiusAddressController = TextEditingController(
+    text: initialInput.pppoeRadiusSettings?.address,
+  );
+  final pppoeRadiusSecretController = TextEditingController(
+    text: initialInput.pppoeRadiusSettings?.secret,
+  );
   var provisionNetwork = initialInput.provisionNetwork;
   var enableNatMasquerade = initialInput.enableNatMasquerade;
   var loginByCookie = initialInput.loginByCookie;
   var loginByHttpPap = initialInput.loginByHttpPap;
   var loginByHttps = initialInput.loginByHttps;
   var useRadius = initialInput.useRadius;
+  var configurePppoe = initialInput.configurePppoe;
+  var configurePppoeServer = initialInput.configurePppoeServer;
 
   void applyPreset(HotspotSetupInput input) {
     serverNameController.text = input.serverName;
@@ -712,6 +765,21 @@ Future<void> _showSetupHotspotDialog(
     loginByHttpPap = input.loginByHttpPap;
     loginByHttps = input.loginByHttps;
     useRadius = input.useRadius;
+    configurePppoe = input.configurePppoe;
+    pppoeInterfaceController.text = input.pppoeInterface ?? 'ether1';
+    pppoeUsernameController.text = input.pppoeUsername ?? '';
+    pppoePasswordController.text = input.pppoePassword ?? '';
+    pppoeClientNameController.text = input.pppoeClientName;
+    configurePppoeServer = input.configurePppoeServer;
+    pppoeServerInterfaceController.text = input.pppoeServerInterface ?? '';
+    pppoeServiceNameController.text = input.pppoeServiceName;
+    pppoeProfileNameController.text = input.pppoeProfileName;
+    pppoeLocalAddressController.text = input.pppoeLocalAddress ?? '';
+    pppoeRemotePoolController.text = input.pppoeRemotePool ?? '';
+    pppoeRemotePoolRangesController.text = input.pppoeRemotePoolRanges;
+    pppoeRadiusAddressController.text =
+        input.pppoeRadiusSettings?.address ?? '';
+    pppoeRadiusSecretController.text = input.pppoeRadiusSettings?.secret ?? '';
   }
 
   HotspotSetupInput buildInput() {
@@ -745,6 +813,25 @@ Future<void> _showSetupHotspotDialog(
                   int.tryParse(radiusAuthPortController.text.trim()) ?? 0,
               accountingPort:
                   int.tryParse(radiusAccountingPortController.text.trim()) ?? 0,
+            )
+          : null,
+      configurePppoe: configurePppoe,
+      pppoeInterface: pppoeInterfaceController.text.trim(),
+      pppoeUsername: pppoeUsernameController.text.trim(),
+      pppoePassword: pppoePasswordController.text,
+      pppoeClientName: pppoeClientNameController.text.trim(),
+      configurePppoeServer: configurePppoeServer,
+      pppoeServerInterface: pppoeServerInterfaceController.text.trim(),
+      pppoeServiceName: pppoeServiceNameController.text.trim(),
+      pppoeProfileName: pppoeProfileNameController.text.trim(),
+      pppoeLocalAddress: pppoeLocalAddressController.text.trim(),
+      pppoeRemotePool: pppoeRemotePoolController.text.trim(),
+      pppoeRemotePoolRanges: pppoeRemotePoolRangesController.text.trim(),
+      pppoeRadiusSettings: configurePppoeServer
+          ? RadiusServerSettings(
+              address: pppoeRadiusAddressController.text.trim(),
+              secret: pppoeRadiusSecretController.text,
+              service: 'ppp',
             )
           : null,
     );
@@ -907,6 +994,129 @@ Future<void> _showSetupHotspotDialog(
                     ),
                     contentPadding: EdgeInsets.zero,
                   ),
+                  SwitchListTile(
+                    value: configurePppoe,
+                    onChanged: (value) =>
+                        setState(() => configurePppoe = value),
+                    title: const Text('Configure PPPoE WAN'),
+                    subtitle: const Text(
+                      'Authenticate the router to the ISP without requiring a VPN for Internet uplink.',
+                    ),
+                    secondary: const Icon(Icons.public_outlined),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  if (configurePppoe) ...[
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoeInterfaceController,
+                      decoration: const InputDecoration(
+                        labelText: 'PPPoE WAN interface',
+                        hintText: 'ether1',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoeClientNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'PPPoE client name',
+                        hintText: 'pppoe-wan',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoeUsernameController,
+                      decoration: const InputDecoration(
+                        labelText: 'ISP PPPoE username',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoePasswordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'ISP PPPoE password',
+                        helperText:
+                            'Stored only in the secure router credential path.',
+                      ),
+                    ),
+                  ],
+                  SwitchListTile(
+                    value: configurePppoeServer,
+                    onChanged: (value) =>
+                        setState(() => configurePppoeServer = value),
+                    title: const Text('Enable PPPoE subscriber access'),
+                    subtitle: const Text(
+                      'Run a PPPoE server with FreeRADIUS authentication and accounting.',
+                    ),
+                    secondary: const Icon(Icons.people_alt_outlined),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  if (configurePppoeServer) ...[
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoeServerInterfaceController,
+                      decoration: const InputDecoration(
+                        labelText: 'PPPoE server interface',
+                        hintText: 'bridge-hotspot',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoeServiceNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'PPPoE service name',
+                        hintText: 'WireSpot-PPPoE',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoeProfileNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'PPP default profile',
+                        hintText: 'WireSpot-PPPoE-Profile',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoeLocalAddressController,
+                      decoration: const InputDecoration(
+                        labelText: 'PPP local address',
+                        hintText: '10.50.0.1',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoeRemotePoolController,
+                      decoration: const InputDecoration(
+                        labelText: 'PPP remote address pool',
+                        hintText: 'pppoe-pool',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoeRemotePoolRangesController,
+                      decoration: const InputDecoration(
+                        labelText: 'PPPoE pool ranges',
+                        hintText: '10.50.0.10-10.50.0.254',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoeRadiusAddressController,
+                      decoration: const InputDecoration(
+                        labelText: 'FreeRADIUS server address',
+                        hintText: '10.50.0.10',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: pppoeRadiusSecretController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'FreeRADIUS shared secret',
+                      ),
+                    ),
+                  ],
                   if (useRadius) ...[
                     const SizedBox(height: 8),
                     TextField(
@@ -1154,6 +1364,18 @@ Future<void> _showSetupHotspotDialog(
     dnsServersController.dispose();
     natSrcAddressController.dispose();
     natOutInterfaceController.dispose();
+    pppoeInterfaceController.dispose();
+    pppoeUsernameController.dispose();
+    pppoePasswordController.dispose();
+    pppoeClientNameController.dispose();
+    pppoeServerInterfaceController.dispose();
+    pppoeServiceNameController.dispose();
+    pppoeProfileNameController.dispose();
+    pppoeLocalAddressController.dispose();
+    pppoeRemotePoolController.dispose();
+    pppoeRemotePoolRangesController.dispose();
+    pppoeRadiusAddressController.dispose();
+    pppoeRadiusSecretController.dispose();
   }
 }
 

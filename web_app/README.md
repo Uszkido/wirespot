@@ -7,8 +7,9 @@ The **WireSpot Cloud Web Dashboard** provides a feature-complete web management 
 ## 🚀 Key Features & Capabilities
 
 - **Account Sync & Mobile Pairing**:
-  - Signup creates a workspace Organization ID and access code, then opens Cloud Sync setup so the same values can be entered in the mobile app.
-  - The API Base URL is operator-supplied (your deployed WireSpot backend); credentials can be copied directly from the Cloud Sync panel.
+  - Signup and sign-in call the configured WireSpot backend (`/api/v1/auth/register` and `/api/v1/auth/login`) and only save credentials after the server returns an access token.
+  - If no URL has been configured yet, the forms use the local backend at `http://127.0.0.1:8080`. Set a deployed HTTPS backend URL before using the dashboard with a phone or another computer.
+  - The returned Organization ID and access token are shown in Cloud Sync and can be copied into the mobile app.
   - Keep accounts, active hotspot profiles, router credentials, and voucher configurations in sync.
 
 - **4-Step Guided Auto-Configuration Wizard**:
@@ -17,6 +18,7 @@ The **WireSpot Cloud Web Dashboard** provides a feature-complete web management 
     2. **Router Setup**: RouterOS host IP, credentials, API port configuration.
     3. **Hotspot Presets**: Selectable business templates (Quick Voucher, Small Business, Hotel Guest, RADIUS).
     4. **Ticket Customizer**: POS voucher thermal ticket layout selection & live preview.
+  - MikroTik setup can optionally generate a PPPoE WAN client and NAT rule. PPPoE provides ISP uplink authentication; it does not expose the router management API or replace secure LAN, API-SSL, or cloud-agent access.
 
 - **Subscriptions & Tier Billing**:
   - Active subscription status tracking (**Free**, **Pro**, **Enterprise**).
@@ -68,6 +70,12 @@ Open `http://localhost:8080` in your browser.
 ## 📦 Deployment Options
 
 Because `web_app` consists of static assets (`index.html`, `styles.css`, `app.js`), it can be hosted on any static hosting platform:
+
+The dashboard starts with an empty workspace. Router cards, users, vouchers,
+telemetry charts, and event history are rendered only from local operator
+actions or successful cloud responses; no sample telemetry is presented as
+live data. Reboot and CLI actions are submitted to the authenticated cloud
+command queue and show a queued state until the mobile agent acknowledges them.
 
 - **Vercel**: `vercel deploy web_app`
 - **Netlify**: `netlify deploy --dir=web_app`

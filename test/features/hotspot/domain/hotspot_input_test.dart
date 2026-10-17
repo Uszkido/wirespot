@@ -278,4 +278,35 @@ void main() {
       contains('RADIUS timeout must be positive.'),
     );
   });
+
+  test('PPPoE WAN settings validate and mask credentials in setup plan', () {
+    const incomplete = HotspotSetupInput(
+      serverName: 'pppoe-hotspot',
+      interfaceName: 'bridge',
+      serverProfileName: 'default',
+      addressPool: 'pool',
+      configurePppoe: true,
+    );
+    expect(incomplete.validationErrors, contains('Enter the ISP PPPoE username.'));
+    expect(incomplete.validationErrors, contains('Enter the ISP PPPoE password.'));
+
+    const input = HotspotSetupInput(
+      serverName: 'pppoe-hotspot',
+      interfaceName: 'bridge',
+      serverProfileName: 'default',
+      addressPool: 'pool',
+      configurePppoe: true,
+      pppoeInterface: 'ether1',
+      pppoeUsername: 'isp-user',
+      pppoePassword: 'isp-secret',
+    );
+    expect(input.validationErrors, isEmpty);
+    expect(input.toPppoeAttributes(), containsPair('interface', 'ether1'));
+    expect(input.toPppoeNatAttributes(), containsPair('out-interface', 'pppoe-wan'));
+    expect(input.toPlan().steps.map((step) => step.command), containsAll([
+      '/interface/pppoe-client/add (or /interface/pppoe-client/set)',
+      '/ip/firewall/nat/add',
+    ]));
+    expect(input.toPlan().toLines().join('\n'), isNot(contains('isp-secret')));
+  });
 }

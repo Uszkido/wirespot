@@ -57,6 +57,8 @@ class RouterOsHotspotService implements HotspotService {
     HotspotSetupInput input,
   ) async {
     _validateSetupInput(input);
+    await _provisionPppoe(router, input);
+    await _provisionPppoeServer(router, input);
     await _provisionNetwork(router, input);
     final existingProfile = await _routerConnectionService.execute(
       router,
@@ -103,6 +105,169 @@ class RouterOsHotspotService implements HotspotService {
       );
     }
     await _configureRadius(router, input);
+  }
+
+  Future<void> _provisionPppoeServer(
+    RouterEntity router,
+    HotspotSetupInput input,
+  ) async {
+    final profile = input.toPppoeProfileAttributes();
+    final server = input.toPppoeServerAttributes();
+    final radius = input.pppoeRadiusSettings?.toRouterOsAttributes();
+    if (profile == null || server == null || radius == null) return;
+
+    final pool = input.toPppoePoolAttributes();
+    if (pool != null) {
+      final existingPool = await _routerConnectionService.execute(
+        router,
+        '/ip/pool/print',
+        queries: ['=name=${input.pppoeRemotePool!.trim()}'],
+      );
+      if (existingPool.isEmpty) {
+        await _routerConnectionService.execute(
+          router,
+          '/ip/pool/add',
+          attributes: pool,
+        );
+      } else {
+        final id = existingPool.records.first['.id'];
+        if (id != null && id.trim().isNotEmpty) {
+          await _routerConnectionService.execute(
+            router,
+            '/ip/pool/set',
+            attributes: {'.id': id, ...pool},
+          );
+        }
+      }
+    }
+
+    final existingProfile = await _routerConnectionService.execute(
+      router,
+      '/ppp/profile/print',
+      queries: ['=name=${input.pppoeProfileName.trim()}'],
+    );
+    if (existingProfile.isEmpty) {
+      await _routerConnectionService.execute(
+        router,
+        '/ppp/profile/add',
+        attributes: profile,
+      );
+    } else {
+      final id = existingProfile.records.first['.id'];
+      if (id == null || id.trim().isEmpty) {
+        throw StateError('RouterOS returned a PPP profile without an id.');
+      }
+      await _routerConnectionService.execute(
+        router,
+        '/ppp/profile/set',
+        attributes: {'.id': id, ...profile},
+      );
+    }
+
+    final existingRadius = await _routerConnectionService.execute(
+      router,
+      '/radius/print',
+      queries: ['=address=${radius['address']}', '=service=ppp'],
+    );
+    if (existingRadius.isEmpty) {
+      await _routerConnectionService.execute(
+        router,
+        '/radius/add',
+        attributes: radius,
+      );
+    } else {
+      final id = existingRadius.records.first['.id'];
+      if (id != null && id.trim().isNotEmpty) {
+        await _routerConnectionService.execute(
+          router,
+          '/radius/set',
+          attributes: {'.id': id, ...radius},
+        );
+      }
+    }
+    await _routerConnectionService.execute(
+      router,
+      '/ppp/aaa/set',
+      attributes: {
+        'use-radius': 'yes',
+        'accounting': 'yes',
+        'interim-update': '5m',
+      },
+    );
+    final existingServer = await _routerConnectionService.execute(
+      router,
+      '/interface/pppoe-server/server/print',
+      queries: ['=service-name=${input.pppoeServiceName.trim()}'],
+    );
+    if (existingServer.isEmpty) {
+      await _routerConnectionService.execute(
+        router,
+        '/interface/pppoe-server/server/add',
+        attributes: server,
+      );
+    } else {
+      final id = existingServer.records.first['.id'];
+      if (id != null && id.trim().isNotEmpty) {
+        await _routerConnectionService.execute(
+          router,
+          '/interface/pppoe-server/server/set',
+          attributes: {'.id': id, ...server},
+        );
+      }
+    }
+  }
+
+  Future<void> _provisionPppoe(
+    RouterEntity router,
+    HotspotSetupInput input,
+  ) async {
+    final attributes = input.toPppoeAttributes();
+    if (attributes == null) return;
+    final existing = await _routerConnectionService.execute(
+      router,
+      '/interface/pppoe-client/print',
+      queries: ['=name=${input.pppoeClientName.trim()}'],
+    );
+    if (existing.isEmpty) {
+      await _routerConnectionService.execute(
+        router,
+        '/interface/pppoe-client/add',
+        attributes: attributes,
+      );
+    } else {
+      final id = existing.records.first['.id'];
+      if (id == null || id.trim().isEmpty) {
+        throw StateError('RouterOS returned a PPPoE client without an id.');
+      }
+      await _routerConnectionService.execute(
+        router,
+        '/interface/pppoe-client/set',
+        attributes: {'.id': id, ...attributes},
+      );
+    }
+    final nat = input.toPppoeNatAttributes();
+    if (nat == null) return;
+    final existingNat = await _routerConnectionService.execute(
+      router,
+      '/ip/firewall/nat/print',
+      queries: ['=comment=${nat['comment']}'],
+    );
+    if (existingNat.isEmpty) {
+      await _routerConnectionService.execute(
+        router,
+        '/ip/firewall/nat/add',
+        attributes: nat,
+      );
+    } else {
+      final id = existingNat.records.first['.id'];
+      if (id != null && id.trim().isNotEmpty) {
+        await _routerConnectionService.execute(
+          router,
+          '/ip/firewall/nat/set',
+          attributes: {'.id': id, ...nat},
+        );
+      }
+    }
   }
 
   Future<void> _configureRadius(

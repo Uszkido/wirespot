@@ -9,6 +9,7 @@ class BackendStore {
   static final _backupTimes = <String, DateTime>{};
   static final _telemetryEvents = <String, int>{};
   static final _entitlements = <String, Map<String, dynamic>>{};
+  static final _commands = <String, List<Map<String, dynamic>>>{};
 
   static List<Map<String, dynamic>> vouchersFor(String orgId) =>
       _vouchers.putIfAbsent(orgId, () => <Map<String, dynamic>>[]);
@@ -36,5 +37,20 @@ class BackendStore {
 
   static void saveEntitlement(String orgId, Map<String, dynamic> value) {
     _entitlements[orgId] = value;
+  }
+
+  static List<Map<String, dynamic>> commandsFor(String orgId) =>
+      _commands.putIfAbsent(orgId, () => <Map<String, dynamic>>[]);
+
+  static void enqueueCommand(String orgId, Map<String, dynamic> command) {
+    commandsFor(orgId).add(command);
+  }
+
+  static Map<String, dynamic>? commandFor(String orgId, String commandId) {
+    final commands = commandsFor(orgId);
+    for (final command in commands) {
+      if (command['id'] == commandId) return command;
+    }
+    return null;
   }
 }

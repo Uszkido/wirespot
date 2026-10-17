@@ -55,6 +55,9 @@
         <a class="nav-item" data-tab="tab-reports">
           <i class="fa-solid fa-file-invoice-dollar"></i> Reports
         </a>
+        <a class="nav-item" data-tab="tab-help">
+          <i class="fa-solid fa-circle-question"></i> Help & FAQ
+        </a>
       </nav>
     </div>
 
@@ -638,6 +641,43 @@
         </div>
       </section>
 
+      <!-- ═══ TAB: HELP & FAQ ═══ -->
+      <section id="tab-help" class="tab-content">
+        <div class="glass" style="padding: 24px;">
+          <span class="eyebrow">WIRESPOT GUIDE</span>
+          <h2>Connect the mobile app and web dashboard</h2>
+          <p style="color:var(--text-muted)">Sign in to the same WireSpot workspace on both devices. The mobile app and web dashboard then share routers, vouchers, subscribers, settings, and reports through Cloud Sync.</p>
+          <div class="getting-started-steps">
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-user-plus"></i></span><span><strong>1. Create or sign in to your account</strong><small>Use the same account on the mobile app and this dashboard.</small></span></div>
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-cloud"></i></span><span><strong>2. Configure Cloud Sync</strong><small>Use the deployed WireSpot API URL. Local testing uses http://127.0.0.1:8080.</small></span></div>
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-link"></i></span><span><strong>3. Pair the mobile app</strong><small>Open Cloud Sync in the app and use the same workspace sign-in or one-time pairing flow.</small></span></div>
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-arrows-rotate"></i></span><span><strong>4. Sync and verify</strong><small>Press Sync Now, then confirm the router fleet and voucher counts match.</small></span></div>
+          </div>
+        </div>
+        <div class="glass" style="padding: 24px; margin-top: 16px;">
+          <span class="eyebrow">ROUTER CONFIGURATION</span>
+          <h2>Configure the router before connecting it</h2>
+          <p style="color:var(--text-muted)">Use the guide for your vendor, then return to Router Fleet and run Test connection. WireSpot only applies changes after you review and confirm a setup plan.</p>
+          <div class="getting-started-steps">
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-network-wired"></i></span><span><strong>MikroTik RouterOS</strong><small>Create a dedicated least-privilege operator. Enable API-SSL on 8729 (prefer this over 8728), restrict access to your WireSpot agent/LAN, then enter the router host, port, username, and password.</small></span></div>
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-tower-broadcast"></i></span><span><strong>Ruijie / Reyee</strong><small>Make sure the gateway is adopted in its controller, create a scoped controller/API account, and use the controller URL, site, and token shown in the vendor portal.</small></span></div>
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-terminal"></i></span><span><strong>OpenWrt</strong><small>Keep LuCI/ubus or SSH private, install and configure the supported captive-portal package, and create a scoped service credential. Do not expose LuCI or SSH directly to the internet.</small></span></div>
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-server"></i></span><span><strong>Omada / UniFi</strong><small>Confirm the controller is online and the access points/gateway are adopted. Create a dedicated controller account or token and use HTTPS for the controller endpoint.</small></span></div>
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-shield-halved"></i></span><span><strong>After connection</strong><small>Verify the discovered identity, take a configuration backup, run a dry-run/preflight, and test one subscriber before enabling production changes.</small></span></div>
+          </div>
+          <p style="color:var(--text-muted); margin: 16px 0 0;"><i class="fa-solid fa-circle-info"></i> Vendor APIs differ. If a control is marked unsupported, WireSpot will not pretend it succeeded; use the vendor controller or the guided command plan instead.</p>
+        </div>
+        <div class="glass" style="padding: 24px; margin-top: 16px;">
+          <h2>Frequently asked questions</h2>
+          <details open><summary>Do I need a VPN?</summary><p>Not for the cloud-agent workflow. The router or mobile agent makes an outbound connection. A VPN or trusted LAN is still recommended for direct RouterOS management.</p></details>
+          <details><summary>What does PPPoE do?</summary><p>PPPoE authenticates subscribers to the router. FreeRADIUS checks their username, password, plan, speed, expiry, and accounting. It is not a router-management tunnel.</p></details>
+          <details><summary>Where do my vouchers and subscribers appear?</summary><p>After both devices use the same signed-in workspace and Cloud Sync succeeds, records created on one device are synchronized to the other.</p></details>
+          <details><summary>Why is my dashboard empty?</summary><p>WireSpot does not show fabricated data. Add a router or complete Cloud Sync before live routers, users, telemetry, and reports appear.</p></details>
+          <details><summary>How do I recover access?</summary><p>Use Forgot password on the sign-in screen. Production deployments must have a configured identity provider and email delivery service.</p></details>
+          <details><summary>Is it safe to expose RADIUS or RouterOS ports?</summary><p>No. Keep UDP 1812/1813 and RouterOS API ports private. Use firewall restrictions, API-SSL, a trusted LAN, or the cloud agent.</p></details>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -748,6 +788,7 @@
 
       <div class="auth-tabs">
         <button class="auth-tab active" id="tab-auth-login">Sign In</button>
+        <button class="auth-tab" id="tab-auth-token">Access Token</button>
         <button class="auth-tab" id="tab-auth-register">Create Account</button>
       </div>
 
@@ -758,10 +799,18 @@
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" class="form-control" id="auth-pass-login" placeholder="Enter your password" required>
+          <div class="password-field"><input type="password" class="form-control" id="auth-pass-login" placeholder="Enter your password" required><button type="button" class="btn btn-secondary password-toggle" data-target="auth-pass-login" aria-label="Show password"><i class="fa-solid fa-eye"></i></button></div>
         </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 16px;font-size:12px;color:var(--text-muted)"><label><input type="checkbox" id="auth-remember"> Remember this device</label><button type="button" class="link-button" id="btn-forgot-password">Forgot password?</button></div>
         <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-right-to-bracket"></i>
           Sign In & Sync</button>
+      </form>
+
+      <form id="form-auth-token" style="display:none;">
+        <div class="form-group"><label>Organization ID</label><input type="text" class="form-control" id="auth-org-token" placeholder="org_your_workspace" required></div>
+        <div class="form-group"><label>Access Token</label><input type="password" class="form-control" id="auth-access-token" placeholder="Paste your WireSpot token" required></div>
+        <p style="font-size:12px;color:var(--text-muted);margin:0 0 16px">Use the credentials from Cloud Sync or the mobile app pairing setup.</p>
+        <button type="submit" class="btn btn-primary" style="width:100%"><i class="fa-solid fa-key"></i> Connect Workspace</button>
       </form>
 
       <form id="form-auth-register" style="display: none;">
@@ -775,11 +824,17 @@
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" class="form-control" id="auth-pass-reg" placeholder="Create a strong password"
-            required>
+          <div class="password-field"><input type="password" class="form-control" id="auth-pass-reg" placeholder="Create a strong password" required><button type="button" class="btn btn-secondary password-toggle" data-target="auth-pass-reg" aria-label="Show password"><i class="fa-solid fa-eye"></i></button></div>
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-user-plus"></i> Create
           Account</button>
+      </form>
+
+      <form id="form-auth-recovery" style="display:none;">
+        <div class="form-group"><label>Account email</label><input type="email" class="form-control" id="auth-email-recovery" placeholder="admin@company.com" required></div>
+        <p style="font-size:12px;color:var(--text-muted);margin:0 0 16px">We’ll ask the WireSpot backend to start account recovery. A hosted identity provider is required to send the actual reset email.</p>
+        <button type="submit" class="btn btn-primary" style="width:100%"><i class="fa-solid fa-envelope"></i> Request recovery</button>
+        <button type="button" class="btn btn-secondary" style="width:100%;margin-top:8px" id="btn-back-to-login">Back to sign in</button>
       </form>
 
       <button type="button" class="btn btn-danger auth-signout" id="btn-signout">
@@ -875,6 +930,15 @@
               value="admin"></div>
           <div class="form-group"><label>Password</label><input type="password" class="form-control"
               id="wiz-router-pass" placeholder="••••••••"></div>
+        </div>
+        <div class="glass" style="padding: 12px; margin-top: 12px; border-color: rgba(52,211,153,.35);">
+          <label style="display:flex; gap:8px; align-items:center; font-weight:700;"><input type="checkbox" id="wiz-pppoe-enabled"> Configure PPPoE WAN (VPN not required for Internet uplink)</label>
+          <div id="wiz-pppoe-fields" style="display:none; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:10px;">
+            <input type="text" class="form-control" id="wiz-pppoe-interface" placeholder="WAN interface (ether1)" value="ether1">
+            <input type="text" class="form-control" id="wiz-pppoe-user" placeholder="ISP PPPoE username">
+            <input type="password" class="form-control" id="wiz-pppoe-pass" placeholder="ISP PPPoE password">
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">PPPoE authenticates the router to your ISP. It does not replace secure router management; use LAN, API-SSL firewall rules, or the WireSpot cloud agent for management.</div>
         </div>
         <div style="display: flex; justify-content: space-between; margin-top: 12px;">
           <button class="btn btn-secondary" id="btn-wiz-back-2"><i class="fa-solid fa-arrow-left"></i> Back</button>

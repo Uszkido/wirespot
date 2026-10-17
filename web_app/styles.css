@@ -859,6 +859,17 @@ select.form-control {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.password-field { position: relative; display: flex; align-items: center; }
+.password-field .form-control { padding-right: 44px; }
+.password-toggle { position: absolute; right: 4px; top: 4px; padding: 7px 9px; min-width: 34px; }
+.link-button { border: 0; background: transparent; color: var(--accent); cursor: pointer; padding: 0; font: inherit; }
+.link-button:hover { text-decoration: underline; }
+
+#tab-help details { border-top: 1px solid var(--border); padding: 14px 0; }
+#tab-help details:last-child { border-bottom: 1px solid var(--border); }
+#tab-help summary { cursor: pointer; font-weight: 650; color: var(--text-primary); }
+#tab-help details p { color: var(--text-muted); line-height: 1.6; margin: 10px 0 0; font-size: 13px; }
+
 .auth-divider {
   display: flex;
   align-items: center;

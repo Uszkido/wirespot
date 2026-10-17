@@ -1,0 +1,7 @@
+# WireSpot RouterOS clients. Keep this file generated from environment values.
+client wirespot-routeros {
+    ipaddr = __RADIUS_CLIENT_IP__
+    secret = __RADIUS_CLIENT_SECRET__
+    shortname = wirespot-routeros
+    nastype = mikrotik
+}

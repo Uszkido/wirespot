@@ -1,4 +1,5 @@
 import 'package:dart_frog/dart_frog.dart';
+import 'package:wirespot_backend/auth.dart';
 
 Response onRequest(RequestContext context) {
   return Response.json(
@@ -6,7 +7,11 @@ Response onRequest(RequestContext context) {
       'service': 'WireSpot Cloud API Server',
       'version': '1.0.0',
       'status': 'healthy',
-      'provider': 'Koyeb Free Tier / Firebase Firestore',
+      'provider': 'Dart Frog process-local store',
+      'productionReady': false,
+      'authenticationMode': productionMode
+          ? 'server-token-allowlist'
+          : 'development-token',
       'documentation': 'https://github.com/Uszkido/wirespot/wiki',
     },
   );

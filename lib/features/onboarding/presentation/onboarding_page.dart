@@ -6,6 +6,7 @@ import '../../../core/branding/app_branding.dart';
 import '../../../core/di/providers.dart';
 import '../../../core/router/app_routes.dart';
 import '../../settings/domain/entities/app_settings.dart';
+import '../../hotspot/presentation/pppoe_radius_guide.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
@@ -365,6 +366,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             theme,
             Icons.cloud_done_outlined,
             'Cloud Sync keeps router, voucher, and report data available across devices.',
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => showPppoeRadiusGuide(context),
+            icon: const Icon(Icons.menu_book_outlined),
+            label: const Text('Open PPPoE + FreeRADIUS guide'),
           ),
         ],
       ),

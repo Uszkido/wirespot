@@ -100,6 +100,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               icon: const Icon(Icons.more_vert),
               onSelected: (route) => context.push(route),
               itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: AppRoutes.help,
+                  child: ListTile(
+                    leading: Icon(Icons.help_outline),
+                    title: Text('Help & setup guide'),
+                  ),
+                ),
                 PopupMenuItem(
                   value: AppRoutes.routers,
                   child: ListTile(

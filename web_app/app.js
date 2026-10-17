@@ -6,46 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── Initial State ───
   const defaultState = {
     activeTab: 'tab-dashboard',
-    routers: [
-      { name: 'Main-Gateway-MikroTik', vendor: 'MikroTik RouterOS v7', ip: '192.168.88.1', port: 8728, status: 'online', users: 32 },
-      { name: 'Pool-Bar-Ruijie', vendor: 'Ruijie / Reyee', ip: '10.0.0.15', port: 443, status: 'online', users: 12 },
-      { name: 'Lobby-AP-OpenWrt', vendor: 'OpenWrt LuCI', ip: '192.168.1.1', port: 22, status: 'online', users: 8 },
-      { name: 'Hotel-Controller-Omada', vendor: 'TP-Link Omada', ip: '192.168.0.10', port: 443, status: 'online', users: 24 },
-      { name: 'Campus-UniFi-CloudKey', vendor: 'Ubiquiti UniFi', ip: '192.168.20.5', port: 443, status: 'online', users: 45 },
-      { name: 'Generic-Edge-Gateway', vendor: 'Generic Router', ip: '10.0.0.1', port: 443, status: 'online', users: 6 }
-    ],
-    hotspotUsers: [
-      { username: 'operator_admin', profile: 'VIP-10MBPS', uptimeLimit: 'Unlimited', dataLimit: 'Unlimited', bytesIn: '1.2 GB', bytesOut: '450 MB' },
-      { username: 'guest_user_1', profile: 'Café-1Hour', uptimeLimit: '01:00:00', dataLimit: '500 MB', bytesIn: '14.2 MB', bytesOut: '1.8 MB' },
-      { username: 'guest_user_2', profile: 'Hotel-24Hour', uptimeLimit: '24:00:00', dataLimit: '2 GB', bytesIn: '128.5 MB', bytesOut: '14.2 MB' }
-    ],
-    userProfiles: [
-      { name: 'Café-1Hour', downSpeed: '3 Mbps', upSpeed: '1 Mbps', sharedUsers: 1, timeout: '60m' },
-      { name: 'Hotel-24Hour', downSpeed: '10 Mbps', upSpeed: '3 Mbps', sharedUsers: 2, timeout: '1440m' },
-      { name: 'VIP-10MBPS', downSpeed: '20 Mbps', upSpeed: '5 Mbps', sharedUsers: 5, timeout: 'Unlimited' }
-    ],
-    sessions: [
-      { username: 'WS-8A2F', mac: 'BC:D1:D3:4A:89:12', ip: '192.168.88.102', uptime: '45m 12s', bytesIn: '14.2 MB', bytesOut: '1.8 MB' },
-      { username: 'WS-3K90', mac: '70:F8:E7:11:90:BB', ip: '192.168.88.105', uptime: '12m 04s', bytesIn: '4.8 MB', bytesOut: '0.6 MB' },
-      { username: 'WS-99PL', mac: 'A4:50:46:12:34:56', ip: '192.168.88.110', uptime: '02h 15m', bytesIn: '128.5 MB', bytesOut: '14.2 MB' }
-    ],
-    vouchers: [
-      { code: 'WS-8A2F', profile: '1Hour-5MBPS', price: 2.50, createdAt: '2026-08-24 10:15', status: 'active' },
-      { code: 'WS-3K90', profile: '1Hour-5MBPS', price: 2.50, createdAt: '2026-08-24 10:20', status: 'active' },
-      { code: 'WS-99PL', profile: '1Day-10MBPS', price: 5.00, createdAt: '2026-08-24 08:30', status: 'active' },
-      { code: 'WS-4411', profile: '7Day-VIP', price: 15.00, createdAt: '2026-08-23 14:00', status: 'unused' },
-      { code: 'WS-5522', profile: '1Hour-5MBPS', price: 2.50, createdAt: '2026-08-22 19:45', status: 'expired' }
-    ],
-    cloudQueue: [
-      { id: 'op_sync_101', resourceType: 'voucher', resourceId: 'v_WS-8A2F', operation: 'upsert', idempotencyKey: 'idemp_v_8A2F', attempts: 1, status: 'pending' },
-      { id: 'op_sync_102', resourceType: 'router', resourceId: 'r_MikroTik', operation: 'upsert', idempotencyKey: 'idemp_r_mt', attempts: 1, status: 'pending' },
-      { id: 'op_sync_100', resourceType: 'hotspot_profile', resourceId: 'hp_1hour', operation: 'upsert', idempotencyKey: 'idemp_hp_1h', attempts: 2, status: 'completed' }
-    ],
-    events: [
-      { time: '11:28:10', source: 'CloudSyncService', desc: 'Background sync triggered via Firebase REST API', status: 'success' },
-      { time: '11:15:00', source: 'VoucherService', desc: 'Generated batch of 5 vouchers (1Hour-5MBPS)', status: 'success' },
-      { time: '10:45:12', source: 'RouterOSConnector', desc: 'Connected to MikroTik gateway at 192.168.88.1:8728', status: 'info' }
-    ]
+    // A new workspace contains no fabricated routers, users, telemetry, or
+    // billing records. These collections are populated only by local actions
+    // or a successful cloud sync.
+    routers: [],
+    hotspotUsers: [],
+    userProfiles: [],
+    sessions: [],
+    vouchers: [],
+    telemetry: [],
+    cloudQueue: [],
+    events: []
   };
 
   // Load state from localStorage or use defaults
@@ -134,7 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'tab-vouchers': 'Voucher Batch & Inventory',
         'tab-subscriptions': 'Subscriptions & Billing',
         'tab-cloud': 'WireSpot Cloud Sync Center',
-        'tab-reports': 'Sales Analytics & Export'
+        'tab-reports': 'Sales Analytics & Export',
+        'tab-help': 'Help & FAQ'
       };
       document.getElementById('page-title').textContent = titleMap[targetTab] || 'Dashboard';
       document.querySelector('.sidebar')?.classList.remove('mobile-open');
@@ -200,18 +172,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.querySelectorAll('.btn-reboot').forEach(b => {
-      b.addEventListener('click', () => {
+      b.addEventListener('click', async () => {
         const rName = b.getAttribute('data-router');
         const router = state.routers.find(item => item.name === rName);
         if (!router) return;
-        router.status = 'restarting';
-        saveState(); renderRouters();
-        showToast(`Restarting ${rName}...`, 'info');
-        setTimeout(() => {
-          router.status = 'online';
-          saveState(); renderRouters();
-          showToast(`${rName} is online again.`, 'success');
-        }, 1500);
+        try {
+          const result = await cloudRequest('api/v1/commands/pending', {
+            method: 'POST',
+            body: JSON.stringify({ targetResourceId: router.id || router.ip, type: 'remote_reboot' })
+          });
+          state.events.unshift({ time: new Date().toTimeString().substring(0, 8), source: 'CommandQueue', desc: `Reboot queued for ${rName} (${result.id})`, status: 'info' });
+          saveState(); renderEvents();
+          showToast(`Reboot queued for ${rName}; it will run when the mobile agent is online.`, 'info');
+        } catch (error) {
+          showToast(`Reboot was not sent: ${error.message}`, 'error');
+        }
       });
     });
 
@@ -267,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const idx = state.hotspotUsers.indexOf(u);
       return `
       <tr>
-        <td><strong>${u.username}</strong></td>
+        <td><strong>${u.username}</strong>${u.syncStatus === 'queued' ? ' <span class="badge badge-warning">Queued</span>' : ''}</td>
         <td><span class="badge badge-info">${u.profile}</span></td>
         <td>${u.uptimeLimit}</td>
         <td>${u.dataLimit}</td>
@@ -306,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!tbody) return;
     tbody.innerHTML = state.userProfiles.length ? state.userProfiles.map(p => `
       <tr>
-        <td><strong>${p.name}</strong></td>
+        <td><strong>${p.name}</strong>${p.syncStatus === 'queued' ? ' <span class="badge badge-warning">Queued</span>' : ''}</td>
         <td>${p.downSpeed}</td>
         <td>${p.upSpeed}</td>
         <td>${p.sharedUsers} User(s)</td>
@@ -608,6 +583,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }));
   document.getElementById('btn-wiz-next-1')?.addEventListener('click', () => showWizardStep(2));
   document.getElementById('btn-wiz-back-2')?.addEventListener('click', () => showWizardStep(1));
+  document.getElementById('wiz-pppoe-enabled')?.addEventListener('change', event => {
+    const fields = document.getElementById('wiz-pppoe-fields');
+    if (fields) fields.style.display = event.target.checked ? 'grid' : 'none';
+  });
   document.getElementById('btn-wiz-next-2')?.addEventListener('click', () => {
     const host = document.getElementById('wiz-router-host').value.trim();
     if (!host) { showToast('Enter the router IP address or hostname.', 'error'); return; }
@@ -623,17 +602,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const profile = document.getElementById('wiz-package-name').value.trim() || 'WireSpot Guest Pass';
     const speed = document.getElementById('wiz-speed-limit').value || '3';
     const duration = document.getElementById('wiz-duration').value || '60';
+    const pppoeEnabled = document.getElementById('wiz-pppoe-enabled')?.checked === true;
+    const pppoeInterface = document.getElementById('wiz-pppoe-interface')?.value.trim() || 'ether1';
+    const pppoeUser = document.getElementById('wiz-pppoe-user')?.value.trim() || '';
+    const pppoePass = document.getElementById('wiz-pppoe-pass')?.value || '';
+    if (pppoeEnabled && (!pppoeUser || !pppoePass)) {
+      showToast('Enter the ISP PPPoE username and password.', 'error');
+      return;
+    }
+    const pppoeCommands = pppoeEnabled
+      ? `\n/interface pppoe-client add name=pppoe-wan interface="${pppoeInterface}" user="${pppoeUser}" password="${pppoePass}" add-default-route=yes use-peer-dns=yes disabled=no\n/ip firewall nat add chain=srcnat out-interface=pppoe-wan action=masquerade comment="WireSpot PPPoE WAN"`
+      : '';
     const script = vendorKey === 'mikrotik'
       ? `# WireSpot MikroTik RouterOS hotspot setup\n# Target: ${host}:${port}\n# Review commands and apply them in a trusted RouterOS terminal.\n/interface wireless set [ find default-name=wlan1 ] ssid="${ssid}"\n/ip hotspot user profile add name="${profile}" rate-limit="${speed}M/${speed}M" session-timeout=${duration}m\n/ip service set api disabled=no port=${port}`
       : `# WireSpot ${vendor} connection profile\n# Target: ${host}:${port}\n# This vendor is managed through its controller/API connector.\n# Save this router, then configure credentials in the secure mobile app or cloud backend.\n# Hotspot profile: ${profile}\n# Speed: ${speed} Mbps · Duration: ${duration} minutes`;
-    document.getElementById('wiz-script-preview').value = script;
+    document.getElementById('wiz-script-preview').value = script + (vendorKey === 'mikrotik' ? pppoeCommands : '');
     showWizardStep(4);
   });
   document.getElementById('btn-wiz-back-4')?.addEventListener('click', () => showWizardStep(3));
   document.getElementById('btn-wiz-deploy')?.addEventListener('click', async () => {
     const vendor = document.getElementById('wiz-router-vendor').selectedOptions[0].text;
     const host = document.getElementById('wiz-router-host').value.trim();
-    const router = { name: `${vendor.split(' / ')[0]}-${host}`, vendor, ip: host, port: Number(document.getElementById('wiz-router-port').value) || 8728, status: 'configured', users: 0, hotspotProfile: document.getElementById('wiz-package-name').value.trim() };
+    const router = { id: `router_${host.replace(/[^a-z0-9]+/gi, '_')}`, name: `${vendor.split(' / ')[0]}-${host}`, vendor, ip: host, port: Number(document.getElementById('wiz-router-port').value) || 8728, status: 'configured', users: 0, hotspotProfile: document.getElementById('wiz-package-name').value.trim(), pppoeEnabled: document.getElementById('wiz-pppoe-enabled')?.checked === true };
     const existing = state.routers.findIndex(item => item.ip === host);
     if (existing >= 0) state.routers[existing] = { ...state.routers[existing], ...router };
     else state.routers.push(router);
@@ -658,9 +648,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── Auth Form Handler ───
   const tabAuthLogin = document.getElementById('tab-auth-login');
+  const tabAuthToken = document.getElementById('tab-auth-token');
   const tabAuthReg = document.getElementById('tab-auth-register');
   const formLogin = document.getElementById('form-auth-login');
+  const formToken = document.getElementById('form-auth-token');
   const formReg = document.getElementById('form-auth-register');
+  const formRecovery = document.getElementById('form-auth-recovery');
 
   const savedAccount = localStorage.getItem('wirespot_web_account');
   const account = savedAccount ? JSON.parse(savedAccount) : null;
@@ -690,55 +683,148 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!localStorage.getItem('wirespot_web_session')) openAuth(!savedAccount);
 
+  const showAuthForm = (activeTab, activeForm) => {
+    [tabAuthLogin, tabAuthToken, tabAuthReg].forEach(tab => tab?.classList.toggle('active', tab === activeTab));
+    [formLogin, formToken, formReg, formRecovery].forEach(form => { if (form) form.style.display = form === activeForm ? 'block' : 'none'; });
+  };
   if (tabAuthLogin && tabAuthReg) {
     tabAuthLogin.addEventListener('click', () => {
-      tabAuthLogin.classList.add('active');
-      tabAuthReg.classList.remove('active');
-      formLogin.style.display = 'block';
-      formReg.style.display = 'none';
+      showAuthForm(tabAuthLogin, formLogin);
     });
 
+    tabAuthToken?.addEventListener('click', () => showAuthForm(tabAuthToken, formToken));
+
     tabAuthReg.addEventListener('click', () => {
-      tabAuthReg.classList.add('active');
-      tabAuthLogin.classList.remove('active');
-      formReg.style.display = 'block';
-      formLogin.style.display = 'none';
+      showAuthForm(tabAuthReg, formReg);
     });
   }
 
+  document.querySelectorAll('.password-toggle').forEach(button => button.addEventListener('click', () => {
+    const input = document.getElementById(button.dataset.target);
+    if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+    button.setAttribute('aria-label', input.type === 'password' ? 'Show password' : 'Hide password');
+    const icon = button.querySelector('i');
+    if (icon) icon.className = input.type === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+  }));
+
+  document.getElementById('btn-forgot-password')?.addEventListener('click', () => {
+    if (authSubtitle) authSubtitle.textContent = 'Recover access to your workspace.';
+    showAuthForm(null, formRecovery);
+  });
+  document.getElementById('btn-back-to-login')?.addEventListener('click', () => {
+    if (authSubtitle) authSubtitle.textContent = 'Sign in to sync your workspace.';
+    showAuthForm(tabAuthLogin, formLogin);
+  });
+
   if (formLogin) {
-    formLogin.addEventListener('submit', (e) => {
+    formLogin.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('auth-email-login').value;
-      if (!savedAccount || JSON.parse(savedAccount).email !== email) {
-        showToast('No account found for this email. Create an account first.', 'error');
-        return;
+      const password = document.getElementById('auth-pass-login').value;
+      const configured = JSON.parse(localStorage.getItem('wirespot_web_cloud_config') || '{}');
+      const baseUrl = (configured.url || 'http://127.0.0.1:8080').replace(/\/$/, '');
+      try {
+        const response = await fetch(`${baseUrl}/api/v1/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || `Sign in failed (${response.status}).`);
+        const user = payload.user || {};
+        const config = {
+          url: baseUrl,
+          organizationId: user.organizationId || configured.organizationId || `org_${email.split('@')[0]}`,
+          token: payload.accessToken || ''
+        };
+        if (!config.token) throw new Error('The backend did not return an access token.');
+        localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: user.organizationName || config.organizationId, email }));
+        localStorage.setItem('wirespot_web_cloud_config', JSON.stringify(config));
+        localStorage.setItem('wirespot_web_session', JSON.stringify({ email, signedInAt: Date.now() }));
+        document.getElementById('modal-auth').classList.remove('active');
+        showToast(`Signed in as ${email}. Cloud sync is ready.`, 'success');
+        window.location.reload();
+      } catch (error) {
+        showToast(error.message || 'Unable to sign in.', 'error');
       }
-      localStorage.setItem('wirespot_web_session', JSON.stringify({ email, signedInAt: Date.now() }));
-      document.getElementById('modal-auth').classList.remove('active');
-      showToast(`Signed in as ${email}`, 'success');
     });
   }
 
   if (formReg) {
-    formReg.addEventListener('submit', (e) => {
+    formReg.addEventListener('submit', async (e) => {
       e.preventDefault();
       const org = document.getElementById('auth-org-reg').value;
       const email = document.getElementById('auth-email-reg').value;
-      localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: org, email }));
-      localStorage.setItem('wirespot_web_session', JSON.stringify({ email, signedInAt: Date.now() }));
-      localStorage.setItem('wirespot_web_cloud_config', JSON.stringify({
-        url: document.getElementById('cloud-api-url')?.value.trim() || '',
-        organizationId: `org_${org.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`,
-        token: `ws_web_${Date.now()}`
-      }));
-      const generatedConfig = JSON.parse(localStorage.getItem('wirespot_web_cloud_config'));
-      if (cloudOrgInput) cloudOrgInput.value = generatedConfig.organizationId;
-      if (cloudTokenInput) cloudTokenInput.value = generatedConfig.token;
-      renderCloudCredentials?.();
-      document.getElementById('modal-auth').classList.remove('active');
-      document.querySelector('[data-tab="tab-cloud"]')?.click();
-      showToast(`Account created for ${org}!`, 'success');
+      const password = document.getElementById('auth-pass-reg').value;
+      const configured = JSON.parse(localStorage.getItem('wirespot_web_cloud_config') || '{}');
+      const baseUrl = (configured.url || 'http://127.0.0.1:8080').replace(/\/$/, '');
+      try {
+        const response = await fetch(`${baseUrl}/api/v1/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ organizationName: org, email, password })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || `Account creation failed (${response.status}).`);
+        const user = payload.user || {};
+        const generatedConfig = {
+          url: baseUrl,
+          organizationId: user.organizationId || `org_${org.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`,
+          token: payload.accessToken || ''
+        };
+        if (!generatedConfig.token) throw new Error('The backend did not return an access token.');
+        localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: org, email }));
+        localStorage.setItem('wirespot_web_session', JSON.stringify({ email, signedInAt: Date.now() }));
+        localStorage.setItem('wirespot_web_cloud_config', JSON.stringify(generatedConfig));
+        document.getElementById('modal-auth').classList.remove('active');
+        showToast(`Account created for ${org}. Cloud sync is ready.`, 'success');
+        window.location.reload();
+      } catch (error) {
+        showToast(error.message || 'Unable to create the account.', 'error');
+      }
+    });
+  }
+
+  if (formToken) {
+    formToken.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const organizationId = document.getElementById('auth-org-token').value.trim();
+      const token = document.getElementById('auth-access-token').value.trim();
+      const configured = JSON.parse(localStorage.getItem('wirespot_web_cloud_config') || '{}');
+      const baseUrl = (configured.url || 'http://127.0.0.1:8080').replace(/\/$/, '');
+      try {
+        const response = await fetch(`${baseUrl}/api/v1/routers`, {
+          headers: { Authorization: `Bearer ${token}`, 'X-WireSpot-Organization': organizationId }
+        });
+        if (!response.ok) throw new Error(`Access token was rejected (${response.status}).`);
+        localStorage.setItem('wirespot_web_cloud_config', JSON.stringify({ url: baseUrl, organizationId, token }));
+        localStorage.setItem('wirespot_web_session', JSON.stringify({ organizationId, signedInAt: Date.now(), method: 'token' }));
+        localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: organizationId, email: 'Token workspace' }));
+        document.getElementById('modal-auth').classList.remove('active');
+        showToast('Workspace connected. Cloud sync is ready.', 'success');
+        window.location.reload();
+      } catch (error) {
+        showToast(error.message || 'Unable to connect this workspace.', 'error');
+      }
+    });
+  }
+
+  if (formRecovery) {
+    formRecovery.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('auth-email-recovery').value.trim();
+      const configured = JSON.parse(localStorage.getItem('wirespot_web_cloud_config') || '{}');
+      const baseUrl = (configured.url || 'http://127.0.0.1:8080').replace(/\/$/, '');
+      try {
+        const response = await fetch(`${baseUrl}/api/v1/auth/recover`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || `Recovery request failed (${response.status}).`);
+        showToast(payload.message || 'Recovery request received.', 'success');
+        showAuthForm(tabAuthLogin, formLogin);
+      } catch (error) {
+        showToast(error.message || 'Unable to request account recovery.', 'error');
+      }
     });
   }
 
@@ -824,7 +910,8 @@ document.addEventListener('DOMContentLoaded', () => {
             hotspotUsers: state.hotspotUsers,
             userProfiles: state.userProfiles,
             sessions: state.sessions,
-            vouchers: state.vouchers
+            vouchers: state.vouchers,
+            telemetry: state.telemetry
           })
         });
         const remote = await cloudRequest('api/v1/routers');
@@ -856,7 +943,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await cloudRequest('api/v1/backup/latest');
       const backup = result.backup;
       if (!backup || typeof backup !== 'object') throw new Error('No cloud backup is available yet.');
-      for (const key of ['routers', 'hotspotUsers', 'userProfiles', 'sessions', 'vouchers']) {
+      for (const key of ['routers', 'hotspotUsers', 'userProfiles', 'sessions', 'vouchers', 'telemetry']) {
         if (Array.isArray(backup[key])) state[key] = backup[key];
       }
       saveState();
@@ -915,31 +1002,83 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('Live session list refreshed.', 'info');
   });
 
-  document.getElementById('btn-add-hotspot-user')?.addEventListener('click', () => {
+  document.getElementById('btn-add-hotspot-user')?.addEventListener('click', async () => {
+    const router = state.routers.find(item => item.status === 'online' || item.status === 'configured');
+    const cloud = readCloudConfig?.();
+    if (!router || !cloud?.url || !cloud.token) {
+      showToast('Connect a router and WireSpot Cloud before provisioning a hotspot user.', 'error');
+      return;
+    }
     const username = prompt('Username:', `guest_${Date.now().toString().slice(-4)}`)?.trim();
     if (!username) return;
     const profile = prompt('Profile:', state.userProfiles[0]?.name || 'Guest')?.trim() || 'Guest';
-    state.hotspotUsers.push({ username, profile, uptimeLimit: 'Unlimited', dataLimit: 'Unlimited', bytesIn: '0 B', bytesOut: '0 B' });
-    saveState(); renderHotspotUsers(); renderSummary();
-    showToast(`Hotspot user ${username} added.`, 'success');
+    try {
+      const result = await cloudRequest('api/v1/commands/pending', {
+        method: 'POST',
+        body: JSON.stringify({
+          targetResourceId: router.id || router.ip,
+          type: 'router_command',
+          params: { command: '/ip/hotspot/user/add', attributes: { name: username, profile } }
+        })
+      });
+      state.hotspotUsers.push({ username, profile, uptimeLimit: 'Unlimited', dataLimit: 'Unlimited', bytesIn: '0 B', bytesOut: '0 B', syncStatus: 'queued', commandId: result.id });
+      state.events.unshift({ time: new Date().toTimeString().substring(0, 8), source: 'CommandQueue', desc: `Hotspot user ${username} queued for ${router.name}`, status: 'info' });
+      saveState(); renderHotspotUsers(); renderEvents(); renderSummary();
+      showToast(`Hotspot user ${username} queued for ${router.name}.`, 'info');
+    } catch (error) {
+      showToast(`User was not queued: ${error.message}`, 'error');
+    }
   });
 
-  document.getElementById('btn-add-user-profile')?.addEventListener('click', () => {
+  document.getElementById('btn-add-user-profile')?.addEventListener('click', async () => {
+    const router = state.routers.find(item => item.status === 'online' || item.status === 'configured');
+    const cloud = readCloudConfig?.();
+    if (!router || !cloud?.url || !cloud.token) {
+      showToast('Connect a router and WireSpot Cloud before provisioning a profile.', 'error');
+      return;
+    }
     const name = prompt('Profile name:', `Guest-${state.userProfiles.length + 1}`)?.trim();
     if (!name) return;
-    state.userProfiles.push({ name, downSpeed: '5 Mbps', upSpeed: '2 Mbps', sharedUsers: 1, timeout: '60m' });
-    saveState(); renderUserProfiles();
-    showToast(`Profile ${name} added.`, 'success');
+    try {
+      const result = await cloudRequest('api/v1/commands/pending', {
+        method: 'POST',
+        body: JSON.stringify({
+          targetResourceId: router.id || router.ip,
+          type: 'router_command',
+          params: { command: '/ip/hotspot/user/profile/add', attributes: { name } }
+        })
+      });
+      state.userProfiles.push({ name, downSpeed: '5 Mbps', upSpeed: '2 Mbps', sharedUsers: 1, timeout: '60m', syncStatus: 'queued', commandId: result.id });
+      saveState(); renderUserProfiles();
+      showToast(`Profile ${name} queued for ${router.name}.`, 'info');
+    } catch (error) {
+      showToast(`Profile was not queued: ${error.message}`, 'error');
+    }
   });
 
-  document.getElementById('btn-send-cli')?.addEventListener('click', () => {
+  document.getElementById('btn-send-cli')?.addEventListener('click', async () => {
     const input = document.getElementById('cli-command-input');
     const output = document.getElementById('cli-output-text');
     const command = input?.value.trim();
     if (!command || !output) return;
-    output.textContent += `\n[operator] > ${command}\nCommand queued for the selected router. Connect Cloud Sync to execute remote commands.`;
-    input.value = '';
-    output.parentElement?.scrollTo(0, output.parentElement.scrollHeight);
+    const selectedName = document.getElementById('cli-router-name')?.textContent?.replace(/^Connected to /, '').trim();
+    const router = state.routers.find(item => item.name === selectedName);
+    if (!router) {
+      showToast('Select a connected router before sending a command.', 'error');
+      return;
+    }
+    try {
+      const result = await cloudRequest('api/v1/commands/pending', {
+        method: 'POST',
+        body: JSON.stringify({ targetResourceId: router.id || router.ip, type: 'router_command', params: { command } })
+      });
+      output.textContent += `\n[operator] > ${command}\nQueued as ${result.id}; awaiting mobile agent.`;
+      input.value = '';
+      output.parentElement?.scrollTo(0, output.parentElement.scrollHeight);
+      showToast('Command queued for the selected router.', 'success');
+    } catch (error) {
+      showToast(`Command was not queued: ${error.message}`, 'error');
+    }
   });
 
   document.getElementById('btn-current-plan')?.addEventListener('click', () => {
@@ -956,12 +1095,37 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── Refresh Button ───
   const btnRefresh = document.getElementById('btn-refresh');
   if (btnRefresh) {
-    btnRefresh.addEventListener('click', () => {
+    btnRefresh.addEventListener('click', async () => {
+      const config = readCloudConfig?.();
+      let refreshMessage = 'Dashboard data refreshed locally.';
+      if (config?.url && config.token) {
+        btnRefresh.disabled = true;
+        try {
+          const [routers, backup] = await Promise.all([
+            cloudRequest('api/v1/routers'),
+            cloudRequest('api/v1/backup/latest').catch(() => null)
+          ]);
+          if (Array.isArray(routers?.routers)) state.routers = routers.routers;
+          if (backup?.backup && typeof backup.backup === 'object') {
+            for (const key of ['hotspotUsers', 'userProfiles', 'sessions', 'vouchers', 'telemetry']) {
+              if (Array.isArray(backup.backup[key])) state[key] = backup.backup[key];
+            }
+          }
+          saveState();
+          refreshMessage = 'Dashboard refreshed from WireSpot Cloud.';
+        } catch (error) {
+          refreshMessage = `Cloud refresh failed: ${error.message}`;
+        } finally {
+          btnRefresh.disabled = false;
+        }
+      }
       renderEvents();
       renderRouters();
       renderSessions();
       renderVouchers();
-      showToast('Dashboard data refreshed!', 'info');
+      renderHotspotUsers();
+      renderSummary();
+      showToast(refreshMessage, refreshMessage.includes('failed') ? 'error' : 'info');
     });
   }
 
@@ -1108,14 +1272,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const bwCtx = document.getElementById('bandwidthChart');
     if (bwCtx && typeof Chart !== 'undefined') {
+      const telemetry = Array.isArray(state.telemetry) ? state.telemetry.slice(-7) : [];
+      const telemetryRows = telemetry.length ? telemetry : [{ downloadMbps: 0, uploadMbps: 0 }];
       new Chart(bwCtx, {
         type: 'line',
         data: {
-          labels: ['10:00', '10:15', '10:30', '10:45', '11:00', '11:15', '11:30'],
+          labels: telemetry.length
+            ? telemetry.map(point => point.time || new Date(point.recordedAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+            : ['No telemetry'],
           datasets: [
             {
               label: 'Download (Mbps)',
-              data: [12.4, 24.8, 45.2, 38.1, 62.5, 54.0, 78.2],
+              data: telemetryRows.map(point => Number(point.downloadMbps) || 0),
               borderColor: '#38bdf8',
               backgroundColor: 'rgba(56, 189, 248, 0.1)',
               fill: true,
@@ -1123,7 +1291,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             {
               label: 'Upload (Mbps)',
-              data: [3.1, 6.2, 11.5, 8.4, 14.2, 12.1, 18.5],
+              data: telemetryRows.map(point => Number(point.uploadMbps) || 0),
               borderColor: '#818cf8',
               backgroundColor: 'rgba(129, 140, 248, 0.1)',
               fill: true,
@@ -1144,13 +1312,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const cpuCtx = document.getElementById('cpuChart');
     if (cpuCtx && typeof Chart !== 'undefined') {
+      const routersWithCpu = state.routers.filter(router => Number.isFinite(Number(router.cpuLoad)));
       new Chart(cpuCtx, {
         type: 'bar',
         data: {
-          labels: ['MikroTik', 'Ruijie', 'OpenWrt', 'Omada', 'UniFi', 'Generic'],
+          labels: routersWithCpu.length ? routersWithCpu.map(router => router.name) : ['No router telemetry'],
           datasets: [{
             label: 'CPU Load %',
-            data: [18, 12, 8, 24, 32, 15],
+            data: routersWithCpu.length ? routersWithCpu.map(router => Number(router.cpuLoad) || 0) : [0],
             backgroundColor: [
               'rgba(56, 189, 248, 0.7)',
               'rgba(52, 211, 153, 0.7)',

@@ -1,0 +1,9 @@
+# WireSpot FreeRADIUS file-backed development users.
+# Production users should be provisioned from the chosen SQL/REST identity store.
+# Format: username  Cleartext-Password := "password"
+#         Mikrotik-Rate-Limit := "10M/10M"
+#         Session-Timeout := 3600
+
+wirespot-demo  Cleartext-Password := "replace-this-password"
+    Mikrotik-Rate-Limit := "10M/10M",
+    Session-Timeout := 3600

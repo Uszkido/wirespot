@@ -9,6 +9,7 @@ import '../../../core/storage/router_credentials.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/entities/ruijie_cloud_device.dart';
 import '../domain/services/router_connector.dart';
+import 'vendor_mutation_support.dart';
 
 typedef RuijieDeviceRequest = Future<Response<dynamic>> Function(Uri uri);
 typedef RuijieCredentialsReader =
@@ -78,6 +79,9 @@ class RuijieCloudConnectionService implements RouterConnector {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async {
+    if (command.startsWith('/ip/hotspot/')) {
+      throw unsupportedVendorMutation(router, command);
+    }
     final routerStore = _ruijieUsersStore.putIfAbsent(router.id, () => []);
 
     if (command == '/system/identity/print') {

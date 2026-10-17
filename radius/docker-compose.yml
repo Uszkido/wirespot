@@ -1,0 +1,18 @@
+services:
+  freeradius:
+    build: .
+    restart: unless-stopped
+    environment:
+      RADIUS_CLIENT_SECRET: ${RADIUS_CLIENT_SECRET:?Set RADIUS_CLIENT_SECRET in .env}
+      RADIUS_CLIENT_IP: ${RADIUS_CLIENT_IP:-0.0.0.0/0}
+    ports:
+      - "1812:1812/udp"
+      - "1813:1813/udp"
+    volumes:
+      - ./config/clients.conf.template:/opt/wirespot/clients.conf.template:ro
+      - ./config/authorize:/etc/freeradius/3.0/mods-config/files/authorize:ro
+    healthcheck:
+      test: ["CMD-SHELL", "freeradius -XC >/dev/null 2>&1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

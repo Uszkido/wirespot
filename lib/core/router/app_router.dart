@@ -11,6 +11,8 @@ import '../../features/hotspot/presentation/captive_portal_customizer_page.dart'
 import '../../features/hotspot/presentation/csv_import_page.dart';
 import '../../features/alerts/presentation/alert_settings_page.dart';
 import '../../features/hotspot/presentation/hotspot_page.dart';
+import '../../features/hotspot/presentation/radius_subscribers_page.dart';
+import '../../features/help/presentation/help_center_page.dart';
 import '../../features/onboarding/presentation/onboarding_page.dart';
 import '../../features/permissions/presentation/permission_readiness_page.dart';
 import '../../features/reports/presentation/reports_page.dart';
@@ -67,6 +69,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LicenseGate(child: DashboardPage()),
       ),
       GoRoute(
+        path: AppRoutes.help,
+        name: 'help',
+        builder: (context, state) => const LicenseGate(child: HelpCenterPage()),
+      ),
+      GoRoute(
         path: AppRoutes.routers,
         name: 'routers',
         builder: (context, state) => const LicenseGate(child: RoutersPage()),
@@ -97,6 +104,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/hotspot/import',
         name: 'csv-import',
         builder: (context, state) => const LicenseGate(child: CsvImportPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.radiusSubscribers,
+        name: 'radius-subscribers',
+        builder: (context, state) =>
+            const LicenseGate(child: RadiusSubscribersPage()),
       ),
       GoRoute(
         path: AppRoutes.portalCustomizer,
