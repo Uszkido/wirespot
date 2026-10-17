@@ -10,9 +10,10 @@ RUN dart pub get --offline
 # Dart Frog generates the production server from the routes directory.
 # Keep the generator aligned with the dart_frog runtime locked in
 # pubspec.lock. The latest CLI may generate code for a newer API.
-RUN dart pub global activate dart_frog_cli 1.2.6
+RUN dart pub global deactivate dart_frog_cli || true
+RUN dart pub global activate dart_frog_cli 1.2.6 --overwrite
 ENV PATH="/root/.pub-cache/bin:${PATH}"
-RUN dart_frog build
+RUN dart_frog --version && dart_frog build
 
 # Ultra-lightweight runtime image (< 50MB RAM footprint)
 FROM dart:stable AS runtime
