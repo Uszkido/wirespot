@@ -52,11 +52,12 @@ Future<Response> onRequest(RequestContext context) async {
     }
     final plan = payload['plan'] as String?;
     final deviceId = payload['deviceId'] as String?;
+    final scope = (payload['scope'] as String?)?.trim().toLowerCase();
     final endsAt = payload['endsAt'] as String?;
     if (plan == null ||
-        deviceId == null ||
+        (deviceId == null && scope != 'workspace') ||
         endsAt == null ||
-        deviceId.trim().length < 8 ||
+        (deviceId != null && deviceId.trim().length < 8) ||
         DateTime.tryParse(endsAt) == null) {
       return Response.json(
         statusCode: 400,
@@ -65,9 +66,10 @@ Future<Response> onRequest(RequestContext context) async {
     }
     final entitlement = <String, dynamic>{
       'plan': plan,
-      'deviceId': deviceId.trim().toUpperCase(),
-      'startsAt':
-          (payload['startsAt'] as String?) ??
+      if (deviceId != null && deviceId.trim().isNotEmpty)
+        'deviceId': deviceId.trim().toUpperCase(),
+      'scope': scope == 'workspace' ? 'workspace' : 'device',
+      'startsAt': (payload['startsAt'] as String?) ??
           DateTime.now().toUtc().toIso8601String(),
       'endsAt': endsAt,
       'verified': true,

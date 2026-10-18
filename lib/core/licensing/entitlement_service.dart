@@ -82,16 +82,18 @@ class EntitlementService {
           payload['revoked'] == true) {
         return null;
       }
-      final licensedDevice = (payload['deviceId'] as String?)
-          ?.trim()
-          .toUpperCase();
+      final licensedDevice = (payload['deviceId'] as String?)?.trim();
+      final scope = (payload['scope'] as String?)?.trim().toLowerCase();
       final endsAt = DateTime.tryParse(payload['endsAt'] as String? ?? '');
       final plan = BillingPlan.fromId(payload['plan'] as String?);
-      if (licensedDevice != deviceId.toUpperCase() ||
+      final isWorkspaceEntitlement =
+          scope == 'workspace' ||
+          (licensedDevice == null || licensedDevice.isEmpty);
+      if ((!isWorkspaceEntitlement &&
+              licensedDevice.toUpperCase() != deviceId.toUpperCase()) ||
           endsAt == null ||
           !endsAt.isAfter(now) ||
-          plan == BillingPlan.trial ||
-          plan == BillingPlan.lifetimeDevice) {
+          plan == BillingPlan.trial) {
         return null;
       }
       return _LocalLicense(plan: plan, endsAt: endsAt);
