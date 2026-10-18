@@ -5,13 +5,13 @@ UniFi (Controller REST API), and Generic Routers (HTTP/REST/SNMP).
 
 | Item | Status |
 | --- | --- |
-| Current version | `0.1.27+28` |
+| Current version | `0.1.27+30` |
 | Android debug APK | Builds successfully |
 | Static analysis | Passing (0 issues) |
 | Tests | 82 passing |
 | Multi-Vendor Connectors | MikroTik hotspot/voucher connector plus authenticated connection/discovery foundations for Ruijie, OpenWrt, Omada, UniFi, and Generic |
 | Web Dashboard | Fully Synchronized & Static Hosting Ready (`web_app/`) |
-| Latest APK output | `outputs\WireSpot-0.1.27+28-brand-collaboration-debug.apk` |
+| Latest APK output | `outputs\WireSpot-0.1.27+30-brand-collaboration-debug.apk` |
 | Latest pushed commit | See GitHub `main` |
 
 ## Why WireSpot
@@ -146,7 +146,7 @@ build\app\outputs\flutter-apk\app-debug.apk
 Current packaged debug APK:
 
 ```text
-outputs\WireSpot-0.1.27+28-brand-collaboration-debug.apk
+outputs\WireSpot-0.1.27+30-brand-collaboration-debug.apk
 ```
 
 ## Operator Setup

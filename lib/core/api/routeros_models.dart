@@ -38,7 +38,12 @@ class RouterOsInterface {
     required this.type,
     required this.running,
     required this.disabled,
+    this.defaultName,
     this.macAddress,
+    this.speed,
+    this.fullDuplex,
+    this.linkDowns,
+    this.lastLinkUpTime,
     this.rxByte,
     this.txByte,
   });
@@ -47,7 +52,14 @@ class RouterOsInterface {
   final String type;
   final bool running;
   final bool disabled;
+
+  /// The physical port name reported by RouterOS before a custom rename.
+  final String? defaultName;
   final String? macAddress;
+  final String? speed;
+  final bool? fullDuplex;
+  final int? linkDowns;
+  final String? lastLinkUpTime;
   final int? rxByte;
   final int? txByte;
 
@@ -57,7 +69,14 @@ class RouterOsInterface {
       type: record['type'] ?? '',
       running: record['running'] == 'true',
       disabled: record['disabled'] == 'true',
+      defaultName: record['default-name'],
       macAddress: record['mac-address'],
+      speed: record['speed'],
+      fullDuplex: record['full-duplex'] == null
+          ? null
+          : record['full-duplex'] == 'true',
+      linkDowns: int.tryParse(record['link-downs'] ?? ''),
+      lastLinkUpTime: record['last-link-up-time'],
       rxByte: int.tryParse(record['rx-byte'] ?? ''),
       txByte: int.tryParse(record['tx-byte'] ?? ''),
     );

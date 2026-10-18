@@ -533,6 +533,22 @@ class _InterfacesPanel extends StatelessWidget {
     return _DashboardPanel(
       child: Column(
         children: [
+          Row(
+            children: [
+              Text(
+                '${interfaces.length} interfaces',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const Spacer(),
+              Text(
+                '${interfaces.where((item) => item.running && !item.disabled).length} connected',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 20),
           // Show every interface reported by the connected router. The
           // previous six-item cap hid ports on larger MikroTik models and
           // made the dashboard look as if those ports were unavailable.
@@ -554,6 +570,15 @@ class _InterfaceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isRunning = interface.running && !interface.disabled;
+    final physicalName = interface.defaultName?.trim();
+    final speed = interface.speed?.trim();
+    final connectionDetails = [
+      if (physicalName != null &&
+          physicalName.isNotEmpty &&
+          physicalName != interface.name)
+        physicalName,
+      if (speed != null && speed.isNotEmpty) speed,
+    ].join(' • ');
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -562,7 +587,12 @@ class _InterfaceRow extends StatelessWidget {
         color: isRunning ? colorScheme.primary : colorScheme.onSurfaceVariant,
       ),
       title: Text(interface.name),
-      subtitle: Text(interface.type.isEmpty ? 'interface' : interface.type),
+      subtitle: Text(
+        [
+          if (interface.type.isNotEmpty) interface.type else 'interface',
+          if (connectionDetails.isNotEmpty) connectionDetails,
+        ].join(' • '),
+      ),
       trailing: Text(
         isRunning ? text.running : text.down,
         style: TextStyle(
@@ -601,7 +631,31 @@ class _InterfaceRow extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _InterfaceDetailRow(label: 'Type', value: _value(interface.type)),
+              _InterfaceDetailRow(
+                label: 'Connected port',
+                value: _value(interface.defaultName ?? interface.name),
+              ),
               _InterfaceDetailRow(label: 'Status', value: status),
+              _InterfaceDetailRow(
+                label: 'Link speed',
+                value: _value(interface.speed),
+              ),
+              _InterfaceDetailRow(
+                label: 'Duplex',
+                value: interface.fullDuplex == null
+                    ? '--'
+                    : interface.fullDuplex!
+                    ? 'Full duplex'
+                    : 'Half duplex',
+              ),
+              _InterfaceDetailRow(
+                label: 'Link downs',
+                value: interface.linkDowns?.toString() ?? '--',
+              ),
+              _InterfaceDetailRow(
+                label: 'Last link up',
+                value: _value(interface.lastLinkUpTime),
+              ),
               _InterfaceDetailRow(
                 label: 'MAC address',
                 value: _value(interface.macAddress),

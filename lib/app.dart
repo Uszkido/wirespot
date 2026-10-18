@@ -79,7 +79,13 @@ class _WireSpotAppState extends ConsumerState<WireSpotApp>
       darkTheme: AppTheme.dark(),
       themeMode: _themeMode(settings?.themePreference),
       locale: _materialLocale(settings?.languageCode),
-      supportedLocales: const [Locale('en'), Locale('fr'), Locale('ha')],
+      // Hausa is translated by WireSpot's AppText layer. Flutter's bundled
+      // MaterialLocalizations does not currently provide a Hausa delegate,
+      // so keeping it in this list would leave Material controls (dropdowns,
+      // dialogs, date pickers, etc.) without localizations and can make the
+      // Settings screen fail after switching languages. The Material chrome
+      // falls back to English while the app content remains Hausa.
+      supportedLocales: const [Locale('en'), Locale('fr')],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -100,7 +106,8 @@ class _WireSpotAppState extends ConsumerState<WireSpotApp>
   Locale _materialLocale(String? languageCode) {
     return switch (languageCode) {
       'fr' => const Locale('fr'),
-      'ha' => const Locale('ha'),
+      // Hausa is intentionally handled by AppText, not MaterialLocalizations.
+      'ha' => const Locale('en'),
       _ => const Locale('en'),
     };
   }
