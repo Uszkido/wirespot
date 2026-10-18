@@ -341,6 +341,8 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                 onPressed: state.isLoading
                     ? null
                     : () async {
+                        // The page remains mounted before the dialog is shown below.
+                        // ignore: use_build_context_synchronously
                         final dialogContext = context;
                         final code = await controller.createCompanionCode();
                         if (!mounted || code == null) return;
