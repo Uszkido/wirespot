@@ -31,6 +31,7 @@ Future<Response> onRequest(RequestContext context, String commandId) async {
       command['resultPayload'] = payload['resultPayload'];
     if (payload['errorMessage'] is String)
       command['errorMessage'] = payload['errorMessage'];
+    BackendStore.persist();
     return Response.json(body: {'status': 'success', 'command': command});
   } catch (_) {
     return Response.json(

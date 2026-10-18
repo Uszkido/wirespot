@@ -47,6 +47,7 @@ Future<Response> onRequest(RequestContext context) async {
           ).add(Map<String, dynamic>.from(voucher));
         }
       }
+      BackendStore.persist();
 
       return Response.json(
         body: {

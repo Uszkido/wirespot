@@ -40,6 +40,7 @@ Future<Response> onRequest(RequestContext context) async {
       BackendStore.routersFor(orgId)
         ..clear()
         ..addAll(incoming);
+      BackendStore.persist();
       return Response.json(
         body: {
           'status': 'success',

@@ -1,8 +1,11 @@
-/// Organization-scoped state used by the lightweight backend.
-/// Each request is kept isolated by its organization id.
+import 'dart:convert';
+import 'dart:io';
+
+/// Organization-scoped state with an atomic JSON snapshot for restart-safe
+/// single-instance deployments. Configure WIRESPOT_STORE_PATH to a persistent
+/// volume in production; use Firestore before running multiple instances.
 class BackendStore {
   BackendStore._();
-
   static final _vouchers = <String, List<Map<String, dynamic>>>{};
   static final _routers = <String, List<Map<String, dynamic>>>{};
   static final _backups = <String, Map<String, dynamic>>{};
@@ -10,47 +13,145 @@ class BackendStore {
   static final _telemetryEvents = <String, int>{};
   static final _entitlements = <String, Map<String, dynamic>>{};
   static final _commands = <String, List<Map<String, dynamic>>>{};
+  static final _path =
+      Platform.environment['WIRESPOT_STORE_PATH'] ?? '.wirespot/store.json';
+  static bool _loaded = false;
 
-  static List<Map<String, dynamic>> vouchersFor(String orgId) =>
-      _vouchers.putIfAbsent(orgId, () => <Map<String, dynamic>>[]);
+  static void _ensureLoaded() {
+    if (_loaded) return;
+    _loaded = true;
+    final file = File(_path);
+    if (!file.existsSync()) return;
+    try {
+      final root = jsonDecode(file.readAsStringSync());
+      if (root is! Map) return;
+      _readLists(root['vouchers'], _vouchers);
+      _readLists(root['routers'], _routers);
+      _readLists(root['commands'], _commands);
+      _readMaps(root['backups'], _backups);
+      _readMaps(root['entitlements'], _entitlements);
+      if (root['backupTimes'] is Map) {
+        for (final e in (root['backupTimes'] as Map).entries) {
+          final value = DateTime.tryParse(e.value.toString());
+          if (value != null) _backupTimes[e.key.toString()] = value;
+        }
+      }
+      if (root['telemetryEvents'] is Map) {
+        for (final e in (root['telemetryEvents'] as Map).entries) {
+          _telemetryEvents[e.key.toString()] = e.value is num
+              ? (e.value as num).toInt()
+              : int.tryParse(e.value.toString()) ?? 0;
+        }
+      }
+    } on Object {
+      // Ignore a corrupt snapshot and allow the service to start cleanly.
+    }
+  }
 
-  static List<Map<String, dynamic>> routersFor(String orgId) =>
-      _routers.putIfAbsent(orgId, () => <Map<String, dynamic>>[]);
+  static void _readLists(
+      Object? value, Map<String, List<Map<String, dynamic>>> target) {
+    if (value is! Map) return;
+    for (final e in value.entries) {
+      if (e.value is List) {
+        target[e.key.toString()] = (e.value as List)
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+    }
+  }
 
-  static Map<String, dynamic>? latestBackupFor(String orgId) => _backups[orgId];
+  static void _readMaps(
+      Object? value, Map<String, Map<String, dynamic>> target) {
+    if (value is! Map) return;
+    for (final e in value.entries) {
+      if (e.value is Map)
+        target[e.key.toString()] = Map<String, dynamic>.from(e.value as Map);
+    }
+  }
 
-  static DateTime? latestBackupAtFor(String orgId) => _backupTimes[orgId];
+  static List<Map<String, dynamic>> vouchersFor(String orgId) {
+    _ensureLoaded();
+    return _vouchers.putIfAbsent(orgId, () => <Map<String, dynamic>>[]);
+  }
+
+  static List<Map<String, dynamic>> routersFor(String orgId) {
+    _ensureLoaded();
+    return _routers.putIfAbsent(orgId, () => <Map<String, dynamic>>[]);
+  }
+
+  static Map<String, dynamic>? latestBackupFor(String orgId) {
+    _ensureLoaded();
+    return _backups[orgId];
+  }
+
+  static DateTime? latestBackupAtFor(String orgId) {
+    _ensureLoaded();
+    return _backupTimes[orgId];
+  }
 
   static void saveBackup(String orgId, Map<String, dynamic> backup) {
+    _ensureLoaded();
     _backups[orgId] = backup;
     _backupTimes[orgId] = DateTime.now().toUtc();
+    persist();
   }
 
   static int incrementTelemetry(String orgId) {
+    _ensureLoaded();
     final count = (_telemetryEvents[orgId] ?? 0) + 1;
     _telemetryEvents[orgId] = count;
+    persist();
     return count;
   }
 
-  static Map<String, dynamic>? entitlementFor(String orgId) =>
-      _entitlements[orgId];
-
-  static void saveEntitlement(String orgId, Map<String, dynamic> value) {
-    _entitlements[orgId] = value;
+  static Map<String, dynamic>? entitlementFor(String orgId) {
+    _ensureLoaded();
+    return _entitlements[orgId];
   }
 
-  static List<Map<String, dynamic>> commandsFor(String orgId) =>
-      _commands.putIfAbsent(orgId, () => <Map<String, dynamic>>[]);
+  static void saveEntitlement(String orgId, Map<String, dynamic> value) {
+    _ensureLoaded();
+    _entitlements[orgId] = value;
+    persist();
+  }
+
+  static List<Map<String, dynamic>> commandsFor(String orgId) {
+    _ensureLoaded();
+    return _commands.putIfAbsent(orgId, () => <Map<String, dynamic>>[]);
+  }
 
   static void enqueueCommand(String orgId, Map<String, dynamic> command) {
     commandsFor(orgId).add(command);
+    persist();
   }
 
-  static Map<String, dynamic>? commandFor(String orgId, String commandId) {
-    final commands = commandsFor(orgId);
-    for (final command in commands) {
-      if (command['id'] == commandId) return command;
+  static Map<String, dynamic>? commandFor(String orgId, String commandId) =>
+      commandsFor(orgId)
+          .cast<Map<String, dynamic>?>()
+          .firstWhere((c) => c?['id'] == commandId, orElse: () => null);
+
+  /// Persist after callers mutate a list returned by this store.
+  static void persist() {
+    _ensureLoaded();
+    try {
+      final file = File(_path);
+      file.parent.createSync(recursive: true);
+      final temp = File('$_path.tmp');
+      temp.writeAsStringSync(jsonEncode({
+        'vouchers': _vouchers,
+        'routers': _routers,
+        'backups': _backups,
+        'backupTimes':
+            _backupTimes.map((k, v) => MapEntry(k, v.toIso8601String())),
+        'telemetryEvents': _telemetryEvents,
+        'entitlements': _entitlements,
+        'commands': _commands,
+      }));
+      if (file.existsSync()) file.deleteSync();
+      temp.renameSync(_path);
+    } on Object {
+      // Read-only filesystems continue operating with in-memory state.
     }
-    return null;
   }
 }
