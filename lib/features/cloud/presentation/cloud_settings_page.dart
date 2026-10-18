@@ -346,6 +346,8 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                         await Clipboard.setData(ClipboardData(text: code));
                         if (!mounted) return;
                         final dialogContext = context;
+                        // The mounted check above protects this stateful page.
+                        // ignore: use_build_context_synchronously
                         showDialog<void>(
                           context: dialogContext,
                           builder: (context) => AlertDialog(
