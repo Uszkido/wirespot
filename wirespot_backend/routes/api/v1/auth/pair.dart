@@ -10,6 +10,7 @@ Future<Response> onRequest(RequestContext context) async {
     final bodyText = await context.request.body();
     final json = jsonDecode(bodyText) as Map<String, dynamic>;
     final pairingKey = json['pairingKey'] as String? ?? '';
+    final requestedOrganization = (json['organizationId'] as String?)?.trim();
 
     if (pairingKey.isEmpty || !pairingKey.startsWith('WS-')) {
       return Response.json(
@@ -26,7 +27,9 @@ Future<Response> onRequest(RequestContext context) async {
         'status': 'success',
         'pairingKey': pairingKey,
         'accessToken': token,
-        'organizationId': 'org_wirespot_default',
+        'organizationId': requestedOrganization?.isNotEmpty == true
+            ? requestedOrganization
+            : 'org_wirespot_default',
         'expiresIn': 86400,
         'pairedAt': DateTime.now().toIso8601String(),
       },

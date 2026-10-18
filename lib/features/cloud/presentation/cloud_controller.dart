@@ -228,7 +228,10 @@ class CloudController extends StateNotifier<CloudState> {
       successMessage: () => null,
     );
     try {
-      final data = await _apiClient.pairDevice(pairingKey.trim());
+      final data = await _apiClient.pairDevice(
+        pairingKey.trim(),
+        organizationId: state.connection?.organizationId,
+      );
       final token = data['accessToken'] as String? ?? '';
       final orgId = data['organizationId'] as String?;
       final expiresIn = (data['expiresIn'] as num?)?.toInt() ?? 1440;

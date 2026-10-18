@@ -40,11 +40,18 @@ class CloudApiClient {
     }
   }
 
-  Future<Map<String, dynamic>> pairDevice(String pairingKey) async {
+  Future<Map<String, dynamic>> pairDevice(
+    String pairingKey, {
+    String? organizationId,
+  }) async {
     final response = await _request(
       'POST',
       'auth/pair',
-      data: {'pairingKey': pairingKey},
+      data: {
+        'pairingKey': pairingKey,
+        if (organizationId != null && organizationId.trim().isNotEmpty)
+          'organizationId': organizationId.trim(),
+      },
       requireSession: false,
     );
     return response.data ?? {};
