@@ -72,9 +72,15 @@ class _FakeCloudApiClient implements CloudApiClient {
   Future<bool> testConnection() async => true;
 
   @override
-  Future<Map<String, dynamic>> pairDevice(String pairingKey) async => {
+  Future<Map<String, dynamic>> pairDevice(
+    String pairingKey, {
+    String? organizationId,
+  }) async => {'status': 'success', 'accessToken': 'token_pair_123'};
+
+  @override
+  Future<Map<String, dynamic>> createPairingCode() async => {
     'status': 'success',
-    'accessToken': 'token_pair_123',
+    'pairingCode': 'WS-TEST-CODE',
   };
 
   @override

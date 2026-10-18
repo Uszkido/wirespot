@@ -8,6 +8,8 @@ UniFi (Controller REST API), and Generic Routers (HTTP/REST/SNMP).
 | Current version | `0.1.27+31` |
 | Android debug APK | Builds successfully |
 | Windows desktop | Windows runner added; CI produces a portable `windows-x64` artifact |
+| Linux desktop | Linux runner added; CI produces a portable `linux-x64` bundle |
+| iOS | iOS target added; CI produces an unsigned release app (Apple signing required for devices/TestFlight) |
 | Static analysis | Passing (0 issues) |
 | Tests | 82 passing |
 | Multi-Vendor Connectors | MikroTik hotspot/voucher connector plus authenticated connection/discovery foundations for Ruijie, OpenWrt, Omada, UniFi, and Generic |
@@ -99,7 +101,7 @@ WireSpot solves that with a focused Android workflow:
 | Networking | Original RouterOS API client, Dio where HTTP/cloud APIs are needed |
 | Android | Kotlin platform channels for VPN, Bluetooth, sharing, printing |
 | Windows | Flutter Windows desktop runner; router, reports, local storage, and cloud workflows |
-| iOS | Planned Flutter target requiring native iOS channel implementations |
+| iOS | Flutter target with unsigned CI builds; Apple signing and iOS-specific native integrations are required for store/device distribution |
 | VPN | WireGuard Android tunnel backend integration |
 | Printing | ESC/POS Bluetooth thermal printer support & Web Ticket Preview |
 | QR | QR generation and WireGuard QR import |
@@ -138,6 +140,7 @@ C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check analyze
 C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check test
 C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check build apk --debug --target-platform android-arm64
 C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check build windows --release
+C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check build linux --release
 ```
 
 Debug APK:
@@ -158,6 +161,12 @@ Windows release output:
 build\windows\x64\runner\Release\wirespot.exe
 ```
 
+Linux release output:
+
+```text
+build/linux/x64/release/bundle/wirespot
+```
+
 The Windows build is distributed as the complete `Release` folder, not only
 the executable, because Flutter bundles its DLLs and data files beside it.
 On a local Windows workstation, enable **Developer Mode** before building so
@@ -169,6 +178,14 @@ official WireGuard CLI, Windows printer queues (including paired Bluetooth
 printers exposed as Windows printers), and Windows Hello through Flutter's
 `local_auth` plugin. Install WireGuard for Windows and pair the printer in
 Windows before using those features.
+
+Linux and iOS targets share the Flutter application and cloud workflows. Linux
+is packaged as a portable desktop bundle by CI. The iOS CI artifact is
+intentionally unsigned: installing on an iPhone, TestFlight distribution, and
+App Store release require an Apple Developer team, certificates, and a macOS
+signing workflow. Native iOS implementations for platform-specific features
+such as WireGuard, Bluetooth printing, and biometrics should be validated on a
+real iPhone before release.
 
 ## Operator Setup
 

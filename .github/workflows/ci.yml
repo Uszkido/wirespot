@@ -96,3 +96,77 @@ jobs:
           name: WireSpot-windows-x64
           path: build/windows/x64/runner/Release
           if-no-files-found: error
+
+  linux:
+    name: Build Linux desktop app
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install Linux desktop dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Enable Linux desktop
+        run: flutter config --enable-linux-desktop
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze project
+        run: flutter analyze
+
+      - name: Build Linux release
+        run: flutter build linux --release
+
+      - name: Upload Linux desktop artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: WireSpot-linux-x64
+          path: build/linux/x64/release/bundle
+          if-no-files-found: error
+
+  ios:
+    name: Analyze and build iOS (unsigned)
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Enable iOS
+        run: flutter config --enable-ios
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze project
+        run: flutter analyze
+
+      - name: Build unsigned iOS release
+        run: flutter build ios --release --no-codesign
+
+      - name: Package unsigned iOS app
+        run: ditto -c -k --sequesterRsrc --keepParent build/ios/iphoneos/Runner.app WireSpot-ios-unsigned.zip
+
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: WireSpot-ios-unsigned
+          path: WireSpot-ios-unsigned.zip
+          if-no-files-found: error
