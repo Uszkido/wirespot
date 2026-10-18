@@ -1,9 +1,9 @@
 # WireSpot 100% Free Cloud Backend (`wirespot_backend/`)
 
 This directory contains the lightweight **Dart Frog API Server** for WireSpot.
-It provides the mobile/web API contract and a process-local store suitable for
-local and single-instance testing. Firestore persistence is required before
-production or multi-instance hosting.
+It provides the mobile/web API contract and an organization-scoped JSON file
+store. The store survives process restarts when its path is on persistent disk.
+Firestore is still recommended before multi-instance hosting.
 
 ---
 
@@ -70,6 +70,11 @@ entries. In production, organization and role claims come only from the
 server-side token allow-list; client-provided role/organization headers are
 ignored. Replace this allow-list with a hosted identity provider before
 multi-tenant public launch.
+
+Set `WIRESPOT_STORE_PATH` to a persistent disk path (for example
+`/var/data/wirespot/store.json` on Render) to retain data across restarts.
+Without a persistent volume, the service remains functional but its local
+snapshot can be lost during redeployments.
 
 ---
 
