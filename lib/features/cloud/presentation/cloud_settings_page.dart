@@ -345,8 +345,9 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                         if (!mounted || code == null) return;
                         await Clipboard.setData(ClipboardData(text: code));
                         if (!mounted) return;
+                        final dialogContext = context;
                         showDialog<void>(
-                          context: context,
+                          context: dialogContext,
                           builder: (context) => AlertDialog(
                             title: const Text('Windows companion code'),
                             content: SelectableText(
