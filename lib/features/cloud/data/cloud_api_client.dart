@@ -25,7 +25,15 @@ class CloudApiClient {
 
   Future<bool> testConnection() async {
     try {
-      final response = await getJson('health');
+      // Health is exposed at the service root so it can be used before a
+      // session exists. Authenticated API operations are mounted below
+      // /api/v1 (see _apiBaseUri below).
+      final response = await _request(
+        'GET',
+        'health',
+        requireSession: false,
+        includeApiPrefix: false,
+      );
       return response.statusCode == 200;
     } catch (_) {
       return false;
@@ -125,6 +133,7 @@ class CloudApiClient {
     Map<String, Object?>? data,
     String? idempotencyKey,
     bool requireSession = true,
+    bool includeApiPrefix = true,
   }) async {
     final settings = await _settingsService.loadConnection();
     final session = await _settingsService.loadSession();
@@ -143,15 +152,34 @@ class CloudApiClient {
     if (organizationId != null && organizationId.isNotEmpty) {
       headers['X-WireSpot-Organization'] = organizationId;
     }
+    final cleanPath = path.replaceFirst(RegExp(r'^/+'), '');
+    final requestUri = includeApiPrefix
+        ? _apiBaseUri(settings.apiBaseUri).resolve(cleanPath)
+        : _rootUri(settings.apiBaseUri).resolve(cleanPath);
     final response = await _dio.request<Map<String, dynamic>>(
-      settings.apiBaseUri
-          .resolve(path.replaceFirst(RegExp(r'^/'), ''))
-          .toString(),
+      requestUri.toString(),
       data: data,
       options: Options(method: method, headers: headers),
     );
     return response;
   }
+
+  /// Accept either the user-friendly service URL (for example
+  /// `https://wirespot-api.onrender.com`) or an already versioned API URL.
+  /// This keeps existing installations working while ensuring mobile calls
+  /// reach the Dart Frog routes under `/api/v1` instead of the service root.
+  Uri _apiBaseUri(Uri configured) {
+    final path = configured.path.replaceFirst(RegExp(r'/+$'), '');
+    if (path.endsWith('/api/v1')) {
+      return configured.replace(path: '$path/');
+    }
+    if (path.endsWith('/api')) {
+      return configured.replace(path: '$path/v1/');
+    }
+    return configured.replace(path: '${path.isEmpty ? '' : path}/api/v1/');
+  }
+
+  Uri _rootUri(Uri configured) => configured.replace(path: '/');
 }
 
 /// Adapter keeps entitlement concerns out of the broad CloudApiClient
