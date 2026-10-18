@@ -23,6 +23,7 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _regOrgController = TextEditingController();
+  final _pairingController = TextEditingController();
   bool _allowInsecure = false;
   int _authTabIndex = 0; // 0: Sign In, 1: Sign Up, 2: Token
 
@@ -49,6 +50,7 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
     _emailController.dispose();
     _passwordController.dispose();
     _regOrgController.dispose();
+    _pairingController.dispose();
     super.dispose();
   }
 
@@ -354,6 +356,11 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                     label: Text('Token'),
                     icon: Icon(Icons.key),
                   ),
+                  ButtonSegment(
+                    value: 3,
+                    label: Text('Companion'),
+                    icon: Icon(Icons.devices_other),
+                  ),
                 ],
                 selected: {_authTabIndex},
                 onSelectionChanged: (newSelection) {
@@ -445,7 +452,7 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                   icon: const Icon(Icons.person_add),
                   label: const Text('Create Operator Account'),
                 ),
-              ] else ...[
+              ] else if (_authTabIndex == 2) ...[
                 TextField(
                   controller: _tokenController,
                   decoration: InputDecoration(
@@ -468,6 +475,31 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                   },
                   icon: const Icon(Icons.key),
                   label: const Text('Save Access Token'),
+                ),
+              ] else ...[
+                const Text(
+                  'Pair this Windows PC with your activated phone. The PC will use the same cloud workspace without requiring a second subscription.',
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _pairingController,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone pairing code',
+                    hintText: 'WS-XXXX-SYNC',
+                    prefixIcon: Icon(Icons.qr_code_2),
+                  ),
+                  textCapitalization: TextCapitalization.characters,
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: state.isLoading
+                      ? null
+                      : () {
+                          final key = _pairingController.text.trim();
+                          if (key.isNotEmpty) controller.pairCompanion(key);
+                        },
+                  icon: const Icon(Icons.link),
+                  label: const Text('Pair as companion device'),
                 ),
               ],
             ] else ...[

@@ -221,6 +221,46 @@ class CloudController extends StateNotifier<CloudState> {
     }
   }
 
+  Future<bool> pairCompanion(String pairingKey) async {
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: () => null,
+      successMessage: () => null,
+    );
+    try {
+      final data = await _apiClient.pairDevice(pairingKey.trim());
+      final token = data['accessToken'] as String? ?? '';
+      final orgId = data['organizationId'] as String?;
+      final expiresIn = (data['expiresIn'] as num?)?.toInt() ?? 1440;
+      if (token.isEmpty) throw StateError('Pairing did not return a session.');
+      final current =
+          state.connection ??
+          const CloudConnectionSettings(
+            apiBaseUrl: 'https://wirespot-api.onrender.com',
+          );
+      await _settingsService.saveConnection(
+        current.copyWith(organizationId: orgId),
+      );
+      await _settingsService.saveSession(
+        CloudSession(
+          accessToken: token,
+          expiresAt: DateTime.now().add(Duration(minutes: expiresIn)),
+        ),
+      );
+      await load();
+      state = state.copyWith(
+        successMessage: () => 'Companion device paired successfully.',
+      );
+      return true;
+    } catch (error) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: () => 'Pairing failed: ${error.toString()}',
+      );
+      return false;
+    }
+  }
+
   Future<bool> signUp({
     required String email,
     required String password,
