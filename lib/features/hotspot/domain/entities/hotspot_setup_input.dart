@@ -119,26 +119,38 @@ class HotspotSetupInput {
       }
     }
     if (configurePppoe) {
-      if (!_hasText(pppoeInterface))
+      if (!_hasText(pppoeInterface)) {
         errors.add('Enter the PPPoE WAN interface.');
-      if (!_hasText(pppoeUsername)) errors.add('Enter the ISP PPPoE username.');
-      if (!_hasText(pppoePassword)) errors.add('Enter the ISP PPPoE password.');
-      if (!_hasText(pppoeClientName))
+      }
+      if (!_hasText(pppoeUsername)) {
+        errors.add('Enter the ISP PPPoE username.');
+      }
+      if (!_hasText(pppoePassword)) {
+        errors.add('Enter the ISP PPPoE password.');
+      }
+      if (!_hasText(pppoeClientName)) {
         errors.add('Enter the PPPoE client name.');
+      }
     }
     if (configurePppoeServer) {
-      if (!_hasText(pppoeServerInterface))
+      if (!_hasText(pppoeServerInterface)) {
         errors.add('Enter the PPPoE server interface.');
-      if (!_hasText(pppoeServiceName))
+      }
+      if (!_hasText(pppoeServiceName)) {
         errors.add('Enter the PPPoE service name.');
-      if (!_hasText(pppoeProfileName))
+      }
+      if (!_hasText(pppoeProfileName)) {
         errors.add('Enter the PPPoE profile name.');
-      if (!_hasText(pppoeLocalAddress))
+      }
+      if (!_hasText(pppoeLocalAddress)) {
         errors.add('Enter the PPPoE local address.');
-      if (!_hasText(pppoeRemotePool))
+      }
+      if (!_hasText(pppoeRemotePool)) {
         errors.add('Enter the PPPoE remote address pool.');
-      if (!_hasText(pppoeRemotePoolRanges))
+      }
+      if (!_hasText(pppoeRemotePoolRanges)) {
         errors.add('Enter the PPPoE pool ranges.');
+      }
       if (pppoeRadiusSettings == null) {
         errors.add('Add RADIUS settings for PPPoE authentication.');
       } else {

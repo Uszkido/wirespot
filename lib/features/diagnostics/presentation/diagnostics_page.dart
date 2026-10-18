@@ -137,80 +137,149 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _targetController,
-                    decoration: InputDecoration(
-                      labelText: 'IP / Hostname (e.g. 8.8.8.8)',
-                      border: const OutlineInputBorder(),
-                      enabled: !_isRunning,
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Target',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                    onSubmitted: (_) => !_isRunning ? _start() : null,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                SegmentedButton<DiagnosticMode>(
-                  segments: const [
-                    ButtonSegment(
-                      value: DiagnosticMode.ping,
-                      label: Text('Ping'),
-                      icon: Icon(Icons.network_ping_outlined),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _targetController,
+                      decoration: const InputDecoration(
+                        labelText: 'IP address or hostname',
+                        hintText: 'e.g. 8.8.8.8',
+                        prefixIcon: Icon(Icons.dns_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                      enabled:
+                          !_isRunning && _mode != DiagnosticMode.securityAudit,
+                      onSubmitted: (_) => !_isRunning ? _start() : null,
                     ),
-                    ButtonSegment(
-                      value: DiagnosticMode.traceroute,
-                      label: Text('Traceroute'),
-                      icon: Icon(Icons.route_outlined),
-                    ),
-                    ButtonSegment(
-                      value: DiagnosticMode.securityAudit,
-                      label: Text('Audit'),
-                      icon: Icon(Icons.security_outlined),
+                    const SizedBox(height: 8),
+                    Text(
+                      _mode == DiagnosticMode.securityAudit
+                          ? 'Security audit checks the saved router fleet.'
+                          : 'Tests run through the selected router connection.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
-                  selected: {_mode},
-                  onSelectionChanged: _isRunning
-                      ? null
-                      : (modes) {
-                          setState(() {
-                            _mode = modes.first;
-                          });
-                        },
                 ),
-                const Spacer(),
-                if (_isRunning)
-                  FilledButton.icon(
-                    onPressed: _stop,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: theme.colorScheme.error,
-                      foregroundColor: theme.colorScheme.onError,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Check type',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                    icon: const Icon(Icons.stop),
-                    label: const Text('Stop'),
-                  )
-                else
-                  FilledButton.icon(
-                    onPressed: _start,
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('Start'),
-                  ),
-              ],
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<DiagnosticMode>(
+                        segments: const [
+                          ButtonSegment(
+                            value: DiagnosticMode.ping,
+                            label: Text('Ping'),
+                            icon: Icon(Icons.network_ping_outlined),
+                          ),
+                          ButtonSegment(
+                            value: DiagnosticMode.traceroute,
+                            label: Text('Route'),
+                            icon: Icon(Icons.route_outlined),
+                          ),
+                          ButtonSegment(
+                            value: DiagnosticMode.securityAudit,
+                            label: Text('Audit'),
+                            icon: Icon(Icons.security_outlined),
+                          ),
+                        ],
+                        selected: {_mode},
+                        onSelectionChanged: _isRunning
+                            ? null
+                            : (modes) {
+                                setState(() {
+                                  _mode = modes.first;
+                                });
+                              },
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: _isRunning
+                          ? FilledButton.icon(
+                              onPressed: _stop,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: theme.colorScheme.error,
+                                foregroundColor: theme.colorScheme.onError,
+                              ),
+                              icon: const Icon(Icons.stop),
+                              label: const Text('Stop check'),
+                            )
+                          : FilledButton.icon(
+                              onPressed: _start,
+                              icon: const Icon(Icons.play_arrow),
+                              label: const Text('Start check'),
+                            ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(8),
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.terminal_outlined),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Live output',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const Spacer(),
+                          if (_isRunning)
+                            const Chip(
+                              avatar: Icon(Icons.circle, size: 10),
+                              label: Text('Running'),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        width: double.infinity,
+                        color: Colors.black,
+                        padding: const EdgeInsets.all(12),
+                        child: _buildConsoleOutput(),
+                      ),
+                    ),
+                  ],
                 ),
-                padding: const EdgeInsets.all(12),
-                child: _buildConsoleOutput(),
               ),
             ),
           ],

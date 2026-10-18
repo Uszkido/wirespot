@@ -21,11 +21,18 @@ class RadiusSubscriber {
 
   List<String> get validationErrors {
     final errors = <String>[];
-    if (username.trim().isEmpty) errors.add('Enter a subscriber username.');
-    if (password.isEmpty) errors.add('Enter a subscriber password.');
-    if (planName.trim().isEmpty) errors.add('Select a subscriber plan.');
-    if (rateLimit.trim().isEmpty)
+    if (username.trim().isEmpty) {
+      errors.add('Enter a subscriber username.');
+    }
+    if (password.isEmpty) {
+      errors.add('Enter a subscriber password.');
+    }
+    if (planName.trim().isEmpty) {
+      errors.add('Select a subscriber plan.');
+    }
+    if (rateLimit.trim().isEmpty) {
       errors.add('Set a download/upload rate limit.');
+    }
     if (sessionTimeoutSeconds != null && sessionTimeoutSeconds! <= 0) {
       errors.add('Session timeout must be positive.');
     }
