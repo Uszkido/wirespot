@@ -55,6 +55,42 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('wirespot_web_state', JSON.stringify(state));
   };
 
+  // Normalize the mobile BackupPayload into the dashboard's view model. The
+  // mobile app is the source of truth for router/profile/settings data; the
+  // dashboard should display those records instead of keeping a second demo
+  // schema that silently drops them.
+  const applyCloudBackup = backup => {
+    if (!backup || typeof backup !== 'object') return false;
+    if (Array.isArray(backup.routers)) {
+      state.routers = backup.routers.map(router => ({
+        ...router,
+        ip: router.ip || router.host || '',
+        port: Number(router.port || router.apiPort || 8728),
+        status: router.status || (router.isEnabled === false ? 'disabled' : 'configured'),
+        users: Number(router.users || 0),
+      }));
+    }
+    if (Array.isArray(backup.vouchers)) state.vouchers = backup.vouchers;
+    if (Array.isArray(backup.hotspotUsers)) state.hotspotUsers = backup.hotspotUsers;
+    if (Array.isArray(backup.userProfiles)) state.userProfiles = backup.userProfiles;
+    if (Array.isArray(backup.sessions)) state.sessions = backup.sessions;
+    if (Array.isArray(backup.telemetry)) state.telemetry = backup.telemetry;
+    if (Array.isArray(backup.hotspotProfiles)) {
+      state.userProfiles = backup.hotspotProfiles.map(profile => ({
+        ...profile,
+        downSpeed: profile.downSpeed || profile.rateLimit || '—',
+        upSpeed: profile.upSpeed || profile.rateLimit || '—',
+        timeout: profile.timeout || (profile.validityMinutes ? `${profile.validityMinutes}m` : 'Unlimited'),
+        sharedUsers: Number(profile.sharedUsers || 1),
+      }));
+    }
+    if (backup.settings && typeof backup.settings === 'object') {
+      if (backup.settings.currencyCode) localStorage.setItem('wirespot_currency', backup.settings.currencyCode);
+      state.businessSettings = backup.settings;
+    }
+    return true;
+  };
+
   const currentCurrency = () => localStorage.getItem('wirespot_currency') || 'NGN';
   const formatMoney = amount => {
     const currency = currentCurrency();
@@ -968,9 +1004,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await cloudRequest('api/v1/backup/latest');
       const backup = result.backup;
       if (!backup || typeof backup !== 'object') throw new Error('No cloud backup is available yet.');
-      for (const key of ['routers', 'hotspotUsers', 'userProfiles', 'sessions', 'vouchers', 'telemetry']) {
-        if (Array.isArray(backup[key])) state[key] = backup[key];
-      }
+      applyCloudBackup(backup);
       saveState();
       renderRouters(); renderHotspotUsers(); renderUserProfiles(); renderSessions(); renderVouchers(); renderSummary();
       showToast('Latest cloud backup restored.', 'success');
@@ -1131,11 +1165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cloudRequest('api/v1/backup/latest').catch(() => null)
           ]);
           if (Array.isArray(routers?.routers)) state.routers = routers.routers;
-          if (backup?.backup && typeof backup.backup === 'object') {
-            for (const key of ['hotspotUsers', 'userProfiles', 'sessions', 'vouchers', 'telemetry']) {
-              if (Array.isArray(backup.backup[key])) state[key] = backup.backup[key];
-            }
-          }
+          if (backup?.backup && typeof backup.backup === 'object') applyCloudBackup(backup.backup);
           saveState();
           refreshMessage = 'Dashboard refreshed from WireSpot Cloud.';
         } catch (error) {
