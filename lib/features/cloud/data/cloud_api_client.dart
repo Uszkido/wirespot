@@ -57,6 +57,11 @@ class CloudApiClient {
     return response.data ?? {};
   }
 
+  Future<Map<String, dynamic>> createPairingCode() async {
+    final response = await _request('POST', 'auth/pair/create');
+    return response.data ?? {};
+  }
+
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await _request(
       'POST',

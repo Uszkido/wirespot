@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:dart_frog/dart_frog.dart';
+import 'package:wirespot_backend/backend_store.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   if (context.request.method != HttpMethod.post) {
@@ -10,9 +11,8 @@ Future<Response> onRequest(RequestContext context) async {
     final bodyText = await context.request.body();
     final json = jsonDecode(bodyText) as Map<String, dynamic>;
     final pairingKey = json['pairingKey'] as String? ?? '';
-    final requestedOrganization = (json['organizationId'] as String?)?.trim();
-
-    if (pairingKey.isEmpty || !pairingKey.startsWith('WS-')) {
+    final organization = BackendStore.consumePairingCode(pairingKey);
+    if (pairingKey.isEmpty || organization == null) {
       return Response.json(
         statusCode: 400,
         body: {'error': 'Invalid pairing key. Format must be WS-XXXX-SYNC.'},
@@ -27,9 +27,7 @@ Future<Response> onRequest(RequestContext context) async {
         'status': 'success',
         'pairingKey': pairingKey,
         'accessToken': token,
-        'organizationId': requestedOrganization?.isNotEmpty == true
-            ? requestedOrganization
-            : 'org_wirespot_default',
+        'organizationId': organization,
         'expiresIn': 86400,
         'pairedAt': DateTime.now().toIso8601String(),
       },

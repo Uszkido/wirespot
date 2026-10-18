@@ -264,6 +264,18 @@ class CloudController extends StateNotifier<CloudState> {
     }
   }
 
+  Future<String?> createCompanionCode() async {
+    try {
+      final data = await _apiClient.createPairingCode();
+      return data['pairingKey'] as String?;
+    } catch (error) {
+      state = state.copyWith(
+        errorMessage: () => 'Could not create pairing code: $error',
+      );
+      return null;
+    }
+  }
+
   Future<bool> signUp({
     required String email,
     required String password,

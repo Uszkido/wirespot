@@ -336,6 +336,34 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                 value: session.accessToken,
                 obscured: true,
               ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: state.isLoading
+                    ? null
+                    : () async {
+                        final code = await controller.createCompanionCode();
+                        if (!mounted || code == null) return;
+                        await Clipboard.setData(ClipboardData(text: code));
+                        if (!mounted) return;
+                        showDialog<void>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Windows companion code'),
+                            content: SelectableText(
+                              '$code\n\nValid for 10 minutes and one device only. It has been copied to the clipboard.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Done'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                icon: const Icon(Icons.devices_other),
+                label: const Text('Generate Windows companion code'),
+              ),
             ],
             const SizedBox(height: 16),
             if (!hasSession) ...[

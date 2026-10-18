@@ -13,6 +13,7 @@ class BackendStore {
   static final _telemetryEvents = <String, int>{};
   static final _entitlements = <String, Map<String, dynamic>>{};
   static final _commands = <String, List<Map<String, dynamic>>>{};
+  static final _pairingCodes = <String, Map<String, dynamic>>{};
   static final _path =
       Platform.environment['WIRESPOT_STORE_PATH'] ?? '.wirespot/store.json';
   static bool _loaded = false;
@@ -130,6 +131,27 @@ class BackendStore {
       commandsFor(orgId)
           .cast<Map<String, dynamic>?>()
           .firstWhere((c) => c?['id'] == commandId, orElse: () => null);
+
+  static String createPairingCode(String orgId) {
+    final code =
+        'WS-${DateTime.now().microsecondsSinceEpoch.toString().substring(7)}-SYNC';
+    _pairingCodes[code] = {
+      'organizationId': orgId,
+      'expiresAt': DateTime.now()
+          .toUtc()
+          .add(const Duration(minutes: 10))
+          .toIso8601String(),
+    };
+    return code;
+  }
+
+  static String? consumePairingCode(String code) {
+    final entry = _pairingCodes.remove(code.trim().toUpperCase());
+    if (entry == null) return null;
+    final expiry = DateTime.tryParse(entry['expiresAt']?.toString() ?? '');
+    if (expiry == null || !expiry.isAfter(DateTime.now().toUtc())) return null;
+    return entry['organizationId']?.toString();
+  }
 
   /// Persist after callers mutate a list returned by this store.
   static void persist() {
