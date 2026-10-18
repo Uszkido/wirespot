@@ -254,16 +254,19 @@ class _DashboardContent extends ConsumerWidget {
                 value:
                     '${snapshot.todaySalesCurrency} '
                     '${(snapshot.todaySalesMinor / 100).toStringAsFixed(0)}',
+                onTap: () => _showTodaySales(context, snapshot),
               ),
               MetricCard(
                 icon: Icons.memory_outlined,
                 label: 'CPU',
                 value: resource == null ? '--' : '${resource.cpuLoad}%',
+                onTap: () => _showCpuDetails(context, resource),
               ),
               MetricCard(
                 icon: Icons.storage_outlined,
                 label: text.memory,
                 value: memoryPercent == null ? '--' : '$memoryPercent%',
+                onTap: () => _showMemoryDetails(context, resource),
               ),
             ],
           ),
@@ -294,6 +297,120 @@ class _DashboardContent extends ConsumerWidget {
     final used = resource.totalMemory - resource.freeMemory;
     return ((used / resource.totalMemory) * 100).round();
   }
+
+  void _showTodaySales(BuildContext context, DashboardSnapshot snapshot) {
+    _showMetricSheet(
+      context,
+      title: 'Today’s sales',
+      icon: Icons.receipt_long_outlined,
+      rows: [
+        _MetricDetail(
+          label: 'Total',
+          value:
+              '${snapshot.todaySalesCurrency} '
+              '${(snapshot.todaySalesMinor / 100).toStringAsFixed(2)}',
+        ),
+        const _MetricDetail(label: 'Period', value: 'Today'),
+        _MetricDetail(label: 'Router', value: snapshot.routerName),
+      ],
+    );
+  }
+
+  void _showCpuDetails(BuildContext context, RouterOsSystemResource? resource) {
+    _showMetricSheet(
+      context,
+      title: 'CPU usage',
+      icon: Icons.memory_outlined,
+      rows: [
+        _MetricDetail(
+          label: 'Current load',
+          value: resource == null ? '--' : '${resource.cpuLoad}%',
+        ),
+        _MetricDetail(
+          label: 'Temperature',
+          value: resource?.temperature == null
+              ? '--'
+              : '${resource!.temperature} °C',
+        ),
+        _MetricDetail(
+          label: 'Router version',
+          value: resource?.version ?? '--',
+        ),
+      ],
+    );
+  }
+
+  void _showMemoryDetails(
+    BuildContext context,
+    RouterOsSystemResource? resource,
+  ) {
+    final used = resource == null
+        ? null
+        : resource.totalMemory - resource.freeMemory;
+    _showMetricSheet(
+      context,
+      title: 'Memory usage',
+      icon: Icons.storage_outlined,
+      rows: [
+        _MetricDetail(
+          label: 'Used',
+          value: used == null ? '--' : ByteFormat.compact(used),
+        ),
+        _MetricDetail(
+          label: 'Free',
+          value: resource == null
+              ? '--'
+              : ByteFormat.compact(resource.freeMemory),
+        ),
+        _MetricDetail(
+          label: 'Total',
+          value: resource == null
+              ? '--'
+              : ByteFormat.compact(resource.totalMemory),
+        ),
+      ],
+    );
+  }
+
+  void _showMetricSheet(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required List<_MetricDetail> rows,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon),
+                  const SizedBox(width: 12),
+                  Text(title, style: Theme.of(context).textTheme.titleLarge),
+                ],
+              ),
+              const SizedBox(height: 16),
+              for (final row in rows)
+                _InterfaceDetailRow(label: row.label, value: row.value),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MetricDetail {
+  const _MetricDetail({required this.label, required this.value});
+
+  final String label;
+  final String value;
 }
 
 class _RouterHeader extends ConsumerWidget {
