@@ -7,30 +7,11 @@ Future<Response> onRequest(RequestContext context) async {
   if (!isAuthenticated(context)) return unauthorized();
   final orgId = organizationId(context);
   if (context.request.method == HttpMethod.get) {
-    final scoped = BackendStore.vouchersFor(orgId);
-    final vouchers = scoped.isEmpty
-        ? [
-            {
-              'code': 'WS-8A2F',
-              'profile': '1Hour-5MBPS',
-              'price': 2.50,
-              'status': 'active',
-              'createdAt': DateTime.now().toIso8601String(),
-            },
-            {
-              'code': 'WS-3K90',
-              'profile': '1Day-10MBPS',
-              'price': 5.00,
-              'status': 'unused',
-              'createdAt': DateTime.now().toIso8601String(),
-            },
-          ]
-        : scoped;
     return Response.json(
       body: {
         'status': 'success',
         'organizationId': orgId,
-        'vouchers': vouchers,
+        'vouchers': BackendStore.vouchersFor(orgId),
       },
     );
   }
@@ -40,11 +21,20 @@ Future<Response> onRequest(RequestContext context) async {
       final bodyText = await context.request.body();
       final json = jsonDecode(bodyText) as Map<String, dynamic>;
       final vouchers = json['vouchers'] as List<dynamic>? ?? [];
+      var syncedCount = 0;
+      final stored = BackendStore.vouchersFor(orgId);
       for (final voucher in vouchers) {
         if (voucher is Map) {
-          BackendStore.vouchersFor(
-            orgId,
-          ).add(Map<String, dynamic>.from(voucher));
+          final normalized = Map<String, dynamic>.from(voucher);
+          final key = _voucherKey(normalized);
+          if (key == null) continue;
+          final index = stored.indexWhere((item) => _voucherKey(item) == key);
+          if (index >= 0) {
+            stored[index] = normalized;
+          } else {
+            stored.add(normalized);
+          }
+          syncedCount++;
         }
       }
       BackendStore.persist();
@@ -52,7 +42,7 @@ Future<Response> onRequest(RequestContext context) async {
       return Response.json(
         body: {
           'status': 'success',
-          'syncedCount': vouchers.length,
+          'syncedCount': syncedCount,
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
@@ -65,4 +55,10 @@ Future<Response> onRequest(RequestContext context) async {
   }
 
   return Response(statusCode: 405, body: 'Method Not Allowed');
+}
+
+String? _voucherKey(Map<String, dynamic> voucher) {
+  final value = voucher['id'] ?? voucher['code'] ?? voucher['voucherId'];
+  if (value is! String || value.trim().isEmpty) return null;
+  return value.trim().toLowerCase();
 }
