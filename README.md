@@ -5,7 +5,7 @@ UniFi (Controller REST API), and Generic Routers (HTTP/REST/SNMP).
 
 | Item | Status |
 | --- | --- |
-| Current version | `0.1.26+27` |
+| Current version | `0.1.27+28` |
 | Android debug APK | Builds successfully |
 | Static analysis | Passing (0 issues) |
 | Tests | 82 passing |
@@ -146,7 +146,7 @@ build\app\outputs\flutter-apk\app-debug.apk
 Current packaged debug APK:
 
 ```text
-outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
+outputs\WireSpot-0.1.27+28-brand-collaboration-debug.apk
 ```
 
 ## Operator Setup

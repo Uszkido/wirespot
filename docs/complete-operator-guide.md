@@ -59,11 +59,19 @@ router IP from the same network.
 Build or copy the latest debug APK:
 
 ```text
-outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
+outputs\WireSpot-0.1.27+28-brand-collaboration-debug.apk
 ```
 
 Transfer it to the phone and install it. Android may ask you to allow installs
 from the source app.
+
+For an update to install over an existing WireSpot installation, both APKs
+must use the same signing key and the new APK must have a higher version code.
+If the previous APK came from a different computer, GitHub artifact, or Play
+Store track, Android will reject the update because its signature is different.
+Uninstall that old build once (after exporting or syncing any local data), then
+install the new build. Production and Play Store builds must always use the
+same private upload keystore described in the Play Store release guide.
 
 ## 5. First Launch
 
@@ -379,4 +387,3 @@ WireSpot now includes a standalone Web Dashboard in `web_app/` providing full fe
   python -m http.server 8080
   ```
 - **Static Hosting**: Deployable to Vercel, Netlify, GitHub Pages, or any static web server.
-
