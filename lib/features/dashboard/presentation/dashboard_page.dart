@@ -416,7 +416,10 @@ class _InterfacesPanel extends StatelessWidget {
     return _DashboardPanel(
       child: Column(
         children: [
-          for (final interface in interfaces.take(6))
+          // Show every interface reported by the connected router. The
+          // previous six-item cap hid ports on larger MikroTik models and
+          // made the dashboard look as if those ports were unavailable.
+          for (final interface in interfaces)
             _InterfaceRow(interface: interface, text: text),
         ],
       ),
