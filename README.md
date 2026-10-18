@@ -7,6 +7,7 @@ UniFi (Controller REST API), and Generic Routers (HTTP/REST/SNMP).
 | --- | --- |
 | Current version | `0.1.27+30` |
 | Android debug APK | Builds successfully |
+| Windows desktop | Windows runner added; CI produces a portable `windows-x64` artifact |
 | Static analysis | Passing (0 issues) |
 | Tests | 82 passing |
 | Multi-Vendor Connectors | MikroTik hotspot/voucher connector plus authenticated connection/discovery foundations for Ruijie, OpenWrt, Omada, UniFi, and Generic |
@@ -97,6 +98,7 @@ WireSpot solves that with a focused Android workflow:
 | Storage | Drift/SQLite, secure storage |
 | Networking | Original RouterOS API client, Dio where HTTP/cloud APIs are needed |
 | Android | Kotlin platform channels for VPN, Bluetooth, sharing, printing |
+| Windows | Flutter Windows desktop runner; router, reports, local storage, and cloud workflows |
 | iOS | Planned Flutter target requiring native iOS channel implementations |
 | VPN | WireGuard Android tunnel backend integration |
 | Printing | ESC/POS Bluetooth thermal printer support & Web Ticket Preview |
@@ -135,6 +137,7 @@ C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check pub get
 C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check analyze
 C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check test
 C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check build apk --debug --target-platform android-arm64
+C:\tmp\wirespot_flutter\flutter\bin\flutter.bat --no-version-check build windows --release
 ```
 
 Debug APK:
@@ -148,6 +151,18 @@ Current packaged debug APK:
 ```text
 outputs\WireSpot-0.1.27+30-brand-collaboration-debug.apk
 ```
+
+Windows release output:
+
+```text
+build\windows\x64\runner\Release\wirespot.exe
+```
+
+The Windows build is distributed as the complete `Release` folder, not only
+the executable, because Flutter bundles its DLLs and data files beside it.
+On a local Windows workstation, enable **Developer Mode** before building so
+Flutter can create plugin symlinks. GitHub Actions builds and uploads the same
+folder as the `WireSpot-windows-x64` artifact.
 
 ## Operator Setup
 
