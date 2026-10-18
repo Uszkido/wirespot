@@ -452,6 +452,85 @@ class _InterfaceRow extends StatelessWidget {
           color: isRunning ? colorScheme.primary : colorScheme.onSurfaceVariant,
         ),
       ),
+      onTap: () => _showInterfaceDetails(context),
+    );
+  }
+
+  void _showInterfaceDetails(BuildContext context) {
+    final status = interface.disabled
+        ? 'Disabled'
+        : interface.running
+        ? 'Running'
+        : 'Down';
+
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                interface.name,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Interface details',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              _InterfaceDetailRow(label: 'Type', value: _value(interface.type)),
+              _InterfaceDetailRow(label: 'Status', value: status),
+              _InterfaceDetailRow(
+                label: 'MAC address',
+                value: _value(interface.macAddress),
+              ),
+              _InterfaceDetailRow(
+                label: 'Received',
+                value: interface.rxByte == null
+                    ? '--'
+                    : ByteFormat.compact(interface.rxByte!),
+              ),
+              _InterfaceDetailRow(
+                label: 'Transmitted',
+                value: interface.txByte == null
+                    ? '--'
+                    : ByteFormat.compact(interface.txByte!),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _value(String? value) {
+    final trimmed = value?.trim() ?? '';
+    return trimmed.isEmpty ? '--' : trimmed;
+  }
+}
+
+class _InterfaceDetailRow extends StatelessWidget {
+  const _InterfaceDetailRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(child: Text(label)),
+          const SizedBox(width: 16),
+          Flexible(child: Text(value, textAlign: TextAlign.end)),
+        ],
+      ),
     );
   }
 }
