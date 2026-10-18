@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -68,6 +70,7 @@ import '../storage/router_credential_store.dart';
 import '../storage/secure_storage_service.dart';
 import '../storage/voucher_secret_store.dart';
 import '../vpn/platform_wireguard_vpn_service.dart';
+import '../vpn/windows_wireguard_vpn_service.dart';
 import '../vpn/unified_vpn_service.dart';
 import '../vpn/vpn_status_service.dart';
 import '../vpn/wireguard_auto_reconnect_service.dart';
@@ -89,7 +92,10 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<PinHashService>(PinHashService.new)
     ..registerLazySingleton<BiometricAuthService>(BiometricAuthService.new)
     ..registerLazySingleton<FlutterSecureStorage>(
-      () => const FlutterSecureStorage(aOptions: AndroidOptions()),
+      () => const FlutterSecureStorage(
+        aOptions: AndroidOptions(),
+        wOptions: WindowsOptions.defaultOptions,
+      ),
     )
     ..registerLazySingleton<SecureStorageService>(
       () => SecureStorageService(sl<FlutterSecureStorage>()),
@@ -140,9 +146,13 @@ Future<void> configureDependencies() async {
       () => VoucherSecretStore(sl<SecureStorageService>()),
     )
     ..registerLazySingleton<WireGuardVpnService>(
-      () => PlatformWireGuardVpnService(
-        secureStorage: sl<SecureStorageService>(),
-      ),
+      () => Platform.isWindows
+          ? WindowsWireGuardVpnService(
+              secureStorage: sl<SecureStorageService>(),
+            )
+          : PlatformWireGuardVpnService(
+              secureStorage: sl<SecureStorageService>(),
+            ),
     )
     ..registerLazySingleton<UnifiedVpnService>(
       () => PlatformUnifiedVpnService(

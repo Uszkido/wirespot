@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 
 import '../branding/app_branding.dart';
@@ -17,6 +20,9 @@ class PlatformPrinterService implements PrinterService {
 
   @override
   Future<List<BluetoothPrinterDevice>> pairedBluetoothPrinters() async {
+    if (Platform.isWindows) {
+      return _windowsPrinters();
+    }
     try {
       final result = await _channel.invokeListMethod<Map<Object?, Object?>>(
         'pairedBluetoothPrinters',
@@ -47,6 +53,9 @@ class PlatformPrinterService implements PrinterService {
       receipt,
       paperWidth: paperWidth,
     );
+    if (Platform.isWindows) {
+      return _printOnWindows(printer: printer, text: text);
+    }
     try {
       final result = await _channel
           .invokeMapMethod<Object?, Object?>('printText', {
@@ -65,6 +74,72 @@ class PlatformPrinterService implements PrinterService {
         success: false,
         message: error.message ?? 'Could not print receipt.',
       );
+    }
+  }
+
+  Future<List<BluetoothPrinterDevice>> _windowsPrinters() async {
+    const script = r'''
+$ErrorActionPreference = 'Stop'
+Get-Printer | Select-Object Name,PortName | ConvertTo-Json -Compress
+''';
+    try {
+      final result = await Process.run('powershell.exe', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        script,
+      ]);
+      if (result.exitCode != 0) {
+        throw PrinterException('${result.stderr}'.trim());
+      }
+      final raw = '${result.stdout}'.trim();
+      if (raw.isEmpty) return const [];
+      final decoded = jsonDecode(raw);
+      final records = decoded is List ? decoded : [decoded];
+      return records
+          .whereType<Map>()
+          .map(
+            (item) => BluetoothPrinterDevice(
+              name: '${item['Name'] ?? ''}',
+              address: 'windows:${item['Name'] ?? item['PortName'] ?? ''}',
+            ),
+          )
+          .where((printer) => printer.name.trim().isNotEmpty)
+          .toList();
+    } on PrinterException {
+      rethrow;
+    } on Object catch (error) {
+      throw PrinterException('Could not load Windows printers: $error');
+    }
+  }
+
+  Future<PrintJobResult> _printOnWindows({
+    required BluetoothPrinterDevice printer,
+    required String text,
+  }) async {
+    final printerName = printer.address.startsWith('windows:')
+        ? printer.address.substring('windows:'.length)
+        : printer.name;
+    final directory = await Directory.systemTemp.createTemp('wirespot-print-');
+    final file = File('${directory.path}${Platform.pathSeparator}receipt.txt');
+    await file.writeAsString(text);
+    final escapedPath = file.path.replaceAll("'", "''");
+    final escapedPrinter = printerName.replaceAll("'", "''");
+    try {
+      final result = await Process.run('powershell.exe', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        "Get-Content -LiteralPath '$escapedPath' -Raw | Out-Printer -Name '$escapedPrinter'",
+      ]);
+      return PrintJobResult(
+        success: result.exitCode == 0,
+        message: result.exitCode == 0
+            ? 'Sent to Windows printer.'
+            : '${result.stderr}'.trim(),
+      );
+    } finally {
+      await directory.delete(recursive: true);
     }
   }
 }

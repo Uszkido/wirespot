@@ -19,7 +19,7 @@ class DiagnosticsPage extends ConsumerStatefulWidget {
 }
 
 class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
-  final _targetController = TextEditingController(text: '8.8.8.8');
+  final _targetController = TextEditingController();
   DiagnosticMode _mode = DiagnosticMode.ping;
   bool _isRunning = false;
   StreamSubscription<Map<String, String>>? _subscription;
@@ -79,7 +79,12 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
       return;
     }
 
-    final target = _targetController.text.trim();
+    // A local router should be testable immediately after it is connected.
+    // Keep external targets available, but default an empty target to the
+    // selected router rather than assuming public DNS is reachable.
+    final target = _targetController.text.trim().isEmpty
+        ? router.host
+        : _targetController.text.trim();
     if (target.isEmpty) return;
 
     setState(() {
@@ -184,7 +189,7 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
                       controller: _targetController,
                       decoration: const InputDecoration(
                         labelText: 'IP address or hostname',
-                        hintText: 'e.g. 8.8.8.8',
+                        hintText: 'Router address or e.g. 8.8.8.8',
                         prefixIcon: Icon(Icons.dns_outlined),
                         border: OutlineInputBorder(),
                       ),
@@ -196,7 +201,7 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
                     Text(
                       _mode == DiagnosticMode.securityAudit
                           ? 'Security audit checks the saved router fleet.'
-                          : 'Tests run through the selected router connection.',
+                          : 'Leave blank to ping the selected router, or enter another target.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

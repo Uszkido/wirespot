@@ -312,8 +312,17 @@ class RouterEntity {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  bool get requiresPrivateTunnel =>
-      requireVpn || remoteAccessMode.requiresPrivateTunnel;
+  /// Whether this router must be reached through a private tunnel.
+  ///
+  /// The access mode is authoritative. This is important for older records
+  /// that still have `requireVpn=true` from the original default while the
+  /// operator has since selected Local LAN or API-SSL.
+  bool get requiresPrivateTunnel => switch (remoteAccessMode) {
+    RouterRemoteAccessMode.localLan => false,
+    RouterRemoteAccessMode.publicApiSsl => false,
+    RouterRemoteAccessMode.custom => requireVpn,
+    _ => true,
+  };
 
   bool get supportsHotspotVouchers => vendor.supportsHotspotVouchers;
 

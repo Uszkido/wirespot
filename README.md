@@ -5,14 +5,14 @@ UniFi (Controller REST API), and Generic Routers (HTTP/REST/SNMP).
 
 | Item | Status |
 | --- | --- |
-| Current version | `0.1.27+30` |
+| Current version | `0.1.27+31` |
 | Android debug APK | Builds successfully |
 | Windows desktop | Windows runner added; CI produces a portable `windows-x64` artifact |
 | Static analysis | Passing (0 issues) |
 | Tests | 82 passing |
 | Multi-Vendor Connectors | MikroTik hotspot/voucher connector plus authenticated connection/discovery foundations for Ruijie, OpenWrt, Omada, UniFi, and Generic |
 | Web Dashboard | Fully Synchronized & Static Hosting Ready (`web_app/`) |
-| Latest APK output | `outputs\WireSpot-0.1.27+30-brand-collaboration-debug.apk` |
+| Latest APK output | `outputs\WireSpot-0.1.27+31-brand-collaboration-debug.apk` |
 | Latest pushed commit | See GitHub `main` |
 
 ## Why WireSpot
@@ -149,7 +149,7 @@ build\app\outputs\flutter-apk\app-debug.apk
 Current packaged debug APK:
 
 ```text
-outputs\WireSpot-0.1.27+30-brand-collaboration-debug.apk
+outputs\WireSpot-0.1.27+31-brand-collaboration-debug.apk
 ```
 
 Windows release output:
@@ -163,6 +163,12 @@ the executable, because Flutter bundles its DLLs and data files beside it.
 On a local Windows workstation, enable **Developer Mode** before building so
 Flutter can create plugin symlinks. GitHub Actions builds and uploads the same
 folder as the `WireSpot-windows-x64` artifact.
+
+Windows integrations include WireGuard tunnel-service control through the
+official WireGuard CLI, Windows printer queues (including paired Bluetooth
+printers exposed as Windows printers), and Windows Hello through Flutter's
+`local_auth` plugin. Install WireGuard for Windows and pair the printer in
+Windows before using those features.
 
 ## Operator Setup
 

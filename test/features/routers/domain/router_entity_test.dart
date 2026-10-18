@@ -60,4 +60,17 @@ void main() {
     );
     expect(router.supportsHotspotVouchers, isFalse);
   });
+
+  test('local LAN mode never requires a VPN for API diagnostics', () {
+    const router = RouterEntity(
+      id: 'router-local',
+      name: 'Local Router',
+      host: '192.168.88.1',
+      username: 'admin',
+      requireVpn: true,
+      remoteAccessMode: RouterRemoteAccessMode.localLan,
+    );
+
+    expect(router.requiresPrivateTunnel, isFalse);
+  });
 }
