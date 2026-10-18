@@ -837,6 +837,15 @@
         <button type="button" class="btn btn-secondary" style="width:100%;margin-top:8px" id="btn-back-to-login">Back to sign in</button>
       </form>
 
+      <div id="auth-generated-credentials" class="auth-generated-credentials" style="display:none;">
+        <div class="eyebrow">MOBILE APP SETUP</div>
+        <h3>Your sync credentials are ready</h3>
+        <p>WireSpot generated these automatically after sign-in. Copy them into the mobile app under Cloud Sync.</p>
+        <div class="credential-row"><span>Organization ID</span><code id="auth-generated-org"></code><button type="button" class="btn btn-secondary btn-copy-credential" data-copy-target="auth-generated-org">Copy</button></div>
+        <div class="credential-row"><span>Access token</span><code id="auth-generated-token"></code><button type="button" class="btn btn-secondary btn-copy-credential" data-copy-target="auth-generated-token">Copy</button></div>
+        <button type="button" class="btn btn-primary" style="width:100%;margin-top:14px" id="btn-auth-continue">Continue to WireSpot</button>
+      </div>
+
       <button type="button" class="btn btn-danger auth-signout" id="btn-signout">
         <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign out
       </button>

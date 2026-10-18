@@ -344,6 +344,15 @@ body::before {
 .credential-row span { color: var(--text-secondary); }
 .credential-row code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent); }
 .btn-copy-credential { padding: 5px 9px; font-size: 11px; }
+.auth-generated-credentials {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid rgba(24, 191, 255, .45);
+  border-radius: 12px;
+  background: rgba(11, 143, 255, .08);
+}
+.auth-generated-credentials h3 { margin: 5px 0 6px; }
+.auth-generated-credentials p { color: var(--text-muted); font-size: 12px; line-height: 1.5; }
 
 @media (max-width: 800px) {
   .report-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }

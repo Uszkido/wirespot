@@ -673,6 +673,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const authClose = document.getElementById('btn-close-auth');
   const authSubtitle = document.getElementById('auth-subtitle');
   const signOutButton = document.getElementById('btn-signout');
+  const generatedCredentials = document.getElementById('auth-generated-credentials');
+  const generatedOrg = document.getElementById('auth-generated-org');
+  const generatedToken = document.getElementById('auth-generated-token');
+  const showGeneratedCredentials = (config) => {
+    if (generatedOrg) generatedOrg.textContent = config.organizationId || '';
+    if (generatedToken) generatedToken.textContent = config.token || '';
+    const apiInput = document.getElementById('cloud-api-url');
+    const orgInput = document.getElementById('cloud-org-id');
+    const tokenInput = document.getElementById('cloud-token');
+    if (apiInput) apiInput.value = config.url || '';
+    if (orgInput) orgInput.value = config.organizationId || '';
+    if (tokenInput) tokenInput.value = config.token || '';
+    if (typeof renderCloudCredentials === 'function') renderCloudCredentials();
+    if (generatedCredentials) generatedCredentials.style.display = 'block';
+    [formLogin, formToken, formReg, formRecovery].forEach(form => { if (form) form.style.display = 'none'; });
+    [tabAuthLogin, tabAuthToken, tabAuthReg].forEach(tab => { if (tab) tab.style.display = 'none'; });
+    if (authSubtitle) authSubtitle.textContent = 'Your account is connected.';
+  };
+  document.getElementById('btn-auth-continue')?.addEventListener('click', () => {
+    authModal?.classList.remove('active');
+  });
   const openAuth = (firstRun) => {
     if (firstRun) {
       tabAuthReg?.click();
@@ -747,10 +768,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!config.token) throw new Error('The backend did not return an access token.');
         localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: user.organizationName || config.organizationId, email }));
         localStorage.setItem('wirespot_web_cloud_config', JSON.stringify(config));
-        localStorage.setItem('wirespot_web_session', JSON.stringify({ email, signedInAt: Date.now() }));
-        document.getElementById('modal-auth').classList.remove('active');
+        localStorage.setItem('wirespot_web_session', JSON.stringify({ email, organizationId: config.organizationId, signedInAt: Date.now() }));
+        showGeneratedCredentials(config);
         showToast(`Signed in as ${email}. Cloud sync is ready.`, 'success');
-        window.location.reload();
       } catch (error) {
         showToast(error.message || 'Unable to sign in.', 'error');
       }
@@ -781,11 +801,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         if (!generatedConfig.token) throw new Error('The backend did not return an access token.');
         localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: org, email }));
-        localStorage.setItem('wirespot_web_session', JSON.stringify({ email, signedInAt: Date.now() }));
+        localStorage.setItem('wirespot_web_session', JSON.stringify({ email, organizationId: generatedConfig.organizationId, signedInAt: Date.now() }));
         localStorage.setItem('wirespot_web_cloud_config', JSON.stringify(generatedConfig));
-        document.getElementById('modal-auth').classList.remove('active');
+        showGeneratedCredentials(generatedConfig);
         showToast(`Account created for ${org}. Cloud sync is ready.`, 'success');
-        window.location.reload();
       } catch (error) {
         showToast(error.message || 'Unable to create the account.', 'error');
       }
