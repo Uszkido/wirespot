@@ -287,8 +287,14 @@ void main() {
       addressPool: 'pool',
       configurePppoe: true,
     );
-    expect(incomplete.validationErrors, contains('Enter the ISP PPPoE username.'));
-    expect(incomplete.validationErrors, contains('Enter the ISP PPPoE password.'));
+    expect(
+      incomplete.validationErrors,
+      contains('Enter the ISP PPPoE username.'),
+    );
+    expect(
+      incomplete.validationErrors,
+      contains('Enter the ISP PPPoE password.'),
+    );
 
     const input = HotspotSetupInput(
       serverName: 'pppoe-hotspot',
@@ -302,11 +308,17 @@ void main() {
     );
     expect(input.validationErrors, isEmpty);
     expect(input.toPppoeAttributes(), containsPair('interface', 'ether1'));
-    expect(input.toPppoeNatAttributes(), containsPair('out-interface', 'pppoe-wan'));
-    expect(input.toPlan().steps.map((step) => step.command), containsAll([
-      '/interface/pppoe-client/add (or /interface/pppoe-client/set)',
-      '/ip/firewall/nat/add',
-    ]));
+    expect(
+      input.toPppoeNatAttributes(),
+      containsPair('out-interface', 'pppoe-wan'),
+    );
+    expect(
+      input.toPlan().steps.map((step) => step.command),
+      containsAll([
+        '/interface/pppoe-client/add (or /interface/pppoe-client/set)',
+        '/ip/firewall/nat/add',
+      ]),
+    );
     expect(input.toPlan().toLines().join('\n'), isNot(contains('isp-secret')));
   });
 }
