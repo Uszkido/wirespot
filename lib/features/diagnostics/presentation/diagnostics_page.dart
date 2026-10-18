@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/routeros_api_exception.dart';
 import '../../../core/di/providers.dart';
 import '../../dashboard/presentation/dashboard_providers.dart';
 import '../../routers/presentation/router_providers.dart';
@@ -36,6 +37,13 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
 
   void _start() {
     final routers = ref.read(routersProvider).asData?.value ?? [];
+    if (routers.isEmpty) {
+      setState(() {
+        _error = 'Add and connect a router before running diagnostics.';
+        _isRunning = false;
+      });
+      return;
+    }
     final router = routers.firstWhere(
       (r) => r.id == ref.read(selectedRouterIdProvider),
       orElse: () => routers.first,
@@ -96,7 +104,7 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
       },
       onError: (error) {
         setState(() {
-          _error = error.toString();
+          _error = _friendlyError(error, router.host, router.apiPort);
           _isRunning = false;
         });
       },
@@ -125,6 +133,28 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
         );
       }
     });
+  }
+
+  String _friendlyError(Object error, String host, int port) {
+    if (error is RouterOsVpnRequiredException) {
+      return 'Connect the private VPN tunnel before contacting this router.';
+    }
+    if (error is RouterOsAuthenticationException) {
+      return 'Router login was rejected. Check the saved RouterOS username and password.';
+    }
+    if (error is RouterOsApiException) {
+      final message = error.message.trim();
+      if (error.category == 'unsupported_vendor') {
+        return 'Ping is not available for this router connector yet. Select a MikroTik RouterOS router.';
+      }
+      if (error.category == 'connection') {
+        return 'Could not reach $host:$port. Check the router address, API port, network, and VPN.';
+      }
+      return message.isEmpty
+          ? 'The router rejected the ping command.'
+          : message;
+    }
+    return 'Diagnostics failed: ${error.toString()}';
   }
 
   @override
