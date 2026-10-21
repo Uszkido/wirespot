@@ -65,6 +65,76 @@ class CloudBackupService {
     return true;
   }
 
+  /// Pulls the cloud snapshot, merges it with local records, restores the
+  /// merged workspace, and publishes the result again. Records are merged by
+  /// stable id (or name for WireGuard profiles); cloud values win conflicts,
+  /// while local-only records are preserved. This makes a companion device
+  /// both a consumer and a publisher of the shared workspace.
+  Future<bool> syncBidirectional() async {
+    final local = await _backupService.buildBackup();
+    final remote = await fetchLatestCloudBackup();
+    if (remote == null) {
+      return uploadCloudBackup();
+    }
+
+    final merged = BackupPayload(
+      version: local.version > remote.version ? local.version : remote.version,
+      exportedAt: DateTime.now(),
+      settings: {...local.settings, ...remote.settings},
+      printers: _mergeRecords(local.printers, remote.printers),
+      routers: _mergeRecords(local.routers, remote.routers),
+      hotspotProfiles: _mergeRecords(
+        local.hotspotProfiles,
+        remote.hotspotProfiles,
+      ),
+      routerGroups: _mergeRecords(local.routerGroups, remote.routerGroups),
+      wireGuardConfigs: _mergeRecords(
+        local.wireGuardConfigs,
+        remote.wireGuardConfigs,
+        keyFields: const ['id', 'name'],
+      ),
+    );
+
+    await _backupService.restoreBackup(merged);
+    final uploaded = await _cloudApiClient.uploadCloudBackup(merged.toJson());
+    if (uploaded) {
+      final jsonStr = jsonEncode(merged.toJson());
+      await _settingsRepository.writeSetting(
+        AppSettingsKeys.lastCloudBackupAt,
+        merged.exportedAt.toIso8601String(),
+      );
+      await _settingsRepository.writeSetting(
+        AppSettingsKeys.lastCloudBackupSize,
+        utf8.encode(jsonStr).length.toString(),
+      );
+    }
+    return uploaded;
+  }
+
+  static List<Map<String, Object?>> _mergeRecords(
+    List<Map<String, Object?>> local,
+    List<Map<String, Object?>> remote, {
+    List<String> keyFields = const ['id'],
+  }) {
+    final merged = <String, Map<String, Object?>>{};
+    String key(Map<String, Object?> record) {
+      for (final field in keyFields) {
+        final value = record[field]?.toString().trim();
+        if (value != null && value.isNotEmpty) return '$field:$value';
+      }
+      return 'anonymous:${merged.length}';
+    }
+
+    for (final record in local) {
+      merged[key(record)] = Map<String, Object?>.from(record);
+    }
+    // Apply remote last so a cloud edit is consistent across all companions.
+    for (final record in remote) {
+      merged[key(record)] = Map<String, Object?>.from(record);
+    }
+    return merged.values.toList(growable: false);
+  }
+
   Future<bool> autoRestoreFromCloudIfLocalEmpty() async {
     final routers = await _database.select(_database.routers).get();
     if (routers.isNotEmpty) {

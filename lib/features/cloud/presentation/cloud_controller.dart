@@ -383,11 +383,14 @@ class CloudController extends StateNotifier<CloudState> {
     );
     try {
       final synchronized = await _syncService.syncPending();
+      final bidirectional = await _backupService?.syncBidirectional() ?? false;
       final pending = await _syncRepository.pendingOperations();
       state = state.copyWith(
         isSyncing: false,
         pendingOperations: pending,
-        successMessage: () => 'Synchronized $synchronized operation(s).',
+        successMessage: () => bidirectional
+            ? 'Synchronized $synchronized operation(s) and merged the workspace.'
+            : 'Synchronized $synchronized operation(s).',
       );
     } catch (error) {
       final pending = await _syncRepository.pendingOperations();

@@ -192,6 +192,12 @@ class SchedulerExecutionService {
       return 'Cloud sync service unavailable.';
     }
     final count = await _cloudSyncService.syncPending();
+    if (_cloudBackupService != null) {
+      final merged = await _cloudBackupService.syncBidirectional();
+      return merged
+          ? 'Cloud sync synchronized $count pending operation(s) and merged the workspace.'
+          : 'Cloud sync synchronized $count pending operation(s); workspace merge unavailable.';
+    }
     return 'Cloud sync synchronized $count pending operation(s).';
   }
 
