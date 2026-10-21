@@ -9,25 +9,25 @@ enum BillingPlan {
     id: 'wirespot_small_monthly',
     title: 'Small monthly',
     description: 'Single-site operators, one primary router, core tools.',
-    monthlyPriceGuide: 'NGN 3,000 - 5,000',
+    monthlyPriceGuide: 'NGN 5,000 / month',
   ),
   proMonthly(
     id: 'wirespot_pro_monthly',
     title: 'Pro monthly',
     description: 'Multi-router hotspot operations, VPN, printing, reports.',
-    monthlyPriceGuide: 'NGN 8,000 - 12,000',
+    monthlyPriceGuide: 'NGN 10,000 / month',
   ),
   proYearly(
     id: 'wirespot_pro_yearly',
     title: 'Pro yearly',
     description: 'Best value for serious operators and small ISPs.',
-    monthlyPriceGuide: 'NGN 80,000 - 120,000/year',
+    monthlyPriceGuide: 'NGN 100,000 / year',
   ),
   lifetimeDevice(
     id: 'wirespot_lifetime_device',
     title: 'Lifetime device',
     description: 'Offline device-bound license for direct installations.',
-    monthlyPriceGuide: 'NGN 150,000 - 250,000',
+    monthlyPriceGuide: 'NGN 200,000 one-time',
   );
 
   const BillingPlan({

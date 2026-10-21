@@ -28,10 +28,10 @@ WireSpot uses a full-access trial followed by paid access.
 
 | Product ID | Plan | Suggested Price | Best For |
 | --- | --- | --- | --- |
-| `wirespot_small_monthly` | Small monthly | NGN 3,000 - 5,000 | Small hotspot shops, one-site users |
-| `wirespot_pro_monthly` | Pro monthly | NGN 8,000 - 12,000 | Active operators, technicians, multi-router users |
-| `wirespot_pro_yearly` | Pro yearly | NGN 80,000 - 120,000/year | Serious operators and small ISPs |
-| `wirespot_lifetime_device` | Lifetime device | NGN 150,000 - 250,000 | Offline/direct install customers |
+| `wirespot_small_monthly` | Small monthly | NGN 5,000 / month | Small hotspot shops, one-site users |
+| `wirespot_pro_monthly` | Pro monthly | NGN 10,000 / month | Active operators, technicians, multi-router users |
+| `wirespot_pro_yearly` | Pro yearly | NGN 100,000 / year | Serious operators and small ISPs |
+| `wirespot_lifetime_device` | Lifetime device | NGN 200,000 one-time | Offline/direct install customers |
 
 ## Premium Feature Positioning
 
