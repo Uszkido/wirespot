@@ -6,6 +6,15 @@ class SchedulerSettingsService {
 
   final SettingsRepository _settingsRepository;
 
+  /// Enables the shared cloud loop for new installs without changing the
+  /// user's explicit scheduler choices on existing installs.
+  Future<void> ensureCloudSyncEnabled() async {
+    final key = _enabledKey(ScheduledTaskType.cloudSync);
+    if (await _settingsRepository.readSetting(key) == null) {
+      await _settingsRepository.writeSetting(key, 'true');
+    }
+  }
+
   Future<List<ScheduledTask>> load() async {
     final tasks = <ScheduledTask>[];
     for (final task in ScheduledTask.defaults()) {

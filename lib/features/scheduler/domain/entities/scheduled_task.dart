@@ -89,7 +89,7 @@ class ScheduledTask {
       ScheduledTask(
         type: ScheduledTaskType.cloudSync,
         enabled: false,
-        intervalMinutes: 15,
+        intervalMinutes: 1,
       ),
     ];
   }

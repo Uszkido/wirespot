@@ -8,6 +8,7 @@ import 'app.dart';
 import 'core/di/service_locator.dart';
 import 'features/cloud/domain/services/cloud_backup_service.dart';
 import 'features/scheduler/domain/services/scheduler_execution_service.dart';
+import 'features/scheduler/domain/services/scheduler_settings_service.dart';
 import 'features/settings/domain/services/backup_service.dart';
 
 Future<void> main() async {
@@ -22,6 +23,7 @@ Future<void> main() async {
     // cannot load SQLite; normal Android versions load the bundled library.
   }
   await configureDependencies();
+  await sl<SchedulerSettingsService>().ensureCloudSyncEnabled();
   sl<SchedulerExecutionService>().start();
 
   // Render the first screen immediately. Cloud/local backup restore is a

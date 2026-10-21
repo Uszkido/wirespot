@@ -1031,9 +1031,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return payload;
   };
 
+  let cloudHydrationInFlight = false;
   const hydrateFromCloud = async () => {
+    if (cloudHydrationInFlight) return false;
     const config = readCloudConfig();
     if (!config.url || !config.token) return false;
+    cloudHydrationInFlight = true;
     try {
       const result = await cloudRequest('api/v1/backup/latest');
       if (!result?.backup) return false;
@@ -1053,12 +1056,30 @@ document.addEventListener('DOMContentLoaded', () => {
       updateSyncIndicator(false);
       console.warn('WireSpot cloud hydration failed:', error);
       return false;
+    } finally {
+      cloudHydrationInFlight = false;
     }
   };
 
   // A signed-in web dashboard should reflect the shared workspace immediately,
   // without requiring the operator to press Sync Now first.
   void hydrateFromCloud();
+
+  // Keep every open dashboard current without requiring a manual refresh. The
+  // tab is paused while hidden to avoid unnecessary requests, then refreshed
+  // as soon as the operator returns to it.
+  const cloudRefreshIntervalMs = 15_000;
+  let cloudRefreshTimer = null;
+  const startCloudRefresh = () => {
+    if (cloudRefreshTimer) clearInterval(cloudRefreshTimer);
+    cloudRefreshTimer = setInterval(() => {
+      if (!document.hidden) void hydrateFromCloud();
+    }, cloudRefreshIntervalMs);
+  };
+  startCloudRefresh();
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) void hydrateFromCloud();
+  });
 
   document.getElementById('btn-save-cloud')?.addEventListener('click', () => {
     const config = readCloudConfig();
