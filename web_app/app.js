@@ -1241,15 +1241,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.getElementById('btn-current-plan')?.addEventListener('click', () => {
-    showToast('Enterprise Cloud is the active workspace plan.', 'info');
-  });
-  document.getElementById('btn-manage-subscription')?.addEventListener('click', () => {
-    document.querySelector('[data-tab="tab-cloud"]')?.click();
-    showToast('Manage billing and cloud sync from the Cloud Sync tab.', 'info');
-  });
-  document.getElementById('btn-switch-pro')?.addEventListener('click', () => {
-    showToast('Plan changes will be available when billing is connected.', 'info');
+  const planTitles = {
+    trial: '7-day trial',
+    smallMonthly: 'Small monthly',
+    proMonthly: 'Pro monthly',
+    proYearly: 'Pro yearly',
+    lifetimeDevice: 'Lifetime device'
+  };
+  document.querySelectorAll('.plan-action').forEach(button => {
+    button.addEventListener('click', () => {
+      const title = planTitles[button.dataset.plan] || 'selected plan';
+      document.querySelector('[data-tab="tab-cloud"]')?.click();
+      showToast(`${title} selected. Complete activation or billing from the Cloud Sync tab.`, 'info');
+    });
   });
 
   // ─── Refresh Button ───
@@ -1372,16 +1376,6 @@ document.addEventListener('DOMContentLoaded', () => {
     popup.document.close();
   };
   document.getElementById('btn-export-pdf')?.addEventListener('click', () => { const { rows } = renderReport(); printReport('WireSpot Sales Report', rows); });
-  ['btn-download-inv-1', 'btn-download-inv-2'].forEach(id => document.getElementById(id)?.addEventListener('click', event => {
-    const button = event.currentTarget;
-    printReport(`WireSpot Invoice ${button.dataset.invoice}`, [{
-      code: button.dataset.invoice,
-      profile: 'Enterprise Cloud',
-      createdAt: button.dataset.invoiceDate,
-      status: 'paid',
-      price: 49
-    }]);
-  }));
   renderReport();
 
   // ─── Thermal Receipt Live Preview Sync ───

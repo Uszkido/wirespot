@@ -496,59 +496,84 @@
           </div>
           <div class="status-indicator"
             style="background: rgba(56, 189, 248, 0.1); border-color: var(--accent); color: var(--accent);">
-            <i class="fa-solid fa-crown"></i> Enterprise Cloud
+            <i class="fa-solid fa-crown"></i> WireSpot plans
           </div>
         </div>
 
+        <p class="pricing-note">These are the same plan guides used by the mobile app. Prices are shown in NGN until billing is connected; the final price is confirmed at checkout.</p>
         <div class="pricing-grid">
-          <div class="pricing-card glass">
+          <div class="pricing-card glass" data-plan="trial">
             <div class="pricing-header">
-              <h3>Free Community</h3>
-              <p style="font-size: 12px; color: var(--text-muted);">Single-router hobbyists</p>
-              <div class="pricing-price">₦0 <span>/ month</span></div>
+              <h3>7-day trial</h3>
+              <p style="font-size: 12px; color: var(--text-muted);">Full access for first-time devices</p>
+              <div class="pricing-price">Free <span>for 7 days</span></div>
             </div>
             <ul class="plan-features">
-              <li><i class="fa-solid fa-check"></i> 1 Managed Router</li>
-              <li><i class="fa-solid fa-check"></i> 25 Active Sessions</li>
-              <li><i class="fa-solid fa-check"></i> Basic Vouchers</li>
-              <li><i class="fa-solid fa-xmark" style="color: var(--text-muted);"></i> Cloud Sync</li>
+              <li><i class="fa-solid fa-check"></i> Full app access</li>
+              <li><i class="fa-solid fa-check"></i> No payment required to start</li>
+              <li><i class="fa-solid fa-check"></i> Upgrade whenever you are ready</li>
             </ul>
-            <button class="btn btn-secondary" style="width: 100%;" id="btn-current-plan">Current Plan</button>
+            <button class="btn btn-secondary plan-action" style="width: 100%;" data-plan="trial">Start with trial</button>
           </div>
 
-          <div class="pricing-card glass featured">
+          <div class="pricing-card glass" data-plan="smallMonthly">
+            <div class="pricing-header">
+              <h3>Small monthly</h3>
+              <p style="font-size: 12px; color: var(--text-muted);">Single-site operators, one primary router</p>
+              <div class="pricing-price">NGN 3,000–5,000 <span>/ month</span></div>
+            </div>
+            <ul class="plan-features">
+              <li><i class="fa-solid fa-check"></i> Core hotspot tools</li>
+              <li><i class="fa-solid fa-check"></i> One primary router</li>
+              <li><i class="fa-solid fa-check"></i> Local device activation</li>
+            </ul>
+            <button class="btn btn-secondary plan-action" style="width: 100%;" data-plan="smallMonthly">Choose small monthly</button>
+          </div>
+
+          <div class="pricing-card glass featured" data-plan="proMonthly">
             <div
               style="position: absolute; top: -10px; right: 20px; background: linear-gradient(135deg, var(--accent-deep), var(--accent)); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
-              Active
+              Most popular
             </div>
             <div class="pricing-header">
-              <h3>Enterprise Cloud</h3>
-              <p style="font-size: 12px; color: var(--text-muted);">ISP operators & multi-venue</p>
-              <div class="pricing-price">₦49 <span>/ month</span></div>
+              <h3>Pro monthly</h3>
+              <p style="font-size: 12px; color: var(--text-muted);">Multi-router hotspot operations</p>
+              <div class="pricing-price">NGN 8,000–12,000 <span>/ month</span></div>
             </div>
             <ul class="plan-features">
-              <li><i class="fa-solid fa-check"></i> Unlimited Routers</li>
-              <li><i class="fa-solid fa-check"></i> Unlimited Users</li>
-              <li><i class="fa-solid fa-check"></i> VPN Cloud Tunnels</li>
-              <li><i class="fa-solid fa-check"></i> Thermal Customizer</li>
-              <li><i class="fa-solid fa-check"></i> 24/7 Cloud Sync</li>
+              <li><i class="fa-solid fa-check"></i> Multi-router operations</li>
+              <li><i class="fa-solid fa-check"></i> VPN and cloud sync</li>
+              <li><i class="fa-solid fa-check"></i> Printing and reports</li>
             </ul>
-            <button class="btn btn-primary" style="width: 100%;" id="btn-manage-subscription"><i class="fa-solid fa-rotate"></i> Manage</button>
+            <button class="btn btn-primary plan-action" style="width: 100%;" data-plan="proMonthly"><i class="fa-solid fa-rotate"></i> Choose pro monthly</button>
           </div>
 
-          <div class="pricing-card glass">
+          <div class="pricing-card glass" data-plan="proYearly">
             <div class="pricing-header">
-              <h3>Operator Pro</h3>
-              <p style="font-size: 12px; color: var(--text-muted);">Small business & cafés</p>
-              <div class="pricing-price">₦19 <span>/ month</span></div>
+              <h3>Pro yearly</h3>
+              <p style="font-size: 12px; color: var(--text-muted);">Best value for serious operators and small ISPs</p>
+              <div class="pricing-price">NGN 80,000–120,000 <span>/ year</span></div>
             </div>
             <ul class="plan-features">
-              <li><i class="fa-solid fa-check"></i> Up to 5 Routers</li>
-              <li><i class="fa-solid fa-check"></i> 500 Sessions</li>
-              <li><i class="fa-solid fa-check"></i> Cloud Sync</li>
-              <li><i class="fa-solid fa-xmark" style="color: var(--text-muted);"></i> VPN Tunnels</li>
+              <li><i class="fa-solid fa-check"></i> Everything in Pro monthly</li>
+              <li><i class="fa-solid fa-check"></i> Annual billing</li>
+              <li><i class="fa-solid fa-check"></i> Best value for growing teams</li>
             </ul>
-            <button class="btn btn-secondary" style="width: 100%;" id="btn-switch-pro">Switch to Pro</button>
+            <button class="btn btn-secondary plan-action" style="width: 100%;" data-plan="proYearly">Choose pro yearly</button>
+          </div>
+
+          <div class="pricing-card glass" data-plan="lifetimeDevice">
+            <div class="pricing-header">
+              <h3>Lifetime device</h3>
+              <p style="font-size: 12px; color: var(--text-muted);">Offline, device-bound installation</p>
+              <div class="pricing-price">NGN 150,000–250,000 <span>one-time</span></div>
+            </div>
+            <ul class="plan-features">
+              <li><i class="fa-solid fa-check"></i> No recurring subscription</li>
+              <li><i class="fa-solid fa-check"></i> Bound to one activated device</li>
+              <li><i class="fa-solid fa-check"></i> Ideal for direct installations</li>
+            </ul>
+            <button class="btn btn-secondary plan-action" style="width: 100%;" data-plan="lifetimeDevice">Choose lifetime device</button>
           </div>
         </div>
 
@@ -569,24 +594,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td><code>INV-2026-0801</code></td>
-                  <td>Aug 1, 2026</td>
-                  <td>Enterprise Cloud</td>
-                  <td class="invoice-amount" data-amount="49">—</td>
-                  <td><span class="badge badge-success">Paid</span></td>
-                  <td><button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;"
-                      id="btn-download-inv-1" data-invoice="INV-2026-0801" data-invoice-date="Aug 1, 2026"><i class="fa-solid fa-download"></i> PDF</button></td>
-                </tr>
-                <tr>
-                  <td><code>INV-2026-0701</code></td>
-                  <td>Jul 1, 2026</td>
-                  <td>Enterprise Cloud</td>
-                  <td class="invoice-amount" data-amount="49">—</td>
-                  <td><span class="badge badge-success">Paid</span></td>
-                  <td><button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;"
-                      id="btn-download-inv-2" data-invoice="INV-2026-0701" data-invoice-date="Jul 1, 2026"><i class="fa-solid fa-download"></i> PDF</button></td>
-                </tr>
+                <tr><td colspan="6" class="empty-state"><i class="fa-regular fa-folder-open"></i><span>No invoices yet. Billing records will appear here after a plan is purchased.</span></td></tr>
               </tbody>
             </table>
           </div>

@@ -975,6 +975,13 @@ select.form-control {
   margin-top: 20px;
 }
 
+.pricing-note {
+  margin: -8px 0 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 .pricing-card {
   padding: 28px 22px;
   display: flex;
