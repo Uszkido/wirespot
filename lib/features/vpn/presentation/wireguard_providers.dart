@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/di/providers.dart';
 import '../../../core/vpn/vpn_statistics.dart';
 import '../../../core/vpn/vpn_status.dart';
+import '../../../core/vpn/wireguard_tunnel.dart';
 import '../domain/entities/wireguard_settings.dart';
 
 final wireGuardSettingsProvider = FutureProvider.autoDispose<WireGuardSettings>(
@@ -30,3 +31,8 @@ final wireGuardStatisticsProvider = FutureProvider.autoDispose<VpnStatistics>((
 final wireGuardLogsProvider = FutureProvider.autoDispose<List<String>>((ref) {
   return ref.watch(wireGuardVpnServiceProvider).logs();
 });
+
+final wireGuardTunnelsProvider =
+    FutureProvider.autoDispose<List<WireGuardTunnel>>((ref) {
+      return ref.watch(wireGuardVpnServiceProvider).getSavedTunnels();
+    });

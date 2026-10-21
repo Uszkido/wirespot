@@ -9,6 +9,7 @@ import '../../../core/utils/byte_format.dart';
 import '../../../core/vpn/vpn_statistics.dart';
 import '../../../core/vpn/vpn_status.dart';
 import '../../../core/vpn/wireguard_config.dart';
+import '../../../core/vpn/wireguard_tunnel.dart';
 import '../domain/entities/wireguard_settings.dart';
 import 'wireguard_qr_scan_page.dart';
 import 'wireguard_providers.dart';
@@ -46,6 +47,7 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
     final statusFallback = ref.watch(wireGuardStatusProvider);
     final statistics = ref.watch(wireGuardStatisticsProvider);
     final logs = ref.watch(wireGuardLogsProvider);
+    final tunnels = ref.watch(wireGuardTunnelsProvider);
     final settings = ref.watch(wireGuardSettingsProvider);
     final resolvedStatus = status ?? statusFallback.asData?.value;
     final settingsValue = settings.asData?.value;
@@ -88,11 +90,13 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
               controller: _tunnelNameController,
               status: resolvedStatus,
               settings: settingsValue,
+              tunnels: tunnels.asData?.value ?? const [],
               onImport: _showImportDialog,
               onPickFile: _pickFileAndImportConfig,
               onScanQr: _scanQrConfig,
               onConnect: _connect,
               onDisconnect: _disconnect,
+              onTunnelSelected: _selectTunnel,
               onAutoReconnectChanged: (value) {
                 _setAutoReconnect(value);
               },
@@ -121,7 +125,26 @@ class _WireGuardPageState extends ConsumerState<WireGuardPage> {
     ref
       ..invalidate(wireGuardStatusProvider)
       ..invalidate(wireGuardStatisticsProvider)
-      ..invalidate(wireGuardLogsProvider);
+      ..invalidate(wireGuardLogsProvider)
+      ..invalidate(wireGuardTunnelsProvider);
+  }
+
+  Future<void> _selectTunnel(String name) async {
+    final selected = name.trim();
+    if (selected.isEmpty) return;
+    final current = ref.read(wireGuardStatusProvider).asData?.value;
+    _tunnelNameController.text = selected;
+    if (current?.isConnected == true && current?.tunnelName != selected) {
+      try {
+        await ref.read(wireGuardVpnServiceProvider).disconnect();
+        await ref.read(wireGuardVpnServiceProvider).connect(selected);
+        _showSnack('Switched to WireGuard tunnel "$selected".');
+      } on Object catch (error) {
+        _showSnack('Could not switch WireGuard tunnel: $error');
+      }
+    }
+    await _saveSettings(selectedTunnelName: selected);
+    _refresh();
   }
 
   Future<void> _connect() async {
@@ -444,22 +467,26 @@ class _TunnelCard extends StatelessWidget {
     required this.controller,
     required this.status,
     required this.settings,
+    required this.tunnels,
     required this.onImport,
     required this.onPickFile,
     required this.onScanQr,
     required this.onConnect,
     required this.onDisconnect,
+    required this.onTunnelSelected,
     required this.onAutoReconnectChanged,
   });
 
   final TextEditingController controller;
   final VpnStatus? status;
   final WireGuardSettings? settings;
+  final List<WireGuardTunnel> tunnels;
   final Future<void> Function() onImport;
   final Future<void> Function() onPickFile;
   final Future<void> Function() onScanQr;
   final Future<void> Function() onConnect;
   final Future<void> Function() onDisconnect;
+  final Future<void> Function(String name) onTunnelSelected;
   final ValueChanged<bool> onAutoReconnectChanged;
 
   @override
@@ -495,13 +522,42 @@ class _TunnelCard extends StatelessWidget {
               Text(status!.message!),
             ],
             const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Tunnel name',
-                prefixIcon: Icon(Icons.label_outline),
+            if (tunnels.isEmpty)
+              TextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  labelText: 'Tunnel name',
+                  prefixIcon: Icon(Icons.label_outline),
+                ),
+              )
+            else
+              InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Saved tunnel profile',
+                  prefixIcon: Icon(Icons.route_outlined),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value:
+                        tunnels.any((tunnel) => tunnel.name == controller.text)
+                        ? controller.text
+                        : null,
+                    hint: const Text('Select a saved tunnel'),
+                    items: tunnels
+                        .map(
+                          (tunnel) => DropdownMenuItem<String>(
+                            value: tunnel.name,
+                            child: Text(tunnel.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (name) {
+                      if (name != null) onTunnelSelected(name);
+                    },
+                  ),
+                ),
               ),
-            ),
             const SizedBox(height: 12),
             SwitchListTile(
               value: settings?.autoReconnectEnabled ?? false,
