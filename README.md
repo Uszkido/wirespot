@@ -45,6 +45,11 @@ WireSpot solves that with a focused Android workflow:
   and generic routers.
 - **WireGuard-first remote access**: designed so operators do not need to expose
   RouterOS API ports directly to the internet.
+- **Multi-profile VPN switching**: save profiles for multiple router networks,
+  select them from the VPN screen, and switch safely by disconnecting the
+  current tunnel before connecting the next one. Android and iOS permit one
+  active full-device VPN interface at a time; use one profile with multiple
+  WireGuard peers when simultaneous router-network reachability is required.
 - **Business hotspot presets**: quick voucher, small business, hotel guest
   Wi-Fi, and RADIUS-managed setup templates.
 - **PPPoE subscriber access**: configure RouterOS PPPoE server profiles with
