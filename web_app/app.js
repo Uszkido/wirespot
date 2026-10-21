@@ -854,6 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('wirespot_web_cloud_config', JSON.stringify(config));
         localStorage.setItem('wirespot_web_session', JSON.stringify({ email, organizationId: config.organizationId, signedInAt: Date.now() }));
         showGeneratedCredentials(config);
+        await hydrateFromCloud();
         showToast(`Signed in as ${email}. Cloud sync is ready.`, 'success');
       } catch (error) {
         showToast(error.message || 'Unable to sign in.', 'error');
@@ -888,6 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('wirespot_web_session', JSON.stringify({ email, organizationId: generatedConfig.organizationId, signedInAt: Date.now() }));
         localStorage.setItem('wirespot_web_cloud_config', JSON.stringify(generatedConfig));
         showGeneratedCredentials(generatedConfig);
+        await hydrateFromCloud();
         showToast(`Account created for ${org}. Cloud sync is ready.`, 'success');
       } catch (error) {
         showToast(error.message || 'Unable to create the account.', 'error');
@@ -983,7 +985,8 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const hydrateFromCloud = async () => {
-    if (!cloudConfig.url || !cloudConfig.token) return false;
+    const config = readCloudConfig();
+    if (!config.url || !config.token) return false;
     try {
       const result = await cloudRequest('api/v1/backup/latest');
       if (!result?.backup) return false;
