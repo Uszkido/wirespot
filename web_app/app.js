@@ -792,7 +792,20 @@ document.addEventListener('DOMContentLoaded', () => {
     authModal?.classList.add('active');
   };
 
-  if (!localStorage.getItem('wirespot_web_session')) openAuth(!savedAccount);
+  // Do not trust an orphaned browser session. Older builds stored the account
+  // profile separately from the API token, which left the dashboard looking
+  // signed in while every cloud request was unauthenticated.
+  const storedSession = localStorage.getItem('wirespot_web_session');
+  let storedCloudConfig = {};
+  try {
+    storedCloudConfig = JSON.parse(localStorage.getItem('wirespot_web_cloud_config') || '{}');
+  } catch (_) {
+    storedCloudConfig = {};
+  }
+  const hasValidCloudSession = Boolean(
+    storedSession && storedCloudConfig.url && storedCloudConfig.token,
+  );
+  if (!hasValidCloudSession) openAuth(!savedAccount);
 
   const showAuthForm = (activeTab, activeForm) => {
     [tabAuthLogin, tabAuthToken, tabAuthReg].forEach(tab => tab?.classList.toggle('active', tab === activeTab));
