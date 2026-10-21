@@ -10,5 +10,6 @@ final cloudControllerProvider =
         syncRepository: ref.watch(cloudSyncRepositoryProvider),
         syncService: ref.watch(cloudSyncServiceProvider),
         apiClient: ref.watch(cloudApiClientProvider),
+        backupService: ref.watch(cloudBackupServiceProvider),
       );
     });

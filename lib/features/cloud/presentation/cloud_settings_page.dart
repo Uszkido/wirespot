@@ -660,6 +660,14 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                       : const Icon(Icons.sync),
                   label: Text(text.syncNow),
                 ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  onPressed: state.isSyncing
+                      ? null
+                      : () => controller.restoreLatestBackup(),
+                  icon: const Icon(Icons.cloud_download_outlined),
+                  label: const Text('Restore cloud'),
+                ),
               ],
             ),
             const SizedBox(height: 12),

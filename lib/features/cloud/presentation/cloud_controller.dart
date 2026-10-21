@@ -7,6 +7,7 @@ import '../domain/entities/cloud_sync_operation.dart';
 import '../domain/repositories/cloud_sync_repository.dart';
 import '../domain/services/cloud_settings_service.dart';
 import '../domain/services/cloud_sync_service.dart';
+import '../domain/services/cloud_backup_service.dart';
 
 class CloudState {
   const CloudState({
@@ -66,10 +67,12 @@ class CloudController extends StateNotifier<CloudState> {
     required CloudSyncRepository syncRepository,
     required CloudSyncService syncService,
     required CloudApiClient apiClient,
+    CloudBackupService? backupService,
   }) : _settingsService = settingsService,
        _syncRepository = syncRepository,
        _syncService = syncService,
        _apiClient = apiClient,
+       _backupService = backupService,
        super(const CloudState()) {
     load();
   }
@@ -78,6 +81,24 @@ class CloudController extends StateNotifier<CloudState> {
   final CloudSyncRepository _syncRepository;
   final CloudSyncService _syncService;
   final CloudApiClient _apiClient;
+  final CloudBackupService? _backupService;
+
+  /// Restores the latest organization workspace after authentication when the
+  /// local database is empty (for example, on a newly paired Windows device).
+  /// A restore failure must not invalidate a successful sign-in.
+  Future<void> _restoreCloudWorkspaceIfEmpty() async {
+    final backupService = _backupService;
+    if (backupService == null) return;
+    try {
+      final restored = await backupService.autoRestoreFromCloudIfLocalEmpty();
+      if (restored) {
+        await load();
+      }
+    } on Object {
+      // Authentication remains successful even when the backup endpoint is
+      // temporarily unavailable. The user can retry from the sync card.
+    }
+  }
 
   Future<void> load() async {
     state = state.copyWith(isLoading: true, errorMessage: () => null);
@@ -208,6 +229,7 @@ class CloudController extends StateNotifier<CloudState> {
       );
       await _settingsService.saveSession(session);
       await load();
+      await _restoreCloudWorkspaceIfEmpty();
       state = state.copyWith(
         successMessage: () => 'Welcome back! Signed in as $email.',
       );
@@ -251,6 +273,7 @@ class CloudController extends StateNotifier<CloudState> {
         ),
       );
       await load();
+      await _restoreCloudWorkspaceIfEmpty();
       state = state.copyWith(
         successMessage: () => 'Companion device paired successfully.',
       );
@@ -317,6 +340,7 @@ class CloudController extends StateNotifier<CloudState> {
       );
       await _settingsService.saveSession(session);
       await load();
+      await _restoreCloudWorkspaceIfEmpty();
       state = state.copyWith(
         successMessage: () => 'Account created! Signed in as $email.',
       );
@@ -371,6 +395,34 @@ class CloudController extends StateNotifier<CloudState> {
         isSyncing: false,
         pendingOperations: pending,
         errorMessage: () => 'Sync failed: $error',
+      );
+    }
+  }
+
+  /// Explicitly replaces an empty/local workspace with the latest cloud
+  /// backup. This is useful on companion devices and is never run silently
+  /// when local router data already exists.
+  Future<void> restoreLatestBackup() async {
+    final backupService = _backupService;
+    if (backupService == null || state.isSyncing) return;
+    state = state.copyWith(
+      isSyncing: true,
+      errorMessage: () => null,
+      successMessage: () => null,
+    );
+    try {
+      final restored = await backupService.restoreFromCloud();
+      await load();
+      state = state.copyWith(
+        isSyncing: false,
+        successMessage: () => restored
+            ? 'Latest cloud workspace restored.'
+            : 'No cloud backup is available yet.',
+      );
+    } catch (error) {
+      state = state.copyWith(
+        isSyncing: false,
+        errorMessage: () => 'Cloud restore failed: $error',
       );
     }
   }
