@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.wirespot" "\0"
-            VALUE "FileDescription", "wirespot" "\0"
+            VALUE "CompanyName", "Vexel Innovations" "\0"
+            VALUE "FileDescription", "WireSpot hotspot operations" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "wirespot" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.wirespot. All rights reserved." "\0"
+            VALUE "InternalName", "WireSpot" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Vexel Innovations. All rights reserved." "\0"
             VALUE "OriginalFilename", "wirespot.exe" "\0"
-            VALUE "ProductName", "wirespot" "\0"
+            VALUE "ProductName", "WireSpot" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
