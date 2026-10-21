@@ -749,9 +749,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const account = savedAccount ? JSON.parse(savedAccount) : null;
   const userName = document.getElementById('current-user-name');
   const userEmail = document.getElementById('current-user-email');
+  const updateAccountHeader = profile => {
+    if (!profile) return;
+    if (userName) userName.textContent = profile.organization || 'WireSpot Operator';
+    if (userEmail) userEmail.textContent = profile.email || 'Signed in';
+  };
   if (account) {
-    if (userName) userName.textContent = account.organization || 'WireSpot Operator';
-    if (userEmail) userEmail.textContent = account.email || '';
+    updateAccountHeader(account);
+  } else if (localStorage.getItem('wirespot_web_session')) {
+    updateAccountHeader({ organization: 'WireSpot Operator', email: 'Signed in' });
   }
   const authModal = document.getElementById('modal-auth');
   const authClose = document.getElementById('btn-close-auth');
@@ -771,6 +777,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tokenInput) tokenInput.value = config.token || '';
     if (typeof renderCloudCredentials === 'function') renderCloudCredentials();
     if (generatedCredentials) generatedCredentials.style.display = 'block';
+    let profile = null;
+    try {
+      profile = JSON.parse(localStorage.getItem('wirespot_web_account') || 'null');
+    } catch (_) {
+      profile = null;
+    }
+    updateAccountHeader(profile || { organization: config.organizationId, email: 'Signed in' });
+    if (config.url && config.token) {
+      const syncLabel = document.getElementById('sync-status-label');
+      if (syncLabel) syncLabel.textContent = 'Cloud connected';
+    }
     [formLogin, formToken, formReg, formRecovery].forEach(form => { if (form) form.style.display = 'none'; });
     [tabAuthLogin, tabAuthToken, tabAuthReg].forEach(tab => { if (tab) tab.style.display = 'none'; });
     if (authSubtitle) authSubtitle.textContent = 'Your account is connected.';
@@ -1026,6 +1043,13 @@ document.addEventListener('DOMContentLoaded', () => {
       updateSyncIndicator(true);
       return true;
     } catch (error) {
+      // A brand-new workspace legitimately has no backup yet. The API is
+      // still reachable and authenticated in that case, so do not report a
+      // disconnected cloud connection just because latest returns 404.
+      if (String(error.message || error).includes('(404)')) {
+        updateSyncIndicator(true);
+        return false;
+      }
       updateSyncIndicator(false);
       console.warn('WireSpot cloud hydration failed:', error);
       return false;
@@ -1117,6 +1141,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   signOutButton?.addEventListener('click', () => {
     localStorage.removeItem('wirespot_web_session');
+    localStorage.removeItem('wirespot_web_account');
+    updateAccountHeader({ organization: 'WireSpot Operator', email: 'Not signed in' });
+    updateSyncIndicator(false);
     authModal?.classList.remove('active');
     openAuth(false);
     showToast('You have been signed out.', 'info');
