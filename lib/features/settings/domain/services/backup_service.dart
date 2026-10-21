@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/vpn/wireguard_vpn_service.dart';
+import '../../../hotspot/domain/services/hotspot_service.dart';
+import '../../../routers/domain/entities/router_entity.dart';
 import '../entities/app_settings.dart';
 import '../entities/backup_payload.dart';
 import '../entities/printer_config_entity.dart';
@@ -18,13 +20,16 @@ class BackupService {
     required SettingsRepository repository,
     required AppDatabase database,
     required WireGuardVpnService wireGuardVpnService,
+    HotspotService? hotspotService,
   }) : _repository = repository,
        _database = database,
-       _wireGuardVpnService = wireGuardVpnService;
+       _wireGuardVpnService = wireGuardVpnService,
+       _hotspotService = hotspotService;
 
   final SettingsRepository _repository;
   final AppDatabase _database;
   final WireGuardVpnService _wireGuardVpnService;
+  final HotspotService? _hotspotService;
 
   Future<BackupPayload> buildBackup() async {
     final printers = await _repository.getPrinters();
@@ -51,6 +56,44 @@ class BackupService {
     final groups = await _database.select(_database.routerGroups).get();
     final wgConfigs = await _wireGuardVpnService.getSavedTunnels();
 
+    final routerSnapshots = <Map<String, Object?>>[];
+    for (final r in routers) {
+      final snapshot = <String, Object?>{
+        'id': r.id,
+        'groupId': r.groupId,
+        'vendor': r.vendor,
+        'name': r.name,
+        'host': r.host,
+        'apiPort': r.apiPort,
+        'useSsl': r.useSsl,
+        'requireVpn': r.requireVpn,
+        'remoteAccessMode': r.remoteAccessMode,
+        'username': r.username,
+        'identity': r.identity,
+        'version': r.version,
+        'boardName': r.boardName,
+        'isEnabled': r.isEnabled,
+        'lastConnectedAt': r.lastConnectedAt?.toUtc().toIso8601String(),
+        'createdAt': r.createdAt.toIso8601String(),
+      };
+      final hotspotService = _hotspotService;
+      if (hotspotService != null) {
+        try {
+          final entity = _routerEntityFromRecord(r);
+          final sessions = await hotspotService.getActiveSessions(entity);
+          snapshot['status'] = 'online';
+          snapshot['users'] = sessions.length;
+          snapshot['lastConnectedAt'] = DateTime.now()
+              .toUtc()
+              .toIso8601String();
+        } on Object {
+          snapshot['status'] = 'offline';
+          snapshot['users'] = 0;
+        }
+      }
+      routerSnapshots.add(snapshot);
+    }
+
     return BackupPayload(
       version: 1,
       exportedAt: DateTime.now(),
@@ -65,26 +108,7 @@ class BackupService {
             'isDefault': printer.isDefault,
           },
       ],
-      routers: [
-        for (final r in routers)
-          {
-            'id': r.id,
-            'groupId': r.groupId,
-            'vendor': r.vendor,
-            'name': r.name,
-            'host': r.host,
-            'apiPort': r.apiPort,
-            'useSsl': r.useSsl,
-            'requireVpn': r.requireVpn,
-            'remoteAccessMode': r.remoteAccessMode,
-            'username': r.username,
-            'identity': r.identity,
-            'version': r.version,
-            'boardName': r.boardName,
-            'isEnabled': r.isEnabled,
-            'createdAt': r.createdAt.toIso8601String(),
-          },
-      ],
+      routers: routerSnapshots,
       hotspotProfiles: [
         for (final p in profiles)
           {
@@ -333,4 +357,29 @@ class BackupService {
     }
     return value?.toString().toLowerCase() == 'true';
   }
+}
+
+RouterEntity _routerEntityFromRecord(RouterRecord record) {
+  return RouterEntity(
+    id: record.id,
+    groupId: record.groupId,
+    vendor: RouterVendor.fromName(record.vendor),
+    name: record.name,
+    host: record.host,
+    apiPort: record.apiPort,
+    useSsl: record.useSsl,
+    requireVpn: record.requireVpn,
+    remoteAccessMode: RouterRemoteAccessMode.fromName(
+      record.remoteAccessMode,
+      requireVpn: record.requireVpn,
+    ),
+    username: record.username,
+    identity: record.identity,
+    version: record.version,
+    boardName: record.boardName,
+    isEnabled: record.isEnabled,
+    lastConnectedAt: record.lastConnectedAt,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+  );
 }

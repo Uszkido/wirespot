@@ -277,6 +277,7 @@ Future<void> configureDependencies() async {
         repository: sl<SettingsRepository>(),
         database: sl<AppDatabase>(),
         wireGuardVpnService: sl<WireGuardVpnService>(),
+        hotspotService: sl<HotspotService>(),
       ),
     )
     ..registerLazySingleton<CloudBackupService>(
