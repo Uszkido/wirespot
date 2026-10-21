@@ -91,6 +91,54 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   };
 
+  const recordKey = record => {
+    if (!record || typeof record !== 'object') return `anonymous-${Math.random()}`;
+    return String(record.id || record.name || record.code || record.host || JSON.stringify(record));
+  };
+
+  // Keep local-only records, while applying the cloud version when both
+  // devices contain the same record. This mirrors the mobile companion merge
+  // policy and prevents the web dashboard from replacing the shared backup
+  // with its smaller browser-only schema.
+  const mergeRecords = (local, remote) => {
+    const merged = new Map();
+    (Array.isArray(local) ? local : []).forEach(record => merged.set(recordKey(record), record));
+    (Array.isArray(remote) ? remote : []).forEach(record => merged.set(recordKey(record), record));
+    return [...merged.values()];
+  };
+
+  const buildWebBackup = () => ({
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    settings: state.businessSettings || {},
+    routers: state.routers,
+    hotspotUsers: state.hotspotUsers,
+    userProfiles: state.userProfiles,
+    sessions: state.sessions,
+    vouchers: state.vouchers,
+    telemetry: state.telemetry
+  });
+
+  const mergeCloudBackups = (local, remote) => {
+    const localBackup = local || buildWebBackup();
+    const remoteBackup = remote || {};
+    return {
+      version: Math.max(Number(localBackup.version) || 1, Number(remoteBackup.version) || 1),
+      exportedAt: new Date().toISOString(),
+      settings: { ...(localBackup.settings || {}), ...(remoteBackup.settings || {}) },
+      routers: mergeRecords(localBackup.routers, remoteBackup.routers),
+      hotspotUsers: mergeRecords(localBackup.hotspotUsers, remoteBackup.hotspotUsers),
+      userProfiles: mergeRecords(localBackup.userProfiles, remoteBackup.userProfiles),
+      sessions: mergeRecords(localBackup.sessions, remoteBackup.sessions),
+      vouchers: mergeRecords(localBackup.vouchers, remoteBackup.vouchers),
+      telemetry: mergeRecords(localBackup.telemetry, remoteBackup.telemetry),
+      printers: mergeRecords(localBackup.printers, remoteBackup.printers),
+      hotspotProfiles: mergeRecords(localBackup.hotspotProfiles, remoteBackup.hotspotProfiles),
+      routerGroups: mergeRecords(localBackup.routerGroups, remoteBackup.routerGroups),
+      wireGuardConfigs: mergeRecords(localBackup.wireGuardConfigs, remoteBackup.wireGuardConfigs)
+    };
+  };
+
   const currentCurrency = () => localStorage.getItem('wirespot_currency') || 'NGN';
   const formatMoney = amount => {
     const currency = currentCurrency();
@@ -934,6 +982,27 @@ document.addEventListener('DOMContentLoaded', () => {
     return payload;
   };
 
+  const hydrateFromCloud = async () => {
+    if (!cloudConfig.url || !cloudConfig.token) return false;
+    try {
+      const result = await cloudRequest('api/v1/backup/latest');
+      if (!result?.backup) return false;
+      applyCloudBackup(result.backup);
+      saveState();
+      renderRouters(); renderHotspotUsers(); renderUserProfiles(); renderSessions(); renderVouchers(); renderSummary();
+      updateSyncIndicator(true);
+      return true;
+    } catch (error) {
+      updateSyncIndicator(false);
+      console.warn('WireSpot cloud hydration failed:', error);
+      return false;
+    }
+  };
+
+  // A signed-in web dashboard should reflect the shared workspace immediately,
+  // without requiring the operator to press Sync Now first.
+  void hydrateFromCloud();
+
   document.getElementById('btn-save-cloud')?.addEventListener('click', () => {
     const config = readCloudConfig();
     localStorage.setItem(cloudConfigKey, JSON.stringify(config));
@@ -958,25 +1027,24 @@ document.addEventListener('DOMContentLoaded', () => {
     btnTriggerSync.addEventListener('click', async () => {
       btnTriggerSync.disabled = true;
       try {
+        const localBackup = buildWebBackup();
+        let remoteBackup = null;
+        try {
+          const latest = await cloudRequest('api/v1/backup/latest');
+          remoteBackup = latest?.backup || null;
+        } catch (error) {
+          if (!String(error.message || error).includes('404')) throw error;
+        }
+        const mergedBackup = mergeCloudBackups(localBackup, remoteBackup);
         await cloudRequest('api/v1/sync/vouchers', {
           method: 'POST',
           body: JSON.stringify({ vouchers: state.vouchers })
         });
         await cloudRequest('api/v1/backup/upload', {
           method: 'POST',
-          body: JSON.stringify({
-            version: 1,
-            exportedAt: new Date().toISOString(),
-            routers: state.routers,
-            hotspotUsers: state.hotspotUsers,
-            userProfiles: state.userProfiles,
-            sessions: state.sessions,
-            vouchers: state.vouchers,
-            telemetry: state.telemetry
-          })
+          body: JSON.stringify(mergedBackup)
         });
-        const remote = await cloudRequest('api/v1/routers');
-        if (Array.isArray(remote.routers)) state.routers = remote.routers;
+        applyCloudBackup(mergedBackup);
         state.cloudQueue.forEach(q => q.status = 'completed');
         state.events.unshift({ time: new Date().toTimeString().substring(0, 8), source: 'CloudSyncService', desc: 'Synchronized vouchers and router inventory with WireSpot Cloud', status: 'success' });
         saveState(); renderCloudQueue(); renderEvents(); renderRouters(); renderSummary();
