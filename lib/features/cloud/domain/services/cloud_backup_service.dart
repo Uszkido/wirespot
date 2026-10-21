@@ -87,6 +87,9 @@ class CloudBackupService {
         local.hotspotProfiles,
         remote.hotspotProfiles,
       ),
+      hotspotUsers: _mergeRecords(local.hotspotUsers, remote.hotspotUsers),
+      sessions: _mergeRecords(local.sessions, remote.sessions),
+      vouchers: _mergeRecords(local.vouchers, remote.vouchers),
       routerGroups: _mergeRecords(local.routerGroups, remote.routerGroups),
       wireGuardConfigs: _mergeRecords(
         local.wireGuardConfigs,

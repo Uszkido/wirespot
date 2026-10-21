@@ -53,10 +53,15 @@ class BackupService {
 
     final routers = await _database.select(_database.routers).get();
     final profiles = await _database.select(_database.hotspotProfiles).get();
+    final voucherHistory = await _database
+        .select(_database.voucherHistory)
+        .get();
     final groups = await _database.select(_database.routerGroups).get();
     final wgConfigs = await _wireGuardVpnService.getSavedTunnels();
 
     final routerSnapshots = <Map<String, Object?>>[];
+    final hotspotUsers = <Map<String, Object?>>[];
+    final sessionSnapshots = <Map<String, Object?>>[];
     for (final r in routers) {
       final snapshot = <String, Object?>{
         'id': r.id,
@@ -80,9 +85,52 @@ class BackupService {
       if (hotspotService != null) {
         try {
           final entity = _routerEntityFromRecord(r);
-          final sessions = await hotspotService.getActiveSessions(entity);
+          final users = await hotspotService.getUsers(entity);
+          hotspotUsers.addAll(
+            users.map(
+              (user) => {
+                'id': user.id,
+                'routerId': r.id,
+                'routerName': r.name,
+                'username': user.name,
+                'profile': user.profile,
+                'server': user.server,
+                'comment': user.comment,
+                'disabled': user.disabled,
+                'uptime': user.uptime,
+                'bytesIn': user.bytesIn,
+                'bytesOut': user.bytesOut,
+                'limitUptime': user.limitUptime,
+                'limitBytesTotal': user.limitBytesTotal,
+              },
+            ),
+          );
+        } on Object {
+          // A user listing failure should not hide router health or sessions.
+        }
+        try {
+          final entity = _routerEntityFromRecord(r);
+          final activeSessions = await hotspotService.getActiveSessions(entity);
+          sessionSnapshots.addAll(
+            activeSessions.map(
+              (session) => {
+                'id': session.id,
+                'routerId': r.id,
+                'routerName': r.name,
+                'username': session.user,
+                'address': session.address,
+                'macAddress': session.macAddress,
+                'uptime': session.uptime,
+                'sessionTimeLeft': session.sessionTimeLeft,
+                'bytesIn': session.bytesIn,
+                'bytesOut': session.bytesOut,
+                'loginBy': session.loginBy,
+                'server': session.server,
+              },
+            ),
+          );
           snapshot['status'] = 'online';
-          snapshot['users'] = sessions.length;
+          snapshot['users'] = activeSessions.length;
           snapshot['lastConnectedAt'] = DateTime.now()
               .toUtc()
               .toIso8601String();
@@ -120,6 +168,25 @@ class BackupService {
             'priceMinor': p.priceMinor,
             'currency': p.currency,
             'createdAt': p.createdAt.toIso8601String(),
+          },
+      ],
+      hotspotUsers: hotspotUsers,
+      sessions: sessionSnapshots,
+      vouchers: [
+        for (final voucher in voucherHistory)
+          {
+            'id': voucher.id,
+            'routerId': voucher.routerId,
+            'username': voucher.username,
+            'code': voucher.username,
+            'profileId': voucher.profileId,
+            'priceMinor': voucher.priceMinor,
+            'currency': voucher.currency,
+            'validityMinutes': voucher.validityMinutes,
+            'generatedAt': voucher.generatedAt.toUtc().toIso8601String(),
+            'printedAt': voucher.printedAt?.toUtc().toIso8601String(),
+            'soldAt': voucher.soldAt?.toUtc().toIso8601String(),
+            'note': voucher.note,
           },
       ],
       routerGroups: [

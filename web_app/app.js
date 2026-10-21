@@ -70,8 +70,19 @@ document.addEventListener('DOMContentLoaded', () => {
         users: Number(router.users || 0),
       }));
     }
-    if (Array.isArray(backup.vouchers)) state.vouchers = backup.vouchers;
-    if (Array.isArray(backup.hotspotUsers)) state.hotspotUsers = backup.hotspotUsers;
+    if (Array.isArray(backup.vouchers)) {
+      state.vouchers = backup.vouchers.map(voucher => ({
+        ...voucher,
+        code: voucher.code || voucher.username || voucher.id || ''
+      }));
+    }
+    if (Array.isArray(backup.hotspotUsers)) {
+      state.hotspotUsers = backup.hotspotUsers.map(user => ({
+        ...user,
+        username: user.username || user.name || user.id || '',
+        profile: user.profile || 'default'
+      }));
+    }
     if (Array.isArray(backup.userProfiles)) state.userProfiles = backup.userProfiles;
     if (Array.isArray(backup.sessions)) state.sessions = backup.sessions;
     if (Array.isArray(backup.telemetry)) state.telemetry = backup.telemetry;

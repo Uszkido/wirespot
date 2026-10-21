@@ -6,6 +6,9 @@ class BackupPayload {
     required this.printers,
     this.routers = const [],
     this.hotspotProfiles = const [],
+    this.hotspotUsers = const [],
+    this.sessions = const [],
+    this.vouchers = const [],
     this.routerGroups = const [],
     this.wireGuardConfigs = const [],
   });
@@ -16,6 +19,9 @@ class BackupPayload {
   final List<Map<String, Object?>> printers;
   final List<Map<String, Object?>> routers;
   final List<Map<String, Object?>> hotspotProfiles;
+  final List<Map<String, Object?>> hotspotUsers;
+  final List<Map<String, Object?>> sessions;
+  final List<Map<String, Object?>> vouchers;
   final List<Map<String, Object?>> routerGroups;
   final List<Map<String, Object?>> wireGuardConfigs;
 
@@ -27,6 +33,9 @@ class BackupPayload {
       'printers': printers,
       'routers': routers,
       'hotspotProfiles': hotspotProfiles,
+      'hotspotUsers': hotspotUsers,
+      'sessions': sessions,
+      'vouchers': vouchers,
       'routerGroups': routerGroups,
       'wireGuardConfigs': wireGuardConfigs,
     };
@@ -37,6 +46,9 @@ class BackupPayload {
     final rawPrinters = json['printers'];
     final rawRouters = json['routers'];
     final rawProfiles = json['hotspotProfiles'];
+    final rawUsers = json['hotspotUsers'];
+    final rawSessions = json['sessions'];
+    final rawVouchers = json['vouchers'];
     final rawGroups = json['routerGroups'];
     final rawWg = json['wireGuardConfigs'];
     final rawVersion = json['version'];
@@ -55,6 +67,9 @@ class BackupPayload {
       printers: _parseList(rawPrinters),
       routers: _parseList(rawRouters),
       hotspotProfiles: _parseList(rawProfiles),
+      hotspotUsers: _parseList(rawUsers),
+      sessions: _parseList(rawSessions),
+      vouchers: _parseList(rawVouchers),
       routerGroups: _parseList(rawGroups),
       wireGuardConfigs: _parseList(rawWg),
     );
