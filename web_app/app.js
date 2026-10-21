@@ -1002,7 +1002,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // every request silently failed. Re-enter the auth flow so the hosted
       // dashboard can recover without manual localStorage cleanup.
       localStorage.removeItem('wirespot_web_session');
-      localStorage.removeItem('wirespot_web_cloud_config');
+      // Keep the organization ID so legacy workspaces reconnect to the same
+      // cloud data when the user signs in again.
+      localStorage.setItem('wirespot_web_cloud_config', JSON.stringify({
+        ...config,
+        token: ''
+      }));
       openAuth(false);
     }
     if (!response.ok) throw new Error(payload.error || `Cloud request failed (${response.status}).`);
