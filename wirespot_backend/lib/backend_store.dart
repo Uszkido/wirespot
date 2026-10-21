@@ -14,6 +14,7 @@ class BackendStore {
   static final _entitlements = <String, Map<String, dynamic>>{};
   static final _commands = <String, List<Map<String, dynamic>>>{};
   static final _pairingCodes = <String, Map<String, dynamic>>{};
+  static final _accounts = <String, Map<String, dynamic>>{};
   static final _path =
       Platform.environment['WIRESPOT_STORE_PATH'] ?? '.wirespot/store.json';
   static bool _loaded = false;
@@ -31,6 +32,7 @@ class BackendStore {
       _readLists(root['commands'], _commands);
       _readMaps(root['backups'], _backups);
       _readMaps(root['entitlements'], _entitlements);
+      _readMaps(root['accounts'], _accounts);
       if (root['backupTimes'] is Map) {
         for (final e in (root['backupTimes'] as Map).entries) {
           final value = DateTime.tryParse(e.value.toString());
@@ -95,6 +97,17 @@ class BackendStore {
     _ensureLoaded();
     _backups[orgId] = backup;
     _backupTimes[orgId] = DateTime.now().toUtc();
+    persist();
+  }
+
+  static Map<String, dynamic>? accountFor(String email) {
+    _ensureLoaded();
+    return _accounts[email.trim().toLowerCase()];
+  }
+
+  static void saveAccount(String email, Map<String, dynamic> account) {
+    _ensureLoaded();
+    _accounts[email.trim().toLowerCase()] = Map<String, dynamic>.from(account);
     persist();
   }
 
@@ -168,6 +181,7 @@ class BackendStore {
             _backupTimes.map((k, v) => MapEntry(k, v.toIso8601String())),
         'telemetryEvents': _telemetryEvents,
         'entitlements': _entitlements,
+        'accounts': _accounts,
         'commands': _commands,
       }));
       if (file.existsSync()) file.deleteSync();

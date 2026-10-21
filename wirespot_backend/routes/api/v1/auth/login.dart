@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dart_frog/dart_frog.dart';
 import 'package:wirespot_backend/auth.dart';
+import 'package:wirespot_backend/backend_store.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   if (context.request.method != HttpMethod.post) {
@@ -30,7 +31,9 @@ Future<Response> onRequest(RequestContext context) async {
 
     final token =
         'ws_jwt_${DateTime.now().millisecondsSinceEpoch}_${email.hashCode.abs()}';
-    final orgId = 'org_${email.split('@').first}';
+    final account = BackendStore.accountFor(email);
+    final orgId = account?['organizationId']?.toString() ??
+        'org_${email.split('@').first}';
 
     return Response.json(
       body: {
@@ -38,6 +41,8 @@ Future<Response> onRequest(RequestContext context) async {
         'message': 'Signed in successfully.',
         'user': {
           'email': email,
+          if (account?['organizationName'] != null)
+            'organizationName': account!['organizationName'],
           'organizationId': orgId,
           'lastLogin': DateTime.now().toIso8601String(),
         },
