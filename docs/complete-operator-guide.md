@@ -1,9 +1,10 @@
-# WireSpot Complete Operator Guide
+# WireSpot operator guide
 
-This guide explains WireSpot from setup to daily operation, activation,
-testing, backup, and Play Store preparation.
+This guide covers installation, router setup, daily hotspot work, cloud sync,
+backups, licensing, and release checks. It is written for an operator who is
+setting up a site for the first time.
 
-## 1. What WireSpot Is
+## 1. Overview
 
 WireSpot is an Android app for managing business hotspot operations. MikroTik
 RouterOS is the current full live connector. WireSpot also includes a
@@ -14,7 +15,7 @@ It supports router management, local LAN access, WireGuard remote access,
 hotspot users, profiles, sessions, voucher generation, QR codes, ticket
 printing, reporting, scheduler settings, backup, app security, and licensing.
 
-## 2. Main Features
+## 2. Available features
 
 - App login with local PIN and biometric-ready flow.
 - Secure router credential storage.

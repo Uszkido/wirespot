@@ -1,7 +1,26 @@
-OpenWrt (LuCI & ubus API), TP-Link Omada (Controller OpenAPI), Ubiquiti
-UniFi (Controller REST API), and Generic Routers (HTTP/REST/SNMP).
+# WireSpot
 
-## Project Status
+WireSpot is a hotspot operations tool for small ISPs, hotels, estates, and
+field technicians. The Flutter application manages routers, subscribers,
+vouchers, receipts, and reports from one workspace. A companion web dashboard
+provides shared cloud access for teams.
+
+MikroTik RouterOS is the production connector today. Ruijie/Reyee, OpenWrt,
+TP-Link Omada, Ubiquiti UniFi, and generic routers have connection and discovery
+support where noted below; write operations for those vendors are still being
+completed and should be tested before deployment.
+
+## Project status
+
+The repository is under active development. The current CI status, supported
+platforms, and known limitations are listed here rather than presented as
+finished product claims.
+
+Supported discovery paths include OpenWrt (LuCI/ubus), TP-Link Omada
+(controller API), Ubiquiti UniFi (controller REST), and generic HTTP/REST/SNMP
+routers.
+
+## Project status
 
 | Item | Status |
 | --- | --- |
@@ -13,17 +32,17 @@ UniFi (Controller REST API), and Generic Routers (HTTP/REST/SNMP).
 | Static analysis | Passing (0 issues) |
 | Tests | 82 passing |
 | Multi-Vendor Connectors | MikroTik hotspot/voucher connector plus authenticated connection/discovery foundations for Ruijie, OpenWrt, Omada, UniFi, and Generic |
-| Web Dashboard | Fully Synchronized & Static Hosting Ready (`web_app/`) |
+| Web Dashboard | Static dashboard with account, router, voucher, report, and cloud-sync views (`web_app/`) |
 | Latest APK output | `outputs\WireSpot-0.1.27+31-brand-collaboration-debug.apk` |
 | Latest pushed commit | See GitHub `main` |
 
-## Why WireSpot
+## What WireSpot does
 
 Hotspot operators often manage routers with several disconnected tools: vendor
 dashboards for router work, spreadsheets for sales, manual voucher records,
 separate QR generators, and unsafe public router access for remote support.
 
-WireSpot solves that with a focused Android workflow:
+WireSpot brings the routine work into one operator workflow:
 
 - Manage MikroTik, Ruijie / Reyee, OpenWrt, TP-Link Omada, Ubiquiti UniFi, and
   Generic routers with active vendor connectors.
@@ -36,7 +55,7 @@ WireSpot solves that with a focused Android workflow:
 - Protect app access with PIN, biometric-ready authentication, encrypted local
   storage, and device-bound licensing.
 
-## Highlights
+## Main capabilities
 
 - **RouterOS API client from scratch**: socket protocol, command execution,
   login, read/write, listen support, timeout/error handling, SSL-ready paths.
@@ -352,7 +371,7 @@ Still required before production upload:
 - run internal testing
 - complete production license validation path
 
-## Roadmap To 100%
+## Planned work
 
 - Real Play Billing or server-side license validation.
 - Release signing and Play Store AAB.

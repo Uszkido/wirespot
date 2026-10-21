@@ -2,7 +2,7 @@
 
 ## One-line Summary
 
-WireSpot is a modern Android hotspot management app for business Wi-Fi
+WireSpot is an Android hotspot management app for business Wi-Fi
 operators, starting with full MikroTik RouterOS support and expanding toward
 multi-brand router control for Ruijie/Reyee, OpenWrt, TP-Link Omada, Ubiquiti
 UniFi, and generic routers.

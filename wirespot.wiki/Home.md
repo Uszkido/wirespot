@@ -1,12 +1,12 @@
-# 🌐 WireSpot
+# WireSpot
 
-**Secure multi-brand hotspot operations built by [Vexel Innovations](https://vexel-innovations.vercel.app/) in collaboration with TechNova Technologies.**
+WireSpot is a hotspot operations tool from [Vexel Innovations](https://vexel-innovations.vercel.app/), developed in collaboration with TechNova Technologies.
 
-WireSpot is a modern Flutter Android/iOS application for hotspot operators, technicians, and small ISPs who manage business Wi-Fi and voucher networks. It brings router management, hotspot users, voucher generation, thermal printing, reporting, WireGuard remote access, backup, and licensing into one mobile app.
+The app is intended for hotspot operators, technicians, and small ISPs. It covers router management, hotspot users, vouchers, thermal printing, reports, WireGuard remote access, backup, and licensing.
 
 ---
 
-## ✨ Key Features
+## Key features
 
 | Feature | Description |
 |---------|-------------|

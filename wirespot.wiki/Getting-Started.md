@@ -1,4 +1,4 @@
-# 🚀 Getting Started
+# Getting started
 
 ## Requirements
 
@@ -14,7 +14,7 @@
 - MikroTik RouterOS router with API enabled for full live hotspot operations
 - Ruijie/Reyee, OpenWrt, TP-Link Omada, UniFi, or generic router for planned connector discovery
 
-### Future iOS
+### iOS development
 - macOS, Xcode, CocoaPods, and Apple Developer account (see [[FAQ]])
 
 ---
@@ -94,7 +94,7 @@ session; the dashboard does not ship with fake router records.
 
 ---
 
-## What's Next?
+## Next steps
 
 - [[User Manual]] — Full end-to-end operator guide
 - [[Router Setup and Fleet Management]] — Configure your first router

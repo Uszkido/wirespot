@@ -1,4 +1,4 @@
-**🌐 [WireSpot Wiki](Home)**
+**[WireSpot Wiki](Home)**
 
 ---
 
