@@ -546,17 +546,31 @@ class _RouterHealthPanel extends ConsumerWidget {
   }
 }
 
-class _InterfacesPanel extends StatelessWidget {
+class _InterfacesPanel extends StatefulWidget {
   const _InterfacesPanel({required this.interfaces, required this.text});
 
   final List<RouterOsInterface> interfaces;
   final AppText text;
 
   @override
+  State<_InterfacesPanel> createState() => _InterfacesPanelState();
+}
+
+class _InterfacesPanelState extends State<_InterfacesPanel> {
+  bool _showAll = false;
+
+  @override
   Widget build(BuildContext context) {
+    final interfaces = widget.interfaces;
+    final text = widget.text;
     if (interfaces.isEmpty) {
       return _DashboardPanel(child: Text(text.noInterfaces));
     }
+
+    final active = interfaces
+        .where((item) => item.running && !item.disabled)
+        .toList(growable: false);
+    final visible = _showAll ? interfaces : active;
 
     return _DashboardPanel(
       child: Column(
@@ -564,24 +578,34 @@ class _InterfacesPanel extends StatelessWidget {
           Row(
             children: [
               Text(
-                '${interfaces.length} interfaces',
+                _showAll
+                    ? '${interfaces.length} interfaces'
+                    : '${active.length} active interfaces',
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               const Spacer(),
-              Text(
-                '${interfaces.where((item) => item.running && !item.disabled).length} connected',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
+              TextButton.icon(
+                onPressed: () => setState(() => _showAll = !_showAll),
+                icon: Icon(
+                  _showAll ? Icons.visibility_off_outlined : Icons.visibility,
+                  size: 18,
                 ),
+                label: Text(_showAll ? 'Show active only' : 'Show all'),
               ),
             ],
           ),
           const Divider(height: 20),
-          // Show every interface reported by the connected router. The
-          // previous six-item cap hid ports on larger MikroTik models and
-          // made the dashboard look as if those ports were unavailable.
-          for (final interface in interfaces)
-            _InterfaceRow(interface: interface, text: text),
+          if (visible.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Text(
+                'No active interfaces. Tap “Show all” to inspect every port.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            )
+          else
+            for (final interface in visible)
+              _InterfaceRow(interface: interface, text: text),
         ],
       ),
     );
