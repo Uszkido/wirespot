@@ -6,6 +6,7 @@ class MetricCard extends StatelessWidget {
     required this.label,
     required this.value,
     this.onTap,
+    this.width,
     super.key,
   });
 
@@ -13,6 +14,7 @@ class MetricCard extends StatelessWidget {
   final String label;
   final String value;
   final VoidCallback? onTap;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class MetricCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return SizedBox(
-      width: 160,
+      width: width ?? 160,
       height: 132,
       child: Card(
         child: InkWell(

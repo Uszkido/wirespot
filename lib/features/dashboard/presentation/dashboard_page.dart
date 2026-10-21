@@ -238,37 +238,49 @@ class _DashboardContent extends ConsumerWidget {
         children: [
           _RouterHeader(snapshot: snapshot),
           const SizedBox(height: 20),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              MetricCard(
-                icon: Icons.people_outline,
-                label: text.onlineUsers,
-                value: snapshot.onlineUsers.toString(),
-                onTap: () => context.push(AppRoutes.hotspotSessions),
-              ),
-              MetricCard(
-                icon: Icons.receipt_long_outlined,
-                label: text.todaySales,
-                value:
-                    '${snapshot.todaySalesCurrency} '
-                    '${(snapshot.todaySalesMinor / 100).toStringAsFixed(0)}',
-                onTap: () => _showTodaySales(context, snapshot),
-              ),
-              MetricCard(
-                icon: Icons.memory_outlined,
-                label: 'CPU',
-                value: resource == null ? '--' : '${resource.cpuLoad}%',
-                onTap: () => _showCpuDetails(context, resource),
-              ),
-              MetricCard(
-                icon: Icons.storage_outlined,
-                label: text.memory,
-                value: memoryPercent == null ? '--' : '$memoryPercent%',
-                onTap: () => _showMemoryDetails(context, resource),
-              ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth >= 900 ? 4 : 2;
+              const gap = 12.0;
+              final cardWidth =
+                  (constraints.maxWidth - (gap * (columns - 1))) / columns;
+              return Wrap(
+                spacing: gap,
+                runSpacing: gap,
+                children: [
+                  MetricCard(
+                    width: cardWidth,
+                    icon: Icons.people_outline,
+                    label: text.onlineUsers,
+                    value: snapshot.onlineUsers.toString(),
+                    onTap: () => context.push(AppRoutes.hotspotSessions),
+                  ),
+                  MetricCard(
+                    width: cardWidth,
+                    icon: Icons.receipt_long_outlined,
+                    label: text.todaySales,
+                    value:
+                        '${snapshot.todaySalesCurrency} '
+                        '${(snapshot.todaySalesMinor / 100).toStringAsFixed(0)}',
+                    onTap: () => _showTodaySales(context, snapshot),
+                  ),
+                  MetricCard(
+                    width: cardWidth,
+                    icon: Icons.memory_outlined,
+                    label: 'CPU',
+                    value: resource == null ? '--' : '${resource.cpuLoad}%',
+                    onTap: () => _showCpuDetails(context, resource),
+                  ),
+                  MetricCard(
+                    width: cardWidth,
+                    icon: Icons.storage_outlined,
+                    label: text.memory,
+                    value: memoryPercent == null ? '--' : '$memoryPercent%',
+                    onTap: () => _showMemoryDetails(context, resource),
+                  ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 28),
           SectionHeader(title: text.routerHealth),
@@ -428,11 +440,27 @@ class _RouterHeader extends ConsumerWidget {
     final text = AppText(languageCode);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outlineVariant),
+        gradient: LinearGradient(
+          colors: [
+            colorScheme.primaryContainer,
+            colorScheme.surfaceContainerLow,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withValues(alpha: 0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Row(
         children: [
