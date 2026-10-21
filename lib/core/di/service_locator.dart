@@ -171,6 +171,7 @@ Future<void> configureDependencies() async {
         sl<AppDatabase>(),
         sl<RouterCredentialStore>(),
         cloudWorkspaceSyncService: sl<CloudWorkspaceSyncService>(),
+        cloudBackupService: sl<CloudBackupService>(),
       ),
     )
     ..registerLazySingleton<RuijieCloudConnectionService>(

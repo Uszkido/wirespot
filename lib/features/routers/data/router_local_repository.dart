@@ -6,6 +6,7 @@ import '../../../core/storage/router_credentials.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/entities/router_group_entity.dart';
 import '../domain/repositories/router_repository.dart';
+import '../../cloud/domain/services/cloud_backup_service.dart';
 import '../../cloud/domain/services/cloud_workspace_sync_service.dart';
 
 class RouterLocalRepository implements RouterRepository {
@@ -13,11 +14,14 @@ class RouterLocalRepository implements RouterRepository {
     this._database,
     this._credentialStore, {
     CloudWorkspaceSyncService? cloudWorkspaceSyncService,
-  }) : _cloudWorkspaceSyncService = cloudWorkspaceSyncService;
+    CloudBackupService? cloudBackupService,
+  }) : _cloudWorkspaceSyncService = cloudWorkspaceSyncService,
+       _cloudBackupService = cloudBackupService;
 
   final AppDatabase _database;
   final RouterCredentialStore _credentialStore;
   final CloudWorkspaceSyncService? _cloudWorkspaceSyncService;
+  final CloudBackupService? _cloudBackupService;
 
   @override
   Stream<List<RouterEntity>> watchRouters() {
@@ -81,6 +85,10 @@ class RouterLocalRepository implements RouterRepository {
         routerId: router.id,
         routerData: router.toJson(),
       );
+      // The web dashboard reads the shared backup snapshot. Publish the
+      // complete workspace after a router change so it appears online without
+      // requiring the operator to open Cloud Sync and press Sync Now.
+      await _cloudBackupService?.uploadCloudBackup();
     } catch (_) {
       // Local persistence must remain available while cloud sync is offline.
     }
@@ -92,6 +100,11 @@ class RouterLocalRepository implements RouterRepository {
       _database.routers,
     )..where((table) => table.id.equals(id))).go();
     await _credentialStore.delete(id);
+    try {
+      await _cloudBackupService?.uploadCloudBackup();
+    } catch (_) {
+      // Local deletion must remain available while cloud sync is offline.
+    }
   }
 
   @override
