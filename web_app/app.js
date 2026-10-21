@@ -993,6 +993,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (config.organizationId) headers['X-WireSpot-Organization'] = config.organizationId;
     const response = await fetch(`${config.url}/${path.replace(/^\//, '')}`, { ...options, headers });
     const payload = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      // Expired tokens previously left the dashboard looking signed in while
+      // every request silently failed. Re-enter the auth flow so the hosted
+      // dashboard can recover without manual localStorage cleanup.
+      localStorage.removeItem('wirespot_web_session');
+      localStorage.removeItem('wirespot_web_cloud_config');
+      openAuth(false);
+    }
     if (!response.ok) throw new Error(payload.error || `Cloud request failed (${response.status}).`);
     return payload;
   };
