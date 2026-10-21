@@ -852,7 +852,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch(`${baseUrl}/api/v1/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({
+            email,
+            password,
+            organizationId: configured.organizationId || undefined
+          })
         });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(payload.error || `Sign in failed (${response.status}).`);

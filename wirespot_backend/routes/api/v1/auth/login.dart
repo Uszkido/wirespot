@@ -21,6 +21,7 @@ Future<Response> onRequest(RequestContext context) async {
     final json = jsonDecode(bodyText) as Map<String, dynamic>;
     final email = json['email'] as String? ?? '';
     final password = json['password'] as String? ?? '';
+    final requestedOrganizationId = json['organizationId'] as String?;
 
     if (email.isEmpty || password.isEmpty) {
       return Response.json(
@@ -33,6 +34,7 @@ Future<Response> onRequest(RequestContext context) async {
         'ws_jwt_${DateTime.now().millisecondsSinceEpoch}_${email.hashCode.abs()}';
     final account = BackendStore.accountFor(email);
     final orgId = account?['organizationId']?.toString() ??
+        requestedOrganizationId?.trim() ??
         'org_${email.split('@').first}';
 
     return Response.json(
