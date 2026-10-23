@@ -136,6 +136,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     title: Text('Help & setup guide'),
                   ),
                 ),
+                const PopupMenuItem(
+                  value: AppRoutes.onboarding,
+                  child: ListTile(
+                    leading: Icon(Icons.auto_awesome_outlined),
+                    title: Text('Setup walkthrough'),
+                  ),
+                ),
                 PopupMenuItem(
                   value: AppRoutes.routers,
                   child: ListTile(
@@ -264,7 +271,7 @@ class _DashboardNavigation extends StatelessWidget {
     );
     final index = selected < 0 ? 0 : selected;
     void navigate(int value) {
-      if (value != index) context.go(_items[value].$2);
+      if (value != index) context.push(_items[value].$2);
     }
 
     if (rail) {
