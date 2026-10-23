@@ -82,4 +82,25 @@ void main() {
     );
     expect(BackendStore.sessionFor(expired), isNull);
   });
+
+  test('telemetry frames are retained and isolated by organization', () {
+    BackendStore.saveTelemetry('org-telemetry-a', [
+      {
+        'routerId': 'router-a',
+        'cpuLoad': 24.5,
+        'freeMemoryMb': 128,
+        'timestamp': '2026-10-23T10:00:00Z',
+      },
+    ]);
+    BackendStore.saveTelemetry('org-telemetry-b', [
+      {'routerId': 'router-b', 'cpuLoad': 61},
+    ]);
+
+    expect(BackendStore.telemetryFor('org-telemetry-a'), hasLength(1));
+    expect(BackendStore.telemetryFor('org-telemetry-a').single['routerId'],
+        'router-a');
+    expect(BackendStore.telemetryFor('org-telemetry-b').single['routerId'],
+        'router-b');
+    expect(BackendStore.telemetryFor('org-telemetry-a', limit: 0), hasLength(1));
+  });
 }

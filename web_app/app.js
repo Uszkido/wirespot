@@ -1074,9 +1074,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!config.url || !config.token) return false;
     cloudHydrationInFlight = true;
     try {
-      const result = await cloudRequest('api/v1/backup/latest');
-      if (!result?.backup) return false;
-      applyCloudBackup(result.backup);
+      let result = null;
+      try {
+        result = await cloudRequest('api/v1/backup/latest');
+      } catch (error) {
+        if (!String(error.message || error).includes('(404)')) throw error;
+      }
+      if (result?.backup) applyCloudBackup(result.backup);
+      const telemetry = await cloudRequest('api/v1/telemetry?limit=120').catch(() => null);
+      if (Array.isArray(telemetry?.telemetry) && telemetry.telemetry.length) {
+        state.telemetry = telemetry.telemetry;
+      }
+      if (!result?.backup && !telemetry?.telemetry?.length) return false;
       saveState();
       renderRouters(); renderHotspotUsers(); renderUserProfiles(); renderSessions(); renderVouchers(); renderSummary();
       updateSyncIndicator(true);
@@ -1349,12 +1358,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (config?.url && config.token) {
         btnRefresh.disabled = true;
         try {
-          const [routers, backup] = await Promise.all([
+          const [routers, backup, telemetry] = await Promise.all([
             cloudRequest('api/v1/routers'),
-            cloudRequest('api/v1/backup/latest').catch(() => null)
+            cloudRequest('api/v1/backup/latest').catch(() => null),
+            cloudRequest('api/v1/telemetry?limit=120').catch(() => null)
           ]);
           if (Array.isArray(routers?.routers)) state.routers = routers.routers;
           if (backup?.backup && typeof backup.backup === 'object') applyCloudBackup(backup.backup);
+          if (Array.isArray(telemetry?.telemetry) && telemetry.telemetry.length) state.telemetry = telemetry.telemetry;
           saveState();
           refreshMessage = 'Dashboard refreshed from WireSpot Cloud.';
         } catch (error) {

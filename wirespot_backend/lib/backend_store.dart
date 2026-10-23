@@ -11,6 +11,7 @@ class BackendStore {
   static final _backups = <String, Map<String, dynamic>>{};
   static final _backupTimes = <String, DateTime>{};
   static final _telemetryEvents = <String, int>{};
+  static final _telemetryFrames = <String, List<Map<String, dynamic>>>{};
   static final _entitlements = <String, Map<String, dynamic>>{};
   static final _commands = <String, List<Map<String, dynamic>>>{};
   static final _pairingCodes = <String, Map<String, dynamic>>{};
@@ -35,6 +36,7 @@ class BackendStore {
       _readMaps(root['entitlements'], _entitlements);
       _readMaps(root['accounts'], _accounts);
       _readMaps(root['sessions'], _sessions);
+      _readLists(root['telemetryFrames'], _telemetryFrames);
       if (root['backupTimes'] is Map) {
         for (final e in (root['backupTimes'] as Map).entries) {
           final value = DateTime.tryParse(e.value.toString());
@@ -187,6 +189,46 @@ class BackendStore {
     return count;
   }
 
+  /// Stores the latest authenticated telemetry frames for an organization.
+  /// Frames are retained in bounded per-organization history so dashboards can
+  /// render real measurements without allowing an unbounded process snapshot.
+  static void saveTelemetry(
+    String orgId,
+    Iterable<Map<String, dynamic>> frames, {
+    int maxFrames = 240,
+  }) {
+    _ensureLoaded();
+    final incoming = frames.toList(growable: false);
+    final stored = _telemetryFrames.putIfAbsent(
+      orgId,
+      () => <Map<String, dynamic>>[],
+    );
+    for (final frame in incoming) {
+      final routerId = frame['routerId']?.toString().trim();
+      if (routerId == null || routerId.isEmpty) continue;
+      stored.add(Map<String, dynamic>.from(frame));
+    }
+    if (stored.length > maxFrames) {
+      stored.removeRange(0, stored.length - maxFrames);
+    }
+    _telemetryEvents[orgId] = (_telemetryEvents[orgId] ?? 0) + incoming.length;
+    persist();
+  }
+
+  static List<Map<String, dynamic>> telemetryFor(
+    String orgId, {
+    int limit = 120,
+  }) {
+    _ensureLoaded();
+    final frames = _telemetryFrames[orgId] ?? const <Map<String, dynamic>>[];
+    final safeLimit = limit.clamp(1, 240).toInt();
+    final start = frames.length > safeLimit ? frames.length - safeLimit : 0;
+    return frames
+        .sublist(start)
+        .map((frame) => Map<String, dynamic>.from(frame))
+        .toList(growable: false);
+  }
+
   static Map<String, dynamic>? entitlementFor(String orgId) {
     _ensureLoaded();
     return _entitlements[orgId];
@@ -248,6 +290,7 @@ class BackendStore {
         'backupTimes':
             _backupTimes.map((k, v) => MapEntry(k, v.toIso8601String())),
         'telemetryEvents': _telemetryEvents,
+        'telemetryFrames': _telemetryFrames,
         'entitlements': _entitlements,
         'accounts': _accounts,
         'sessions': _sessions,

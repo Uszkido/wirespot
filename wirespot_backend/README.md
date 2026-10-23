@@ -65,7 +65,11 @@ For another Git provider, use the same Docker settings: root directory
 - `POST /api/v1/commands/pending`: Queue a `remote_reboot` or `router_command`
   for an online mobile agent; the agent executes it and acknowledges the result.
 - `POST /api/v1/commands/<id>/ack`: Record command completion or failure.
-- `POST /api/v1/telemetry`: Accept telemetry frames.
+- `POST /api/v1/telemetry`: Validate and retain organization-scoped telemetry
+  frames (CPU, memory, uptime, and active hotspot users).
+- `GET /api/v1/telemetry?limit=120`: Read the most recent real telemetry frames
+  for the authenticated organization. The store keeps a bounded history and
+  never creates placeholder measurements.
 - `POST /api/v1/backup/upload` & `GET /api/v1/backup/latest`: Upload and retrieve the latest backup.
 - `GET /api/v1/license/entitlement`: Read the organization's verified entitlement.
 - `POST /api/v1/license/entitlement`: Issue an entitlement only when the
