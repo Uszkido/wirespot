@@ -10,8 +10,7 @@ Response onRequest(RequestContext context) {
       'provider': 'Dart Frog process-local store',
       'productionReady': productionConfigurationReady,
       'productionConfigurationGaps': productionConfigurationGaps,
-      'authenticationMode':
-          productionMode ? 'server-token-allowlist' : 'development-token',
+      'authenticationMode': authenticationModeLabel,
       'documentation': 'https://github.com/Uszkido/wirespot/wiki',
     },
   );

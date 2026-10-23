@@ -35,6 +35,11 @@ bool get localAuthEnabled =>
     !productionMode ||
     Platform.environment['WIRESPOT_ENABLE_LOCAL_AUTH']?.toLowerCase() == 'true';
 
+String get authenticationModeLabel {
+  if (!productionMode) return 'development-token';
+  return localAuthEnabled ? 'local-pilot-auth' : 'server-token-allowlist';
+}
+
 bool localAuthEnabledFor(Map<String, String> environment) {
   final mode = environment['WIRESPOT_ENV']?.toLowerCase() == 'production' ||
       environment['WIRESPOT_PRODUCTION']?.toLowerCase() == 'true';
