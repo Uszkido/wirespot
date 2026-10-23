@@ -207,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
 
       const targetTab = item.getAttribute('data-tab');
+      if (targetTab === 'tab-reports' && !guardWebPermission('financialReports')) return;
       item.classList.add('active');
       document.getElementById(targetTab).classList.add('active');
 
@@ -287,6 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.btn-reboot').forEach(b => {
       b.addEventListener('click', async () => {
+        if (!guardWebPermission('routerManagement')) return;
         const rName = b.getAttribute('data-router');
         const router = state.routers.find(item => item.name === rName);
         if (!router) return;
@@ -306,6 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.btn-edit-router').forEach(b => {
       b.addEventListener('click', () => {
+        if (!guardWebPermission('routerManagement')) return;
         const router = state.routers.find(item => item.name === b.getAttribute('data-router'));
         if (!router) return;
         const name = prompt('Router name:', router.name)?.trim();
@@ -334,6 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.btn-delete-router').forEach(b => {
       b.addEventListener('click', () => {
+        if (!guardWebPermission('routerManagement')) return;
         const name = b.getAttribute('data-router');
         const index = state.routers.findIndex(item => item.name === name);
         if (index < 0 || !confirm(`Remove ${name} from this workspace?`)) return;
@@ -370,6 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.btn-reset-user').forEach(b => {
       b.addEventListener('click', () => {
+        if (!guardWebPermission('routerManagement')) return;
         const username = b.getAttribute('data-user');
         const user = state.hotspotUsers.find(item => item.username === username);
         if (!user) return;
@@ -381,6 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.btn-del-user').forEach(b => {
       b.addEventListener('click', () => {
+        if (!guardWebPermission('routerManagement')) return;
         const idx = b.getAttribute('data-idx');
         const removed = state.hotspotUsers.splice(idx, 1);
         saveState();
@@ -409,6 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.btn-edit-profile').forEach(b => {
       b.addEventListener('click', () => {
+        if (!guardWebPermission('routerManagement')) return;
         const profile = state.userProfiles.find(item => item.name === b.getAttribute('data-profile'));
         if (!profile) return;
         const speed = prompt('Download speed:', profile.downSpeed);
@@ -423,6 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.btn-delete-profile').forEach(b => {
       b.addEventListener('click', () => {
+        if (!guardWebPermission('routerManagement')) return;
         const name = b.getAttribute('data-profile');
         const inUse = state.hotspotUsers.some(user => user.profile === name);
         if (inUse) {
@@ -457,6 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.btn-kick').forEach(b => {
       b.addEventListener('click', () => {
+        if (!guardWebPermission('disconnectSessions')) return;
         const idx = b.getAttribute('data-idx');
         const user = state.sessions[idx].username;
         state.sessions.splice(idx, 1);
@@ -627,6 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (vForm) {
     vForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      if (!guardWebPermission('sellVouchers')) return;
       const profile = document.getElementById('v-profile').value;
       const quantity = parseInt(document.getElementById('v-quantity').value) || 5;
       const price = parseFloat(document.getElementById('v-price').value) || 2.50;
@@ -666,7 +676,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnClose = document.getElementById(btnCloseId);
 
     if (btnOpen && modal) {
-      btnOpen.addEventListener('click', () => modal.classList.add('active'));
+      btnOpen.addEventListener('click', () => {
+        if (btnOpenId === 'btn-open-wizard' && !guardWebPermission('routerManagement')) return;
+        modal.classList.add('active');
+      });
     }
     if (btnClose && modal) {
       btnClose.addEventListener('click', () => modal.classList.remove('active'));
@@ -747,6 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('btn-wiz-back-4')?.addEventListener('click', () => showWizardStep(3));
   document.getElementById('btn-wiz-deploy')?.addEventListener('click', async () => {
+    if (!guardWebPermission('routerManagement')) return;
     const vendor = document.getElementById('wiz-router-vendor').selectedOptions[0].text;
     const host = document.getElementById('wiz-router-host').value.trim();
     const router = { id: `router_${host.replace(/[^a-z0-9]+/gi, '_')}`, name: `${vendor.split(' / ')[0]}-${host}`, vendor, ip: host, port: Number(document.getElementById('wiz-router-port').value) || 8728, status: 'configured', users: 0, hotspotProfile: document.getElementById('wiz-package-name').value.trim(), pppoeEnabled: document.getElementById('wiz-pppoe-enabled')?.checked === true };
@@ -788,7 +802,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const updateAccountHeader = profile => {
     if (!profile) return;
     if (userName) userName.textContent = profile.organization || 'WireSpot Operator';
-    if (userEmail) userEmail.textContent = profile.email || 'Signed in';
+    if (userEmail) {
+      const role = profile.role ? ` · ${String(profile.role).toLowerCase()}` : '';
+      userEmail.textContent = `${profile.email || 'Signed in'}${role}`;
+    }
   };
   if (account) {
     updateAccountHeader(account);
@@ -802,6 +819,74 @@ document.addEventListener('DOMContentLoaded', () => {
   const generatedCredentials = document.getElementById('auth-generated-credentials');
   const generatedOrg = document.getElementById('auth-generated-org');
   const generatedToken = document.getElementById('auth-generated-token');
+
+  // Keep the dashboard's affordances consistent with the Flutter permission
+  // matrix. These checks are UX safeguards only; every mutating API endpoint
+  // still validates the role carried by the authenticated session token.
+  const webRole = () => {
+    try {
+      const session = JSON.parse(localStorage.getItem('wirespot_web_session') || '{}');
+      const account = JSON.parse(localStorage.getItem('wirespot_web_account') || '{}');
+      return String(session.role || account.role || 'owner').trim().toLowerCase();
+    } catch (_) {
+      return 'owner';
+    }
+  };
+  const webCan = permission => {
+    const role = webRole();
+    if (permission === 'routerManagement') return ['owner', 'manager', 'admin'].includes(role);
+    if (permission === 'commandExecution') return ['owner', 'manager', 'admin', 'operator'].includes(role);
+    if (permission === 'cloudBackup') return ['owner', 'admin'].includes(role);
+    if (permission === 'financialReports') return ['owner', 'manager', 'admin'].includes(role);
+    if (permission === 'sellVouchers') return role !== 'viewer';
+    if (permission === 'disconnectSessions') return ['owner', 'manager', 'admin', 'operator'].includes(role);
+    return true;
+  };
+  const guardWebPermission = permission => {
+    if (webCan(permission)) return true;
+    showToast(`Your ${webRole()} role does not have permission for this action.`, 'error');
+    return false;
+  };
+  const setPermissionState = (element, allowed, label) => {
+    if (!element) return;
+    element.disabled = !allowed;
+    element.setAttribute('aria-disabled', String(!allowed));
+    if (!allowed) element.title = label;
+  };
+  const applyWebPermissions = () => {
+    const reportsAllowed = webCan('financialReports');
+    const reportsNav = document.querySelector('[data-tab="tab-reports"]');
+    const reportsSection = document.getElementById('tab-reports');
+    if (reportsNav) {
+      reportsNav.style.display = reportsAllowed ? '' : 'none';
+      reportsNav.setAttribute('aria-hidden', String(!reportsAllowed));
+    }
+    if (reportsSection) {
+      reportsSection.style.display = reportsAllowed ? '' : 'none';
+      reportsSection.setAttribute('aria-hidden', String(!reportsAllowed));
+    }
+    const restricted = [
+      ['#btn-add-router', 'routerManagement'],
+      ['#btn-wiz-deploy', 'routerManagement'],
+      ['#btn-send-cli', 'commandExecution'],
+      ['#btn-trigger-sync', 'cloudBackup'],
+      ['#btn-restore-backup', 'cloudBackup'],
+      ['#btn-export-excel', 'financialReports'],
+      ['#btn-export-json', 'financialReports'],
+      ['#btn-export-pdf', 'financialReports'],
+      ['#btn-add-hotspot-user', 'routerManagement'],
+      ['#btn-add-user-profile', 'routerManagement'],
+      ['#btn-refresh-sessions', 'disconnectSessions'],
+    ];
+    restricted.forEach(([selector, permission]) => {
+      setPermissionState(document.querySelector(selector), webCan(permission), `Restricted for the ${webRole()} role`);
+    });
+    document.querySelectorAll('.btn-edit-router, .btn-reboot, .btn-delete-router, .btn-edit-profile, .btn-delete-profile, .btn-reset-user, .btn-del-user')
+      .forEach(button => setPermissionState(button, webCan('routerManagement'), `Restricted for the ${webRole()} role`));
+    document.querySelectorAll('.btn-kick').forEach(button => setPermissionState(button, webCan('disconnectSessions'), `Restricted for the ${webRole()} role`));
+    const voucherSubmit = document.querySelector('#voucher-form button[type="submit"]');
+    setPermissionState(voucherSubmit, webCan('sellVouchers'), `Restricted for the ${webRole()} role`);
+  };
   const showGeneratedCredentials = (config) => {
     if (generatedOrg) generatedOrg.textContent = config.organizationId || '';
     if (generatedToken) generatedToken.textContent = config.token || '';
@@ -827,6 +912,7 @@ document.addEventListener('DOMContentLoaded', () => {
     [formLogin, formToken, formReg, formRecovery].forEach(form => { if (form) form.style.display = 'none'; });
     [tabAuthLogin, tabAuthToken, tabAuthReg].forEach(tab => { if (tab) tab.style.display = 'none'; });
     if (authSubtitle) authSubtitle.textContent = 'Your account is connected.';
+    applyWebPermissions();
   };
   document.getElementById('btn-auth-continue')?.addEventListener('click', () => {
     authModal?.classList.remove('active');
@@ -859,6 +945,7 @@ document.addEventListener('DOMContentLoaded', () => {
     storedSession && storedCloudConfig.url && storedCloudConfig.token,
   );
   if (!hasValidCloudSession) openAuth(!savedAccount);
+  applyWebPermissions();
 
   const showAuthForm = (activeTab, activeForm) => {
     [tabAuthLogin, tabAuthToken, tabAuthReg].forEach(tab => tab?.classList.toggle('active', tab === activeTab));
@@ -920,9 +1007,10 @@ document.addEventListener('DOMContentLoaded', () => {
           token: payload.accessToken || ''
         };
         if (!config.token) throw new Error('The backend did not return an access token.');
-        localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: user.organizationName || config.organizationId, email }));
+        const role = String(user.role || 'owner').toLowerCase();
+        localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: user.organizationName || config.organizationId, email, role }));
         localStorage.setItem('wirespot_web_cloud_config', JSON.stringify(config));
-        localStorage.setItem('wirespot_web_session', JSON.stringify({ email, organizationId: config.organizationId, signedInAt: Date.now() }));
+        localStorage.setItem('wirespot_web_session', JSON.stringify({ email, organizationId: config.organizationId, role, signedInAt: Date.now() }));
         showGeneratedCredentials(config);
         await hydrateFromCloud();
         showToast(`Signed in as ${email}. Cloud sync is ready.`, 'success');
@@ -955,8 +1043,9 @@ document.addEventListener('DOMContentLoaded', () => {
           token: payload.accessToken || ''
         };
         if (!generatedConfig.token) throw new Error('The backend did not return an access token.');
-        localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: org, email }));
-        localStorage.setItem('wirespot_web_session', JSON.stringify({ email, organizationId: generatedConfig.organizationId, signedInAt: Date.now() }));
+        const role = String(user.role || 'owner').toLowerCase();
+        localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: org, email, role }));
+        localStorage.setItem('wirespot_web_session', JSON.stringify({ email, organizationId: generatedConfig.organizationId, role, signedInAt: Date.now() }));
         localStorage.setItem('wirespot_web_cloud_config', JSON.stringify(generatedConfig));
         showGeneratedCredentials(generatedConfig);
         await hydrateFromCloud();
@@ -980,10 +1069,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (!response.ok) throw new Error(`Access token was rejected (${response.status}).`);
         localStorage.setItem('wirespot_web_cloud_config', JSON.stringify({ url: baseUrl, organizationId, token }));
-        localStorage.setItem('wirespot_web_session', JSON.stringify({ organizationId, signedInAt: Date.now(), method: 'token' }));
-        localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: organizationId, email: 'Token workspace' }));
+        const role = 'owner';
+        localStorage.setItem('wirespot_web_session', JSON.stringify({ organizationId, role, signedInAt: Date.now(), method: 'token' }));
+        localStorage.setItem('wirespot_web_account', JSON.stringify({ organization: organizationId, email: 'Token workspace', role }));
         document.getElementById('modal-auth').classList.remove('active');
         showToast('Workspace connected. Cloud sync is ready.', 'success');
+        applyWebPermissions();
         window.location.reload();
       } catch (error) {
         showToast(error.message || 'Unable to connect this workspace.', 'error');
@@ -1088,6 +1179,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!result?.backup && !telemetry?.telemetry?.length) return false;
       saveState();
       renderRouters(); renderHotspotUsers(); renderUserProfiles(); renderSessions(); renderVouchers(); renderSummary();
+      applyWebPermissions();
       updateSyncIndicator(true);
       return true;
     } catch (error) {
@@ -1148,6 +1240,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnTriggerSync = document.getElementById('btn-trigger-sync');
   if (btnTriggerSync) {
     btnTriggerSync.addEventListener('click', async () => {
+      if (!guardWebPermission('cloudBackup')) return;
       btnTriggerSync.disabled = true;
       try {
         const localBackup = buildWebBackup();
@@ -1189,6 +1282,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.getElementById('btn-restore-backup')?.addEventListener('click', async () => {
+    if (!guardWebPermission('cloudBackup')) return;
     const confirmed = window.confirm('Restore the latest cloud backup? Current local records will be replaced.');
     if (!confirmed) return;
     try {
@@ -1245,17 +1339,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnAddRouter = document.getElementById('btn-add-router');
   if (btnAddRouter) {
     btnAddRouter.addEventListener('click', () => {
+      if (!guardWebPermission('routerManagement')) return;
       document.getElementById('modal-wizard')?.classList.add('active');
       showWizardStep(2);
     });
   }
 
   document.getElementById('btn-refresh-sessions')?.addEventListener('click', () => {
+    if (!guardWebPermission('disconnectSessions')) return;
     renderSessions();
     showToast('Live session list refreshed.', 'info');
   });
 
   document.getElementById('btn-add-hotspot-user')?.addEventListener('click', async () => {
+    if (!guardWebPermission('routerManagement')) return;
     const router = state.routers.find(item => item.status === 'online' || item.status === 'configured');
     const cloud = readCloudConfig?.();
     if (!router || !cloud?.url || !cloud.token) {
@@ -1284,6 +1381,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-add-user-profile')?.addEventListener('click', async () => {
+    if (!guardWebPermission('routerManagement')) return;
     const router = state.routers.find(item => item.status === 'online' || item.status === 'configured');
     const cloud = readCloudConfig?.();
     if (!router || !cloud?.url || !cloud.token) {
@@ -1310,6 +1408,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-send-cli')?.addEventListener('click', async () => {
+    if (!guardWebPermission('commandExecution')) return;
     const input = document.getElementById('cli-command-input');
     const output = document.getElementById('cli-output-text');
     const command = input?.value.trim();
@@ -1380,6 +1479,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderVouchers();
       renderHotspotUsers();
       renderSummary();
+      applyWebPermissions();
       showToast(refreshMessage, refreshMessage.includes('failed') ? 'error' : 'info');
     });
   }
@@ -1452,12 +1552,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('report-range')?.addEventListener('change', renderReport);
   document.getElementById('btn-export-excel')?.addEventListener('click', () => {
+    if (!guardWebPermission('financialReports')) return;
     const { rows, period } = renderReport();
     const csv = toCsv([['Voucher code', 'Profile', 'Created at', 'Status', `Amount (${reportCurrency?.value || 'NGN'})`], ...rows.map(v => [v.code, v.profile, v.createdAt, v.status, (Number(v.price) || 0).toFixed(2)])]);
     downloadFile(`wirespot-report-${period.label.toLowerCase().replaceAll(' ', '-')}.csv`, csv, 'text/csv;charset=utf-8');
     showToast('CSV report downloaded. It opens directly in Excel.', 'success');
   });
   document.getElementById('btn-export-json')?.addEventListener('click', () => {
+    if (!guardWebPermission('financialReports')) return;
     const snapshot = { version: 1, exportedAt: new Date().toISOString(), ...state };
     downloadFile(`wirespot-workspace-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(snapshot, null, 2), 'application/json');
     showToast('Workspace JSON backup downloaded.', 'success');
@@ -1470,7 +1572,11 @@ document.addEventListener('DOMContentLoaded', () => {
     popup.document.write(`<!doctype html><html><head><title>${title}</title><style>body{font:14px Arial;color:#172033;padding:36px}header{display:flex;align-items:center;gap:14px;border-bottom:2px solid #0b8fff;padding-bottom:16px}header img{width:48px;height:48px;border-radius:12px}h1{margin:0;font-size:24px}small{color:#64748b}table{width:100%;border-collapse:collapse;margin-top:28px}th,td{padding:10px;border-bottom:1px solid #dbe3ef;text-align:left}th{background:#eef6ff}.total{margin-top:24px;text-align:right;font-size:18px;font-weight:bold}@media print{button{display:none}}</style></head><body><header><img src="${location.origin}/wirespot_mark.jpg"><div><h1>${title}</h1><small>${period.label} · Generated ${new Date().toLocaleString()}</small></div></header><table><thead><tr><th>Voucher</th><th>Profile</th><th>Created</th><th>Status</th><th>Amount</th></tr></thead><tbody>${body || '<tr><td colspan="5">No records in this period.</td></tr>'}</tbody></table><div class="total">Total revenue: ${formatMoney(rows.reduce((sum, v) => sum + (Number(v.price) || 0), 0))}</div><script>window.onload=()=>{window.print();}</script></body></html>`);
     popup.document.close();
   };
-  document.getElementById('btn-export-pdf')?.addEventListener('click', () => { const { rows } = renderReport(); printReport('WireSpot Sales Report', rows); });
+  document.getElementById('btn-export-pdf')?.addEventListener('click', () => {
+    if (!guardWebPermission('financialReports')) return;
+    const { rows } = renderReport();
+    printReport('WireSpot Sales Report', rows);
+  });
   renderReport();
 
   // ─── Thermal Receipt Live Preview Sync ───
