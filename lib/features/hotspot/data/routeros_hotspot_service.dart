@@ -23,6 +23,7 @@ class RouterOsHotspotService implements HotspotService {
     RouterEntity router,
     HotspotSetupInput input,
   ) async {
+    _requireHotspotSetupSupport(router);
     _validateSetupInput(input);
     final responses = await Future.wait([
       _routerConnectionService.execute(
@@ -56,6 +57,7 @@ class RouterOsHotspotService implements HotspotService {
     RouterEntity router,
     HotspotSetupInput input,
   ) async {
+    _requireHotspotSetupSupport(router);
     _validateSetupInput(input);
     await _provisionPppoe(router, input);
     await _provisionPppoeServer(router, input);
@@ -616,6 +618,16 @@ class RouterOsHotspotService implements HotspotService {
     final errors = input.validationErrors;
     if (errors.isNotEmpty) {
       throw ArgumentError(errors.join(' '));
+    }
+  }
+
+  void _requireHotspotSetupSupport(RouterEntity router) {
+    if (!router.vendor.supports(RouterCapability.hotspotSetupPresets)) {
+      throw StateError(
+        '${router.vendor.label} does not expose hotspot setup through its '
+        'configured API connector. Use the vendor controller or MikroTik '
+        'RouterOS for hotspot provisioning.',
+      );
     }
   }
 
