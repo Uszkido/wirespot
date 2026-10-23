@@ -45,7 +45,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
     final dashboardContent = snapshot.when(
       data: (value) {
-        if (value == null) {
+        if (value == null && routers.isEmpty) {
           return EmptyState(
             icon: Icons.router_outlined,
             title: text.addRouter,
@@ -54,6 +54,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               onPressed: () => context.push(AppRoutes.newRouter),
               icon: const Icon(Icons.add),
               label: Text(text.addRouter),
+            ),
+          );
+        }
+        if (value == null) {
+          return EmptyState(
+            icon: Icons.router_outlined,
+            title: text.dashboardUnavailable,
+            message: text.interfaceDataAfterConnection,
+            action: FilledButton.icon(
+              onPressed: () => context.push(AppRoutes.routers),
+              icon: const Icon(Icons.router_outlined),
+              label: Text(text.routers),
             ),
           );
         }
@@ -143,13 +155,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     title: Text('Setup walkthrough'),
                   ),
                 ),
-                const PopupMenuItem(
-                  value: AppRoutes.about,
-                  child: ListTile(
-                    leading: Icon(Icons.info_outline),
-                    title: Text('About WireSpot'),
-                  ),
-                ),
                 PopupMenuItem(
                   value: AppRoutes.routers,
                   child: ListTile(
@@ -197,6 +202,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   child: ListTile(
                     leading: const Icon(Icons.settings_outlined),
                     title: Text(text.settings),
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: AppRoutes.about,
+                  child: ListTile(
+                    leading: Icon(Icons.info_outline),
+                    title: Text('About WireSpot'),
                   ),
                 ),
               ],
@@ -388,10 +400,6 @@ class _DashboardContent extends ConsumerWidget {
             _OfflinePanel(theme: theme, text: text)
           else
             _InterfacesPanel(interfaces: routerSnapshot.interfaces, text: text),
-          const SizedBox(height: 20),
-          SectionHeader(title: text.support),
-          const SizedBox(height: 12),
-          const _BrandingPanel(),
         ],
       ),
     );
@@ -909,6 +917,8 @@ class _OfflinePanel extends StatelessWidget {
   }
 }
 
+// Kept as a reusable support panel for a future dedicated support surface.
+// ignore: unused_element
 class _BrandingPanel extends StatelessWidget {
   const _BrandingPanel();
 

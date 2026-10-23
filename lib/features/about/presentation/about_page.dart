@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/branding/app_branding.dart';
+import '../../../core/platform/external_action_service.dart';
 import '../../../shared/widgets/brand_logo.dart';
 
 class AboutPage extends StatelessWidget {
@@ -76,16 +78,34 @@ class AboutPage extends StatelessWidget {
                     icon: Icons.email_outlined,
                     label: 'Support email',
                     value: AppBranding.supportEmail,
+                    actionIcon: Icons.open_in_new,
+                    onTap: () => _openContact(
+                      context,
+                      ExternalActionService.openEmail(AppBranding.supportEmail),
+                      'email app',
+                    ),
                   ),
                   _InfoRow(
                     icon: Icons.phone_outlined,
                     label: 'Support phone',
                     value: AppBranding.supportPhone,
+                    actionIcon: Icons.call_outlined,
+                    onTap: () => _openContact(
+                      context,
+                      ExternalActionService.openPhone(AppBranding.supportPhone),
+                      'phone app',
+                    ),
                   ),
                   _InfoRow(
                     icon: Icons.language_outlined,
                     label: 'Website',
                     value: AppBranding.website,
+                    actionIcon: Icons.open_in_browser_outlined,
+                    onTap: () => _openContact(
+                      context,
+                      ExternalActionService.openWebsite(AppBranding.website),
+                      'browser',
+                    ),
                   ),
                 ],
               ),
@@ -105,6 +125,18 @@ class AboutPage extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _openContact(
+    BuildContext context,
+    Future<bool> action,
+    String target,
+  ) async {
+    final opened = await action;
+    if (!context.mounted || opened) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('No $target is available on this device.')),
+    );
+  }
 }
 
 class _InfoRow extends StatelessWidget {
@@ -112,31 +144,56 @@ class _InfoRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    required this.actionIcon,
+    required this.onTap,
   });
 
   final IconData icon;
   final String label;
   final String value;
+  final IconData actionIcon;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: Theme.of(context).textTheme.labelMedium),
-                SelectableText(value),
-              ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: Theme.of(context).textTheme.labelMedium),
+                  SelectableText(value),
+                ],
+              ),
             ),
-          ),
-        ],
+            IconButton(
+              tooltip: 'Copy $label',
+              icon: const Icon(Icons.copy_outlined),
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: value));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('$label copied.')));
+                }
+              },
+            ),
+            IconButton(
+              tooltip: 'Open $label',
+              icon: Icon(actionIcon),
+              onPressed: onTap,
+            ),
+          ],
+        ),
       ),
     );
   }
