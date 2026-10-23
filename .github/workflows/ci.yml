@@ -61,6 +61,17 @@ jobs:
       - name: Build Android release APK
         run: flutter build apk --release --no-tree-shake-icons
 
+      - name: Validate Android native runtime libraries
+        shell: bash
+        run: |
+          apk="build/app/outputs/flutter-apk/app-release.apk"
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            unzip -l "$apk" | grep -q "lib/$abi/libsqlite3.so" || {
+              echo "Missing sqlite runtime for $abi" >&2
+              exit 1
+            }
+          done
+
       - name: Validate Web Dashboard static files
         run: test -f web_app/index.html && test -f web_app/styles.css && test -f web_app/app.js
 
