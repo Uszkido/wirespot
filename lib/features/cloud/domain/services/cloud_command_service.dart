@@ -71,9 +71,12 @@ class CloudCommandService {
           final routerId = command.targetResourceId;
           if (routerId != null && routerId.isNotEmpty) {
             final router = await _routerRepository.getRouter(routerId);
-            if (router != null) {
-              await _routerConnectionService.execute(router, '/system/reboot');
+            if (router == null) {
+              throw StateError('Target router was not found.');
             }
+            await _routerConnectionService.execute(router, '/system/reboot');
+          } else {
+            throw StateError('Remote reboot requires a target router.');
           }
           return CloudCommandExecutionResult(
             commandId: command.id,
@@ -87,9 +90,12 @@ class CloudCommandService {
           final routerId = command.targetResourceId;
           if (mac != null && routerId != null && routerId.isNotEmpty) {
             final router = await _routerRepository.getRouter(routerId);
-            if (router != null) {
-              await _hotspotService.disconnectSession(router, mac);
+            if (router == null) {
+              throw StateError('Target router was not found.');
             }
+            await _hotspotService.disconnectSession(router, mac);
+          } else {
+            throw StateError('Kick session requires a router and MAC address.');
           }
           return CloudCommandExecutionResult(
             commandId: command.id,
