@@ -12,6 +12,9 @@ work/
 outputs/
 archive/
 
+# Local backend snapshot data; production storage is configured outside Git.
+.wirespot/
+
 # Temporary generated brand boards should not be committed unless exported with
 # the approved TechNova Technologies spelling.
 assets/images/wirespot_logo_full.png
