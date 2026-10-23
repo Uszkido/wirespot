@@ -5,11 +5,12 @@ field technicians. The Flutter application manages routers, subscribers,
 vouchers, receipts, and reports from one workspace. A companion web dashboard
 provides shared cloud access for teams.
 
-MikroTik RouterOS is the full production connector today. OpenWrt, Ruijie/Reyee,
-TP-Link Omada, and Ubiquiti UniFi provide authenticated read-only dashboard
-snapshots through their vendor APIs. Vendor-specific hotspot, voucher, and
-configuration mutations remain deliberately rejected until their API contracts
-are verified; generic routers remain connection-only.
+MikroTik RouterOS is the full hotspot and voucher connector. OpenWrt and
+Ubiquiti UniFi also provide guarded system-control actions through their
+authenticated APIs; Ruijie/Reyee and TP-Link Omada currently provide
+authenticated dashboard snapshots. Vendor-specific hotspot and voucher
+mutations remain deliberately rejected until their API contracts are verified;
+generic routers remain connection-only.
 
 ## Project status
 
@@ -37,7 +38,7 @@ routers.
 | iOS | iOS target added; CI produces an unsigned release app (Apple signing required for devices/TestFlight) |
 | Static analysis | Passing (0 issues) |
 | Tests | 146 passing |
-| Multi-Vendor Connectors | MikroTik hotspot/voucher connector; authenticated read-only dashboard snapshots for OpenWrt, Ruijie, Omada, and UniFi; generic connection probe |
+| Multi-Vendor Connectors | MikroTik hotspot/voucher connector; OpenWrt interface/reboot support; UniFi site/device snapshots and guarded reboot; authenticated dashboard snapshots for Ruijie and Omada; generic connection probe |
 | Web Dashboard | Static dashboard with account, router, voucher, report, and cloud-sync views (`web_app/`) |
 | Latest APK output | `build\app\outputs\flutter-apk\app-debug.apk` (debug) |
 | Latest pushed commit | See GitHub `main` |
@@ -325,7 +326,7 @@ collaboration with TechNova Technologies.
 | Ruijie / Reyee | Connection, discovery, and dashboard snapshot | Secure token-based Ruijie Cloud connection, device discovery, and normalized read-only dashboard snapshot; hotspot and voucher mutations remain rejected |
 | OpenWrt | Connection, dashboard, interface reads, and guarded reboot | LuCI/ubus provides authenticated interface inspection and system reboot; hotspot and voucher mutations require package-specific mapping |
 | TP-Link Omada | Controller connection and dashboard snapshot | OpenAPI site/device reads with normalized dashboard snapshot; site/portal/voucher mutations require controller-version mapping |
-| Ubiquiti UniFi | Controller connection and dashboard snapshot | Official Network Integration API site/device reads; site/guest/voucher mutations require controller-version mapping |
+| Ubiquiti UniFi | Controller snapshot and guarded reboot | Official Network Integration API site/device reads plus targeted reboot; configure the controller site and device IDs in the router form; site/guest/voucher mutations require controller-version mapping |
 | Generic router | Connection foundation | No universal mutation API exists; configure a vendor-specific adapter before enabling mutations |
 
 ## Multi-Router Fleet Operations

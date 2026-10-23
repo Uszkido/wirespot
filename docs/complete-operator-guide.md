@@ -23,8 +23,9 @@ printing, reporting, scheduler settings, backup, app security, and licensing.
 - Secure router credential storage.
 - Multiple router records with brand selection.
 - MikroTik RouterOS live hotspot management.
-- Ruijie/Reyee connection/discovery foundation; OpenWrt read-only ubus
-  dashboard snapshots; Omada, UniFi, and generic connector foundations.
+- Ruijie/Reyee connection/discovery foundation; OpenWrt ubus dashboard and
+  guarded reboot; UniFi controller snapshots and targeted reboot; Omada and
+  generic connector foundations.
 - Local LAN mode and WireGuard-required mode.
 - Router connection testing.
 - Dashboard with online users, sales, CPU, memory, health, and interfaces.
