@@ -8,8 +8,11 @@ class SecureStorageKeys {
   static const cloudConnectionSettings = 'cloud.connection_settings';
   static const cloudSession = 'cloud.session';
 
-  static String routerCredentials(String routerId) {
-    return 'router.$routerId.credentials';
+  static String routerCredentials(String routerId, {String? organizationId}) {
+    final scope = (organizationId == null || organizationId.trim().isEmpty)
+        ? 'default'
+        : organizationId.trim().replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+    return 'router.$scope.$routerId.credentials';
   }
 
   static String voucherPassword(String voucherId) {
