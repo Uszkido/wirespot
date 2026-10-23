@@ -11,5 +11,6 @@ final cloudControllerProvider =
         syncService: ref.watch(cloudSyncServiceProvider),
         apiClient: ref.watch(cloudApiClientProvider),
         backupService: ref.watch(cloudBackupServiceProvider),
+        telemetryService: ref.watch(cloudTelemetryServiceProvider),
       );
     });

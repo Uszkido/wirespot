@@ -7,6 +7,7 @@ import '../../features/cloud/domain/repositories/cloud_sync_repository.dart';
 import '../../features/cloud/domain/services/cloud_backup_service.dart';
 import '../../features/cloud/domain/services/cloud_settings_service.dart';
 import '../../features/cloud/domain/services/cloud_sync_service.dart';
+import '../../features/cloud/domain/services/cloud_telemetry_service.dart';
 import '../../features/hotspot/domain/services/hotspot_service.dart';
 import '../../features/hotspot/domain/services/hotspot_deployment_service.dart';
 import '../../features/hotspot/domain/repositories/hotspot_deployment_repository.dart';
@@ -67,6 +68,10 @@ final cloudSyncRepositoryProvider = Provider<CloudSyncRepository>(
 
 final cloudSyncServiceProvider = Provider<CloudSyncService>(
   (ref) => sl<CloudSyncService>(),
+);
+
+final cloudTelemetryServiceProvider = Provider<CloudTelemetryService>(
+  (ref) => sl<CloudTelemetryService>(),
 );
 
 final cloudBackupServiceProvider = Provider<CloudBackupService>(

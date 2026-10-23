@@ -10,6 +10,7 @@ import '../domain/repositories/cloud_sync_repository.dart';
 import '../domain/services/cloud_settings_service.dart';
 import '../domain/services/cloud_sync_service.dart';
 import '../domain/services/cloud_backup_service.dart';
+import '../domain/services/cloud_telemetry_service.dart';
 
 class CloudState {
   const CloudState({
@@ -70,15 +71,17 @@ class CloudController extends StateNotifier<CloudState> {
     required CloudSyncService syncService,
     required CloudApiClient apiClient,
     CloudBackupService? backupService,
+    CloudTelemetryService? telemetryService,
   }) : _settingsService = settingsService,
        _syncRepository = syncRepository,
        _syncService = syncService,
        _apiClient = apiClient,
        _backupService = backupService,
+       _telemetryService = telemetryService,
        super(const CloudState()) {
     _autoSyncTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (state.session != null && !state.isSyncing) {
-        syncPending();
+        unawaited(_collectTelemetryAndSync());
       }
     });
     load();
@@ -89,7 +92,16 @@ class CloudController extends StateNotifier<CloudState> {
   final CloudSyncService _syncService;
   final CloudApiClient _apiClient;
   final CloudBackupService? _backupService;
+  final CloudTelemetryService? _telemetryService;
   Timer? _autoSyncTimer;
+
+  Future<void> _collectTelemetryAndSync() async {
+    try {
+      await _telemetryService?.collectAndPostTelemetry();
+    } finally {
+      await syncPending();
+    }
+  }
 
   @override
   void dispose() {

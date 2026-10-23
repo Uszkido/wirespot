@@ -15,6 +15,7 @@ import '../../features/cloud/domain/repositories/cloud_sync_repository.dart';
 import '../../features/cloud/domain/services/cloud_backup_service.dart';
 import '../../features/cloud/domain/services/cloud_settings_service.dart';
 import '../../features/cloud/domain/services/cloud_sync_service.dart';
+import '../../features/cloud/domain/services/cloud_telemetry_service.dart';
 import '../../features/cloud/domain/services/cloud_workspace_sync_service.dart';
 import '../../features/hotspot/data/routeros_hotspot_service.dart';
 import '../../features/hotspot/data/hotspot_deployment_local_repository.dart';
@@ -137,6 +138,14 @@ Future<void> configureDependencies() async {
       () => CloudSyncService(
         repository: sl<CloudSyncRepository>(),
         apiClient: sl<CloudApiClient>(),
+      ),
+    )
+    ..registerLazySingleton<CloudTelemetryService>(
+      () => CloudTelemetryService(
+        apiClient: sl<CloudApiClient>(),
+        routerRepository: sl<RouterRepository>(),
+        hotspotService: sl<HotspotService>(),
+        routerConnectionService: sl<RouterConnectionService>(),
       ),
     )
     ..registerLazySingleton<RouterCredentialStore>(
