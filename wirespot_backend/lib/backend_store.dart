@@ -1,5 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 
 /// Organization-scoped state with an atomic JSON snapshot for restart-safe
 /// single-instance deployments. Configure WIRESPOT_STORE_PATH to a persistent
@@ -148,6 +151,30 @@ class BackendStore {
     _accounts[email.trim().toLowerCase()] = Map<String, dynamic>.from(account);
     persist();
   }
+
+  static Map<String, String> passwordRecord(String password) {
+    final random = Random.secure();
+    final salt = base64Url.encode(List<int>.generate(16, (_) => random.nextInt(256)));
+    return {
+      'passwordSalt': salt,
+      'passwordHash': _passwordDigest(password, salt),
+    };
+  }
+
+  static bool verifyPassword(
+    Map<String, dynamic> account,
+    String password,
+  ) {
+    final salt = account['passwordSalt']?.toString();
+    final expected = account['passwordHash']?.toString();
+    if (salt == null || expected == null || salt.isEmpty || expected.isEmpty) {
+      return false;
+    }
+    return _passwordDigest(password, salt) == expected;
+  }
+
+  static String _passwordDigest(String password, String salt) =>
+      sha256.convert(utf8.encode('$salt:$password')).toString();
 
   /// Creates a short-lived bearer session for a successful login or pairing
   /// flow. The session is stored with its organization and role so production

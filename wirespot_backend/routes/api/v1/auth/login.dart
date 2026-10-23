@@ -31,6 +31,12 @@ Future<Response> onRequest(RequestContext context) async {
     }
 
     final account = BackendStore.accountFor(email);
+    if (account == null || !BackendStore.verifyPassword(account, password)) {
+      return Response.json(
+        statusCode: 401,
+        body: {'error': 'Invalid email or password.'},
+      );
+    }
     final orgId = account?['organizationId']?.toString() ??
         requestedOrganizationId?.trim() ??
         'org_${email.split('@').first}';

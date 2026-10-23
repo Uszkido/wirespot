@@ -109,4 +109,22 @@ void main() {
     expect(BackendStore.consumePairingCode(code), 'org-pairing-test');
     expect(BackendStore.consumePairingCode(code), isNull);
   });
+
+  test('password records verify only the original password', () {
+    final record = BackendStore.passwordRecord('correct horse battery staple');
+    expect(BackendStore.verifyPassword(record, 'correct horse battery staple'),
+        isTrue);
+    expect(BackendStore.verifyPassword(record, 'wrong password'), isFalse);
+  });
+
+  test('accounts are stored case-insensitively with password metadata', () {
+    final record = BackendStore.passwordRecord('secret-123');
+    BackendStore.saveAccount('Admin@Example.com', {
+      'organizationId': 'org-auth-test',
+      ...record,
+    });
+    final account = BackendStore.accountFor('admin@example.com');
+    expect(account, isNotNull);
+    expect(BackendStore.verifyPassword(account!, 'secret-123'), isTrue);
+  });
 }

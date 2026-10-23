@@ -40,6 +40,7 @@ Future<Response> onRequest(RequestContext context) async {
       'organizationId': orgId,
       'role': 'owner',
       'organizationName': organizationName,
+      ...BackendStore.passwordRecord(password),
     });
 
     return Response.json(
