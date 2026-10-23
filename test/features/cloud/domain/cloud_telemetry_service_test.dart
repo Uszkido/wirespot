@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wirespot/core/storage/router_credentials.dart';
+import 'package:wirespot/core/api/routeros_api_response.dart';
+import 'package:wirespot/core/api/routeros_models.dart';
 import 'package:wirespot/features/cloud/data/cloud_api_client.dart';
 import 'package:wirespot/features/cloud/domain/services/cloud_telemetry_service.dart';
 import 'package:wirespot/features/hotspot/domain/entities/hotspot_active_session_entity.dart';
@@ -18,6 +20,7 @@ import 'package:wirespot/features/hotspot/domain/services/hotspot_service.dart';
 import 'package:wirespot/features/routers/domain/entities/router_entity.dart';
 import 'package:wirespot/features/routers/domain/entities/router_group_entity.dart';
 import 'package:wirespot/features/routers/domain/repositories/router_repository.dart';
+import 'package:wirespot/features/routers/domain/services/router_connection_service.dart';
 
 void main() {
   test(
@@ -26,11 +29,13 @@ void main() {
       final apiClient = _FakeCloudApiClient();
       final routerRepo = _FakeRouterRepository();
       final hotspotService = _FakeHotspotService();
+      final routerConnectionService = _FakeRouterConnectionService();
 
       final service = CloudTelemetryService(
         apiClient: apiClient,
         routerRepository: routerRepo,
         hotspotService: hotspotService,
+        routerConnectionService: routerConnectionService,
       );
 
       final count = await service.collectAndPostTelemetry();
@@ -41,6 +46,42 @@ void main() {
       expect(apiClient.postedTelemetry.first['activeHotspotUsersCount'], 1);
     },
   );
+}
+
+class _FakeRouterConnectionService implements RouterConnectionService {
+  @override
+  Future<bool> testConnection(RouterEntity router) async => true;
+
+  @override
+  Future<RouterOsApiResponse> execute(
+    RouterEntity router,
+    String command, {
+    Map<String, String> attributes = const {},
+    List<String> queries = const [],
+  }) async => const RouterOsApiResponse(records: []);
+
+  @override
+  Future<RouterOsRouterSnapshot> getSnapshot(RouterEntity router) async =>
+      const RouterOsRouterSnapshot(
+        identity: 'Main Router',
+        resource: RouterOsSystemResource(
+          uptime: '2d3h4m',
+          version: '7.16',
+          boardName: 'test',
+          cpuLoad: 12,
+          freeMemory: 128 * 1024 * 1024,
+          totalMemory: 256 * 1024 * 1024,
+        ),
+        interfaces: [],
+      );
+
+  @override
+  Stream<Map<String, String>> stream(
+    RouterEntity router,
+    String command, {
+    Map<String, String> attributes = const {},
+    List<String> queries = const [],
+  }) async* {}
 }
 
 class _FakeCloudApiClient implements CloudApiClient {

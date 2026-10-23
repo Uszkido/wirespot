@@ -12,15 +12,20 @@ import 'receipt_formatter.dart';
 class PlatformPrinterService implements PrinterService {
   const PlatformPrinterService({
     MethodChannel channel = const MethodChannel(_channelName),
-  }) : _channel = channel;
+    bool? useWindowsNative,
+  }) : _channel = channel,
+       _useWindowsNative = useWindowsNative;
 
   static const _channelName = 'com.wirespot.app/printer';
 
   final MethodChannel _channel;
+  final bool? _useWindowsNative;
+
+  bool get _isWindows => _useWindowsNative ?? Platform.isWindows;
 
   @override
   Future<List<BluetoothPrinterDevice>> pairedBluetoothPrinters() async {
-    if (Platform.isWindows) {
+    if (_isWindows) {
       return _windowsPrinters();
     }
     try {
@@ -53,7 +58,7 @@ class PlatformPrinterService implements PrinterService {
       receipt,
       paperWidth: paperWidth,
     );
-    if (Platform.isWindows) {
+    if (_isWindows) {
       return _printOnWindows(printer: printer, text: text);
     }
     try {

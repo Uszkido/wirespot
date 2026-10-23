@@ -27,7 +27,10 @@ void main() {
   });
 
   test('passes logo asset when receipt shows logo', () async {
-    const service = PlatformPrinterService(channel: channel);
+    const service = PlatformPrinterService(
+      channel: channel,
+      useWindowsNative: false,
+    );
 
     await service.printVoucherReceipt(
       printer: const BluetoothPrinterDevice(
@@ -43,7 +46,10 @@ void main() {
   });
 
   test('omits logo asset when receipt hides logo', () async {
-    const service = PlatformPrinterService(channel: channel);
+    const service = PlatformPrinterService(
+      channel: channel,
+      useWindowsNative: false,
+    );
 
     await service.printVoucherReceipt(
       printer: const BluetoothPrinterDevice(

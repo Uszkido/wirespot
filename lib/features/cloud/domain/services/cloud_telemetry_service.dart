@@ -9,7 +9,7 @@ class CloudTelemetryService {
     required CloudApiClient apiClient,
     required RouterRepository routerRepository,
     required HotspotService hotspotService,
-    required RouterConnectionService routerConnectionService,
+    RouterConnectionService? routerConnectionService,
   }) : _apiClient = apiClient,
        _routerRepository = routerRepository,
        _hotspotService = hotspotService,
@@ -18,12 +18,13 @@ class CloudTelemetryService {
   final CloudApiClient _apiClient;
   final RouterRepository _routerRepository;
   final HotspotService _hotspotService;
-  final RouterConnectionService _routerConnectionService;
+  final RouterConnectionService? _routerConnectionService;
 
   Future<int> collectAndPostTelemetry() async {
     var postedCount = 0;
     try {
       final routers = await _routerRepository.getRouters();
+      if (_routerConnectionService == null) return 0;
       for (final router in routers) {
         try {
           final snapshot = await _routerConnectionService.getSnapshot(router);
