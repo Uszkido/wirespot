@@ -948,10 +948,14 @@ class _SecurityCard extends ConsumerStatefulWidget {
 
 class _SecurityCardState extends ConsumerState<_SecurityCard> {
   AppLockMode _lockMode = AppLockMode.never;
+  late final Future<List<BiometricType>> _biometricMethodsFuture;
 
   @override
   void initState() {
     super.initState();
+    _biometricMethodsFuture = ref
+        .read(biometricAuthServiceProvider)
+        .availableBiometrics();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final value = await ref
           .read(settingsRepositoryProvider)
@@ -991,16 +995,47 @@ class _SecurityCardState extends ConsumerState<_SecurityCard> {
             ),
             const SizedBox(height: 8),
             FutureBuilder<List<BiometricType>>(
-              future: ref
-                  .read(biometricAuthServiceProvider)
-                  .availableBiometrics(),
+              future: _biometricMethodsFuture,
               builder: (context, snapshot) {
                 final methods = snapshot.data ?? const <BiometricType>[];
                 final description = BiometricAuthService.describe(methods);
-                return Text(
-                  methods.isEmpty
-                      ? 'Local PIN protects this device. Device security fallback is available when supported.'
-                      : 'Local PIN plus $description protect this device.',
+                final ready = methods.isNotEmpty;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          ready
+                              ? Icons.verified_user_outlined
+                              : Icons.lock_outline,
+                          size: 20,
+                          color: ready
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            ready
+                                ? 'Biometric unlock is ready'
+                                : 'PIN unlock is ready',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        Chip(
+                          label: Text(ready ? 'Available' : 'Fallback'),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      ready
+                          ? 'Available methods: $description. The PIN remains your fallback.'
+                          : 'Local PIN protects this device. Enroll a device biometric to enable faster unlock.',
+                    ),
+                  ],
                 );
               },
             ),

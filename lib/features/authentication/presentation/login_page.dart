@@ -160,8 +160,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const SizedBox(height: 12),
                       OutlinedButton.icon(
                         onPressed: _isBusy ? null : _biometricLogin,
-                        icon: const Icon(Icons.fingerprint),
+                        icon: Icon(_biometricIcon),
                         label: Text('Use $_biometricLabel'),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Your WireSpot PIN remains available if device security is unavailable.',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ],
@@ -172,6 +180,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ),
       ),
     );
+  }
+
+  IconData get _biometricIcon {
+    final label = _biometricLabel.toLowerCase();
+    if (label.contains('face')) return Icons.face_retouching_natural_outlined;
+    if (label.contains('iris')) return Icons.visibility_outlined;
+    if (label.contains('finger')) return Icons.fingerprint;
+    return Icons.security_outlined;
   }
 
   Future<void> _submit({required bool isSetup}) async {
