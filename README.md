@@ -323,7 +323,7 @@ collaboration with TechNova Technologies.
 | --- | --- | --- |
 | MikroTik RouterOS | Full active connector | RouterOS API, hotspot users, vouchers, dashboard snapshots, setup presets |
 | Ruijie / Reyee | Connection, discovery, and dashboard snapshot | Secure token-based Ruijie Cloud connection, device discovery, and normalized read-only dashboard snapshot; hotspot and voucher mutations remain rejected |
-| OpenWrt | Connection and dashboard foundation | LuCI/ubus connection path; hotspot and voucher mutations require authenticated package-specific mapping |
+| OpenWrt | Connection, dashboard, interface reads, and guarded reboot | LuCI/ubus provides authenticated interface inspection and system reboot; hotspot and voucher mutations require package-specific mapping |
 | TP-Link Omada | Controller connection and dashboard snapshot | OpenAPI site/device reads with normalized dashboard snapshot; site/portal/voucher mutations require controller-version mapping |
 | Ubiquiti UniFi | Controller connection and dashboard snapshot | Official Network Integration API site/device reads; site/guest/voucher mutations require controller-version mapping |
 | Generic router | Connection foundation | No universal mutation API exists; configure a vendor-specific adapter before enabling mutations |
