@@ -53,6 +53,18 @@ class SettingsPage extends ConsumerWidget {
         children: [
           const _BrandCard(),
           const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('About WireSpot and Vexel Innovations'),
+              subtitle: const Text(
+                'Product information, support, and version details.',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(AppRoutes.about),
+            ),
+          ),
+          const SizedBox(height: 16),
           const _SetupGuideCard(),
           const SizedBox(height: 16),
           settings.when(

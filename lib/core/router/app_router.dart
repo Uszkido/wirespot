@@ -10,6 +10,7 @@ import '../../features/diagnostics/presentation/diagnostics_page.dart';
 import '../../features/hotspot/presentation/captive_portal_customizer_page.dart';
 import '../../features/hotspot/presentation/csv_import_page.dart';
 import '../../features/alerts/presentation/alert_settings_page.dart';
+import '../../features/about/presentation/about_page.dart';
 import '../../features/hotspot/presentation/hotspot_page.dart';
 import '../../features/hotspot/presentation/radius_subscribers_page.dart';
 import '../../features/help/presentation/help_center_page.dart';
@@ -72,6 +73,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.help,
         name: 'help',
         builder: (context, state) => const LicenseGate(child: HelpCenterPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.about,
+        name: 'about',
+        builder: (context, state) => const AboutPage(),
       ),
       GoRoute(
         path: AppRoutes.routers,

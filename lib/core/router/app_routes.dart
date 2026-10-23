@@ -19,6 +19,7 @@ class AppRoutes {
   static const portalCustomizer = '/hotspot/portal-customizer';
   static const radiusSubscribers = '/hotspot/radius-subscribers';
   static const help = '/help';
+  static const about = '/about';
 
   static String editRouter(String routerId) {
     return '/routers/$routerId/edit';
