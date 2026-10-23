@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../data/cloud_api_client.dart';
@@ -74,6 +76,11 @@ class CloudController extends StateNotifier<CloudState> {
        _apiClient = apiClient,
        _backupService = backupService,
        super(const CloudState()) {
+    _autoSyncTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (state.session != null && !state.isSyncing) {
+        syncPending();
+      }
+    });
     load();
   }
 
@@ -82,6 +89,13 @@ class CloudController extends StateNotifier<CloudState> {
   final CloudSyncService _syncService;
   final CloudApiClient _apiClient;
   final CloudBackupService? _backupService;
+  Timer? _autoSyncTimer;
+
+  @override
+  void dispose() {
+    _autoSyncTimer?.cancel();
+    super.dispose();
+  }
 
   /// Restores the latest organization workspace after authentication when the
   /// local database is empty (for example, on a newly paired Windows device).
