@@ -6,7 +6,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (BaseDocTemplate, PageBreak, PageTemplate,
                                 Paragraph, Spacer, Table, TableStyle,
-                                KeepTogether)
+                                KeepTogether, Flowable)
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 
@@ -33,6 +33,50 @@ styles.add(ParagraphStyle(name='TableHead', parent=styles['BodyText'], fontName=
 styles.add(ParagraphStyle(name='Bulletx', parent=styles['BodyText'], fontName='Helvetica', fontSize=9.4, leading=13, textColor=INK, leftIndent=13, firstLineIndent=-8, spaceAfter=3))
 styles.add(ParagraphStyle(name='CodeX', parent=styles['Code'], fontName='Courier', fontSize=8.1, leading=11, textColor=colors.HexColor('#E6F1FF'), backColor=colors.HexColor('#14243D'), borderPadding=7, leftIndent=5, rightIndent=5, spaceBefore=3, spaceAfter=7))
 
+class FlowDiagram(Flowable):
+    """Small vector illustration used so the manual remains self-contained."""
+    def __init__(self, title, boxes, caption):
+        super().__init__()
+        self.title = title
+        self.boxes = boxes
+        self.caption = caption
+        self.width = PAGE_W - 34*mm
+        self.height = 43*mm
+
+    def draw(self):
+        c = self.canv
+        c.saveState()
+        c.setFillColor(PALE)
+        c.setStrokeColor(colors.HexColor('#B6C7DC'))
+        c.roundRect(0, 0, self.width, self.height, 5*mm, fill=1, stroke=1)
+        c.setFillColor(NAVY)
+        c.setFont('Helvetica-Bold', 9.5)
+        c.drawString(7*mm, self.height-9*mm, self.title)
+        gap = 8*mm
+        box_w = (self.width - 14*mm - gap*(len(self.boxes)-1)) / len(self.boxes)
+        y = 15*mm
+        for index, (label, detail) in enumerate(self.boxes):
+            x = 7*mm + index*(box_w+gap)
+            c.setFillColor(colors.white)
+            c.setStrokeColor(BLUE)
+            c.roundRect(x, y, box_w, 14*mm, 2.5*mm, fill=1, stroke=1)
+            c.setFillColor(NAVY)
+            c.setFont('Helvetica-Bold', 8)
+            c.drawCentredString(x+box_w/2, y+9*mm, label)
+            c.setFillColor(MUTED)
+            c.setFont('Helvetica', 6.8)
+            c.drawCentredString(x+box_w/2, y+5*mm, detail)
+            if index < len(self.boxes)-1:
+                c.setStrokeColor(BLUE)
+                c.setLineWidth(1.2)
+                c.line(x+box_w+1.5*mm, y+7*mm, x+box_w+gap-1.5*mm, y+7*mm)
+                c.line(x+box_w+gap-1.5*mm, y+7*mm, x+box_w+gap-3*mm, y+8*mm)
+                c.line(x+box_w+gap-1.5*mm, y+7*mm, x+box_w+gap-3*mm, y+6*mm)
+        c.setFillColor(MUTED)
+        c.setFont('Helvetica-Oblique', 7)
+        c.drawCentredString(self.width/2, 3.5*mm, self.caption)
+        c.restoreState()
+
 def esc(text):
     return (text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;'))
 
@@ -54,12 +98,23 @@ def parse_md(text):
             i += 1; continue
         if line.startswith('# '):
             if first_h1:
-                story += [Spacer(1, 42*mm), Paragraph(inline(line[2:]), styles['CoverTitle']), Spacer(1, 4*mm), Paragraph('Technical manual for operators, technicians, and support teams', styles['CoverSub']), Spacer(1, 9*mm), Paragraph('Vexel Innovations  |  in collaboration with TechNova Technologies', styles['CoverSub']), Spacer(1, 8*mm), Paragraph('Release line 1.0.x  |  October 2026', styles['CoverSub']), PageBreak()]
+                story += [Spacer(1, 42*mm), Paragraph(inline(line[2:]), styles['CoverTitle']), Spacer(1, 4*mm), Paragraph('Technical manual for operators, technicians, and support teams', styles['CoverSub']), Spacer(1, 9*mm), Paragraph('Vexel Innovations  |  in collaboration with TechNova Technologies', styles['CoverSub']), Spacer(1, 8*mm), Paragraph('Release 1.0.3+34  |  October 2026', styles['CoverSub']), PageBreak()]
                 first_h1 = False
             else: story.append(Paragraph(inline(line[2:]), styles['H1x']))
             i += 1; continue
         if line.startswith('## '):
-            story.append(Paragraph(inline(line[3:]), styles['H1x'])); i += 1; continue
+            heading = line[3:]
+            story.append(Paragraph(inline(heading), styles['H1x']))
+            if heading.startswith('1. '):
+                story.append(FlowDiagram('WireSpot operating model', [('Mobile app', 'local control'), ('Cloud API', 'shared workspace'), ('Web dashboard', 'team view')], 'Local work continues when cloud access is unavailable.'))
+                story.append(Spacer(1, 3*mm))
+            elif heading.startswith('5. '):
+                story.append(FlowDiagram('Secure router path', [('Phone or desktop', 'operator session'), ('Private tunnel', 'WireGuard / BTH / ZeroTier'), ('RouterOS', 'API 8728/8729')], 'The tunnel protects the management path; it does not replace subscriber authentication.'))
+                story.append(Spacer(1, 3*mm))
+            elif heading.startswith('6. '):
+                story.append(FlowDiagram('Bidirectional organization sync', [('Mobile device', 'queue changes'), ('Cloud service', 'merge by organization'), ('Dashboard', 'hydrate live data')], 'Only authenticated, organization-scoped records are exchanged.'))
+                story.append(Spacer(1, 3*mm))
+            i += 1; continue
         if line.startswith('### '):
             story.append(Paragraph(inline(line[4:]), styles['H2x'])); i += 1; continue
         if line.startswith('```'):

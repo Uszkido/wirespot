@@ -2,7 +2,7 @@
 
 **Product:** WireSpot hotspot operations platform  
 **Publisher:** Vexel Innovations, in collaboration with TechNova Technologies  
-**Release line:** 1.0.x  
+**Release:** 1.0.3+34  
 **Audience:** hotspot operators, field technicians, small ISPs, hotels, estates, and support teams
 
 ## 1. What WireSpot is
@@ -228,9 +228,10 @@ Before a field rollout:
 6. Confirm production backend configuration and persistent storage.
 7. Record the deployed app version and keep a rollback APK.
 
-For source-level maintenance, see the repository README, wiki pages, `radius/`,
-and `wirespot_backend/README.md`. Report bugs through the WireSpot repository;
-do not publish credentials or customer data in issue reports.
+This manual is intended to be self-contained. If support is needed, use the
+contact details in the app's About page and include the app version, device,
+router vendor, connection mode, and the exact error message. Never include
+passwords, access tokens, pairing codes, or customer data in a support request.
 
 ## 14. Product identity
 
@@ -238,3 +239,43 @@ WireSpot is a Vexel Innovations product developed in collaboration with
 TechNova Technologies. Product support, licensing, and release information
 should use the approved contact details shown in the app's About page and the
 organization's published support channel.
+
+## 15. Quick reference and glossary
+
+**API Base URL:** The HTTPS address of the WireSpot cloud service. It is not the
+router address and should never be replaced with a private RouterOS IP.
+
+**Organization ID:** The workspace identifier shared by the mobile app and web
+dashboard. Devices using different organization IDs cannot see one another's
+routers, vouchers, or reports.
+
+**Access token:** A secret bearer credential used for cloud API requests. It is
+created by the configured sign-in or pairing flow and should be treated like a
+password. It is not the local PIN, RouterOS password, or RADIUS secret.
+
+**Pairing code:** A short-lived, one-time code displayed by an activated device
+to authorize a companion desktop or web session.
+
+**Telemetry:** A time-stamped observation obtained from a real router connector.
+When a connector cannot provide a value, WireSpot leaves it unavailable rather
+than displaying a guessed number.
+
+**RouterOS API:** MikroTik's management protocol. Port `8728` is the usual
+plain API port; `8729` is the usual API-SSL port.
+
+**RADIUS:** The authentication and accounting service used for subscriber
+access such as PPPoE. RADIUS is not a VPN and does not make a router remotely
+reachable by itself.
+
+**VPN management path:** A private route, such as WireGuard, Back To Home, or
+ZeroTier, through which the app can reach a router without publishing its
+management port.
+
+### Daily operator checklist
+
+1. Confirm the correct organization and current sync time.
+2. Check that the active router has a recent real snapshot.
+3. Review active sessions and sales before issuing vouchers.
+4. Export or back up important records before major configuration changes.
+5. Disconnect the VPN when field work is complete if it is not needed.
+6. Sign out of shared computers and never leave tokens in screenshots.
