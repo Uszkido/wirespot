@@ -41,10 +41,11 @@ Common RouterOS API ports:
 - Plain API: `8728`
 - SSL API: `8729`
 
-For Ruijie/Reyee, WireSpot can securely store a Ruijie Cloud access token and
-verify the cloud connection through device discovery. It does not yet alter
-Ruijie hotspot or voucher settings. OpenWrt, Omada, UniFi, and generic routers
-remain planned connectors.
+For Ruijie/Reyee, WireSpot can securely store a Ruijie Cloud access token,
+verify the cloud connection, discover devices, and show a normalized read-only
+dashboard snapshot. It does not alter Ruijie hotspot or voucher settings.
+OpenWrt, Omada, and UniFi also provide read-only dashboard snapshots; generic
+routers remain connection-only.
 
 See [Ruijie Cloud Setup](ruijie-cloud-setup.md) for the required credentials
 and the safe setup process.

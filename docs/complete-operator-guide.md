@@ -99,11 +99,12 @@ Use the Routers screen:
 RouterOS API access must be enabled on the MikroTik router. The default API
 port is usually `8728`; API-SSL is usually `8729` when configured.
 
-Ruijie/Reyee supports a limited, read-only Ruijie Cloud connection test using a
-vendor-issued access token. It does not send RouterOS commands or change Ruijie
-configuration. OpenWrt can provide a read-only dashboard snapshot through its
-standard ubus methods; its mutations are not enabled. Omada, UniFi, and generic
-brands remain connection/probe foundations. See [Ruijie Cloud Setup](ruijie-cloud-setup.md).
+Ruijie/Reyee supports a read-only Ruijie Cloud connection, device discovery, and
+normalized dashboard snapshot using a vendor-issued access token. It does not
+send RouterOS commands or change Ruijie configuration. OpenWrt, Omada, and
+UniFi provide read-only dashboard snapshots through their vendor APIs; their
+mutations are not enabled. Generic routers remain connection/probe only. See
+[Ruijie Cloud Setup](ruijie-cloud-setup.md).
 
 ## 7. Local LAN Mode
 

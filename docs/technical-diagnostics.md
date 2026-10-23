@@ -130,11 +130,11 @@ Use normal Git, not Flutter's bundled mini-git, for GitHub pushes.
 
 ## 7. RouterOS API Diagnostics
 
-MikroTik RouterOS is the full live router connector. Ruijie/Reyee has a
-limited Ruijie Cloud connection check using a vendor-issued access token and
-the cloud device-list endpoint. OpenWrt provides a read-only dashboard snapshot
-through LuCI/ubus. TP-Link Omada, Ubiquiti UniFi, and generic routers can be
-saved as authenticated connection/probe foundations.
+MikroTik RouterOS is the full live router connector. Ruijie/Reyee has an
+authenticated Ruijie Cloud connection, device-list discovery, and normalized
+read-only dashboard snapshot. OpenWrt, TP-Link Omada, and Ubiquiti UniFi provide
+read-only dashboard snapshots through their vendor APIs. Generic routers remain
+authenticated connection/probe foundations.
 
 Check RouterOS API service:
 
