@@ -16,6 +16,11 @@ The repository is under active development. The current CI status, supported
 platforms, and known limitations are listed here rather than presented as
 finished product claims.
 
+For an operator-facing walkthrough of installation, routers, VPN, cloud sync,
+RADIUS/PPPoE, reporting, security, platforms, and troubleshooting, see the
+[WireSpot Technical Manual](docs/WireSpot%20Technical%20Manual.pdf). Its
+editable source is kept beside it as `docs/WireSpot Technical Manual.md`.
+
 Supported discovery paths include OpenWrt (LuCI/ubus), TP-Link Omada
 (controller API), Ubiquiti UniFi (controller REST), and generic HTTP/REST/SNMP
 routers.
