@@ -58,8 +58,8 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
 
   @override
   Widget build(BuildContext context) {
-    final role = ref.watch(cloudControllerProvider).session?.role ??
-        OperatorRole.owner;
+    final role =
+        ref.watch(cloudControllerProvider).session?.role ?? OperatorRole.owner;
     final canSell = OperatorPermissionMatrix.canSellVouchers(role);
     final routers = ref.watch(routersProvider);
     final encoding = ref.watch(voucherEncodingProvider);

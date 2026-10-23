@@ -93,8 +93,8 @@ class _HotspotRouterScope extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final role = ref.watch(cloudControllerProvider).session?.role ??
-        OperatorRole.owner;
+    final role =
+        ref.watch(cloudControllerProvider).session?.role ?? OperatorRole.owner;
     final canManage = OperatorPermissionMatrix.canManageRouters(role);
     final canDisconnect = OperatorPermissionMatrix.canDisconnectSessions(role);
     if (!router.vendor.supports(RouterCapability.hotspotUsers)) {
@@ -148,8 +148,7 @@ class _HotspotRouterScope extends ConsumerWidget {
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
                       onPressed: canManage
-                          ? () =>
-                              _showSetupHotspotDialog(context, ref, router)
+                          ? () => _showSetupHotspotDialog(context, ref, router)
                           : null,
                       icon: const Icon(Icons.settings_input_antenna_outlined),
                       label: const Text('Setup hotspot'),
@@ -367,20 +366,22 @@ class _UsersTab extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (canManage) FloatingActionButton.small(
-            heroTag: 'bulk_import',
-            tooltip: 'Bulk import from CSV',
-            onPressed: () =>
-                context.push('/hotspot/import?routerId=${router.id}'),
-            child: const Icon(Icons.upload_file),
-          ),
+          if (canManage)
+            FloatingActionButton.small(
+              heroTag: 'bulk_import',
+              tooltip: 'Bulk import from CSV',
+              onPressed: () =>
+                  context.push('/hotspot/import?routerId=${router.id}'),
+              child: const Icon(Icons.upload_file),
+            ),
           const SizedBox(height: 16),
-          if (canManage) FloatingActionButton(
-            heroTag: 'add_user',
-            tooltip: 'Add hotspot user',
-            onPressed: () => _showCreateUserDialog(context, ref, router),
-            child: const Icon(Icons.person_add_alt),
-          ),
+          if (canManage)
+            FloatingActionButton(
+              heroTag: 'add_user',
+              tooltip: 'Add hotspot user',
+              onPressed: () => _showCreateUserDialog(context, ref, router),
+              child: const Icon(Icons.person_add_alt),
+            ),
         ],
       ),
       itemBuilder: (context, user) => ListTile(
@@ -396,7 +397,10 @@ class _UsersTab extends ConsumerWidget {
                     value: _UserAction.resetCounters,
                     child: Text('Reset counters'),
                   ),
-                  PopupMenuItem(value: _UserAction.delete, child: Text('Delete')),
+                  PopupMenuItem(
+                    value: _UserAction.delete,
+                    child: Text('Delete'),
+                  ),
                 ],
               )
             : null,

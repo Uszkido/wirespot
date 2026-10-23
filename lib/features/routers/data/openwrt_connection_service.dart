@@ -91,19 +91,27 @@ class OpenWrtConnectionService implements RouterConnector {
     try {
       final board = await _rpc(router, session, 'system', 'board');
       final info = await _rpc(router, session, 'system', 'info');
-      final interfaces =
-          await _rpc(router, session, 'network.interface', 'dump');
+      final interfaces = await _rpc(
+        router,
+        session,
+        'network.interface',
+        'dump',
+      );
 
       final model = _string(board, const ['model', 'board_name', 'hostname']);
       final release = _map(board['release']);
-      final version = _string(release, const ['version']) ??
+      final version =
+          _string(release, const ['version']) ??
           _string(board, const ['version', 'kernel']);
       final memory = _map(info['memory']);
       final totalMemory = _number(memory, const ['total', 'total_bytes']);
       final freeMemory = _number(memory, const ['free', 'free_bytes']);
       final load = _numberList(info['load']);
-      if (model == null || version == null || totalMemory == null ||
-          freeMemory == null || load.isEmpty) {
+      if (model == null ||
+          version == null ||
+          totalMemory == null ||
+          freeMemory == null ||
+          load.isEmpty) {
         throw unsupportedVendorSnapshot(router);
       }
 
@@ -155,8 +163,11 @@ class OpenWrtConnectionService implements RouterConnector {
       password: password,
     );
     final result = response['result'];
-    if (result is List && result.length > 1 && result[0] == 0 &&
-        result[1] is Map && (result[1] as Map)['ubus_rpc_session'] != null) {
+    if (result is List &&
+        result.length > 1 &&
+        result[0] == 0 &&
+        result[1] is Map &&
+        (result[1] as Map)['ubus_rpc_session'] != null) {
       return (result[1] as Map)['ubus_rpc_session'].toString();
     }
     throw StateError('OpenWrt ubus authentication failed.');
@@ -181,10 +192,14 @@ class OpenWrtConnectionService implements RouterConnector {
       },
     );
     if (response['status'] == 'error') {
-      throw StateError(response['message']?.toString() ?? 'OpenWrt ubus error.');
+      throw StateError(
+        response['message']?.toString() ?? 'OpenWrt ubus error.',
+      );
     }
     final result = response['result'];
-    if (result is List && result.length > 1 && result[0] == 0 &&
+    if (result is List &&
+        result.length > 1 &&
+        result[0] == 0 &&
         result[1] is Map) {
       return Map<String, dynamic>.from(result[1] as Map);
     }
@@ -195,14 +210,31 @@ class OpenWrtConnectionService implements RouterConnector {
   }
 
   List<RouterOsInterface> _interfaceRows(Map<String, dynamic> payload) {
-    final raw = payload['interface'] ?? payload['interfaces'] ?? payload['items'];
+    final raw =
+        payload['interface'] ?? payload['interfaces'] ?? payload['items'];
     if (raw is! List) return const [];
-    return raw.whereType<Map>().map((item) {
-      final row = Map<String, dynamic>.from(item);
-      final name = _string(row, const ['device', 'l3_device', 'interface', 'name']) ?? '';
-      final up = row['up'] == true || row['up'] == 1;
-      return RouterOsInterface(name: name, type: 'openwrt', running: up, disabled: false);
-    }).where((item) => item.name.isNotEmpty).toList(growable: false);
+    return raw
+        .whereType<Map>()
+        .map((item) {
+          final row = Map<String, dynamic>.from(item);
+          final name =
+              _string(row, const [
+                'device',
+                'l3_device',
+                'interface',
+                'name',
+              ]) ??
+              '';
+          final up = row['up'] == true || row['up'] == 1;
+          return RouterOsInterface(
+            name: name,
+            type: 'openwrt',
+            running: up,
+            disabled: false,
+          );
+        })
+        .where((item) => item.name.isNotEmpty)
+        .toList(growable: false);
   }
 
   Map<String, dynamic> _map(dynamic value) =>
@@ -211,7 +243,9 @@ class OpenWrtConnectionService implements RouterConnector {
   String? _string(Map<String, dynamic> value, List<String> keys) {
     for (final key in keys) {
       final item = value[key];
-      if (item != null && item.toString().trim().isNotEmpty) return item.toString();
+      if (item != null && item.toString().trim().isNotEmpty) {
+        return item.toString();
+      }
     }
     return null;
   }
@@ -226,9 +260,8 @@ class OpenWrtConnectionService implements RouterConnector {
     return null;
   }
 
-  List<num> _numberList(dynamic value) => value is List
-      ? value.whereType<num>().toList(growable: false)
-      : const [];
+  List<num> _numberList(dynamic value) =>
+      value is List ? value.whereType<num>().toList(growable: false) : const [];
 
   String _formatUptime(int seconds) {
     final duration = Duration(seconds: seconds);

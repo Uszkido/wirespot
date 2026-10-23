@@ -19,15 +19,16 @@ class ReportsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final role = ref.watch(cloudControllerProvider).session?.role ??
-        OperatorRole.owner;
+    final role =
+        ref.watch(cloudControllerProvider).session?.role ?? OperatorRole.owner;
     if (!OperatorPermissionMatrix.canViewFinancialReports(role)) {
       return Scaffold(
         appBar: AppBar(title: const Text('Reports')),
         body: const EmptyState(
           icon: Icons.lock_outline,
           title: 'Reports restricted',
-          message: 'Your operator role does not have access to financial reports.',
+          message:
+              'Your operator role does not have access to financial reports.',
         ),
       );
     }

@@ -88,10 +88,13 @@ class UniFiConnectionService implements RouterConnector {
     final freeMemory = _number(primary, const ['freeMemory', 'memoryFree']);
     final totalMemory = _number(primary, const ['totalMemory', 'memoryTotal']);
     return RouterOsRouterSnapshot(
-      identity: _value(primary, const ['name', 'displayName', 'model']) ??
+      identity:
+          _value(primary, const ['name', 'displayName', 'model']) ??
           router.name,
       resource: RouterOsSystemResource(
-        uptime: _formatUptime(_number(primary, const ['uptime', 'uptimeSeconds']).toInt()),
+        uptime: _formatUptime(
+          _number(primary, const ['uptime', 'uptimeSeconds']).toInt(),
+        ),
         version: _value(primary, const ['version', 'firmwareVersion']) ?? '',
         boardName: _value(primary, const ['model', 'modelName']) ?? '',
         cpuLoad: cpu.clamp(0, 100).toInt(),
@@ -132,13 +135,20 @@ class UniFiConnectionService implements RouterConnector {
       (await _credentialStore?.read(router.id))?.accessToken;
 
   List<Map<String, dynamic>> _records(Map<String, dynamic> response) {
-    dynamic value = response['data'] ?? response['items'] ?? response['sites'] ??
+    dynamic value =
+        response['data'] ??
+        response['items'] ??
+        response['sites'] ??
         response['devices'];
     if (value is Map) {
-      value = value['data'] ?? value['items'] ?? value['sites'] ?? value['devices'];
+      value =
+          value['data'] ?? value['items'] ?? value['sites'] ?? value['devices'];
     }
     if (value is! List) return const [];
-    return value.whereType<Map>().map((item) => Map<String, dynamic>.from(item)).toList();
+    return value
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
   }
 
   String? _value(Map<String, dynamic> record, List<String> keys) {
