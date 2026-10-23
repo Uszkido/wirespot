@@ -103,6 +103,27 @@ jobs:
           dart pub global activate dart_frog_cli 1.2.6
           dart_frog build
 
+      - name: Smoke test production backend bundle
+        run: |
+          mkdir -p "$RUNNER_TEMP/wirespot"
+          WIRESPOT_ENV=production \
+          WIRESPOT_ENABLE_LOCAL_AUTH=true \
+          WIRESPOT_STORE_PATH="$RUNNER_TEMP/wirespot/store.json" \
+          PORT=8080 \
+          nohup dart build/bin/server.dart > "$RUNNER_TEMP/wirespot/backend.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          for attempt in {1..30}; do
+            if response=$(curl --silent --show-error --fail http://127.0.0.1:8080/health); then
+              echo "$response"
+              echo "$response" | grep -q '"productionReady":true'
+              exit 0
+            fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/wirespot/backend.log"
+          exit 1
+
   windows:
     name: Build Windows desktop app
     runs-on: windows-2025
