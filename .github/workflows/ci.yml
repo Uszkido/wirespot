@@ -227,3 +227,22 @@ jobs:
           name: WireSpot-ios-unsigned
           path: WireSpot-ios-unsigned.zip
           if-no-files-found: error
+
+  hosted-smoke:
+    name: Verify hosted production sync
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Run authenticated hosted smoke test
+        run: node web_app/smoke-test.mjs
+        env:
+          WIRESPOT_REQUIRE_PRODUCTION: true
+          WIRESPOT_SMOKE_EMAIL: ${{ secrets.WIRESPOT_SMOKE_EMAIL }}
+          WIRESPOT_SMOKE_PASSWORD: ${{ secrets.WIRESPOT_SMOKE_PASSWORD }}
+          WIRESPOT_SMOKE_ROUTER_JSON: ${{ secrets.WIRESPOT_SMOKE_ROUTER_JSON }}
+          WIRESPOT_SMOKE_TELEMETRY_JSON: ${{ secrets.WIRESPOT_SMOKE_TELEMETRY_JSON }}
