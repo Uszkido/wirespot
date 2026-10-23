@@ -18,3 +18,12 @@ RouterOsApiException unsupportedVendorSnapshot(RouterEntity router) =>
       'for live CPU, memory, interface, and session telemetry.',
       category: 'unsupported_operation',
     );
+
+RouterOsApiException unsupportedVendorCommand(
+  RouterEntity router,
+  String command,
+) => RouterOsApiException(
+  '${router.vendor.label} does not expose a normalized command adapter for '
+  '$command yet. Configure the vendor controller API before running it.',
+  category: 'unsupported_operation',
+);

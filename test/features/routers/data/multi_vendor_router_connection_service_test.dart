@@ -92,20 +92,18 @@ void main() {
         final isConnected = await service.testConnection(router);
         expect(isConnected, isTrue);
 
-        final identity = await service.execute(
-          router,
-          '/system/identity/print',
-        );
-        expect(identity.records, isNotEmpty);
-
-        expect(
-          () => service.execute(
+        if (vendor == RouterVendor.mikrotik) {
+          final identity = await service.execute(
             router,
-            '/ip/hotspot/user/add',
-            attributes: {'name': 'test_${vendor.name}', 'password': 'pass'},
-          ),
-          throwsA(isA<RouterOsApiException>()),
-        );
+            '/system/identity/print',
+          );
+          expect(identity.records, isNotEmpty);
+        } else {
+          expect(
+            () => service.execute(router, '/system/identity/print'),
+            throwsA(isA<RouterOsApiException>()),
+          );
+        }
 
         if (vendor == RouterVendor.mikrotik) {
           final snapshot = await service.getSnapshot(router);

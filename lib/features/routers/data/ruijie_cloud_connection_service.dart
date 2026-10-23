@@ -15,9 +15,10 @@ typedef RuijieDeviceRequest = Future<Response<dynamic>> Function(Uri uri);
 typedef RuijieCredentialsReader =
     Future<RouterCredentials?> Function(String routerId);
 
-/// Active Ruijie / Reyee Cloud & Controller connector.
-/// Provides connection testing, device discovery, metric snapshots,
-/// and hotspot user/voucher command execution.
+/// Ruijie/Reyee Cloud authentication and device-discovery connector.
+///
+/// Controller-specific mutations and normalized telemetry are intentionally
+/// rejected until the target Ruijie API version and site model are configured.
 class RuijieCloudConnectionService implements RouterConnector {
   RuijieCloudConnectionService({
     RouterCredentialStore? credentialStore,
@@ -34,9 +35,6 @@ class RuijieCloudConnectionService implements RouterConnector {
   final RuijieDeviceRequest _requestDevices;
   final RuijieCredentialsReader? _readCredentials;
   final VendorHttpClient _http;
-
-  // In-memory store for Ruijie hotspot user/voucher state
-  final Map<String, List<Map<String, String>>> _ruijieUsersStore = {};
 
   @override
   RouterVendor get vendor => RouterVendor.ruijie;
@@ -79,129 +77,7 @@ class RuijieCloudConnectionService implements RouterConnector {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async {
-    if (command.startsWith('/ip/hotspot/')) {
-      throw unsupportedVendorMutation(router, command);
-    }
-    final routerStore = _ruijieUsersStore.putIfAbsent(router.id, () => []);
-
-    if (command == '/system/identity/print') {
-      return RouterOsApiResponse(
-        records: [
-          {'name': router.identity ?? router.name},
-        ],
-      );
-    }
-
-    if (command == '/system/resource/print') {
-      return const RouterOsApiResponse(
-        records: [
-          {
-            'uptime': '14d06h20m',
-            'version': 'RuijieOS 2.28',
-            'board-name': 'Reyee RG-EG105G-P',
-            'cpu-load': '12',
-            'free-memory': '268435456',
-            'total-memory': '536870912',
-          },
-        ],
-      );
-    }
-
-    if (command == '/interface/print') {
-      return const RouterOsApiResponse(
-        records: [
-          {
-            'name': 'WAN1',
-            'type': 'ether',
-            'running': 'true',
-            'disabled': 'false',
-            'mac-address': '00:D0:F8:88:1A:01',
-            'rx-byte': '10485760',
-            'tx-byte': '52428800',
-          },
-          {
-            'name': 'LAN1',
-            'type': 'ether',
-            'running': 'true',
-            'disabled': 'false',
-            'mac-address': '00:D0:F8:88:1A:02',
-            'rx-byte': '52428800',
-            'tx-byte': '10485760',
-          },
-        ],
-      );
-    }
-
-    if (command == '/ip/hotspot/user/print') {
-      return RouterOsApiResponse(records: List.from(routerStore));
-    }
-
-    if (command == '/ip/hotspot/user/add') {
-      final id = '*ruijie_${DateTime.now().millisecondsSinceEpoch}';
-      final newRecord = <String, String>{
-        '.id': id,
-        'name': attributes['name'] ?? 'ruijie_user',
-        'password': attributes['password'] ?? '',
-        'profile': attributes['profile'] ?? 'default',
-        'uptime-limit':
-            attributes['limit-uptime'] ?? attributes['uptime-limit'] ?? '0s',
-        'bytes-total-limit':
-            attributes['limit-bytes-total'] ??
-            attributes['bytes-total-limit'] ??
-            '0',
-        'comment': attributes['comment'] ?? 'Created via Ruijie Cloud API',
-        'disabled': 'false',
-      };
-      routerStore.add(newRecord);
-      return RouterOsApiResponse(records: [newRecord]);
-    }
-
-    if (command == '/ip/hotspot/user/remove') {
-      final targetId = attributes['.id'] ?? attributes['numbers'];
-      routerStore.removeWhere(
-        (item) => item['.id'] == targetId || item['name'] == targetId,
-      );
-      return const RouterOsApiResponse(records: []);
-    }
-
-    if (command == '/ip/hotspot/active/print') {
-      final activeList = routerStore
-          .take(5)
-          .map(
-            (u) => {
-              '.id': '*act_${u['.id']}',
-              'user': u['name'] ?? '',
-              'address': '192.168.110.${routerStore.indexOf(u) + 10}',
-              'mac-address': '00:D0:F8:${routerStore.indexOf(u)}:10:20',
-              'uptime': '15m',
-              'bytes-in': '102400',
-              'bytes-out': '204800',
-            },
-          )
-          .toList();
-      return RouterOsApiResponse(records: activeList);
-    }
-
-    if (command == '/ip/hotspot/user/profile/print') {
-      return const RouterOsApiResponse(
-        records: [
-          {
-            '.id': '*p1',
-            'name': 'default',
-            'shared-users': '1',
-            'rate-limit': '5M/5M',
-          },
-          {
-            '.id': '*p2',
-            'name': 'VIP_Ruijie',
-            'shared-users': '2',
-            'rate-limit': '20M/20M',
-          },
-        ],
-      );
-    }
-
-    return const RouterOsApiResponse(records: []);
+    throw unsupportedVendorCommand(router, command);
   }
 
   @override
@@ -256,26 +132,21 @@ class RuijieCloudConnectionService implements RouterConnector {
     final records = data is Map
         ? data['list'] ?? data['devices'] ?? data['records']
         : data;
-    if (records is! List) {
-      return const [];
-    }
+    if (records is! List) return const [];
     return records
         .whereType<Map>()
         .map((record) => Map<String, Object?>.from(record))
         .toList(growable: false);
   }
 
-  Uri _deviceListUri(RouterEntity router, String token) {
-    return Uri(
-      scheme: router.useSsl ? 'https' : 'http',
-      host: router.host.trim(),
-      port: router.apiPort,
-      path: '/service/api/maint/devices',
-      queryParameters: {'access_token': token},
-    );
-  }
+  Uri _deviceListUri(RouterEntity router, String token) => Uri(
+    scheme: router.useSsl ? 'https' : 'http',
+    host: router.host.trim(),
+    port: router.apiPort,
+    path: '/service/api/maint/devices',
+    queryParameters: {'access_token': token},
+  );
 
-  static Future<Response<dynamic>> _defaultRequestDevices(Uri uri) {
-    return Dio().getUri<dynamic>(uri);
-  }
+  static Future<Response<dynamic>> _defaultRequestDevices(Uri uri) =>
+      Dio().getUri<dynamic>(uri);
 }
