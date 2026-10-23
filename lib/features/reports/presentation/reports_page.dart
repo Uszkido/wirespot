@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/providers.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../authentication/domain/entities/operator_role.dart';
+import '../../cloud/presentation/cloud_providers.dart';
 import '../../routers/domain/entities/router_entity.dart';
 import '../../routers/presentation/router_providers.dart';
 import '../../voucher/domain/entities/voucher_entity.dart';
@@ -17,6 +19,18 @@ class ReportsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final role = ref.watch(cloudControllerProvider).session?.role ??
+        OperatorRole.owner;
+    if (!OperatorPermissionMatrix.canViewFinancialReports(role)) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Reports')),
+        body: const EmptyState(
+          icon: Icons.lock_outline,
+          title: 'Reports restricted',
+          message: 'Your operator role does not have access to financial reports.',
+        ),
+      );
+    }
     final routers = ref.watch(routersProvider);
     final summary = ref.watch(revenueSummaryProvider);
 

@@ -9,6 +9,8 @@ import '../../../core/printer/printer_models.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../dashboard/presentation/dashboard_providers.dart';
+import '../../authentication/domain/entities/operator_role.dart';
+import '../../cloud/presentation/cloud_providers.dart';
 import '../../routers/domain/entities/router_entity.dart';
 import '../../routers/presentation/router_providers.dart';
 import '../../settings/presentation/settings_providers.dart';
@@ -56,6 +58,9 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
 
   @override
   Widget build(BuildContext context) {
+    final role = ref.watch(cloudControllerProvider).session?.role ??
+        OperatorRole.owner;
+    final canSell = OperatorPermissionMatrix.canSellVouchers(role);
     final routers = ref.watch(routersProvider);
     final encoding = ref.watch(voucherEncodingProvider);
     final settings = ref.watch(appSettingsProvider).asData?.value;
@@ -108,6 +113,7 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
                     routerOsProfileController: _routerOsProfileController,
                     currencyCode: currencyCode,
                     isGenerating: _isGenerating,
+                    canSell: canSell,
                     provisionOnRouter: _provisionOnRouter,
                     onRouterChanged: (value) {
                       ref.read(selectedVoucherRouterIdProvider.notifier).state =
@@ -422,6 +428,7 @@ class _VoucherGeneratorCard extends StatelessWidget {
     required this.routerOsProfileController,
     required this.currencyCode,
     required this.isGenerating,
+    required this.canSell,
     required this.provisionOnRouter,
     required this.onRouterChanged,
     required this.onPlanChanged,
@@ -444,6 +451,7 @@ class _VoucherGeneratorCard extends StatelessWidget {
   final TextEditingController routerOsProfileController;
   final String currencyCode;
   final bool isGenerating;
+  final bool canSell;
   final bool provisionOnRouter;
   final ValueChanged<String?> onRouterChanged;
   final ValueChanged<VoucherPlan> onPlanChanged;
@@ -614,7 +622,7 @@ class _VoucherGeneratorCard extends StatelessWidget {
             ],
             const SizedBox(height: 16),
             FilledButton.icon(
-              onPressed: isGenerating ? null : onGenerate,
+              onPressed: !canSell || isGenerating ? null : onGenerate,
               icon: isGenerating
                   ? const SizedBox.square(
                       dimension: 18,

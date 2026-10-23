@@ -6,6 +6,8 @@ import '../../../core/di/providers.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../dashboard/presentation/dashboard_providers.dart';
+import '../../authentication/domain/entities/operator_role.dart';
+import '../../cloud/presentation/cloud_providers.dart';
 import '../../routers/domain/entities/router_entity.dart';
 import '../../routers/presentation/router_providers.dart';
 import '../../settings/presentation/settings_providers.dart';
@@ -91,6 +93,10 @@ class _HotspotRouterScope extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final role = ref.watch(cloudControllerProvider).session?.role ??
+        OperatorRole.owner;
+    final canManage = OperatorPermissionMatrix.canManageRouters(role);
+    final canDisconnect = OperatorPermissionMatrix.canDisconnectSessions(role);
     if (!router.vendor.supports(RouterCapability.hotspotUsers)) {
       return _UnsupportedHotspotRouter(routers: routers, router: router);
     }
@@ -133,14 +139,18 @@ class _HotspotRouterScope extends ConsumerWidget {
                   runSpacing: 8,
                   children: [
                     OutlinedButton.icon(
-                      onPressed: () => context.push(AppRoutes.portalCustomizer),
+                      onPressed: canManage
+                          ? () => context.push(AppRoutes.portalCustomizer)
+                          : null,
                       icon: const Icon(Icons.palette_outlined),
                       label: const Text('Portal templates'),
                     ),
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
-                      onPressed: () =>
-                          _showSetupHotspotDialog(context, ref, router),
+                      onPressed: canManage
+                          ? () =>
+                              _showSetupHotspotDialog(context, ref, router)
+                          : null,
                       icon: const Icon(Icons.settings_input_antenna_outlined),
                       label: const Text('Setup hotspot'),
                     ),
@@ -151,8 +161,9 @@ class _HotspotRouterScope extends ConsumerWidget {
                       label: const Text('PPPoE guide'),
                     ),
                     OutlinedButton.icon(
-                      onPressed: () =>
-                          context.push(AppRoutes.radiusSubscribers),
+                      onPressed: canManage
+                          ? () => context.push(AppRoutes.radiusSubscribers)
+                          : null,
                       icon: const Icon(Icons.manage_accounts_outlined),
                       label: const Text('PPPoE subscribers'),
                     ),
@@ -176,11 +187,11 @@ class _HotspotRouterScope extends ConsumerWidget {
           Expanded(
             child: TabBarView(
               children: [
-                _UsersTab(router: router),
-                _ProfilesTab(router: router),
-                _SessionsTab(router: router),
-                _CookiesTab(router: router),
-                _BindingsTab(router: router),
+                _UsersTab(router: router, canManage: canManage),
+                _ProfilesTab(router: router, canManage: canManage),
+                _SessionsTab(router: router, canDisconnect: canDisconnect),
+                _CookiesTab(router: router, canManage: canManage),
+                _BindingsTab(router: router, canManage: canManage),
                 _QueuesTab(router: router),
                 _DeploymentsTab(router: router),
               ],
@@ -337,9 +348,10 @@ class _UnsupportedHotspotRouter extends ConsumerWidget {
 }
 
 class _UsersTab extends ConsumerWidget {
-  const _UsersTab({required this.router});
+  const _UsersTab({required this.router, required this.canManage});
 
   final RouterEntity router;
+  final bool canManage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -355,7 +367,7 @@ class _UsersTab extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          FloatingActionButton.small(
+          if (canManage) FloatingActionButton.small(
             heroTag: 'bulk_import',
             tooltip: 'Bulk import from CSV',
             onPressed: () =>
@@ -363,7 +375,7 @@ class _UsersTab extends ConsumerWidget {
             child: const Icon(Icons.upload_file),
           ),
           const SizedBox(height: 16),
-          FloatingActionButton(
+          if (canManage) FloatingActionButton(
             heroTag: 'add_user',
             tooltip: 'Add hotspot user',
             onPressed: () => _showCreateUserDialog(context, ref, router),
@@ -375,16 +387,19 @@ class _UsersTab extends ConsumerWidget {
         leading: Icon(user.disabled ? Icons.person_off_outlined : Icons.person),
         title: Text(user.name),
         subtitle: Text(user.profile ?? 'default'),
-        trailing: PopupMenuButton<_UserAction>(
-          onSelected: (action) => _handleUserAction(context, ref, user, action),
-          itemBuilder: (context) => const [
-            PopupMenuItem(
-              value: _UserAction.resetCounters,
-              child: Text('Reset counters'),
-            ),
-            PopupMenuItem(value: _UserAction.delete, child: Text('Delete')),
-          ],
-        ),
+        trailing: canManage
+            ? PopupMenuButton<_UserAction>(
+                onSelected: (action) =>
+                    _handleUserAction(context, ref, user, action),
+                itemBuilder: (context) => const [
+                  PopupMenuItem(
+                    value: _UserAction.resetCounters,
+                    child: Text('Reset counters'),
+                  ),
+                  PopupMenuItem(value: _UserAction.delete, child: Text('Delete')),
+                ],
+              )
+            : null,
       ),
     );
   }
@@ -418,9 +433,10 @@ class _UsersTab extends ConsumerWidget {
 }
 
 class _ProfilesTab extends ConsumerWidget {
-  const _ProfilesTab({required this.router});
+  const _ProfilesTab({required this.router, required this.canManage});
 
   final RouterEntity router;
+  final bool canManage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -432,29 +448,34 @@ class _ProfilesTab extends ConsumerWidget {
       emptyTitle: 'No profiles',
       emptyMessage: 'Create RouterOS hotspot user profiles for plan speeds.',
       onRefresh: () async => ref.invalidate(hotspotProfilesProvider(router)),
-      action: FloatingActionButton(
-        tooltip: 'Add profile',
-        onPressed: () => _showCreateProfileDialog(context, ref, router),
-        child: const Icon(Icons.add),
-      ),
+      action: canManage
+          ? FloatingActionButton(
+              tooltip: 'Add profile',
+              onPressed: () => _showCreateProfileDialog(context, ref, router),
+              child: const Icon(Icons.add),
+            )
+          : null,
       itemBuilder: (context, profile) => ListTile(
         leading: const Icon(Icons.speed_outlined),
         title: Text(profile.name),
         subtitle: Text(profile.rateLimit ?? 'No rate limit'),
-        trailing: IconButton(
-          tooltip: 'Delete profile',
-          onPressed: () => _deleteProfile(context, ref, router, profile),
-          icon: const Icon(Icons.delete_outline),
-        ),
+        trailing: canManage
+            ? IconButton(
+                tooltip: 'Delete profile',
+                onPressed: () => _deleteProfile(context, ref, router, profile),
+                icon: const Icon(Icons.delete_outline),
+              )
+            : null,
       ),
     );
   }
 }
 
 class _SessionsTab extends ConsumerWidget {
-  const _SessionsTab({required this.router});
+  const _SessionsTab({required this.router, required this.canDisconnect});
 
   final RouterEntity router;
+  final bool canDisconnect;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -471,20 +492,24 @@ class _SessionsTab extends ConsumerWidget {
         leading: const Icon(Icons.wifi_tethering),
         title: Text(session.user),
         subtitle: Text(session.address ?? session.macAddress ?? 'active'),
-        trailing: IconButton(
-          tooltip: 'Disconnect',
-          onPressed: () => _disconnectSession(context, ref, router, session),
-          icon: const Icon(Icons.link_off),
-        ),
+        trailing: canDisconnect
+            ? IconButton(
+                tooltip: 'Disconnect',
+                onPressed: () =>
+                    _disconnectSession(context, ref, router, session),
+                icon: const Icon(Icons.link_off),
+              )
+            : null,
       ),
     );
   }
 }
 
 class _CookiesTab extends ConsumerWidget {
-  const _CookiesTab({required this.router});
+  const _CookiesTab({required this.router, required this.canManage});
 
   final RouterEntity router;
+  final bool canManage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -500,20 +525,23 @@ class _CookiesTab extends ConsumerWidget {
         leading: const Icon(Icons.cookie_outlined),
         title: Text(cookie.user),
         subtitle: Text(cookie.macAddress ?? cookie.expiresIn ?? 'cookie'),
-        trailing: IconButton(
-          tooltip: 'Delete cookie',
-          onPressed: () => _deleteCookie(context, ref, router, cookie),
-          icon: const Icon(Icons.delete_outline),
-        ),
+        trailing: canManage
+            ? IconButton(
+                tooltip: 'Delete cookie',
+                onPressed: () => _deleteCookie(context, ref, router, cookie),
+                icon: const Icon(Icons.delete_outline),
+              )
+            : null,
       ),
     );
   }
 }
 
 class _BindingsTab extends ConsumerWidget {
-  const _BindingsTab({required this.router});
+  const _BindingsTab({required this.router, required this.canManage});
 
   final RouterEntity router;
+  final bool canManage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -525,20 +553,24 @@ class _BindingsTab extends ConsumerWidget {
       emptyTitle: 'No IP bindings',
       emptyMessage: 'Bypass, block, or regular bindings will appear here.',
       onRefresh: () async => ref.invalidate(hotspotIpBindingsProvider(router)),
-      action: FloatingActionButton(
-        tooltip: 'Add binding',
-        onPressed: () => _showCreateBindingDialog(context, ref, router),
-        child: const Icon(Icons.add_link),
-      ),
+      action: canManage
+          ? FloatingActionButton(
+              tooltip: 'Add binding',
+              onPressed: () => _showCreateBindingDialog(context, ref, router),
+              child: const Icon(Icons.add_link),
+            )
+          : null,
       itemBuilder: (context, binding) => ListTile(
         leading: const Icon(Icons.rule_folder_outlined),
         title: Text(binding.macAddress ?? binding.address ?? binding.id),
         subtitle: Text(binding.type ?? 'binding'),
-        trailing: IconButton(
-          tooltip: 'Delete binding',
-          onPressed: () => _deleteBinding(context, ref, router, binding),
-          icon: const Icon(Icons.delete_outline),
-        ),
+        trailing: canManage
+            ? IconButton(
+                tooltip: 'Delete binding',
+                onPressed: () => _deleteBinding(context, ref, router, binding),
+                icon: const Icon(Icons.delete_outline),
+              )
+            : null,
       ),
     );
   }
