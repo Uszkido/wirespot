@@ -103,4 +103,10 @@ void main() {
         'router-b');
     expect(BackendStore.telemetryFor('org-telemetry-a', limit: 0), hasLength(1));
   });
+
+  test('pairing codes are one-time and organization-scoped', () {
+    final code = BackendStore.createPairingCode('org-pairing-test');
+    expect(BackendStore.consumePairingCode(code), 'org-pairing-test');
+    expect(BackendStore.consumePairingCode(code), isNull);
+  });
 }

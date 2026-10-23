@@ -36,6 +36,7 @@ class BackendStore {
       _readMaps(root['entitlements'], _entitlements);
       _readMaps(root['accounts'], _accounts);
       _readMaps(root['sessions'], _sessions);
+      _readMaps(root['pairingCodes'], _pairingCodes);
       _readLists(root['telemetryFrames'], _telemetryFrames);
       if (root['backupTimes'] is Map) {
         for (final e in (root['backupTimes'] as Map).entries) {
@@ -256,6 +257,7 @@ class BackendStore {
           .firstWhere((c) => c?['id'] == commandId, orElse: () => null);
 
   static String createPairingCode(String orgId) {
+    _ensureLoaded();
     final code =
         'WS-${DateTime.now().microsecondsSinceEpoch.toString().substring(7)}-SYNC';
     _pairingCodes[code] = {
@@ -265,11 +267,14 @@ class BackendStore {
           .add(const Duration(minutes: 10))
           .toIso8601String(),
     };
+    persist();
     return code;
   }
 
   static String? consumePairingCode(String code) {
+    _ensureLoaded();
     final entry = _pairingCodes.remove(code.trim().toUpperCase());
+    persist();
     if (entry == null) return null;
     final expiry = DateTime.tryParse(entry['expiresAt']?.toString() ?? '');
     if (expiry == null || !expiry.isAfter(DateTime.now().toUtc())) return null;
@@ -294,6 +299,7 @@ class BackendStore {
         'entitlements': _entitlements,
         'accounts': _accounts,
         'sessions': _sessions,
+        'pairingCodes': _pairingCodes,
         'commands': _commands,
       }));
       if (file.existsSync()) file.deleteSync();
