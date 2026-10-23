@@ -101,14 +101,17 @@ class _WireSpotAppState extends ConsumerState<WireSpotApp>
       AppThemePreference.light => ThemeMode.light,
       AppThemePreference.dark => ThemeMode.dark,
       AppThemePreference.ocean => ThemeMode.light,
+      AppThemePreference.glass => ThemeMode.light,
       AppThemePreference.system || null => ThemeMode.system,
     };
   }
 
   ThemeData _theme(AppThemePreference? preference) {
-    return preference == AppThemePreference.ocean
-        ? AppTheme.ocean()
-        : AppTheme.light();
+    return switch (preference) {
+      AppThemePreference.ocean => AppTheme.ocean(),
+      AppThemePreference.glass => AppTheme.glass(),
+      _ => AppTheme.light(),
+    };
   }
 
   Locale _materialLocale(String? languageCode) {

@@ -1,6 +1,6 @@
 /// User-selectable visual styles. System follows the OS; the other styles
 /// keep a predictable WireSpot appearance across devices.
-enum AppThemePreference { system, light, dark, ocean }
+enum AppThemePreference { system, light, dark, ocean, glass }
 
 enum AppLockMode { never, onBackground, afterFiveMinutes }
 

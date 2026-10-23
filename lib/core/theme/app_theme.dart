@@ -29,7 +29,29 @@ class AppTheme {
     return _base(colorScheme);
   }
 
-  static ThemeData _base(ColorScheme colorScheme) {
+  static ThemeData glass() {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF4D8DFF),
+      brightness: Brightness.light,
+      surface: const Color(0xFFEAF3FF),
+    );
+    return _base(
+      colorScheme,
+      cardColor: Colors.white.withValues(alpha: 0.58),
+      cardRadius: 24,
+      cardBorder: BorderSide(
+        color: Colors.white.withValues(alpha: 0.78),
+        width: 1.2,
+      ),
+    );
+  }
+
+  static ThemeData _base(
+    ColorScheme colorScheme, {
+    Color? cardColor,
+    double cardRadius = 8,
+    BorderSide cardBorder = BorderSide.none,
+  }) {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
@@ -42,8 +64,12 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: colorScheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        color: cardColor ?? colorScheme.surfaceContainerLow,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(cardRadius),
+          side: cardBorder,
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
