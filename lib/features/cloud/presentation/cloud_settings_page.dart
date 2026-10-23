@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/app_text.dart';
+import '../../authentication/domain/entities/operator_role.dart';
 import '../../settings/presentation/settings_providers.dart';
 import '../domain/entities/cloud_connection_settings.dart';
 import '../domain/entities/cloud_sync_operation.dart';
@@ -621,6 +622,9 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
     CloudController controller,
   ) {
     final ops = state.pendingOperations;
+    final canManageCloud = OperatorPermissionMatrix.canManageCloudBackup(
+      state.session?.role ?? OperatorRole.owner,
+    );
 
     return Card(
       child: Padding(
@@ -659,7 +663,7 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
               runSpacing: 8,
               children: [
                 FilledButton.icon(
-                  onPressed: state.isSyncing
+                  onPressed: !canManageCloud || state.isSyncing
                       ? null
                       : () => controller.syncPending(),
                   icon: state.isSyncing
@@ -675,7 +679,7 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                   label: Text(text.syncNow),
                 ),
                 OutlinedButton.icon(
-                  onPressed: state.isSyncing
+                  onPressed: !canManageCloud || state.isSyncing
                       ? null
                       : () => controller.restoreLatestBackup(),
                   icon: const Icon(Icons.cloud_download_outlined),
@@ -683,6 +687,13 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                 ),
               ],
             ),
+            if (!canManageCloud) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'Your account can view sync status but cannot change cloud backups.',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
