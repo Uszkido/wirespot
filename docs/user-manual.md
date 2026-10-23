@@ -19,7 +19,9 @@ UniFi, and generic router integrations.
 1. Install the APK on an Android device.
 2. Open WireSpot.
 3. Create a local PIN.
-4. Enable biometric login if the device supports it.
+4. On the login screen, choose **Use device security** to unlock with the
+   enrolled fingerprint, face, iris, Touch ID, Face ID, or Windows Hello. If
+   the device has no enrolled biometric, use the WireSpot PIN instead.
 5. Sign in with the PIN after setup.
 
 The PIN is stored as a salted hash. Router passwords and voucher passwords are stored through the secure storage layer, not plain text database fields.

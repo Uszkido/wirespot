@@ -9,7 +9,9 @@ WireSpot is an Android hotspot operations app for business Wi-Fi and voucher net
 1. Install the APK on an Android device.
 2. Open WireSpot.
 3. Create a local PIN.
-4. Enable biometric login if the device supports it.
+4. Use the device biometric prompt at login when available. Depending on the
+   platform this may be fingerprint, face, iris, Touch ID, Face ID, or Windows
+   Hello. The WireSpot PIN remains the fallback.
 5. Sign in with the PIN after setup.
 
 > **Security:** The PIN is stored as a salted hash. Router passwords and voucher passwords use the secure storage layer — not plain text database fields.

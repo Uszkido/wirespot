@@ -52,7 +52,9 @@ WireSpot brings the routine work into one operator workflow:
 - Generate single or batch vouchers with QR payloads.
 - Print co-branded voucher receipts on Bluetooth ESC/POS thermal printers.
 - Track sales and export reports.
-- Protect app access with PIN, biometric-ready authentication, encrypted local
+- Protect app access with a local PIN and device authentication (Android
+  fingerprint/face/iris, iOS Face ID/Touch ID, and Windows Hello where
+  supported), with a safe PIN/passcode fallback and encrypted local
   storage, and device-bound licensing.
 
 ## Main capabilities
@@ -301,7 +303,10 @@ collaboration with TechNova Technologies.
 ## Security
 
 - Router credentials are stored through secure storage boundaries.
-- App access is protected by local PIN and biometric-ready authentication.
+- App access is protected by a local PIN and device authentication. WireSpot
+  uses the platform authenticator available on the device: fingerprint, face,
+  iris, Touch ID, Face ID, or Windows Hello. If none is enrolled, the PIN
+  remains available.
 - Remote router management is designed around WireGuard.
 - RouterOS credentials should never be committed or shared.
 - Play Store signing keys must stay private and must not be pushed to GitHub.

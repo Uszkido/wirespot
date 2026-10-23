@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/authentication/domain/services/auth_service.dart';
+import '../../features/authentication/domain/services/biometric_auth_service.dart';
 import '../../features/cloud/data/cloud_api_client.dart';
 import '../../features/cloud/domain/repositories/cloud_sync_repository.dart';
 import '../../features/cloud/domain/services/cloud_backup_service.dart';
@@ -47,6 +48,10 @@ import 'service_locator.dart';
 final appDatabaseProvider = Provider<AppDatabase>((ref) => sl<AppDatabase>());
 
 final authServiceProvider = Provider<AuthService>((ref) => sl<AuthService>());
+
+final biometricAuthServiceProvider = Provider<BiometricAuthService>(
+  (ref) => sl<BiometricAuthService>(),
+);
 
 final cloudSettingsServiceProvider = Provider<CloudSettingsService>(
   (ref) => sl<CloudSettingsService>(),

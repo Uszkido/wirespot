@@ -17,7 +17,9 @@ printing, reporting, scheduler settings, backup, app security, and licensing.
 
 ## 2. Available features
 
-- App login with local PIN and biometric-ready flow.
+- App login with a local PIN and platform biometrics. Android can use
+  fingerprint/face/iris, iOS can use Touch ID/Face ID, and Windows can use
+  Windows Hello. A device PIN or passcode remains available as a fallback.
 - Secure router credential storage.
 - Multiple router records with brand selection.
 - MikroTik RouterOS live hotspot management.

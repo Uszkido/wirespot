@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
@@ -21,6 +22,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../core/utils/id_generator.dart';
 import '../../../shared/widgets/brand_logo.dart';
 import '../../authentication/presentation/auth_controller.dart';
+import '../../authentication/domain/services/biometric_auth_service.dart';
 import '../../scheduler/domain/entities/scheduled_task.dart';
 import '../../voucher/domain/entities/ticket_template.dart';
 import '../../voucher/domain/entities/voucher_encoding_settings.dart';
@@ -988,7 +990,20 @@ class _SecurityCardState extends ConsumerState<_SecurityCard> {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
-            const Text('Local PIN and biometric unlock protect this device.'),
+            FutureBuilder<List<BiometricType>>(
+              future: ref
+                  .read(biometricAuthServiceProvider)
+                  .availableBiometrics(),
+              builder: (context, snapshot) {
+                final methods = snapshot.data ?? const <BiometricType>[];
+                final description = BiometricAuthService.describe(methods);
+                return Text(
+                  methods.isEmpty
+                      ? 'Local PIN protects this device. Device security fallback is available when supported.'
+                      : 'Local PIN plus $description protect this device.',
+                );
+              },
+            ),
             const SizedBox(height: 12),
             DropdownButtonFormField<AppLockMode>(
               initialValue: _lockMode,

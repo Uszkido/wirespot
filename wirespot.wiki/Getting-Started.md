@@ -78,7 +78,10 @@ outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
 
 1. **Open WireSpot** on your Android device.
 2. **Create a local PIN** — this is your app access code (stored as a salted hash).
-3. **Enable biometric login** if your device supports it.
+3. **Use device security** at login when available. WireSpot supports the
+   platform authenticator exposed by the device (fingerprint, face, iris,
+   Touch ID, Face ID, or Windows Hello) and always keeps the local PIN as a
+   fallback.
 4. **Follow the onboarding guide**. Tap **Next** to move through router setup,
    WireGuard, and cloud backup guidance, or tap **Skip** to go straight to the
    dashboard. The guide appears automatically only for a new installation.

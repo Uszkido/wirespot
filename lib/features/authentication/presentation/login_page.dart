@@ -8,6 +8,7 @@ import '../../../core/di/providers.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/brand_logo.dart';
 import '../../settings/domain/entities/app_settings.dart';
+import '../domain/services/biometric_auth_service.dart';
 import 'auth_controller.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -23,6 +24,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _confirmPinController = TextEditingController();
   bool _obscurePin = true;
   bool _isBusy = false;
+  bool _biometricAvailable = false;
+  String _biometricLabel = 'device security';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBiometricSupport();
+  }
+
+  Future<void> _loadBiometricSupport() async {
+    final service = ref.read(biometricAuthServiceProvider);
+    final canAuthenticate = await service.canAuthenticate();
+    final available = await service.availableBiometrics();
+    if (!mounted) return;
+    setState(() {
+      _biometricAvailable = canAuthenticate;
+      _biometricLabel = BiometricAuthService.describe(available);
+    });
+  }
 
   @override
   void dispose() {
@@ -136,12 +156,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           : Icon(isSetup ? Icons.lock_outline : Icons.login),
                       label: Text(isSetup ? 'Create PIN' : 'Sign in'),
                     ),
-                    if (!isSetup) ...[
+                    if (!isSetup && _biometricAvailable) ...[
                       const SizedBox(height: 12),
                       OutlinedButton.icon(
                         onPressed: _isBusy ? null : _biometricLogin,
                         icon: const Icon(Icons.fingerprint),
-                        label: const Text('Use biometrics'),
+                        label: Text('Use $_biometricLabel'),
                       ),
                     ],
                   ],
