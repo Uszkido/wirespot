@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const recordKey = record => {
     if (!record || typeof record !== 'object') return `anonymous-${Math.random()}`;
-    return String(record.id || record.name || record.code || record.host || JSON.stringify(record));
+    return String(record.syncKey || record.id || record.name || record.code || record.host || JSON.stringify(record));
   };
 
   // Keep local-only records, while applying the cloud version when both

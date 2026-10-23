@@ -90,6 +90,7 @@ class BackupService {
             users.map(
               (user) => {
                 'id': user.id,
+                'syncKey': '${r.id}:${user.id}',
                 'routerId': r.id,
                 'routerName': r.name,
                 'username': user.name,
@@ -115,6 +116,7 @@ class BackupService {
             activeSessions.map(
               (session) => {
                 'id': session.id,
+                'syncKey': '${r.id}:${session.id}',
                 'routerId': r.id,
                 'routerName': r.name,
                 'username': session.user,
