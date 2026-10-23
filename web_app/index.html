@@ -58,6 +58,9 @@
         <a class="nav-item" data-tab="tab-help">
           <i class="fa-solid fa-circle-question"></i> Help & FAQ
         </a>
+        <a class="nav-item" data-tab="tab-about">
+          <i class="fa-solid fa-circle-info"></i> About WireSpot
+        </a>
       </nav>
     </div>
 
@@ -683,6 +686,26 @@
           <details><summary>Why is my dashboard empty?</summary><p>WireSpot does not show fabricated data. Add a router or complete Cloud Sync before live routers, users, telemetry, and reports appear.</p></details>
           <details><summary>How do I recover access?</summary><p>Use Forgot password on the sign-in screen. Production deployments must have a configured identity provider and email delivery service.</p></details>
           <details><summary>Is it safe to expose RADIUS or RouterOS ports?</summary><p>No. Keep UDP 1812/1813 and RouterOS API ports private. Use firewall restrictions, API-SSL, a trusted LAN, or the cloud agent.</p></details>
+        </div>
+      </section>
+
+      <!-- ═══ TAB: ABOUT ═══ -->
+      <section id="tab-about" class="tab-content">
+        <div class="glass" style="padding: 28px; max-width: 900px;">
+          <div style="display:flex; gap:16px; align-items:center;">
+            <img src="wirespot_mark.jpg" alt="WireSpot logo" style="width:72px;height:72px;border-radius:18px;object-fit:cover;">
+            <div>
+              <span class="eyebrow">WIRESPOT</span>
+              <h2 style="margin:4px 0 0;">WireSpot Cloud Dashboard</h2>
+              <p style="margin:4px 0 0;color:var(--text-muted);">Router and hotspot operations for operators, technicians, and small ISPs.</p>
+            </div>
+          </div>
+          <div class="getting-started-steps" style="margin-top:20px;">
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-code-branch"></i></span><span><strong>Version 0.1.27+31</strong><small>Development and field-testing release. Features and vendor support are listed honestly in the project documentation.</small></span></div>
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-layer-group"></i></span><span><strong>What WireSpot includes</strong><small>Multi-router inventory, MikroTik hotspot operations, vouchers, live sessions, reports, printing workflows, WireGuard access, and shared cloud synchronization.</small></span></div>
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-building"></i></span><span><strong>Vexel Innovations</strong><small>WireSpot is built and maintained by Vexel Innovations in collaboration with TechNova Technologies.</small></span></div>
+            <div class="getting-started-step"><span class="setup-step-icon"><i class="fa-solid fa-envelope"></i></span><span><strong>Support</strong><small>Vexelvision@gmail.com · +234(0)7038953065 · vexel-innovations.vercel.app</small></span></div>
+          </div>
         </div>
       </section>
 

@@ -1086,6 +1086,31 @@ class _BrandCard extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
+            const SizedBox(height: 12),
+            Text(
+              AppBranding.aboutDescription,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(Icons.info_outline, size: 18),
+                const SizedBox(width: 8),
+                Text('Version ${AppBranding.version}'),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    AppBranding.releaseChannel,
+                    textAlign: TextAlign.end,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 14),
             DecoratedBox(
               decoration: BoxDecoration(

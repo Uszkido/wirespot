@@ -205,6 +205,25 @@ class _WireGuardGuideSheet extends StatelessWidget {
               ],
             ),
             const _RouterGuideSection(
+              title: 'MikroTik Back to Home',
+              steps: [
+                'On a supported MikroTik router, open the RouterOS Back to Home setup and enable the BTH service for the site.',
+                'Create a BTH user or device peer for the phone. Keep the invitation or QR code private.',
+                'Install the official MikroTik Back to Home app, accept the invitation, and confirm that the phone can reach the router private address.',
+                'In WireSpot, add the router using the private address reachable through Back to Home. Keep Require WireGuard enabled when the BTH tunnel presents a WireGuard interface.',
+                'Test RouterOS API/API-SSL through the tunnel. If the API is restricted, allow it only from the BTH/WireGuard interface and required port.',
+              ],
+            ),
+            const _RouterGuideSection(
+              title: 'Back to Home checks',
+              steps: [
+                'Use Back to Home only on supported MikroTik RouterOS hardware and versions; availability is determined by MikroTik.',
+                'Do not share the invitation QR, BTH credentials, or RouterOS password in screenshots or chat.',
+                'If the tunnel is connected but Test connection fails, check the private route, RouterOS API service, firewall rules, and selected port.',
+                'When BTH is unavailable, use a normal WireGuard configuration, trusted LAN, or the WireSpot cloud-agent workflow.',
+              ],
+            ),
+            const _RouterGuideSection(
               title: 'If it does not connect',
               steps: [
                 'Check that mobile data or Wi-Fi is available and another VPN is disconnected.',

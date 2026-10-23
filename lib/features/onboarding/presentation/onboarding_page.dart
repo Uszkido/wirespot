@@ -395,7 +395,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   Widget _buildSetupChecklist(ThemeData theme) {
     const steps = [
-      'Import a .conf file or scan a WireGuard QR code.',
+      'Import a .conf file, scan a WireGuard QR code, or use a MikroTik Back to Home invitation.',
       'Grant Android VPN permission when prompted.',
       'Connect the tunnel, then add the router using its VPN address.',
     ];

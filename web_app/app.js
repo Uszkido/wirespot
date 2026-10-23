@@ -207,7 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'tab-subscriptions': 'Subscriptions & Billing',
         'tab-cloud': 'WireSpot Cloud Sync Center',
         'tab-reports': 'Sales Analytics & Export',
-        'tab-help': 'Help & FAQ'
+        'tab-help': 'Help & FAQ',
+        'tab-about': 'About WireSpot'
       };
       document.getElementById('page-title').textContent = titleMap[targetTab] || 'Dashboard';
       document.querySelector('.sidebar')?.classList.remove('mobile-open');
