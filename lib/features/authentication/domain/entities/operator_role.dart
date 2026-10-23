@@ -1,5 +1,15 @@
 enum OperatorRole { owner, manager, cashier, admin, operator, viewer }
 
+extension OperatorRoleWireValue on OperatorRole {
+  static OperatorRole fromWireValue(String? value) {
+    final normalized = value?.trim().toLowerCase();
+    return OperatorRole.values.firstWhere(
+      (role) => role.name == normalized,
+      orElse: () => OperatorRole.owner,
+    );
+  }
+}
+
 class OperatorPermissionMatrix {
   const OperatorPermissionMatrix._();
 

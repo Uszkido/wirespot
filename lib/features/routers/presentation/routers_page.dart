@@ -7,6 +7,8 @@ import '../../../core/localization/app_text.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../dashboard/presentation/dashboard_providers.dart';
+import '../../authentication/domain/entities/operator_role.dart';
+import '../../cloud/presentation/cloud_providers.dart';
 import '../../settings/presentation/settings_providers.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/entities/router_group_entity.dart';
@@ -39,6 +41,9 @@ class RoutersPage extends ConsumerWidget {
     final filteredItems = selectedGroupId == null
         ? items
         : items.where((router) => router.groupId == selectedGroupId).toList();
+    final role =
+        ref.watch(cloudControllerProvider).session?.role ?? OperatorRole.owner;
+    final canManageRouters = OperatorPermissionMatrix.canManageRouters(role);
 
     return Scaffold(
       appBar: AppBar(
@@ -59,7 +64,9 @@ class RoutersPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: text.addRouter,
-        onPressed: () => context.push(AppRoutes.newRouter),
+        onPressed: canManageRouters
+            ? () => context.push(AppRoutes.newRouter)
+            : null,
         child: const Icon(Icons.add),
       ),
       body: routers.when(
@@ -70,7 +77,9 @@ class RoutersPage extends ConsumerWidget {
               title: text.noRoutersYet,
               message: text.noRoutersMessage,
               action: FilledButton.icon(
-                onPressed: () => context.push(AppRoutes.newRouter),
+                onPressed: canManageRouters
+                    ? () => context.push(AppRoutes.newRouter)
+                    : null,
                 icon: const Icon(Icons.add),
                 label: Text(text.addRouter),
               ),
@@ -111,6 +120,7 @@ class RoutersPage extends ConsumerWidget {
                       (effectiveRouterId == null && routerIndex == 0),
                   isConnected: connectionStates[filteredItems[routerIndex].id],
                   group: groupsById[filteredItems[routerIndex].groupId],
+                  canManage: canManageRouters,
                 );
               },
             ),
@@ -294,12 +304,14 @@ class _RouterTile extends ConsumerWidget {
     required this.router,
     required this.isActive,
     required this.isConnected,
+    required this.canManage,
     this.group,
   });
 
   final RouterEntity router;
   final bool isActive;
   final bool? isConnected;
+  final bool canManage;
   final RouterGroupEntity? group;
 
   @override
@@ -398,20 +410,22 @@ class _RouterTile extends ConsumerWidget {
                   title: Text(text.remoteTunnel),
                 ),
               ),
-            PopupMenuItem(
-              value: _RouterAction.edit,
-              child: ListTile(
-                leading: const Icon(Icons.edit_outlined),
-                title: Text(text.edit),
+            if (canManage)
+              PopupMenuItem(
+                value: _RouterAction.edit,
+                child: ListTile(
+                  leading: const Icon(Icons.edit_outlined),
+                  title: Text(text.edit),
+                ),
               ),
-            ),
-            PopupMenuItem(
-              value: _RouterAction.delete,
-              child: ListTile(
-                leading: const Icon(Icons.delete_outline),
-                title: Text(text.delete),
+            if (canManage)
+              PopupMenuItem(
+                value: _RouterAction.delete,
+                child: ListTile(
+                  leading: const Icon(Icons.delete_outline),
+                  title: Text(text.delete),
+                ),
               ),
-            ),
           ],
         ),
       ),

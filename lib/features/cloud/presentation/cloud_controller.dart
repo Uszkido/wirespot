@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../data/cloud_api_client.dart';
 import '../domain/entities/cloud_connection_settings.dart';
 import '../domain/entities/cloud_session.dart';
+import '../../authentication/domain/entities/operator_role.dart';
 import '../domain/entities/cloud_sync_operation.dart';
 import '../domain/repositories/cloud_sync_repository.dart';
 import '../domain/services/cloud_settings_service.dart';
@@ -233,6 +234,7 @@ class CloudController extends StateNotifier<CloudState> {
       final token = data['accessToken'] as String? ?? '';
       final user = data['user'] as Map<String, dynamic>? ?? {};
       final orgId = user['organizationId'] as String?;
+      final role = OperatorRoleWireValue.fromWireValue(user['role'] as String?);
 
       if (token.isEmpty) {
         throw StateError('Invalid credentials or session token missing.');
@@ -252,6 +254,7 @@ class CloudController extends StateNotifier<CloudState> {
       final session = CloudSession(
         accessToken: token,
         expiresAt: DateTime.now().add(const Duration(hours: 24)),
+        role: role,
       );
       await _settingsService.saveSession(session);
       await load();
@@ -344,6 +347,7 @@ class CloudController extends StateNotifier<CloudState> {
       final token = data['accessToken'] as String? ?? '';
       final user = data['user'] as Map<String, dynamic>? ?? {};
       final orgId = user['organizationId'] as String?;
+      final role = OperatorRoleWireValue.fromWireValue(user['role'] as String?);
 
       if (token.isEmpty) {
         throw StateError('Registration failed to yield a valid token.');
@@ -363,6 +367,7 @@ class CloudController extends StateNotifier<CloudState> {
       final session = CloudSession(
         accessToken: token,
         expiresAt: DateTime.now().add(const Duration(hours: 24)),
+        role: role,
       );
       await _settingsService.saveSession(session);
       await load();

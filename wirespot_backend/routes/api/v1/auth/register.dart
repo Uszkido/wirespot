@@ -39,6 +39,7 @@ Future<Response> onRequest(RequestContext context) async {
 
     BackendStore.saveAccount(email, {
       'organizationId': orgId,
+      'role': 'owner',
       'organizationName': organizationName,
     });
 
@@ -50,6 +51,7 @@ Future<Response> onRequest(RequestContext context) async {
           'email': email,
           'organizationName': organizationName,
           'organizationId': orgId,
+          'role': 'owner',
           'createdAt': DateTime.now().toIso8601String(),
         },
         'accessToken': token,

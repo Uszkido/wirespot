@@ -46,6 +46,7 @@ Future<Response> onRequest(RequestContext context) async {
           if (account?['organizationName'] != null)
             'organizationName': account!['organizationName'],
           'organizationId': orgId,
+          'role': account?['role'] ?? 'owner',
           'lastLogin': DateTime.now().toIso8601String(),
         },
         'accessToken': token,
