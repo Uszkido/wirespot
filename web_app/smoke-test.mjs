@@ -115,6 +115,30 @@ if (smokeEmail || smokePassword) {
       throw new Error('Hosted router write/read round-trip did not return the record.');
     }
   }
+
+  if (process.env.WIRESPOT_SMOKE_TELEMETRY_JSON) {
+    let telemetry;
+    try {
+      telemetry = JSON.parse(process.env.WIRESPOT_SMOKE_TELEMETRY_JSON);
+    } catch (error) {
+      throw new Error(`WIRESPOT_SMOKE_TELEMETRY_JSON is not valid JSON: ${error}`);
+    }
+    const accepted = await jsonRequest(`${apiUrl.replace(/\/$/, '')}/api/v1/telemetry`, {
+      method: 'POST',
+      headers: authorization,
+      body: JSON.stringify(telemetry),
+    });
+    if (accepted.status !== 'accepted' || accepted.received < 1) {
+      throw new Error(`Hosted telemetry write was not accepted: ${JSON.stringify(accepted)}`);
+    }
+    const telemetryRead = await jsonRequest(
+      `${apiUrl.replace(/\/$/, '')}/api/v1/telemetry?limit=1`,
+      { headers: authorization },
+    );
+    if (!Array.isArray(telemetryRead.telemetry) || telemetryRead.telemetry.length < 1) {
+      throw new Error('Hosted telemetry write/read round-trip returned no frame.');
+    }
+  }
 }
 
 console.log(`WireSpot dashboard reachable: ${dashboard.url}`);
@@ -124,4 +148,7 @@ console.log(
 );
 if (smokeEmail && smokePassword) {
   console.log('Authenticated cloud sync round-trip: passed');
+}
+if (smokeEmail && smokePassword && process.env.WIRESPOT_SMOKE_TELEMETRY_JSON) {
+  console.log('Authenticated telemetry round-trip: passed');
 }

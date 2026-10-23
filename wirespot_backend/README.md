@@ -53,6 +53,8 @@ also provide `WIRESPOT_SMOKE_EMAIL` and `WIRESPOT_SMOKE_PASSWORD` when running
 router inventory. For a dedicated test workspace, set
 `WIRESPOT_SMOKE_ROUTER_JSON` to one valid router object to verify a write/read
 round-trip as well.
+Set `WIRESPOT_SMOKE_TELEMETRY_JSON` to a valid telemetry frame (or a
+`{"frames":[...]}` payload) to validate the telemetry write/read path too.
 
 The service is configured with `/health` for health checks and CORS for both
 Firebase hosting sites. Render's free web services sleep after inactivity, so
