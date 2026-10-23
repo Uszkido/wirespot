@@ -9,10 +9,10 @@ import 'vendor_mutation_support.dart';
 
 /// OpenWrt LuCI/ubus connector.
 ///
-/// The connector keeps command mutation disabled because OpenWrt packages vary
-/// by distribution. It does, however, read the standard `system board`,
-/// `system info`, and `network.interface dump` ubus methods for a real,
-/// read-only dashboard snapshot.
+/// The connector uses standard ubus methods that are stable across OpenWrt
+/// releases. It supports interface inspection and a guarded system reboot;
+/// hotspot/voucher mutations remain disabled because captive-portal packages
+/// and their schemas vary by distribution.
 class OpenWrtConnectionService implements RouterConnector {
   OpenWrtConnectionService({
     VendorHttpClient? httpClient,
@@ -56,6 +56,47 @@ class OpenWrtConnectionService implements RouterConnector {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async {
+    final normalized = command.trim().toLowerCase().replaceAll(
+      RegExp(r'/+$'),
+      '',
+    );
+    final credentials = await _credentialStore?.read(router.id);
+    final session = await _login(
+      router,
+      credentials?.username ?? router.username,
+      credentials?.password,
+    );
+
+    if (normalized == '/system/reboot') {
+      await _rpc(router, session, 'system', 'reboot');
+      return const RouterOsApiResponse(
+        records: [
+          <String, String>{'status': 'reboot-requested'},
+        ],
+      );
+    }
+
+    if (normalized == '/interface/print') {
+      final interfaces = await _rpc(
+        router,
+        session,
+        'network.interface',
+        'dump',
+      );
+      return RouterOsApiResponse(
+        records: _interfaceRows(interfaces)
+            .map(
+              (item) => <String, String>{
+                'name': item.name,
+                'type': item.type,
+                'up': item.running.toString(),
+                'disabled': item.disabled.toString(),
+              },
+            )
+            .toList(growable: false),
+      );
+    }
+
     throw unsupportedVendorCommand(router, command);
   }
 
@@ -188,7 +229,12 @@ class OpenWrtConnectionService implements RouterConnector {
         'jsonrpc': '2.0',
         'id': DateTime.now().microsecondsSinceEpoch,
         'method': 'call',
-        'params': [session, object, method, argument == null ? {} : {}],
+        'params': [
+          session,
+          object,
+          method,
+          argument == null ? {} : <String, dynamic>{'argument': argument},
+        ],
       },
     );
     if (response['status'] == 'error') {
@@ -202,6 +248,9 @@ class OpenWrtConnectionService implements RouterConnector {
         result[0] == 0 &&
         result[1] is Map) {
       return Map<String, dynamic>.from(result[1] as Map);
+    }
+    if (result is List && result.isNotEmpty && result.first == 0) {
+      return const <String, dynamic>{};
     }
     if (response['data'] is Map) {
       return Map<String, dynamic>.from(response['data'] as Map);
