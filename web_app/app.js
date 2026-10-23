@@ -162,6 +162,43 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   };
 
+  // Inventory and telemetry arrive through separate sync streams. Reconcile
+  // cards from the latest observed frame so a fresh mobile report can correct
+  // a stale inventory status without fabricating data.
+  const reconcileRoutersFromTelemetry = () => {
+    if (!Array.isArray(state.routers) || !Array.isArray(state.telemetry)) return;
+    const latestByRouter = new Map();
+    state.telemetry.forEach(frame => {
+      const key = String(frame?.routerId || frame?.id || '').trim().toLowerCase();
+      if (!key) return;
+      const incomingAt = new Date(frame.timestamp || frame.recordedAt || 0).getTime();
+      const current = latestByRouter.get(key);
+      const currentAt = current ? new Date(current.timestamp || current.recordedAt || 0).getTime() : -1;
+      if (!current || incomingAt >= currentAt) latestByRouter.set(key, frame);
+    });
+    const now = Date.now();
+    state.routers = state.routers.map(router => {
+      const keys = [router.id, router.routerId, router.ip, router.host]
+        .map(value => String(value || '').trim().toLowerCase())
+        .filter(Boolean);
+      const frame = keys.map(key => latestByRouter.get(key)).find(Boolean);
+      if (!frame) return router;
+      const reportedAt = new Date(frame.timestamp || frame.recordedAt || 0).getTime();
+      const fresh = Number.isFinite(reportedAt) && reportedAt > 0 && now - reportedAt <= 90_000;
+      return {
+        ...router,
+        ...(Number.isFinite(Number(frame.cpuLoad)) ? { cpuLoad: Number(frame.cpuLoad) } : {}),
+        ...(Number.isFinite(Number(frame.freeMemoryMb)) ? { freeMemoryMb: Number(frame.freeMemoryMb) } : {}),
+        ...(Number.isFinite(Number(frame.totalMemoryMb)) ? { totalMemoryMb: Number(frame.totalMemoryMb) } : {}),
+        ...(Number.isFinite(Number(frame.activeHotspotUsersCount))
+          ? { users: Number(frame.activeHotspotUsersCount) }
+          : {}),
+        ...(frame.timestamp || frame.recordedAt ? { telemetryAt: frame.timestamp || frame.recordedAt } : {}),
+        ...(fresh ? { status: 'online' } : {}),
+      };
+    });
+  };
+
   const currentCurrency = () => localStorage.getItem('wirespot_currency') || 'NGN';
   const formatMoney = amount => {
     const currency = currentCurrency();
@@ -1177,6 +1214,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (Array.isArray(telemetry?.telemetry) && telemetry.telemetry.length) {
         state.telemetry = telemetry.telemetry;
       }
+      reconcileRoutersFromTelemetry();
       if (!result?.backup && !telemetry?.telemetry?.length) return false;
       saveState();
       renderRouters(); renderHotspotUsers(); renderUserProfiles(); renderSessions(); renderVouchers(); renderSummary();
@@ -1473,6 +1511,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (Array.isArray(routers?.routers)) state.routers = routers.routers;
           if (backup?.backup && typeof backup.backup === 'object') applyCloudBackup(backup.backup);
           if (Array.isArray(telemetry?.telemetry) && telemetry.telemetry.length) state.telemetry = telemetry.telemetry;
+          reconcileRoutersFromTelemetry();
           saveState();
           refreshMessage = 'Dashboard refreshed from WireSpot Cloud.';
         } catch (error) {
