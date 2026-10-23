@@ -67,6 +67,33 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
 
+  backend:
+    name: Analyze and test Cloud API
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: wirespot_backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install backend dependencies
+        run: dart pub get
+
+      - name: Analyze backend
+        run: dart analyze
+
+      - name: Run backend tests
+        run: dart test
+
   windows:
     name: Build Windows desktop app
     runs-on: windows-2025
