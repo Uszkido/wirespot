@@ -80,7 +80,17 @@ class CloudCommandService {
                 '${router.vendor.label} does not support remote system control.',
               );
             }
-            await _routerConnectionService.execute(router, '/system/reboot');
+            final rawAttributes = command.params['attributes'];
+            final attributes = rawAttributes is Map
+                ? rawAttributes.map(
+                    (key, value) => MapEntry(key.toString(), value.toString()),
+                  )
+                : const <String, String>{};
+            await _routerConnectionService.execute(
+              router,
+              '/system/reboot',
+              attributes: attributes,
+            );
           } else {
             throw StateError('Remote reboot requires a target router.');
           }

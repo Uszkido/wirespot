@@ -1,3 +1,4 @@
+import '../../../core/api/routeros_api_exception.dart';
 import '../../../core/api/routeros_api_response.dart';
 import '../../../core/api/routeros_models.dart';
 import '../../../core/api/vendor_http_client.dart';
@@ -6,11 +7,10 @@ import '../domain/entities/router_entity.dart';
 import '../domain/services/router_connector.dart';
 import 'vendor_mutation_support.dart';
 
-/// UniFi Network Controller connection and read-only dashboard connector.
+/// UniFi Network Controller connection and dashboard connector.
 ///
-/// The current integration API is intentionally limited to authenticated site
-/// and device reads. Mutations remain fail-closed until a controller-version
-/// specific contract is selected by the operator.
+/// Reboot requires explicit controller site and device IDs; the connector does
+/// not guess a target from discovery results.
 class UniFiConnectionService implements RouterConnector {
   UniFiConnectionService({
     VendorHttpClient? httpClient,
@@ -41,6 +41,42 @@ class UniFiConnectionService implements RouterConnector {
     Map<String, String> attributes = const {},
     List<String> queries = const [],
   }) async {
+    if (command == '/system/reboot') {
+      final siteId = attributes['siteId']?.trim();
+      final deviceId = attributes['deviceId']?.trim();
+      if (siteId == null ||
+          siteId.isEmpty ||
+          deviceId == null ||
+          deviceId.isEmpty) {
+        throw RouterOsApiException(
+          'UniFi reboot requires explicit siteId and deviceId attributes.',
+          category: 'invalid_configuration',
+        );
+      }
+      final response = await _http.sendRequest(
+        router: router,
+        path:
+            '/proxy/network/integration/v1/sites/${Uri.encodeComponent(siteId)}/devices/${Uri.encodeComponent(deviceId)}/actions',
+        method: 'POST',
+        token: await _token(router),
+        username: await _username(router),
+        password: await _password(router),
+        data: const {'action': 'RESTART'},
+      );
+      final status = response['status']?.toString().toLowerCase();
+      final code = response['code'];
+      if (status == 'error' || (code is num && code >= 400)) {
+        throw RouterOsApiException(
+          response['message']?.toString() ?? 'UniFi reboot request failed.',
+          category: 'remote_command_failed',
+        );
+      }
+      return const RouterOsApiResponse(
+        records: [
+          {'status': 'reboot-requested', 'vendor': 'unifi'},
+        ],
+      );
+    }
     throw unsupportedVendorCommand(router, command);
   }
 

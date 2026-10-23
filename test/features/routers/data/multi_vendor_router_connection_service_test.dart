@@ -24,6 +24,39 @@ VendorHttpClient _stubHttp200() {
 }
 
 void main() {
+  test(
+    'UniFi executes a guarded reboot for an explicit site and device',
+    () async {
+      final client = _RecordingUniFiClient();
+      final service = UniFiConnectionService(httpClient: client);
+      final router = const RouterEntity(
+        id: 'unifi-1',
+        name: 'UniFi gateway',
+        host: '192.168.1.10',
+        username: 'operator',
+        vendor: RouterVendor.ubiquitiUniFi,
+      );
+
+      expect(
+        () => service.execute(router, '/system/reboot'),
+        throwsA(isA<RouterOsApiException>()),
+      );
+      final response = await service.execute(
+        router,
+        '/system/reboot',
+        attributes: {'siteId': 'site/1', 'deviceId': 'gateway-1'},
+      );
+
+      expect(response.records.single['status'], 'reboot-requested');
+      expect(client.method, 'POST');
+      expect(
+        client.path,
+        '/proxy/network/integration/v1/sites/site%2F1/devices/gateway-1/actions',
+      );
+      expect(client.data, {'action': 'RESTART'});
+    },
+  );
+
   test('routes MikroTik commands to the RouterOS connector', () async {
     final mikrotik = _RecordingConnector(RouterVendor.mikrotik);
     final service = MultiVendorRouterConnectionService(connectors: [mikrotik]);
@@ -149,6 +182,30 @@ void main() {
       }
     },
   );
+}
+
+class _RecordingUniFiClient extends VendorHttpClient {
+  String? method;
+  String? path;
+  dynamic data;
+
+  @override
+  Future<Map<String, dynamic>> sendRequest({
+    required RouterEntity router,
+    required String path,
+    String method = 'GET',
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+    dynamic data,
+    String? token,
+    String? username,
+    String? password,
+  }) async {
+    this.method = method;
+    this.path = path;
+    this.data = data;
+    return const {'status': 'success'};
+  }
 }
 
 class _UniFiHttpClient extends VendorHttpClient {
