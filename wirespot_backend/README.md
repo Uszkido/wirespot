@@ -1,4 +1,4 @@
-# WireSpot 100% Free Cloud Backend (`wirespot_backend/`)
+# WireSpot Cloud Backend (`wirespot_backend/`)
 
 This directory contains the lightweight **Dart Frog API Server** for WireSpot.
 It provides the mobile/web API contract and an organization-scoped JSON file
@@ -7,18 +7,17 @@ Firestore is still recommended before multi-instance hosting.
 
 ---
 
-## 🚀 100% Free Deployment (No Credit Card Needed)
+## Pilot deployment
 
-### 1. Database Setup: Firebase Firestore (Free Spark Plan)
-1. Go to [console.firebase.google.com](https://console.firebase.google.com/) and click **Add Project**.
-2. Name your project `wirespot-cloud`.
-3. In the left navigation bar, go to **Build > Firestore Database** and click **Create Database**.
-4. Choose **Start in Test Mode** (or production rules).
-5. Done! You now have 1 GB of free storage and 50,000 free reads per day without entering any credit card.
+The current API uses an organization-scoped JSON snapshot. Firebase Hosting serves
+the web client, but Firestore is **not** the persistence layer for this backend yet.
+Creating a Firestore project alone will not make API data durable. Use the JSON
+store only for a single-instance pilot, and provide a persistent volume (or replace
+the store with a managed database adapter) before treating the service as production.
 
 ---
 
-### 2. Git-based hosting deployment: Render
+### Git-based hosting deployment: Render
 
 The repository includes a root-level [`render.yaml`](../render.yaml) Blueprint.
 It keeps deployment configuration in Git and builds the existing Docker image
@@ -58,8 +57,9 @@ Set `WIRESPOT_SMOKE_TELEMETRY_JSON` to a valid telemetry frame (or a
 
 The service is configured with `/health` for health checks and CORS for both
 Firebase hosting sites. Render's free web services sleep after inactivity, so
-the first request after idle may take longer. The free tier is suitable for
-testing and small pilots, not guaranteed production availability.
+the first request after idle may take longer. The free plan also does not provide
+the durable disk required by the JSON snapshot; it is suitable for testing and
+small pilots only, not production persistence or guaranteed availability.
 
 For another Git provider, use the same Docker settings: root directory
 `wirespot_backend`, Dockerfile `Dockerfile`, context `.`, and port `8080`.
