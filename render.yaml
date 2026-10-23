@@ -18,6 +18,8 @@ services:
         sync: false
       - key: WIRESPOT_OPERATOR_TOKENS
         sync: false
+      - key: WIRESPOT_ENABLE_LOCAL_AUTH
+        sync: false
       - key: WIRESPOT_STORE_PATH
         sync: false
       - key: WIRESPOT_ENTITLEMENT_ADMIN_TOKEN

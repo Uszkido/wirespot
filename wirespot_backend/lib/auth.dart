@@ -25,23 +25,55 @@ bool get productionMode =>
     Platform.environment['WIRESPOT_PRODUCTION']?.toLowerCase() == 'true' ||
     Platform.environment['WIRESPOT_ENV']?.toLowerCase() == 'production';
 
+/// Enables the built-in account endpoints for a single-instance pilot.
+///
+/// Public multi-tenant deployments should leave this disabled and put a
+/// hosted identity provider in front of the API. It is opt-in in production
+/// so a forgotten Render variable cannot accidentally expose local account
+/// registration.
+bool get localAuthEnabled =>
+    !productionMode ||
+    Platform.environment['WIRESPOT_ENABLE_LOCAL_AUTH']?.toLowerCase() == 'true';
+
+bool localAuthEnabledFor(Map<String, String> environment) {
+  final mode = environment['WIRESPOT_ENV']?.toLowerCase() == 'production' ||
+      environment['WIRESPOT_PRODUCTION']?.toLowerCase() == 'true';
+  return !mode ||
+      environment['WIRESPOT_ENABLE_LOCAL_AUTH']?.toLowerCase() == 'true';
+}
+
 /// Indicates whether the backend has the minimum server-side controls needed
 /// to run outside development mode. Hosted identity integration is still
 /// recommended for public multi-tenant deployments.
 bool get productionConfigurationReady =>
-    productionMode &&
-    (Platform.environment['WIRESPOT_OPERATOR_TOKENS'] ?? '')
-        .trim()
-        .isNotEmpty &&
-    (Platform.environment['WIRESPOT_STORE_PATH'] ?? '').trim().isNotEmpty;
+    productionMode && productionConfigurationGaps.isEmpty;
 
 List<String> get productionConfigurationGaps {
   final gaps = <String>[];
   if (!productionMode) gaps.add('WIRESPOT_ENV=production');
-  if ((Platform.environment['WIRESPOT_OPERATOR_TOKENS'] ?? '').trim().isEmpty) {
-    gaps.add('WIRESPOT_OPERATOR_TOKENS');
+  final operatorTokens =
+      (Platform.environment['WIRESPOT_OPERATOR_TOKENS'] ?? '').trim();
+  if (operatorTokens.isEmpty && !localAuthEnabled) {
+    gaps.add('WIRESPOT_OPERATOR_TOKENS or WIRESPOT_ENABLE_LOCAL_AUTH=true');
   }
   if ((Platform.environment['WIRESPOT_STORE_PATH'] ?? '').trim().isEmpty) {
+    gaps.add('WIRESPOT_STORE_PATH');
+  }
+  return gaps;
+}
+
+List<String> productionConfigurationGapsFor(
+  Map<String, String> environment,
+) {
+  final gaps = <String>[];
+  final mode = environment['WIRESPOT_ENV']?.toLowerCase() == 'production' ||
+      environment['WIRESPOT_PRODUCTION']?.toLowerCase() == 'true';
+  if (!mode) gaps.add('WIRESPOT_ENV=production');
+  final tokens = (environment['WIRESPOT_OPERATOR_TOKENS'] ?? '').trim();
+  if (tokens.isEmpty && !localAuthEnabledFor(environment)) {
+    gaps.add('WIRESPOT_OPERATOR_TOKENS or WIRESPOT_ENABLE_LOCAL_AUTH=true');
+  }
+  if ((environment['WIRESPOT_STORE_PATH'] ?? '').trim().isEmpty) {
     gaps.add('WIRESPOT_STORE_PATH');
   }
   return gaps;
@@ -57,8 +89,10 @@ AuthPrincipal? principal(RequestContext context) {
   if (session != null) {
     final organizationId = session['organizationId']?.toString();
     final role = session['role']?.toString().toLowerCase();
-    if (organizationId != null && organizationId.isNotEmpty &&
-        role != null && role.isNotEmpty) {
+    if (organizationId != null &&
+        organizationId.isNotEmpty &&
+        role != null &&
+        role.isNotEmpty) {
       return AuthPrincipal(
         token: token,
         organizationId: organizationId,

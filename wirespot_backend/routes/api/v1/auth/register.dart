@@ -7,12 +7,12 @@ Future<Response> onRequest(RequestContext context) async {
   if (context.request.method != HttpMethod.post) {
     return Response(statusCode: 405, body: 'Method Not Allowed');
   }
-  if (productionMode) {
+  if (!localAuthEnabled) {
     return Response.json(
       statusCode: 501,
       body: {
-        'error':
-            'Configure a hosted identity provider for production registration.',
+        'error': 'Configure a hosted identity provider for production '
+            'registration, or explicitly enable local pilot authentication.',
       },
     );
   }

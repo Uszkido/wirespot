@@ -116,13 +116,20 @@ The hosted reference service currently reports development-token mode until its
 operator config is changed. A production deployment must set:
 
 - `WIRESPOT_ENV=production` (or `WIRESPOT_PRODUCTION=true`)
-- `WIRESPOT_OPERATOR_TOKENS` with server-owned entries in the form
-  `token|organizationId|role`
 - `WIRESPOT_STORE_PATH` on persistent storage, or replace the JSON store with a
   managed database/Firestore implementation
+- either `WIRESPOT_OPERATOR_TOKENS` with server-owned entries in the form
+  `token|organizationId|role`, or the explicit
+  `WIRESPOT_ENABLE_LOCAL_AUTH=true` switch for a single-instance pilot
 
-Development login tokens are not production credentials. Free sleeping hosts are
-fine for pilots but do not guarantee uptime or durable storage.
+The local-auth switch keeps the built-in account login and registration usable
+for a controlled pilot. It is not a replacement for a hosted identity provider
+in a public multi-tenant deployment. Free sleeping hosts are fine for pilots
+but do not guarantee uptime or durable storage. Run the hosted smoke test with
+`WIRESPOT_REQUIRE_PRODUCTION=true`; add a dedicated smoke account through
+`WIRESPOT_SMOKE_EMAIL` and `WIRESPOT_SMOKE_PASSWORD` to verify authenticated
+router reads, and optionally `WIRESPOT_SMOKE_ROUTER_JSON` to verify a complete
+write/read sync round-trip.
 
 ## 7. Hotspot, subscribers, PPPoE, and RADIUS
 

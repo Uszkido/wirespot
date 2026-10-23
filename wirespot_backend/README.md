@@ -35,13 +35,24 @@ from `wirespot_backend/`.
 
 The Blueprint exposes the production settings as unsynced Render environment
 variables. Set them in the service dashboard, not in Git: `WIRESPOT_ENV` to
-`production`, a server-owned `WIRESPOT_OPERATOR_TOKENS` allow-list, and
-`WIRESPOT_STORE_PATH` on durable storage. Leave the environment unset while
-running a development pilot so the development login flow remains available.
+`production`, `WIRESPOT_STORE_PATH` on durable storage, and either a
+server-owned `WIRESPOT_OPERATOR_TOKENS` allow-list or the explicit
+`WIRESPOT_ENABLE_LOCAL_AUTH=true` pilot switch. The latter keeps the built-in
+account registration/login available for a single-instance pilot; use a hosted
+identity provider instead before opening a multi-tenant public service.
+Leave the environment unset while running a development pilot so the
+development login flow remains available.
 
 For a release gate, run the dashboard smoke test with
 `WIRESPOT_REQUIRE_PRODUCTION=true`. It will fail rather than silently accepting
 the development-token mode or a missing durable-store configuration.
+
+To validate an authenticated hosted sync without putting credentials in Git,
+also provide `WIRESPOT_SMOKE_EMAIL` and `WIRESPOT_SMOKE_PASSWORD` when running
+`node web_app/smoke-test.mjs`. The check logs in and reads the organization
+router inventory. For a dedicated test workspace, set
+`WIRESPOT_SMOKE_ROUTER_JSON` to one valid router object to verify a write/read
+round-trip as well.
 
 The service is configured with `/health` for health checks and CORS for both
 Firebase hosting sites. Render's free web services sleep after inactivity, so
@@ -57,7 +68,8 @@ For another Git provider, use the same Docker settings: root directory
 
 - `GET /health`: Health probe check returning database & backend status.
 - `POST /api/v1/auth/pair`: Validate mobile-web device pairing keys (`WS-XXXX-SYNC`).
-- `POST /api/v1/auth/login` and `/api/v1/auth/register`: Create a development session.
+- `POST /api/v1/auth/login` and `/api/v1/auth/register`: Create a session in
+  development or when local pilot authentication is explicitly enabled.
 - `POST /api/v1/auth/recover`: Start account recovery (requires a hosted identity provider for delivery in production).
 - `GET /api/v1/sync/vouchers` & `POST /api/v1/sync/vouchers`: Sync generated voucher batches across devices.
 - `GET /api/v1/routers`: Sync router fleet inventory (MikroTik, Ruijie, OpenWrt, Omada, UniFi, Generic).
@@ -76,13 +88,13 @@ For another Git provider, use the same Docker settings: root directory
   server-only `WIRESPOT_ENTITLEMENT_ADMIN_TOKEN` is configured.
 
 All `/api/v1` data endpoints require `Authorization: Bearer ws_...`. Health
-and authentication endpoints are public. Development login/register tokens are
-intentionally not production credentials. For a production deployment, set
-`WIRESPOT_ENV=production` and configure
-`WIRESPOT_OPERATOR_TOKENS` as comma-separated `token|organizationId|role`
-entries. In production, organization and role claims come only from the
-server-side token allow-list; client-provided role/organization headers are
-ignored. Replace this allow-list with a hosted identity provider before
+and authentication endpoints are public. For a production deployment, set
+`WIRESPOT_ENV=production`, configure `WIRESPOT_STORE_PATH`, and choose one
+authentication mode: server-owned `WIRESPOT_OPERATOR_TOKENS` entries in the
+form `token|organizationId|role`, or the explicit local pilot switch described
+above. In production, organization and role claims from operator tokens are
+server-controlled; client-provided role/organization headers are ignored.
+Replace local pilot authentication with a hosted identity provider before a
 multi-tenant public launch.
 
 Set `WIRESPOT_STORE_PATH` to a persistent disk path (for example

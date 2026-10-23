@@ -9,6 +9,21 @@ async function fetchChecked(url) {
   return response;
 }
 
+async function jsonRequest(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'content-type': 'application/json',
+      ...(options.headers ?? {}),
+    },
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(`${url} returned HTTP ${response.status}: ${JSON.stringify(body)}`);
+  }
+  return body;
+}
+
 const dashboard = await fetchChecked(dashboardUrl);
 const html = await dashboard.text();
 for (const marker of ['WireSpot Cloud', 'app.js', 'auth-email-login']) {
@@ -51,8 +66,62 @@ if (allowedOrigin !== '*' && allowedOrigin !== new URL(dashboardUrl).origin) {
   );
 }
 
+// Optional authenticated round-trip. Keep credentials out of the repository;
+// CI or an operator can provide a dedicated smoke account through environment
+// variables when validating a hosted deployment. The default smoke test stays
+// read-only and therefore remains safe for public Firebase deploys.
+const smokeEmail = process.env.WIRESPOT_SMOKE_EMAIL;
+const smokePassword = process.env.WIRESPOT_SMOKE_PASSWORD;
+if (smokeEmail || smokePassword) {
+  if (!smokeEmail || !smokePassword) {
+    throw new Error('Set both WIRESPOT_SMOKE_EMAIL and WIRESPOT_SMOKE_PASSWORD.');
+  }
+  const login = await jsonRequest(`${apiUrl.replace(/\/$/, '')}/api/v1/auth/login`, {
+    method: 'POST',
+    body: JSON.stringify({ email: smokeEmail, password: smokePassword }),
+  });
+  const token = login.accessToken;
+  if (typeof token !== 'string' || token.length === 0) {
+    throw new Error('Hosted login did not return an access token.');
+  }
+  const authorization = { authorization: `Bearer ${token}` };
+  const routers = await jsonRequest(`${apiUrl.replace(/\/$/, '')}/api/v1/routers`, {
+    headers: authorization,
+  });
+  if (!Array.isArray(routers.routers)) {
+    throw new Error('Hosted router sync response did not contain a routers list.');
+  }
+
+  // Optional write/read verification for a dedicated smoke workspace.
+  if (process.env.WIRESPOT_SMOKE_ROUTER_JSON) {
+    let router;
+    try {
+      router = JSON.parse(process.env.WIRESPOT_SMOKE_ROUTER_JSON);
+    } catch (error) {
+      throw new Error(`WIRESPOT_SMOKE_ROUTER_JSON is not valid JSON: ${error}`);
+    }
+    const sync = await jsonRequest(`${apiUrl.replace(/\/$/, '')}/api/v1/routers`, {
+      method: 'POST',
+      headers: authorization,
+      body: JSON.stringify({ routers: [router] }),
+    });
+    if (sync.status !== 'success' || sync.syncedCount !== 1) {
+      throw new Error(`Hosted router write did not sync exactly one record: ${JSON.stringify(sync)}`);
+    }
+    const refreshed = await jsonRequest(`${apiUrl.replace(/\/$/, '')}/api/v1/routers`, {
+      headers: authorization,
+    });
+    if (!refreshed.routers.some((item) => item.id === router.id)) {
+      throw new Error('Hosted router write/read round-trip did not return the record.');
+    }
+  }
+}
+
 console.log(`WireSpot dashboard reachable: ${dashboard.url}`);
 console.log(`WireSpot API reachable: ${apiUrl}`);
 console.log(
   `API mode: ${healthBody.authenticationMode}; productionReady=${healthBody.productionReady}`,
 );
+if (smokeEmail && smokePassword) {
+  console.log('Authenticated cloud sync round-trip: passed');
+}
