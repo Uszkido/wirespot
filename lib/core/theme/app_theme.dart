@@ -21,6 +21,14 @@ class AppTheme {
     return _base(colorScheme);
   }
 
+  static ThemeData ocean() {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF007C91),
+      brightness: Brightness.light,
+    );
+    return _base(colorScheme);
+  }
+
   static ThemeData _base(ColorScheme colorScheme) {
     return ThemeData(
       useMaterial3: true,

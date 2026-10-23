@@ -72,10 +72,11 @@ class _WireSpotAppState extends ConsumerState<WireSpotApp>
     final router = ref.watch(appRouterProvider);
     final settings = ref.watch(appSettingsProvider).asData?.value;
 
+    final preference = settings?.themePreference;
     return MaterialApp.router(
       title: 'WireSpot',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
+      theme: _theme(preference),
       darkTheme: AppTheme.dark(),
       themeMode: _themeMode(settings?.themePreference),
       locale: _materialLocale(settings?.languageCode),
@@ -99,8 +100,15 @@ class _WireSpotAppState extends ConsumerState<WireSpotApp>
     return switch (preference) {
       AppThemePreference.light => ThemeMode.light,
       AppThemePreference.dark => ThemeMode.dark,
+      AppThemePreference.ocean => ThemeMode.light,
       AppThemePreference.system || null => ThemeMode.system,
     };
+  }
+
+  ThemeData _theme(AppThemePreference? preference) {
+    return preference == AppThemePreference.ocean
+        ? AppTheme.ocean()
+        : AppTheme.light();
   }
 
   Locale _materialLocale(String? languageCode) {

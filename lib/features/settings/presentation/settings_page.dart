@@ -1348,6 +1348,10 @@ class _PreferencesCard extends ConsumerWidget {
                   value: AppThemePreference.dark,
                   child: Text('Dark'),
                 ),
+                DropdownMenuItem(
+                  value: AppThemePreference.ocean,
+                  child: Text('Ocean'),
+                ),
               ],
               onChanged: (value) {
                 if (value != null) {

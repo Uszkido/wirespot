@@ -43,6 +43,35 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         ?.value;
     final effectiveRouterId = selectedRouterId ?? storedActiveRouterId;
 
+    final dashboardContent = snapshot.when(
+      data: (value) {
+        if (value == null) {
+          return EmptyState(
+            icon: Icons.router_outlined,
+            title: text.addRouter,
+            message: text.addRouterMessage,
+            action: FilledButton.icon(
+              onPressed: () => context.push(AppRoutes.newRouter),
+              icon: const Icon(Icons.add),
+              label: Text(text.addRouter),
+            ),
+          );
+        }
+        return _DashboardContent(snapshot: value);
+      },
+      error: (error, stackTrace) => EmptyState(
+        icon: Icons.error_outline,
+        title: text.dashboardUnavailable,
+        message: error.toString(),
+        action: FilledButton.icon(
+          onPressed: () => ref.invalidate(dashboardSnapshotProvider),
+          icon: const Icon(Icons.refresh),
+          label: Text(text.retry),
+        ),
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+    );
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -160,34 +189,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
           ],
         ),
-        body: snapshot.when(
-          data: (value) {
-            if (value == null) {
-              return EmptyState(
-                icon: Icons.router_outlined,
-                title: text.addRouter,
-                message: text.addRouterMessage,
-                action: FilledButton.icon(
-                  onPressed: () => context.push(AppRoutes.newRouter),
-                  icon: const Icon(Icons.add),
-                  label: Text(text.addRouter),
-                ),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth >= 720) {
+              return Row(
+                children: [
+                  _DashboardNavigation(rail: true),
+                  const VerticalDivider(width: 1),
+                  Expanded(child: dashboardContent),
+                ],
               );
             }
-            return _DashboardContent(snapshot: value);
+            return dashboardContent;
           },
-          error: (error, stackTrace) => EmptyState(
-            icon: Icons.error_outline,
-            title: text.dashboardUnavailable,
-            message: error.toString(),
-            action: FilledButton.icon(
-              onPressed: () => ref.invalidate(dashboardSnapshotProvider),
-              icon: const Icon(Icons.refresh),
-              label: Text(text.retry),
-            ),
-          ),
-          loading: () => const Center(child: CircularProgressIndicator()),
         ),
+        bottomNavigationBar: MediaQuery.sizeOf(context).width < 720
+            ? const _DashboardNavigation()
+            : null,
       ),
     );
   }
@@ -212,6 +230,69 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ).pressBackAgain,
         ),
       ),
+    );
+  }
+}
+
+class _DashboardNavigation extends StatelessWidget {
+  const _DashboardNavigation({this.rail = false});
+
+  final bool rail;
+
+  static const _items = <(String, String, IconData, IconData)>[
+    (
+      'Dashboard',
+      AppRoutes.dashboard,
+      Icons.dashboard_outlined,
+      Icons.dashboard,
+    ),
+    ('Routers', AppRoutes.routers, Icons.router_outlined, Icons.router),
+    (
+      'Hotspot',
+      AppRoutes.hotspot,
+      Icons.wifi_tethering_outlined,
+      Icons.wifi_tethering,
+    ),
+    ('Reports', AppRoutes.reports, Icons.bar_chart_outlined, Icons.bar_chart),
+    ('Settings', AppRoutes.settings, Icons.settings_outlined, Icons.settings),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = _items.indexWhere(
+      (item) => item.$2 == GoRouterState.of(context).matchedLocation,
+    );
+    final index = selected < 0 ? 0 : selected;
+    void navigate(int value) {
+      if (value != index) context.go(_items[value].$2);
+    }
+
+    if (rail) {
+      return NavigationRail(
+        selectedIndex: index,
+        onDestinationSelected: navigate,
+        labelType: NavigationRailLabelType.all,
+        destinations: [
+          for (final item in _items)
+            NavigationRailDestination(
+              icon: Icon(item.$3),
+              selectedIcon: Icon(item.$4),
+              label: Text(item.$1),
+            ),
+        ],
+      );
+    }
+    return NavigationBar(
+      selectedIndex: index,
+      onDestinationSelected: navigate,
+      destinations: [
+        for (final item in _items)
+          NavigationDestination(
+            icon: Icon(item.$3),
+            selectedIcon: Icon(item.$4),
+            label: item.$1,
+          ),
+      ],
     );
   }
 }
