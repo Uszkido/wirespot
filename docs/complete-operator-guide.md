@@ -62,7 +62,7 @@ router IP from the same network.
 Build or copy the latest debug APK:
 
 ```text
-outputs\WireSpot-0.1.27+30-brand-collaboration-debug.apk
+outputs\WireSpot-1.0.0+32-debug.apk
 ```
 
 Transfer it to the phone and install it. Android may ask you to allow installs

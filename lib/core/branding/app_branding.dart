@@ -2,7 +2,7 @@ class AppBranding {
   const AppBranding._();
 
   static const appName = 'WireSpot';
-  static const version = '0.1.27+31';
+  static const version = '1.0.0+32';
   static const releaseChannel = 'Development / field testing';
   static const companyName = 'Vexel Innovations';
   static const collaboratorName = 'TechNova Technologies';
