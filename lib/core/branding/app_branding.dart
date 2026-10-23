@@ -2,6 +2,7 @@ class AppBranding {
   const AppBranding._();
 
   static const appName = 'WireSpot';
+
   /// User-facing semantic version. The internal build number remains in
   /// pubspec.yaml for Android and iOS update ordering.
   static const version = '1.0.3';
