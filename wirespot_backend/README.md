@@ -104,6 +104,23 @@ Set `WIRESPOT_STORE_PATH` to a persistent disk path (for example
 Without a persistent volume, the service remains functional but its local
 snapshot can be lost during redeployments.
 
+### Hosted release smoke test
+
+The **WireSpot CI** workflow has a manual `workflow_dispatch` job for the
+hosted release gate. Add these repository secrets before running it:
+
+- `WIRESPOT_SMOKE_EMAIL` and `WIRESPOT_SMOKE_PASSWORD`: a disposable test
+  account in the hosted organization.
+- `WIRESPOT_SMOKE_ROUTER_JSON`: an optional router fixture for a write/read
+  inventory round-trip.
+- `WIRESPOT_SMOKE_TELEMETRY_JSON`: an optional telemetry fixture for a
+  write/read telemetry round-trip.
+
+Run the workflow manually from GitHub Actions. The job requires the hosted
+health endpoint to report production readiness, then authenticates and checks
+the configured round-trips. Never put these values in source files or commit
+them to the repository.
+
 ---
 
 ## 🛠️ Local Testing
