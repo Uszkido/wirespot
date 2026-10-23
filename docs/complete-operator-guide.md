@@ -23,7 +23,8 @@ printing, reporting, scheduler settings, backup, app security, and licensing.
 - Secure router credential storage.
 - Multiple router records with brand selection.
 - MikroTik RouterOS live hotspot management.
-- Ruijie/Reyee, OpenWrt, Omada, UniFi, and generic router connector foundation.
+- Ruijie/Reyee connection/discovery foundation; OpenWrt read-only ubus
+  dashboard snapshots; Omada, UniFi, and generic connector foundations.
 - Local LAN mode and WireGuard-required mode.
 - Router connection testing.
 - Dashboard with online users, sales, CPU, memory, health, and interfaces.
@@ -100,8 +101,9 @@ port is usually `8728`; API-SSL is usually `8729` when configured.
 
 Ruijie/Reyee supports a limited, read-only Ruijie Cloud connection test using a
 vendor-issued access token. It does not send RouterOS commands or change Ruijie
-configuration. OpenWrt, Omada, UniFi, and generic brands can be saved as
-planned connectors. See [Ruijie Cloud Setup](ruijie-cloud-setup.md).
+configuration. OpenWrt can provide a read-only dashboard snapshot through its
+standard ubus methods; its mutations are not enabled. Omada, UniFi, and generic
+brands remain connection/probe foundations. See [Ruijie Cloud Setup](ruijie-cloud-setup.md).
 
 ## 7. Local LAN Mode
 

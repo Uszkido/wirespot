@@ -25,7 +25,7 @@ WireSpot is **proprietary software** by Vexel Innovations. The source code is ho
 |-------|--------|
 | MikroTik | ✅ Full live connector |
 | Ruijie / Reyee | ⚡ Cloud connection test |
-| OpenWrt | 📋 Planned |
+| OpenWrt | ✅ Read-only ubus dashboard snapshot |
 | TP-Link Omada | 📋 Planned |
 | Ubiquiti UniFi | 📋 Planned |
 | Generic | 📋 Planned |

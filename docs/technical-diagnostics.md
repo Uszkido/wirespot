@@ -132,8 +132,9 @@ Use normal Git, not Flutter's bundled mini-git, for GitHub pushes.
 
 MikroTik RouterOS is the full live router connector. Ruijie/Reyee has a
 limited Ruijie Cloud connection check using a vendor-issued access token and
-the cloud device-list endpoint. OpenWrt, TP-Link Omada, Ubiquiti UniFi, and
-generic routers can be saved as planned connectors.
+the cloud device-list endpoint. OpenWrt provides a read-only dashboard snapshot
+through LuCI/ubus. TP-Link Omada, Ubiquiti UniFi, and generic routers can be
+saved as authenticated connection/probe foundations.
 
 Check RouterOS API service:
 

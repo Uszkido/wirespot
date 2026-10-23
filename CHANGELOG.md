@@ -13,6 +13,8 @@ Production-readiness and documentation update.
 - Technical operator manual in PDF and editable Markdown form.
 - Organization-scoped cloud router merge, role-aware API actions, and live
   telemetry handling that refuses fabricated vendor readings.
+- OpenWrt read-only ubus dashboard snapshots for real board, resource, and
+  interface telemetry; unsupported mutations continue to fail closed.
 - Windows, Linux, and unsigned iOS packaging checks in CI.
 
 ### Changed

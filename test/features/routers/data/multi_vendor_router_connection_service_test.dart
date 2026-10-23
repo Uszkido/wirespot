@@ -63,7 +63,7 @@ void main() {
           },
         ),
       );
-      final openwrt = OpenWrtConnectionService(httpClient: stubHttp);
+      final openwrt = OpenWrtConnectionService(httpClient: _OpenWrtHttpClient());
       final omada = OmadaConnectionService(httpClient: stubHttp);
       final unifi = UniFiConnectionService(httpClient: stubHttp);
       final generic = GenericRouterConnectionService();
@@ -109,6 +109,12 @@ void main() {
           final snapshot = await service.getSnapshot(router);
           expect(snapshot.identity, isNotEmpty);
           expect(snapshot.resource.uptime, isNotEmpty);
+        } else if (vendor == RouterVendor.openWrt) {
+          final snapshot = await service.getSnapshot(router);
+          expect(snapshot.identity, 'openwrt-gateway');
+          expect(snapshot.resource.version, '23.05.5');
+          expect(snapshot.resource.totalMemory, 524288);
+          expect(snapshot.interfaces.single.name, 'eth0');
         } else {
           expect(
             () => service.getSnapshot(router),
@@ -118,6 +124,46 @@ void main() {
       }
     },
   );
+}
+
+class _OpenWrtHttpClient extends VendorHttpClient {
+  @override
+  Future<Map<String, dynamic>> sendRequest({
+    required RouterEntity router,
+    required String path,
+    String method = 'GET',
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+    dynamic data,
+    String? token,
+    String? username,
+    String? password,
+  }) async {
+    final params = data is Map ? data['params'] : null;
+    final object = params is List && params.length > 1 ? params[1] : null;
+    final rpcMethod = params is List && params.length > 2 ? params[2] : null;
+    if (object == 'system' && rpcMethod == 'board') {
+      return {
+        'result': [0, {'model': 'MediaTek MT7621', 'release': {'version': '23.05.5'}}],
+      };
+    }
+    if (object == 'system' && rpcMethod == 'info') {
+      return {
+        'result': [
+          0,
+          {
+            'hostname': 'openwrt-gateway',
+            'uptime': 3725,
+            'load': [1024, 512, 256],
+            'memory': {'total': 524288, 'free': 262144},
+          },
+        ],
+      };
+    }
+    return {
+      'result': [0, {'interface': [{'device': 'eth0', 'up': true}]}],
+    };
+  }
 }
 
 class _RecordingConnector implements RouterConnector {

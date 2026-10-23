@@ -72,7 +72,10 @@ enum RouterVendor {
       'Prepare captive portal package details (NoDogSplash or CoovaChilli).',
       'Use a secure operator credential for ubus API access.',
     ],
-    activeCapabilities: {RouterCapability.connectionTest},
+    activeCapabilities: {
+      RouterCapability.connectionTest,
+      RouterCapability.dashboardSnapshot,
+    },
   ),
   tpLinkOmada(
     label: 'TP-Link Omada',
