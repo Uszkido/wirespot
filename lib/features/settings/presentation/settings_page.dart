@@ -53,6 +53,8 @@ class SettingsPage extends ConsumerWidget {
         children: [
           const _BrandCard(),
           const SizedBox(height: 16),
+          const _SetupGuideCard(),
+          const SizedBox(height: 16),
           settings.when(
             data: (value) => _CoBrandingCard(
               settings: value,
@@ -123,6 +125,25 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 16),
           const _CloudBackupCard(),
         ],
+      ),
+    );
+  }
+}
+
+class _SetupGuideCard extends StatelessWidget {
+  const _SetupGuideCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.auto_awesome_outlined),
+        title: const Text('Replay setup walkthrough'),
+        subtitle: const Text(
+          'Review router, VPN, cloud sync, and hotspot setup steps.',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push(AppRoutes.onboarding),
       ),
     );
   }
