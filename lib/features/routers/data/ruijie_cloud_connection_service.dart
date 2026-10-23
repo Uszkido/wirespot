@@ -15,10 +15,9 @@ typedef RuijieDeviceRequest = Future<Response<dynamic>> Function(Uri uri);
 typedef RuijieCredentialsReader =
     Future<RouterCredentials?> Function(String routerId);
 
-/// Ruijie/Reyee Cloud authentication and device-discovery connector.
-///
-/// Controller-specific mutations and normalized telemetry are intentionally
-/// rejected until the target Ruijie API version and site model are configured.
+/// Ruijie/Reyee Cloud authentication, device discovery, and read-only
+/// dashboard connector. Mutations remain fail-closed until the target cloud
+/// API version and site model are selected by the operator.
 class RuijieCloudConnectionService implements RouterConnector {
   RuijieCloudConnectionService({
     RouterCredentialStore? credentialStore,
@@ -100,10 +99,125 @@ class RuijieCloudConnectionService implements RouterConnector {
 
   @override
   Future<RouterOsRouterSnapshot> getSnapshot(RouterEntity router) async {
-    if (!await testConnection(router)) {
+    final response = await _requestDeviceList(router);
+    final records = _deviceRecords(response.data);
+    if (records.isEmpty) {
       throw StateError('Ruijie Cloud controller is unreachable.');
     }
-    throw unsupportedVendorSnapshot(router);
+    final primary = records.first;
+    final uptime = _number(primary, const [
+      'uptime',
+      'uptimeSeconds',
+      'uptime_seconds',
+    ]);
+    return RouterOsRouterSnapshot(
+      identity:
+          _value(primary, const [
+            'name',
+            'deviceName',
+            'device_name',
+            'hostname',
+            'id',
+          ]) ??
+          router.name,
+      resource: RouterOsSystemResource(
+        uptime: _formatUptime(uptime.toInt()),
+        version:
+            _value(primary, const [
+              'version',
+              'firmwareVersion',
+              'firmware_version',
+            ]) ??
+            '',
+        boardName:
+            _value(primary, const ['model', 'deviceModel', 'device_model']) ??
+            '',
+        cpuLoad: _number(primary, const [
+          'cpuLoad',
+          'cpuUtilization',
+          'cpu_utilization',
+        ]).clamp(0, 100).toInt(),
+        freeMemory: _number(primary, const [
+          'freeMemory',
+          'memoryFree',
+          'memory_free',
+        ]).toInt(),
+        totalMemory: _number(primary, const [
+          'totalMemory',
+          'memoryTotal',
+          'memory_total',
+        ]).toInt(),
+      ),
+      interfaces: [
+        for (final device in records)
+          RouterOsInterface(
+            name:
+                _value(device, const [
+                  'name',
+                  'deviceName',
+                  'device_name',
+                  'id',
+                ]) ??
+                '',
+            type:
+                _value(device, const [
+                  'type',
+                  'deviceType',
+                  'device_type',
+                  'model',
+                ]) ??
+                '',
+            running: _isOnline(device),
+            disabled: false,
+            macAddress: _value(device, const [
+              'mac',
+              'macAddress',
+              'mac_address',
+            ]),
+          ),
+      ],
+    );
+  }
+
+  String? _value(Map<String, Object?> record, List<String> keys) {
+    for (final key in keys) {
+      final value = record[key]?.toString().trim();
+      if (value != null && value.isNotEmpty) return value;
+    }
+    return null;
+  }
+
+  num _number(Map<String, Object?> record, List<String> keys) {
+    for (final key in keys) {
+      final value = record[key];
+      if (value is num) return value;
+      final parsed = num.tryParse(value?.toString() ?? '');
+      if (parsed != null) return parsed;
+    }
+    return 0;
+  }
+
+  bool _isOnline(Map<String, Object?> record) {
+    final status = _value(record, const [
+      'status',
+      'deviceStatus',
+      'device_status',
+      'state',
+    ]);
+    return record['online'] == true ||
+        record['connected'] == true ||
+        status?.toLowerCase() == 'online' ||
+        status?.toLowerCase() == 'connected' ||
+        status?.toLowerCase() == 'up';
+  }
+
+  String _formatUptime(int seconds) {
+    if (seconds <= 0) return '';
+    final days = seconds ~/ 86400;
+    final hours = (seconds % 86400) ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    final remaining = seconds % 60;
+    return '${days}d ${hours}h ${minutes}m ${remaining}s';
   }
 
   Future<String> _accessTokenFor(RouterEntity router) async {

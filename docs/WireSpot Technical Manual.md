@@ -165,9 +165,9 @@ command before confirming. Keep tokens, pairing codes, and credentials private.
 | Vendor | Current support |
 | --- | --- |
 | MikroTik RouterOS | Live connection, snapshots, hotspot/voucher operations, and command execution |
-| Ruijie / Reyee | Authenticated Ruijie Cloud connection check and device discovery |
+| Ruijie / Reyee | Authenticated Ruijie Cloud connection, device discovery, and read-only dashboard snapshot |
 | OpenWrt | Authenticated read-only ubus dashboard snapshot; mutations pending |
-| TP-Link Omada | Authenticated controller probe foundation; normalized mutations and snapshots pending |
+| TP-Link Omada | Authenticated controller site/device reads and read-only dashboard snapshot; mutations pending |
 | Ubiquiti UniFi | Authenticated Network Integration API site/device snapshot; normalized mutations pending |
 | Generic | Connection/probe foundation only |
 

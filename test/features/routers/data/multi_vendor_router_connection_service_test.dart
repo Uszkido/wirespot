@@ -58,13 +58,23 @@ void main() {
           statusCode: 200,
           data: {
             'data': [
-              {'id': 'dev1', 'name': 'Ruijie Gateway'},
+              {
+                'id': 'dev1',
+                'name': 'Ruijie Gateway',
+                'model': 'RG-EG105GW',
+                'version': '3.0.28',
+                'status': 'online',
+                'cpuLoad': 12,
+                'uptimeSeconds': 7200,
+              },
             ],
           },
         ),
       );
-      final openwrt = OpenWrtConnectionService(httpClient: _OpenWrtHttpClient());
-      final omada = OmadaConnectionService(httpClient: stubHttp);
+      final openwrt = OpenWrtConnectionService(
+        httpClient: _OpenWrtHttpClient(),
+      );
+      final omada = OmadaConnectionService(httpClient: _OmadaHttpClient());
       final unifi = UniFiConnectionService(httpClient: _UniFiHttpClient());
       final generic = GenericRouterConnectionService();
 
@@ -115,6 +125,16 @@ void main() {
           expect(snapshot.resource.version, '23.05.5');
           expect(snapshot.resource.totalMemory, 524288);
           expect(snapshot.interfaces.single.name, 'eth0');
+        } else if (vendor == RouterVendor.ruijie) {
+          final snapshot = await service.getSnapshot(router);
+          expect(snapshot.identity, 'Ruijie Gateway');
+          expect(snapshot.resource.version, '3.0.28');
+          expect(snapshot.interfaces.single.running, isTrue);
+        } else if (vendor == RouterVendor.tpLinkOmada) {
+          final snapshot = await service.getSnapshot(router);
+          expect(snapshot.identity, 'Omada Gateway');
+          expect(snapshot.resource.version, '1.4.2');
+          expect(snapshot.interfaces.single.running, isTrue);
         } else if (vendor == RouterVendor.ubiquitiUniFi) {
           final snapshot = await service.getSnapshot(router);
           expect(snapshot.identity, 'UniFi Gateway');
@@ -167,6 +187,42 @@ class _UniFiHttpClient extends VendorHttpClient {
   }
 }
 
+class _OmadaHttpClient extends VendorHttpClient {
+  @override
+  Future<Map<String, dynamic>> sendRequest({
+    required RouterEntity router,
+    required String path,
+    String method = 'GET',
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+    dynamic data,
+    String? token,
+    String? username,
+    String? password,
+  }) async {
+    if (path.endsWith('/sites')) {
+      return {
+        'data': [
+          {'id': 'site-1', 'name': 'Main site'},
+        ],
+      };
+    }
+    return {
+      'data': [
+        {
+          'id': 'gateway-1',
+          'name': 'Omada Gateway',
+          'model': 'ER7206',
+          'version': '1.4.2',
+          'status': 'online',
+          'cpuLoad': 21,
+          'uptimeSeconds': 1800,
+        },
+      ],
+    };
+  }
+}
+
 class _OpenWrtHttpClient extends VendorHttpClient {
   @override
   Future<Map<String, dynamic>> sendRequest({
@@ -185,7 +241,13 @@ class _OpenWrtHttpClient extends VendorHttpClient {
     final rpcMethod = params is List && params.length > 2 ? params[2] : null;
     if (object == 'system' && rpcMethod == 'board') {
       return {
-        'result': [0, {'model': 'MediaTek MT7621', 'release': {'version': '23.05.5'}}],
+        'result': [
+          0,
+          {
+            'model': 'MediaTek MT7621',
+            'release': {'version': '23.05.5'},
+          },
+        ],
       };
     }
     if (object == 'system' && rpcMethod == 'info') {
@@ -202,7 +264,14 @@ class _OpenWrtHttpClient extends VendorHttpClient {
       };
     }
     return {
-      'result': [0, {'interface': [{'device': 'eth0', 'up': true}]}],
+      'result': [
+        0,
+        {
+          'interface': [
+            {'device': 'eth0', 'up': true},
+          ],
+        },
+      ],
     };
   }
 }

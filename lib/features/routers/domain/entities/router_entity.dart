@@ -54,6 +54,7 @@ enum RouterVendor {
     ],
     activeCapabilities: {
       RouterCapability.connectionTest,
+      RouterCapability.dashboardSnapshot,
       RouterCapability.cloudController,
     },
   ),
@@ -93,6 +94,7 @@ enum RouterVendor {
     ],
     activeCapabilities: {
       RouterCapability.connectionTest,
+      RouterCapability.dashboardSnapshot,
       RouterCapability.cloudController,
     },
   ),
