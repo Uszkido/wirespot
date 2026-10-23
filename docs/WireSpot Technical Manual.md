@@ -168,7 +168,7 @@ command before confirming. Keep tokens, pairing codes, and credentials private.
 | Ruijie / Reyee | Authenticated Ruijie Cloud connection check and device discovery |
 | OpenWrt | Authenticated read-only ubus dashboard snapshot; mutations pending |
 | TP-Link Omada | Authenticated controller probe foundation; normalized mutations and snapshots pending |
-| Ubiquiti UniFi | Authenticated controller probe foundation; normalized mutations and snapshots pending |
+| Ubiquiti UniFi | Authenticated Network Integration API site/device snapshot; normalized mutations pending |
 | Generic | Connection/probe foundation only |
 
 Unsupported vendor commands and snapshots fail clearly. They are not replaced by

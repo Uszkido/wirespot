@@ -65,7 +65,7 @@ void main() {
       );
       final openwrt = OpenWrtConnectionService(httpClient: _OpenWrtHttpClient());
       final omada = OmadaConnectionService(httpClient: stubHttp);
-      final unifi = UniFiConnectionService(httpClient: stubHttp);
+      final unifi = UniFiConnectionService(httpClient: _UniFiHttpClient());
       final generic = GenericRouterConnectionService();
 
       final service = MultiVendorRouterConnectionService(
@@ -115,6 +115,11 @@ void main() {
           expect(snapshot.resource.version, '23.05.5');
           expect(snapshot.resource.totalMemory, 524288);
           expect(snapshot.interfaces.single.name, 'eth0');
+        } else if (vendor == RouterVendor.ubiquitiUniFi) {
+          final snapshot = await service.getSnapshot(router);
+          expect(snapshot.identity, 'UniFi Gateway');
+          expect(snapshot.resource.version, '9.4.17');
+          expect(snapshot.interfaces.single.running, isTrue);
         } else {
           expect(
             () => service.getSnapshot(router),
@@ -124,6 +129,42 @@ void main() {
       }
     },
   );
+}
+
+class _UniFiHttpClient extends VendorHttpClient {
+  @override
+  Future<Map<String, dynamic>> sendRequest({
+    required RouterEntity router,
+    required String path,
+    String method = 'GET',
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+    dynamic data,
+    String? token,
+    String? username,
+    String? password,
+  }) async {
+    if (path.endsWith('/sites')) {
+      return {
+        'data': [
+          {'id': 'site-1', 'name': 'Main site'},
+        ],
+      };
+    }
+    return {
+      'data': [
+        {
+          'id': 'gateway-1',
+          'name': 'UniFi Gateway',
+          'model': 'UDM Pro',
+          'version': '9.4.17',
+          'status': 'online',
+          'cpuLoad': 18,
+          'uptimeSeconds': 3600,
+        },
+      ],
+    };
+  }
 }
 
 class _OpenWrtHttpClient extends VendorHttpClient {
