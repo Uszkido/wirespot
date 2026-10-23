@@ -16,6 +16,13 @@ for (const marker of ['WireSpot Cloud', 'app.js', 'auth-email-login']) {
     throw new Error(`Dashboard is missing expected marker: ${marker}`);
   }
 }
+const appScript = await fetchChecked(new URL('app.js', dashboard.url));
+const appSource = await appScript.text();
+for (const marker of ['webCan', 'guardWebPermission', 'session.role']) {
+  if (!appSource.includes(marker)) {
+    throw new Error(`Dashboard app script is missing RBAC marker: ${marker}`);
+  }
+}
 
 const health = await fetchChecked(`${apiUrl.replace(/\/$/, '')}/health`);
 const healthBody = await health.json();
