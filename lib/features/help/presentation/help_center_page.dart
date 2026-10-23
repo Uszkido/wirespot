@@ -49,28 +49,35 @@ class HelpCenterPage extends StatelessWidget {
             onTap: () => context.push(AppRoutes.cloud),
           ),
           _GuideTile(
-            title: '3. Configure hotspot and PPPoE',
+            title: '3. Connect a router with WireGuard',
+            description:
+                'Import a VPN file or QR code, connect the tunnel, then add the router through its private address.',
+            icon: Icons.vpn_key_outlined,
+            onTap: () => showWireGuardSetupGuide(context),
+          ),
+          _GuideTile(
+            title: '4. Configure hotspot and PPPoE',
             description:
                 'Set up captive portal users, PPPoE subscriber access, and FreeRADIUS.',
             icon: Icons.wifi_tethering_outlined,
             onTap: () => showPppoeRadiusGuide(context),
           ),
           _GuideTile(
-            title: '4. Manage PPPoE subscribers',
+            title: '5. Manage PPPoE subscribers',
             description:
                 'Create plans, assign speed limits, suspend accounts, and review status.',
             icon: Icons.manage_accounts_outlined,
             onTap: () => context.push(AppRoutes.radiusSubscribers),
           ),
           _GuideTile(
-            title: '5. Create vouchers',
+            title: '6. Create vouchers',
             description:
                 'Generate, print, export, and synchronize hotspot voucher batches.',
             icon: Icons.confirmation_number_outlined,
             onTap: () => context.push(AppRoutes.vouchers),
           ),
           _GuideTile(
-            title: '6. Review reports',
+            title: '7. Review reports',
             description:
                 'Export sales, usage, voucher, and subscriber reports.',
             icon: Icons.assessment_outlined,
@@ -106,6 +113,21 @@ class HelpCenterPage extends StatelessWidget {
                       'WireSpot does not fabricate live data. Complete Cloud Sync or add a router before telemetry and reports appear.',
                 ),
                 _FaqItem(
+                  question: 'What is copied during Cloud Sync?',
+                  answer:
+                      'WireSpot syncs routers, hotspot users, active sessions, hotspot profiles, vouchers, router groups, WireGuard profiles, printer settings, and business settings. The app does not upload router passwords or private keys as ordinary dashboard data.',
+                ),
+                _FaqItem(
+                  question: 'Which address should I enter for a VPN router?',
+                  answer:
+                      'Enter the router address reachable through the WireGuard tunnel, not its public address. Keep Require WireGuard enabled and connect the tunnel before testing the router.',
+                ),
+                _FaqItem(
+                  question: 'Can I use WireSpot without a VPN?',
+                  answer:
+                      'Yes, when the phone is on the same trusted LAN as the router. Turn off Require WireGuard only for local on-site use. For remote management, use WireGuard or another private network path.',
+                ),
+                _FaqItem(
                   question: 'How do I recover access?',
                   answer:
                       'Use Forgot password on the sign-in screen. Production deployments need an identity provider and email delivery service.',
@@ -131,6 +153,80 @@ Future<void> showRouterConfigurationGuide(BuildContext context) {
     showDragHandle: true,
     builder: (context) => const _RouterGuideSheet(),
   );
+}
+
+Future<void> showWireGuardSetupGuide(BuildContext context) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (context) => const _WireGuardGuideSheet(),
+  );
+}
+
+class _WireGuardGuideSheet extends StatelessWidget {
+  const _WireGuardGuideSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Set up WireGuard remote access',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'WireGuard creates a private route between this device and the router site. It is the preferred option for remote management because the RouterOS API does not need to be exposed publicly.',
+            ),
+            const SizedBox(height: 16),
+            const _RouterGuideSection(
+              title: 'Before you begin',
+              steps: [
+                'Ask the network administrator for a client .conf file or a WireGuard QR code.',
+                'Confirm the router site has a working WireGuard server and a peer for this device.',
+                'Make sure the allowed IPs include the router private address, for example 192.168.88.1/32.',
+              ],
+            ),
+            const _RouterGuideSection(
+              title: 'Connect in WireSpot',
+              steps: [
+                'Open WireGuard from the VPN screen or Settings > Permissions and VPN.',
+                'Import the .conf file or scan the QR code, then save the tunnel with a clear site name.',
+                'Tap Connect and approve the Android VPN permission prompt.',
+                'Return to Routers, add the router using its private VPN address, and leave Require WireGuard enabled.',
+                'Run Test connection. The router identity should match the site you intended to reach.',
+              ],
+            ),
+            const _RouterGuideSection(
+              title: 'If it does not connect',
+              steps: [
+                'Check that mobile data or Wi-Fi is available and another VPN is disconnected.',
+                'Confirm the peer public key, endpoint, allowed IPs, and keepalive value with the network administrator.',
+                'Check the router firewall and confirm RouterOS API or API-SSL is allowed from the WireGuard interface.',
+                'Use local LAN mode only when the phone is physically on the router network.',
+              ],
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                context.push(AppRoutes.wireGuard);
+              },
+              icon: const Icon(Icons.vpn_key),
+              label: const Text('Open WireGuard'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _RouterGuideSheet extends StatelessWidget {

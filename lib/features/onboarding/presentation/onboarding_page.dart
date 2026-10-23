@@ -438,7 +438,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           ),
           const SizedBox(height: 32),
           Text(
-            'WhatsApp-Style Cloud Backup',
+            'Keep your workspace in sync',
             textAlign: TextAlign.center,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
@@ -446,8 +446,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Your hotspot profiles, vouchers, router fleet, and settings are '
-            'automatically backed up to the cloud. On fresh installs, your data auto-restores in seconds.',
+            'Cloud Sync keeps your router fleet, hotspot users, sessions, '
+            'vouchers, reports, and settings available on your other WireSpot devices.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyLarge,
           ),
@@ -459,14 +459,17 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Connect your mobile app',
+                    'Connect the mobile app to your web workspace',
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Open Cloud Sync after onboarding and enter the API Base URL, Organization ID, and access code from your WireSpot web account.',
+                    '1. Create or sign in to your account at the WireSpot web dashboard.\n'
+                    '2. Copy the API Base URL, Organization ID, and access code shown in Cloud Sync.\n'
+                    '3. Paste them here, save, and tap Test connection.\n'
+                    '4. Use Sync Now after adding a router or changing hotspot data.',
                     style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: 12),

@@ -164,6 +164,13 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 4),
+            Text(
+              'Set the cloud address and workspace before signing in or syncing.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: _urlController,
@@ -190,18 +197,18 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
               contentPadding: EdgeInsets.zero,
             ),
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.end,
               children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: state.isLoading
-                        ? null
-                        : () => _saveAndTest(controller),
-                    icon: const Icon(Icons.save),
-                    label: Text(text.save),
-                  ),
+                FilledButton.icon(
+                  onPressed: state.isLoading
+                      ? null
+                      : () => _saveAndTest(controller),
+                  icon: const Icon(Icons.save),
+                  label: Text(text.save),
                 ),
-                const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: state.isLoading || state.isTestingConnection
                       ? null
@@ -372,36 +379,14 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
             ],
             const SizedBox(height: 16),
             if (!hasSession) ...[
-              SegmentedButton<int>(
-                segments: const [
-                  ButtonSegment(
-                    value: 0,
-                    label: Text('Sign In'),
-                    icon: Icon(Icons.login),
-                  ),
-                  ButtonSegment(
-                    value: 1,
-                    label: Text('Sign Up'),
-                    icon: Icon(Icons.person_add),
-                  ),
-                  ButtonSegment(
-                    value: 2,
-                    label: Text('Token'),
-                    icon: Icon(Icons.key),
-                  ),
-                  ButtonSegment(
-                    value: 3,
-                    label: Text('Companion'),
-                    icon: Icon(Icons.devices_other),
-                  ),
-                ],
-                selected: {_authTabIndex},
-                onSelectionChanged: (newSelection) {
-                  setState(() {
-                    _authTabIndex = newSelection.first;
-                  });
-                },
+              Text(
+                'Choose how this device connects',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
               ),
+              const SizedBox(height: 8),
+              _buildAuthModeSelector(context),
               const SizedBox(height: 16),
               if (_authTabIndex == 0) ...[
                 TextField(
@@ -607,6 +592,28 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
     );
   }
 
+  Widget _buildAuthModeSelector(BuildContext context) {
+    const modes = [
+      (0, 'Sign in', Icons.login),
+      (1, 'Create account', Icons.person_add),
+      (2, 'Access token', Icons.key),
+      (3, 'Companion device', Icons.devices_other),
+    ];
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final mode in modes)
+          ChoiceChip(
+            avatar: Icon(mode.$3, size: 18),
+            label: Text(mode.$2),
+            selected: _authTabIndex == mode.$1,
+            onSelected: (_) => setState(() => _authTabIndex = mode.$1),
+          ),
+      ],
+    );
+  }
+
   Widget _buildSyncDashboardCard(
     BuildContext context,
     AppText text,
@@ -644,6 +651,13 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                     ],
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
                 FilledButton.icon(
                   onPressed: state.isSyncing
                       ? null
@@ -660,7 +674,6 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
                       : const Icon(Icons.sync),
                   label: Text(text.syncNow),
                 ),
-                const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: state.isSyncing
                       ? null
@@ -671,14 +684,15 @@ class _CloudSettingsPageState extends ConsumerState<CloudSettingsPage> {
               ],
             ),
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 OutlinedButton.icon(
                   onPressed: () => controller.retryFailed(),
                   icon: const Icon(Icons.replay, size: 16),
                   label: Text(text.retryFailed),
                 ),
-                const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: () => controller.clearCompleted(),
                   icon: const Icon(Icons.cleaning_services, size: 16),
