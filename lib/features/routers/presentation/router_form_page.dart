@@ -39,6 +39,8 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
   final _portController = TextEditingController(text: '8728');
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _controllerSiteIdController = TextEditingController();
+  final _controllerDeviceIdController = TextEditingController();
 
   bool _useSsl = false;
   bool _requireVpn = true;
@@ -58,6 +60,8 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
     _portController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
+    _controllerSiteIdController.dispose();
+    _controllerDeviceIdController.dispose();
     super.dispose();
   }
 
@@ -125,6 +129,8 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
             portController: _portController,
             usernameController: _usernameController,
             passwordController: _passwordController,
+            controllerSiteIdController: _controllerSiteIdController,
+            controllerDeviceIdController: _controllerDeviceIdController,
             useSsl: _useSsl,
             requireVpn: _requireVpn,
             vendor: _vendor,
@@ -170,6 +176,8 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
     _vendor = router.vendor;
     _remoteAccessMode = router.remoteAccessMode;
     _groupId = router.groupId;
+    _controllerSiteIdController.text = router.controllerSiteId ?? '';
+    _controllerDeviceIdController.text = router.controllerDeviceId ?? '';
     _didHydrate = true;
   }
 
@@ -250,6 +258,8 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
         identity: existingRouter?.identity,
         version: existingRouter?.version,
         boardName: existingRouter?.boardName,
+        controllerSiteId: _optionalText(_controllerSiteIdController.text),
+        controllerDeviceId: _optionalText(_controllerDeviceIdController.text),
         isEnabled: existingRouter?.isEnabled ?? true,
         lastConnectedAt: existingRouter?.lastConnectedAt,
         createdAt: existingRouter?.createdAt ?? now,
@@ -382,6 +392,11 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  String? _optionalText(String value) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   void _returnToRouters() {
@@ -571,6 +586,8 @@ class _RouterFormBody extends StatelessWidget {
     required this.portController,
     required this.usernameController,
     required this.passwordController,
+    required this.controllerSiteIdController,
+    required this.controllerDeviceIdController,
     required this.useSsl,
     required this.requireVpn,
     required this.vendor,
@@ -597,6 +614,8 @@ class _RouterFormBody extends StatelessWidget {
   final TextEditingController portController;
   final TextEditingController usernameController;
   final TextEditingController passwordController;
+  final TextEditingController controllerSiteIdController;
+  final TextEditingController controllerDeviceIdController;
   final bool useSsl;
   final bool requireVpn;
   final RouterVendor vendor;
@@ -793,6 +812,30 @@ class _RouterFormBody extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
+                if (vendor == RouterVendor.ubiquitiUniFi) ...[
+                  TextFormField(
+                    controller: controllerSiteIdController,
+                    textInputAction: TextInputAction.next,
+                    decoration: const InputDecoration(
+                      labelText: 'UniFi controller site ID',
+                      helperText:
+                          'Required for targeted remote reboot actions.',
+                      prefixIcon: Icon(Icons.location_city_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: controllerDeviceIdController,
+                    textInputAction: TextInputAction.next,
+                    decoration: const InputDecoration(
+                      labelText: 'UniFi controller device ID',
+                      helperText:
+                          'Use the ID returned by the UniFi device list.',
+                      prefixIcon: Icon(Icons.router_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 TextFormField(
                   controller: usernameController,
                   textInputAction: TextInputAction.next,

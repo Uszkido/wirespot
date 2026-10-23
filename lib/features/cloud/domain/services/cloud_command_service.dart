@@ -85,7 +85,12 @@ class CloudCommandService {
                 ? rawAttributes.map(
                     (key, value) => MapEntry(key.toString(), value.toString()),
                   )
-                : const <String, String>{};
+                : <String, String>{
+                    if (router.controllerSiteId != null)
+                      'siteId': router.controllerSiteId!,
+                    if (router.controllerDeviceId != null)
+                      'deviceId': router.controllerDeviceId!,
+                  };
             await _routerConnectionService.execute(
               router,
               '/system/reboot',

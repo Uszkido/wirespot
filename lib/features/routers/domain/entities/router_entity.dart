@@ -57,7 +57,6 @@ enum RouterVendor {
     activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
-      RouterCapability.systemControl,
       RouterCapability.cloudController,
     },
   ),
@@ -119,6 +118,7 @@ enum RouterVendor {
     activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
+      RouterCapability.systemControl,
       RouterCapability.cloudController,
     },
   ),
@@ -289,6 +289,8 @@ class RouterEntity {
     this.identity,
     this.version,
     this.boardName,
+    this.controllerSiteId,
+    this.controllerDeviceId,
     this.isEnabled = true,
     this.lastConnectedAt,
     this.createdAt,
@@ -308,6 +310,10 @@ class RouterEntity {
   final String? identity;
   final String? version;
   final String? boardName;
+
+  /// UniFi Network controller identifiers used for targeted system actions.
+  final String? controllerSiteId;
+  final String? controllerDeviceId;
   final bool isEnabled;
   final DateTime? lastConnectedAt;
   final DateTime? createdAt;
@@ -341,6 +347,8 @@ class RouterEntity {
     'identity': identity,
     'version': version,
     'boardName': boardName,
+    'controllerSiteId': controllerSiteId,
+    'controllerDeviceId': controllerDeviceId,
     'isEnabled': isEnabled,
     'lastConnectedAt': lastConnectedAt?.toUtc().toIso8601String(),
     'createdAt': createdAt?.toUtc().toIso8601String(),

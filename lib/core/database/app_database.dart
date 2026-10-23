@@ -32,7 +32,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -52,6 +52,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 6) {
         await migrator.createTable(cloudSyncOperations);
+      }
+      if (from < 7) {
+        await migrator.addColumn(routers, routers.controllerSiteId);
+        await migrator.addColumn(routers, routers.controllerDeviceId);
       }
     },
   );

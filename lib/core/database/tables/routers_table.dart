@@ -16,6 +16,8 @@ class Routers extends Table {
   TextColumn get identity => text().nullable()();
   TextColumn get version => text().nullable()();
   TextColumn get boardName => text().nullable()();
+  TextColumn get controllerSiteId => text().nullable()();
+  TextColumn get controllerDeviceId => text().nullable()();
   BoolColumn get isEnabled => boolean().withDefault(const Constant(true))();
   DateTimeColumn get lastConnectedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

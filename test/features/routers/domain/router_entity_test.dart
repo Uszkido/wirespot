@@ -72,6 +72,25 @@ void main() {
     );
   });
 
+  test(
+    'UniFi exposes guarded system control and persists controller targets',
+    () {
+      const router = RouterEntity(
+        id: 'router-unifi',
+        name: 'UniFi Gateway',
+        host: '192.168.1.10',
+        username: 'operator',
+        vendor: RouterVendor.ubiquitiUniFi,
+        controllerSiteId: 'site-1',
+        controllerDeviceId: 'device-1',
+      );
+
+      expect(router.vendor.supports(RouterCapability.systemControl), isTrue);
+      expect(router.toJson()['controllerSiteId'], 'site-1');
+      expect(router.toJson()['controllerDeviceId'], 'device-1');
+    },
+  );
+
   test('local LAN mode never requires a VPN for API diagnostics', () {
     const router = RouterEntity(
       id: 'router-local',

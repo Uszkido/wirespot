@@ -165,6 +165,28 @@ class $RoutersTable extends Routers
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _controllerSiteIdMeta = const VerificationMeta(
+    'controllerSiteId',
+  );
+  @override
+  late final GeneratedColumn<String> controllerSiteId = GeneratedColumn<String>(
+    'controller_site_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _controllerDeviceIdMeta =
+      const VerificationMeta('controllerDeviceId');
+  @override
+  late final GeneratedColumn<String> controllerDeviceId =
+      GeneratedColumn<String>(
+        'controller_device_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _isEnabledMeta = const VerificationMeta(
     'isEnabled',
   );
@@ -231,6 +253,8 @@ class $RoutersTable extends Routers
     identity,
     version,
     boardName,
+    controllerSiteId,
+    controllerDeviceId,
     isEnabled,
     lastConnectedAt,
     createdAt,
@@ -334,6 +358,24 @@ class $RoutersTable extends Routers
         boardName.isAcceptableOrUnknown(data['board_name']!, _boardNameMeta),
       );
     }
+    if (data.containsKey('controller_site_id')) {
+      context.handle(
+        _controllerSiteIdMeta,
+        controllerSiteId.isAcceptableOrUnknown(
+          data['controller_site_id']!,
+          _controllerSiteIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('controller_device_id')) {
+      context.handle(
+        _controllerDeviceIdMeta,
+        controllerDeviceId.isAcceptableOrUnknown(
+          data['controller_device_id']!,
+          _controllerDeviceIdMeta,
+        ),
+      );
+    }
     if (data.containsKey('is_enabled')) {
       context.handle(
         _isEnabledMeta,
@@ -422,6 +464,14 @@ class $RoutersTable extends Routers
         DriftSqlType.string,
         data['${effectivePrefix}board_name'],
       ),
+      controllerSiteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}controller_site_id'],
+      ),
+      controllerDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}controller_device_id'],
+      ),
       isEnabled: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_enabled'],
@@ -461,6 +511,8 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
   final String? identity;
   final String? version;
   final String? boardName;
+  final String? controllerSiteId;
+  final String? controllerDeviceId;
   final bool isEnabled;
   final DateTime? lastConnectedAt;
   final DateTime createdAt;
@@ -479,6 +531,8 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     this.identity,
     this.version,
     this.boardName,
+    this.controllerSiteId,
+    this.controllerDeviceId,
     required this.isEnabled,
     this.lastConnectedAt,
     required this.createdAt,
@@ -507,6 +561,12 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     }
     if (!nullToAbsent || boardName != null) {
       map['board_name'] = Variable<String>(boardName);
+    }
+    if (!nullToAbsent || controllerSiteId != null) {
+      map['controller_site_id'] = Variable<String>(controllerSiteId);
+    }
+    if (!nullToAbsent || controllerDeviceId != null) {
+      map['controller_device_id'] = Variable<String>(controllerDeviceId);
     }
     map['is_enabled'] = Variable<bool>(isEnabled);
     if (!nullToAbsent || lastConnectedAt != null) {
@@ -540,6 +600,12 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       boardName: boardName == null && nullToAbsent
           ? const Value.absent()
           : Value(boardName),
+      controllerSiteId: controllerSiteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(controllerSiteId),
+      controllerDeviceId: controllerDeviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(controllerDeviceId),
       isEnabled: Value(isEnabled),
       lastConnectedAt: lastConnectedAt == null && nullToAbsent
           ? const Value.absent()
@@ -568,6 +634,10 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       identity: serializer.fromJson<String?>(json['identity']),
       version: serializer.fromJson<String?>(json['version']),
       boardName: serializer.fromJson<String?>(json['boardName']),
+      controllerSiteId: serializer.fromJson<String?>(json['controllerSiteId']),
+      controllerDeviceId: serializer.fromJson<String?>(
+        json['controllerDeviceId'],
+      ),
       isEnabled: serializer.fromJson<bool>(json['isEnabled']),
       lastConnectedAt: serializer.fromJson<DateTime?>(json['lastConnectedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -591,6 +661,8 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       'identity': serializer.toJson<String?>(identity),
       'version': serializer.toJson<String?>(version),
       'boardName': serializer.toJson<String?>(boardName),
+      'controllerSiteId': serializer.toJson<String?>(controllerSiteId),
+      'controllerDeviceId': serializer.toJson<String?>(controllerDeviceId),
       'isEnabled': serializer.toJson<bool>(isEnabled),
       'lastConnectedAt': serializer.toJson<DateTime?>(lastConnectedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -612,6 +684,8 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     Value<String?> identity = const Value.absent(),
     Value<String?> version = const Value.absent(),
     Value<String?> boardName = const Value.absent(),
+    Value<String?> controllerSiteId = const Value.absent(),
+    Value<String?> controllerDeviceId = const Value.absent(),
     bool? isEnabled,
     Value<DateTime?> lastConnectedAt = const Value.absent(),
     DateTime? createdAt,
@@ -630,6 +704,12 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     identity: identity.present ? identity.value : this.identity,
     version: version.present ? version.value : this.version,
     boardName: boardName.present ? boardName.value : this.boardName,
+    controllerSiteId: controllerSiteId.present
+        ? controllerSiteId.value
+        : this.controllerSiteId,
+    controllerDeviceId: controllerDeviceId.present
+        ? controllerDeviceId.value
+        : this.controllerDeviceId,
     isEnabled: isEnabled ?? this.isEnabled,
     lastConnectedAt: lastConnectedAt.present
         ? lastConnectedAt.value
@@ -656,6 +736,12 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
       identity: data.identity.present ? data.identity.value : this.identity,
       version: data.version.present ? data.version.value : this.version,
       boardName: data.boardName.present ? data.boardName.value : this.boardName,
+      controllerSiteId: data.controllerSiteId.present
+          ? data.controllerSiteId.value
+          : this.controllerSiteId,
+      controllerDeviceId: data.controllerDeviceId.present
+          ? data.controllerDeviceId.value
+          : this.controllerDeviceId,
       isEnabled: data.isEnabled.present ? data.isEnabled.value : this.isEnabled,
       lastConnectedAt: data.lastConnectedAt.present
           ? data.lastConnectedAt.value
@@ -681,6 +767,8 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
           ..write('identity: $identity, ')
           ..write('version: $version, ')
           ..write('boardName: $boardName, ')
+          ..write('controllerSiteId: $controllerSiteId, ')
+          ..write('controllerDeviceId: $controllerDeviceId, ')
           ..write('isEnabled: $isEnabled, ')
           ..write('lastConnectedAt: $lastConnectedAt, ')
           ..write('createdAt: $createdAt, ')
@@ -704,6 +792,8 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
     identity,
     version,
     boardName,
+    controllerSiteId,
+    controllerDeviceId,
     isEnabled,
     lastConnectedAt,
     createdAt,
@@ -726,6 +816,8 @@ class RouterRecord extends DataClass implements Insertable<RouterRecord> {
           other.identity == this.identity &&
           other.version == this.version &&
           other.boardName == this.boardName &&
+          other.controllerSiteId == this.controllerSiteId &&
+          other.controllerDeviceId == this.controllerDeviceId &&
           other.isEnabled == this.isEnabled &&
           other.lastConnectedAt == this.lastConnectedAt &&
           other.createdAt == this.createdAt &&
@@ -746,6 +838,8 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
   final Value<String?> identity;
   final Value<String?> version;
   final Value<String?> boardName;
+  final Value<String?> controllerSiteId;
+  final Value<String?> controllerDeviceId;
   final Value<bool> isEnabled;
   final Value<DateTime?> lastConnectedAt;
   final Value<DateTime> createdAt;
@@ -765,6 +859,8 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     this.identity = const Value.absent(),
     this.version = const Value.absent(),
     this.boardName = const Value.absent(),
+    this.controllerSiteId = const Value.absent(),
+    this.controllerDeviceId = const Value.absent(),
     this.isEnabled = const Value.absent(),
     this.lastConnectedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -785,6 +881,8 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     this.identity = const Value.absent(),
     this.version = const Value.absent(),
     this.boardName = const Value.absent(),
+    this.controllerSiteId = const Value.absent(),
+    this.controllerDeviceId = const Value.absent(),
     this.isEnabled = const Value.absent(),
     this.lastConnectedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -808,6 +906,8 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     Expression<String>? identity,
     Expression<String>? version,
     Expression<String>? boardName,
+    Expression<String>? controllerSiteId,
+    Expression<String>? controllerDeviceId,
     Expression<bool>? isEnabled,
     Expression<DateTime>? lastConnectedAt,
     Expression<DateTime>? createdAt,
@@ -828,6 +928,9 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
       if (identity != null) 'identity': identity,
       if (version != null) 'version': version,
       if (boardName != null) 'board_name': boardName,
+      if (controllerSiteId != null) 'controller_site_id': controllerSiteId,
+      if (controllerDeviceId != null)
+        'controller_device_id': controllerDeviceId,
       if (isEnabled != null) 'is_enabled': isEnabled,
       if (lastConnectedAt != null) 'last_connected_at': lastConnectedAt,
       if (createdAt != null) 'created_at': createdAt,
@@ -850,6 +953,8 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     Value<String?>? identity,
     Value<String?>? version,
     Value<String?>? boardName,
+    Value<String?>? controllerSiteId,
+    Value<String?>? controllerDeviceId,
     Value<bool>? isEnabled,
     Value<DateTime?>? lastConnectedAt,
     Value<DateTime>? createdAt,
@@ -870,6 +975,8 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
       identity: identity ?? this.identity,
       version: version ?? this.version,
       boardName: boardName ?? this.boardName,
+      controllerSiteId: controllerSiteId ?? this.controllerSiteId,
+      controllerDeviceId: controllerDeviceId ?? this.controllerDeviceId,
       isEnabled: isEnabled ?? this.isEnabled,
       lastConnectedAt: lastConnectedAt ?? this.lastConnectedAt,
       createdAt: createdAt ?? this.createdAt,
@@ -920,6 +1027,12 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
     if (boardName.present) {
       map['board_name'] = Variable<String>(boardName.value);
     }
+    if (controllerSiteId.present) {
+      map['controller_site_id'] = Variable<String>(controllerSiteId.value);
+    }
+    if (controllerDeviceId.present) {
+      map['controller_device_id'] = Variable<String>(controllerDeviceId.value);
+    }
     if (isEnabled.present) {
       map['is_enabled'] = Variable<bool>(isEnabled.value);
     }
@@ -954,6 +1067,8 @@ class RoutersCompanion extends UpdateCompanion<RouterRecord> {
           ..write('identity: $identity, ')
           ..write('version: $version, ')
           ..write('boardName: $boardName, ')
+          ..write('controllerSiteId: $controllerSiteId, ')
+          ..write('controllerDeviceId: $controllerDeviceId, ')
           ..write('isEnabled: $isEnabled, ')
           ..write('lastConnectedAt: $lastConnectedAt, ')
           ..write('createdAt: $createdAt, ')
@@ -5228,6 +5343,8 @@ typedef $$RoutersTableCreateCompanionBuilder =
       Value<String?> identity,
       Value<String?> version,
       Value<String?> boardName,
+      Value<String?> controllerSiteId,
+      Value<String?> controllerDeviceId,
       Value<bool> isEnabled,
       Value<DateTime?> lastConnectedAt,
       Value<DateTime> createdAt,
@@ -5249,6 +5366,8 @@ typedef $$RoutersTableUpdateCompanionBuilder =
       Value<String?> identity,
       Value<String?> version,
       Value<String?> boardName,
+      Value<String?> controllerSiteId,
+      Value<String?> controllerDeviceId,
       Value<bool> isEnabled,
       Value<DateTime?> lastConnectedAt,
       Value<DateTime> createdAt,
@@ -5327,6 +5446,16 @@ class $$RoutersTableFilterComposer
 
   ColumnFilters<String> get boardName => $composableBuilder(
     column: $table.boardName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get controllerSiteId => $composableBuilder(
+    column: $table.controllerSiteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get controllerDeviceId => $composableBuilder(
+    column: $table.controllerDeviceId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5425,6 +5554,16 @@ class $$RoutersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get controllerSiteId => $composableBuilder(
+    column: $table.controllerSiteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get controllerDeviceId => $composableBuilder(
+    column: $table.controllerDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isEnabled => $composableBuilder(
     column: $table.isEnabled,
     builder: (column) => ColumnOrderings(column),
@@ -5498,6 +5637,16 @@ class $$RoutersTableAnnotationComposer
   GeneratedColumn<String> get boardName =>
       $composableBuilder(column: $table.boardName, builder: (column) => column);
 
+  GeneratedColumn<String> get controllerSiteId => $composableBuilder(
+    column: $table.controllerSiteId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get controllerDeviceId => $composableBuilder(
+    column: $table.controllerDeviceId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get isEnabled =>
       $composableBuilder(column: $table.isEnabled, builder: (column) => column);
 
@@ -5557,6 +5706,8 @@ class $$RoutersTableTableManager
                 Value<String?> identity = const Value.absent(),
                 Value<String?> version = const Value.absent(),
                 Value<String?> boardName = const Value.absent(),
+                Value<String?> controllerSiteId = const Value.absent(),
+                Value<String?> controllerDeviceId = const Value.absent(),
                 Value<bool> isEnabled = const Value.absent(),
                 Value<DateTime?> lastConnectedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -5576,6 +5727,8 @@ class $$RoutersTableTableManager
                 identity: identity,
                 version: version,
                 boardName: boardName,
+                controllerSiteId: controllerSiteId,
+                controllerDeviceId: controllerDeviceId,
                 isEnabled: isEnabled,
                 lastConnectedAt: lastConnectedAt,
                 createdAt: createdAt,
@@ -5597,6 +5750,8 @@ class $$RoutersTableTableManager
                 Value<String?> identity = const Value.absent(),
                 Value<String?> version = const Value.absent(),
                 Value<String?> boardName = const Value.absent(),
+                Value<String?> controllerSiteId = const Value.absent(),
+                Value<String?> controllerDeviceId = const Value.absent(),
                 Value<bool> isEnabled = const Value.absent(),
                 Value<DateTime?> lastConnectedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -5616,6 +5771,8 @@ class $$RoutersTableTableManager
                 identity: identity,
                 version: version,
                 boardName: boardName,
+                controllerSiteId: controllerSiteId,
+                controllerDeviceId: controllerDeviceId,
                 isEnabled: isEnabled,
                 lastConnectedAt: lastConnectedAt,
                 createdAt: createdAt,
