@@ -32,6 +32,7 @@ enum RouterVendor {
     activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
+      RouterCapability.systemControl,
       RouterCapability.hotspotUsers,
       RouterCapability.hotspotSetupPresets,
       RouterCapability.voucherProvisioning,

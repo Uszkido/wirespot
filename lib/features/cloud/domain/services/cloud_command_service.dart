@@ -1,5 +1,6 @@
 import 'package:wirespot/features/hotspot/domain/services/hotspot_service.dart';
 import 'package:wirespot/features/routers/domain/repositories/router_repository.dart';
+import 'package:wirespot/features/routers/domain/entities/router_entity.dart';
 import 'package:wirespot/features/routers/domain/services/router_connection_service.dart';
 import '../../data/cloud_api_client.dart';
 import '../entities/cloud_command.dart';
@@ -73,6 +74,11 @@ class CloudCommandService {
             final router = await _routerRepository.getRouter(routerId);
             if (router == null) {
               throw StateError('Target router was not found.');
+            }
+            if (!router.vendor.supports(RouterCapability.systemControl)) {
+              throw StateError(
+                '${router.vendor.label} does not support remote system control.',
+              );
             }
             await _routerConnectionService.execute(router, '/system/reboot');
           } else {
