@@ -17,6 +17,9 @@ Future<Response> onRequest(RequestContext context) async {
   }
 
   if (context.request.method == HttpMethod.post) {
+    if (!hasRole(context, commandExecutionRoles)) {
+      return forbidden('Voucher synchronization permission required.');
+    }
     try {
       final bodyText = await context.request.body();
       final json = jsonDecode(bodyText) as Map<String, dynamic>;

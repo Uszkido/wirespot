@@ -7,6 +7,9 @@ Response onRequest(RequestContext context) {
   if (context.request.method != HttpMethod.post) {
     return Response(statusCode: 405, body: 'Method Not Allowed');
   }
+  if (!hasRole(context, cloudBackupRoles)) {
+    return forbidden('Pairing-code management permission required.');
+  }
   return Response.json(body: {
     'status': 'success',
     'pairingKey': BackendStore.createPairingCode(organizationId(context)),

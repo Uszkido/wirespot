@@ -41,4 +41,18 @@ void main() {
       ]),
     );
   });
+
+  test('write permission groups exclude read-only viewers', () {
+    expect(
+        commandExecutionRoles,
+        containsAll(<String>[
+          'owner',
+          'admin',
+          'manager',
+          'operator',
+        ]));
+    expect(commandExecutionRoles, isNot(contains('viewer')));
+    expect(cloudBackupRoles, containsAll(<String>['owner', 'admin']));
+    expect(cloudBackupRoles, isNot(contains('manager')));
+  });
 }
