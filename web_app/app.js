@@ -180,7 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const icons = {
       success: '<i class="fa-solid fa-circle-check"></i>',
       error: '<i class="fa-solid fa-circle-exclamation"></i>',
-      info: '<i class="fa-solid fa-circle-info"></i>'
+      info: '<i class="fa-solid fa-circle-info"></i>',
+      warning: '<i class="fa-solid fa-triangle-exclamation"></i>'
     };
 
     toast.innerHTML = `
@@ -1230,7 +1231,14 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const result = await cloudRequest('health');
       updateSyncIndicator(true);
-      showToast(`Cloud online (${result.status || 'ok'}).`, 'success');
+      if (result.productionReady === true) {
+        showToast(`Cloud online and production-ready (${result.authenticationMode || 'configured'}).`, 'success');
+      } else {
+        const gaps = Array.isArray(result.productionConfigurationGaps)
+          ? result.productionConfigurationGaps.join(', ')
+          : 'production configuration is incomplete';
+        showToast(`Cloud reachable in pilot mode. Complete: ${gaps}.`, 'warning');
+      }
     } catch (error) {
       updateSyncIndicator(false);
       showToast(error.message, 'error');
