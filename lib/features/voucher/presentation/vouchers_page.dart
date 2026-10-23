@@ -114,6 +114,9 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
                     currencyCode: currencyCode,
                     isGenerating: _isGenerating,
                     canSell: canSell,
+                    canProvisionOnRouter: router.vendor.supports(
+                      RouterCapability.voucherProvisioning,
+                    ),
                     provisionOnRouter: _provisionOnRouter,
                     onRouterChanged: (value) {
                       ref.read(selectedVoucherRouterIdProvider.notifier).state =
@@ -125,6 +128,14 @@ class _VouchersPageState extends ConsumerState<VouchersPage> {
                             .read(activeRouterServiceProvider)
                             .selectRouter(value);
                         ref.invalidate(storedActiveRouterIdProvider);
+                        final selected = items.firstWhere(
+                          (item) => item.id == value,
+                        );
+                        if (!selected.vendor.supports(
+                          RouterCapability.voucherProvisioning,
+                        )) {
+                          setState(() => _provisionOnRouter = false);
+                        }
                       }
                     },
                     onPlanChanged: (plan) {
@@ -429,6 +440,7 @@ class _VoucherGeneratorCard extends StatelessWidget {
     required this.currencyCode,
     required this.isGenerating,
     required this.canSell,
+    required this.canProvisionOnRouter,
     required this.provisionOnRouter,
     required this.onRouterChanged,
     required this.onPlanChanged,
@@ -452,6 +464,7 @@ class _VoucherGeneratorCard extends StatelessWidget {
   final String currencyCode;
   final bool isGenerating;
   final bool canSell;
+  final bool canProvisionOnRouter;
   final bool provisionOnRouter;
   final ValueChanged<String?> onRouterChanged;
   final ValueChanged<VoucherPlan> onPlanChanged;
@@ -602,15 +615,17 @@ class _VoucherGeneratorCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             SwitchListTile(
-              value: provisionOnRouter,
-              onChanged: onProvisionChanged,
+              value: provisionOnRouter && canProvisionOnRouter,
+              onChanged: canProvisionOnRouter ? onProvisionChanged : null,
               title: const Text('Create RouterOS users'),
-              subtitle: const Text(
-                'Requires WireGuard and RouterOS API access.',
+              subtitle: Text(
+                canProvisionOnRouter
+                    ? 'Requires RouterOS API access.'
+                    : 'This vendor supports voucher records only; router provisioning is unavailable.',
               ),
               contentPadding: EdgeInsets.zero,
             ),
-            if (provisionOnRouter) ...[
+            if (provisionOnRouter && canProvisionOnRouter) ...[
               const SizedBox(height: 12),
               TextField(
                 controller: routerOsProfileController,
