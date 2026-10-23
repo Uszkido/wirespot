@@ -23,6 +23,16 @@ if (healthBody.status !== 'ok') {
   throw new Error(`API health did not report status=ok: ${JSON.stringify(healthBody)}`);
 }
 
+const corsProbe = await fetch(`${apiUrl.replace(/\/$/, '')}/health`, {
+  headers: { Origin: new URL(dashboardUrl).origin },
+});
+const allowedOrigin = corsProbe.headers.get('access-control-allow-origin');
+if (allowedOrigin !== '*' && allowedOrigin !== new URL(dashboardUrl).origin) {
+  throw new Error(
+    `API CORS does not allow the dashboard origin (${allowedOrigin ?? 'missing'}).`,
+  );
+}
+
 console.log(`WireSpot dashboard reachable: ${dashboard.url}`);
 console.log(`WireSpot API reachable: ${apiUrl}`);
 console.log(
