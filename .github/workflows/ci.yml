@@ -94,6 +94,11 @@ jobs:
       - name: Run backend tests
         run: dart test
 
+      - name: Build Dart Frog route bundle
+        run: |
+          dart pub global activate dart_frog_cli 1.2.6
+          dart_frog build
+
   windows:
     name: Build Windows desktop app
     runs-on: windows-2025
