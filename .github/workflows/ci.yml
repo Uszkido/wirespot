@@ -11,6 +11,10 @@ permissions:
   contents: read
   actions: read
 
+concurrency:
+  group: wirespot-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   flutter:
     name: Analyze, Test, and Build APK
