@@ -4,6 +4,23 @@ All notable WireSpot changes should be documented here.
 
 The format follows practical release notes for operators and maintainers.
 
+## 1.0.3+34 - 2026-10-23
+
+Production-readiness and documentation update.
+
+### Added
+
+- Technical operator manual in PDF and editable Markdown form.
+- Organization-scoped cloud router merge, role-aware API actions, and live
+  telemetry handling that refuses fabricated vendor readings.
+- Windows, Linux, and unsigned iOS packaging checks in CI.
+
+### Changed
+
+- Non-MikroTik connectors now fail closed for unsupported commands and
+  snapshots instead of presenting simulated data.
+- Version metadata and the wiki now point to the current 1.0.3+34 artifact.
+
 ## Unreleased
 
 ### Added

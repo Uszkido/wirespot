@@ -35,7 +35,7 @@ routers.
 | Linux desktop | Linux runner added; CI produces a portable `linux-x64` bundle |
 | iOS | iOS target added; CI produces an unsigned release app (Apple signing required for devices/TestFlight) |
 | Static analysis | Passing (0 issues) |
-| Tests | 82 passing |
+| Tests | 146 passing |
 | Multi-Vendor Connectors | MikroTik hotspot/voucher connector plus authenticated connection/discovery foundations for Ruijie, OpenWrt, Omada, UniFi, and Generic |
 | Web Dashboard | Static dashboard with account, router, voucher, report, and cloud-sync views (`web_app/`) |
 | Latest APK output | `build\app\outputs\flutter-apk\app-debug.apk` (debug) |

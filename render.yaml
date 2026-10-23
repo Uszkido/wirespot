@@ -11,3 +11,14 @@ services:
     envVars:
       - key: WIRESPOT_CORS_ORIGINS
         value: https://wirespot.web.app,https://wirespot-app.web.app
+      # These values are intentionally supplied as Render secrets/settings.
+      # Leave WIRESPOT_ENV unset for a development pilot; set it to production
+      # only after the operator token allow-list and persistent store are ready.
+      - key: WIRESPOT_ENV
+        sync: false
+      - key: WIRESPOT_OPERATOR_TOKENS
+        sync: false
+      - key: WIRESPOT_STORE_PATH
+        sync: false
+      - key: WIRESPOT_ENTITLEMENT_ADMIN_TOKEN
+        sync: false

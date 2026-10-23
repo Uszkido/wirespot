@@ -61,7 +61,7 @@ build\app\outputs\flutter-apk\app-debug.apk
 Current packaged debug APK:
 
 ```
-outputs\WireSpot-0.1.26+27-brand-collaboration-debug.apk
+build\app\outputs\flutter-apk\app-debug.apk
 ```
 
 ---

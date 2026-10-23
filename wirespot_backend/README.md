@@ -33,6 +33,12 @@ from `wirespot_backend/`.
    `https://wirespot-api.onrender.com`.
 5. Set that URL as the API Base URL in the WireSpot web or mobile setup screen.
 
+The Blueprint exposes the production settings as unsynced Render environment
+variables. Set them in the service dashboard, not in Git: `WIRESPOT_ENV` to
+`production`, a server-owned `WIRESPOT_OPERATOR_TOKENS` allow-list, and
+`WIRESPOT_STORE_PATH` on durable storage. Leave the environment unset while
+running a development pilot so the development login flow remains available.
+
 The service is configured with `/health` for health checks and CORS for both
 Firebase hosting sites. Render's free web services sleep after inactivity, so
 the first request after idle may take longer. The free tier is suitable for
