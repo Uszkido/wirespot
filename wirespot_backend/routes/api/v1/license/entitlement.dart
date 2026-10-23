@@ -22,11 +22,8 @@ Future<Response> onRequest(RequestContext context) async {
   if (context.request.method != HttpMethod.post) {
     return Response(statusCode: 405, body: 'Method Not Allowed');
   }
-  if (!hasRole(context, {'owner', 'admin'})) {
-    return Response.json(
-      statusCode: 403,
-      body: {'error': 'Only organization owners or admins may issue licenses.'},
-    );
+  if (!hasRole(context, cloudBackupRoles)) {
+    return forbidden('Only organization owners or admins may issue licenses.');
   }
   final issuerSecret = Platform.environment['WIRESPOT_ENTITLEMENT_ADMIN_TOKEN'];
   if (issuerSecret == null || issuerSecret.isEmpty) {
@@ -66,8 +63,7 @@ Future<Response> onRequest(RequestContext context) async {
     final entitlement = <String, dynamic>{
       'plan': plan,
       'deviceId': deviceId.trim().toUpperCase(),
-      'startsAt':
-          (payload['startsAt'] as String?) ??
+      'startsAt': (payload['startsAt'] as String?) ??
           DateTime.now().toUtc().toIso8601String(),
       'endsAt': endsAt,
       'verified': true,

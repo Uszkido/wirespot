@@ -14,6 +14,12 @@ class AuthPrincipal {
   final String role;
 }
 
+/// Shared role groups used by API routes. Keep these names aligned with the
+/// operator permission matrix in the Flutter client.
+const routerManagementRoles = {'owner', 'admin', 'manager'};
+const commandExecutionRoles = {'owner', 'admin', 'manager', 'operator'};
+const cloudBackupRoles = {'owner', 'admin'};
+
 bool get productionMode =>
     Platform.environment['WIRESPOT_PRODUCTION']?.toLowerCase() == 'true' ||
     Platform.environment['WIRESPOT_ENV']?.toLowerCase() == 'production';
@@ -32,10 +38,13 @@ AuthPrincipal? principal(RequestContext context) {
     for (final entry in configured.split(',')) {
       final parts = entry.split('|');
       if (parts.length == 3 && parts[0] == token) {
+        final organizationId = parts[1].trim();
+        final role = parts[2].trim().toLowerCase();
+        if (organizationId.isEmpty || role.isEmpty) continue;
         return AuthPrincipal(
           token: token,
-          organizationId: parts[1],
-          role: parts[2].toLowerCase(),
+          organizationId: organizationId,
+          role: role,
         );
       }
     }
@@ -45,9 +54,10 @@ AuthPrincipal? principal(RequestContext context) {
   // Development compatibility only. Never enable this fallback in production.
   if (!token.startsWith('ws_')) return null;
   final role =
-      context.request.headers['x-wirespot-role']?.toLowerCase() ?? 'owner';
-  final organization = context.request.headers['x-wirespot-organization']
-      ?.trim();
+      context.request.headers['x-wirespot-role']?.trim().toLowerCase() ??
+          'owner';
+  final organization =
+      context.request.headers['x-wirespot-organization']?.trim();
   return AuthPrincipal(
     token: token,
     organizationId: organization == null || organization.isEmpty
@@ -72,7 +82,12 @@ bool hasRole(RequestContext context, Set<String> allowed) {
   return allowed.contains(principal(context)?.role);
 }
 
+Response forbidden(String message) => Response.json(
+      statusCode: 403,
+      body: {'error': message},
+    );
+
 Response unauthorized() => Response.json(
-  statusCode: 401,
-  body: {'error': 'A valid WireSpot session token is required.'},
-);
+      statusCode: 401,
+      body: {'error': 'A valid WireSpot session token is required.'},
+    );

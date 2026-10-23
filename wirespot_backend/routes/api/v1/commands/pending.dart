@@ -7,11 +7,8 @@ import 'package:wirespot_backend/backend_store.dart';
 Future<Response> onRequest(RequestContext context) async {
   if (!isAuthenticated(context)) return unauthorized();
   if (context.request.method == HttpMethod.post) {
-    if (!hasRole(context, {'owner', 'admin', 'manager', 'operator'})) {
-      return Response.json(
-        statusCode: 403,
-        body: {'error': 'Command execution permission required.'},
-      );
+    if (!hasRole(context, commandExecutionRoles)) {
+      return forbidden('Command execution permission required.');
     }
     try {
       final payload = jsonDecode(await context.request.body());

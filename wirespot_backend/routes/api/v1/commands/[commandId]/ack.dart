@@ -9,6 +9,9 @@ Future<Response> onRequest(RequestContext context, String commandId) async {
   if (context.request.method != HttpMethod.post) {
     return Response(statusCode: 405, body: 'Method Not Allowed');
   }
+  if (!hasRole(context, commandExecutionRoles)) {
+    return forbidden('Command acknowledgement permission required.');
+  }
   final command = BackendStore.commandFor(organizationId(context), commandId);
   if (command == null) {
     return Response.json(
