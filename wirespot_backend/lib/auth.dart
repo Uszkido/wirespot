@@ -34,6 +34,18 @@ bool get productionConfigurationReady =>
         .isNotEmpty &&
     (Platform.environment['WIRESPOT_STORE_PATH'] ?? '').trim().isNotEmpty;
 
+List<String> get productionConfigurationGaps {
+  final gaps = <String>[];
+  if (!productionMode) gaps.add('WIRESPOT_ENV=production');
+  if ((Platform.environment['WIRESPOT_OPERATOR_TOKENS'] ?? '').trim().isEmpty) {
+    gaps.add('WIRESPOT_OPERATOR_TOKENS');
+  }
+  if ((Platform.environment['WIRESPOT_STORE_PATH'] ?? '').trim().isEmpty) {
+    gaps.add('WIRESPOT_STORE_PATH');
+  }
+  return gaps;
+}
+
 AuthPrincipal? principal(RequestContext context) {
   final header = context.request.headers['authorization'];
   if (header == null || !header.startsWith('Bearer ')) return null;

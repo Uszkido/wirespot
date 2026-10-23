@@ -9,6 +9,7 @@ Response onRequest(RequestContext context) {
       'status': 'healthy',
       'provider': 'Dart Frog process-local store',
       'productionReady': productionConfigurationReady,
+      'productionConfigurationGaps': productionConfigurationGaps,
       'authenticationMode':
           productionMode ? 'server-token-allowlist' : 'development-token',
       'documentation': 'https://github.com/Uszkido/wirespot/wiki',

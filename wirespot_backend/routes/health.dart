@@ -12,6 +12,7 @@ Response onRequest(RequestContext context) {
           ? 'file-snapshot (default path)'
           : 'file-snapshot (configured path)',
       'productionReady': productionConfigurationReady,
+      'productionConfigurationGaps': productionConfigurationGaps,
       'authenticationMode':
           productionMode ? 'server-token-allowlist' : 'development-token',
     },
