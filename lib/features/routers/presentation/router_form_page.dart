@@ -12,6 +12,8 @@ import '../../../core/utils/id_generator.dart';
 import '../../../core/utils/validators.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/entities/router_group_entity.dart';
+import '../domain/entities/router_discovery_result.dart';
+import '../domain/services/router_discovery_service.dart';
 import 'router_providers.dart';
 
 class RouterFormPage extends ConsumerStatefulWidget {
@@ -137,6 +139,7 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
             onRemoteAccessModeChanged: _setRemoteAccessMode,
             onGroupChanged: (value) => setState(() => _groupId = value),
             onCreateGroup: _createGroup,
+            onDiscover: _discoverRouter,
             onSave: () => _save(existingRouter),
             onTestConnection: _testConnection,
             onCancel: _returnToRouters,
@@ -330,6 +333,48 @@ class _RouterFormPageState extends ConsumerState<RouterFormPage> {
     } finally {
       await ref.read(routerCredentialStoreProvider).delete(testId);
       if (mounted) setState(() => _isTestingConnection = false);
+    }
+  }
+
+  Future<void> _discoverRouter() async {
+    try {
+      final results = await const RouterDiscoveryService().discover();
+      if (!mounted) return;
+      if (results.isEmpty) {
+        _showMessage('No MikroTik router was found on this local network.');
+        return;
+      }
+      final selected = await showDialog<RouterDiscoveryResult>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Select discovered router'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: results.length,
+              itemBuilder: (context, index) {
+                final result = results[index];
+                return ListTile(
+                  leading: const Icon(Icons.router_outlined),
+                  title: Text(result.displayName),
+                  subtitle: Text(result.host),
+                  onTap: () => Navigator.of(context).pop(result),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      if (!mounted || selected == null) return;
+      setState(() {
+        _vendor = RouterVendor.mikrotik;
+        _nameController.text = selected.displayName;
+        _hostController.text = selected.host;
+      });
+      _showMessage('Router details filled. Add credentials, test, and save.');
+    } on Object catch (error) {
+      if (mounted) _showMessage('Router discovery failed: $error');
     }
   }
 
@@ -540,6 +585,7 @@ class _RouterFormBody extends StatelessWidget {
     required this.onRemoteAccessModeChanged,
     required this.onGroupChanged,
     required this.onCreateGroup,
+    required this.onDiscover,
     required this.onSave,
     required this.onTestConnection,
     required this.onCancel,
@@ -565,6 +611,7 @@ class _RouterFormBody extends StatelessWidget {
   final ValueChanged<RouterRemoteAccessMode> onRemoteAccessModeChanged;
   final ValueChanged<String?> onGroupChanged;
   final Future<void> Function() onCreateGroup;
+  final Future<void> Function() onDiscover;
   final VoidCallback onSave;
   final VoidCallback onTestConnection;
   final VoidCallback onCancel;
@@ -594,6 +641,16 @@ class _RouterFormBody extends StatelessWidget {
                     prefixIcon: Icon(Icons.label_outline),
                   ),
                 ),
+                if (!isEditing) ...[
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: onDiscover,
+                      icon: const Icon(Icons.wifi_find_outlined),
+                      label: const Text('Discover on local network'),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String?>(
                   initialValue: groupId,
