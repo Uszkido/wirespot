@@ -8,10 +8,9 @@ Response onRequest(RequestContext context) {
       'version': '1.0.0',
       'status': 'healthy',
       'provider': 'Dart Frog process-local store',
-      'productionReady': false,
-      'authenticationMode': productionMode
-          ? 'server-token-allowlist'
-          : 'development-token',
+      'productionReady': productionConfigurationReady,
+      'authenticationMode':
+          productionMode ? 'server-token-allowlist' : 'development-token',
       'documentation': 'https://github.com/Uszkido/wirespot/wiki',
     },
   );

@@ -24,6 +24,16 @@ bool get productionMode =>
     Platform.environment['WIRESPOT_PRODUCTION']?.toLowerCase() == 'true' ||
     Platform.environment['WIRESPOT_ENV']?.toLowerCase() == 'production';
 
+/// Indicates whether the backend has the minimum server-side controls needed
+/// to run outside development mode. Hosted identity integration is still
+/// recommended for public multi-tenant deployments.
+bool get productionConfigurationReady =>
+    productionMode &&
+    (Platform.environment['WIRESPOT_OPERATOR_TOKENS'] ?? '')
+        .trim()
+        .isNotEmpty &&
+    (Platform.environment['WIRESPOT_STORE_PATH'] ?? '').trim().isNotEmpty;
+
 AuthPrincipal? principal(RequestContext context) {
   final header = context.request.headers['authorization'];
   if (header == null || !header.startsWith('Bearer ')) return null;

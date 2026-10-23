@@ -11,7 +11,7 @@ Response onRequest(RequestContext context) {
       'database': Platform.environment['WIRESPOT_STORE_PATH'] == null
           ? 'file-snapshot (default path)'
           : 'file-snapshot (configured path)',
-      'productionReady': false,
+      'productionReady': productionConfigurationReady,
       'authenticationMode':
           productionMode ? 'server-token-allowlist' : 'development-token',
     },
