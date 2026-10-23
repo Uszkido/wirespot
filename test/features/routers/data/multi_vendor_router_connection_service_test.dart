@@ -16,7 +16,7 @@ import 'package:wirespot/features/routers/data/unifi_connection_service.dart';
 import 'package:wirespot/features/routers/domain/entities/router_entity.dart';
 import 'package:wirespot/features/routers/domain/services/router_connector.dart';
 
-/// Stub Dio adapter that always returns HTTP 200 with empty JSON body.
+/// Stub Dio adapter that returns a minimal successful JSON response.
 VendorHttpClient _stubHttp200() {
   final dio = Dio();
   dio.httpClientAdapter = _StubAdapter();
@@ -216,7 +216,7 @@ class _StubAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
-    return ResponseBody.fromString('{}', 200);
+    return ResponseBody.fromString('{"status":"ok"}', 200);
   }
 
   @override

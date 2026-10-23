@@ -43,7 +43,7 @@ class OpenWrtConnectionService implements RouterConnector {
         username: credentials?.username ?? router.username,
         password: credentials?.password,
       );
-      return result['status'] != 'error';
+      return result.isNotEmpty && result['status'] != 'error';
     } catch (_) {
       return false;
     }

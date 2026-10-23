@@ -48,7 +48,7 @@ class RuijieCloudConnectionService implements RouterConnector {
         path: '/service/api/maint/devices',
         token: token,
       );
-      return result['status'] != 'error';
+      return result.isNotEmpty && result['status'] != 'error';
     } catch (_) {
       return false;
     }
