@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
+import 'package:wirespot_backend/backend_store.dart';
 
 class AuthPrincipal {
   const AuthPrincipal({
@@ -51,6 +52,20 @@ AuthPrincipal? principal(RequestContext context) {
   if (header == null || !header.startsWith('Bearer ')) return null;
   final token = header.substring('Bearer '.length).trim();
   if (token.isEmpty) return null;
+
+  final session = BackendStore.sessionFor(token);
+  if (session != null) {
+    final organizationId = session['organizationId']?.toString();
+    final role = session['role']?.toString().toLowerCase();
+    if (organizationId != null && organizationId.isNotEmpty &&
+        role != null && role.isNotEmpty) {
+      return AuthPrincipal(
+        token: token,
+        organizationId: organizationId,
+        role: role,
+      );
+    }
+  }
 
   if (productionMode) {
     // Configure WIRESPOT_OPERATOR_TOKENS as comma-separated

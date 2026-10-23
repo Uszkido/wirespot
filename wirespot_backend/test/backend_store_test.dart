@@ -62,4 +62,24 @@ void main() {
       containsAll(<String>['phone-router', 'desktop-router']),
     );
   });
+
+  test('paired sessions retain organization and role until expiry', () {
+    final token = BackendStore.createSession(
+      'org-session-test',
+      role: 'operator',
+      lifetime: const Duration(minutes: 5),
+    );
+
+    expect(BackendStore.sessionFor(token), {
+      'organizationId': 'org-session-test',
+      'role': 'operator',
+      'expiresAt': isA<String>(),
+    });
+
+    final expired = BackendStore.createSession(
+      'org-expired-test',
+      lifetime: const Duration(seconds: -1),
+    );
+    expect(BackendStore.sessionFor(expired), isNull);
+  });
 }

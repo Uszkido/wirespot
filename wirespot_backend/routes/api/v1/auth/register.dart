@@ -34,8 +34,7 @@ Future<Response> onRequest(RequestContext context) async {
 
     final orgId =
         'org_${organizationName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}';
-    final token =
-        'ws_jwt_${DateTime.now().millisecondsSinceEpoch}_${email.hashCode.abs()}';
+    final token = BackendStore.createSession(orgId, role: 'owner');
 
     BackendStore.saveAccount(email, {
       'organizationId': orgId,

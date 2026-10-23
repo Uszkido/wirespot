@@ -15,6 +15,7 @@ class BackendStore {
   static final _commands = <String, List<Map<String, dynamic>>>{};
   static final _pairingCodes = <String, Map<String, dynamic>>{};
   static final _accounts = <String, Map<String, dynamic>>{};
+  static final _sessions = <String, Map<String, dynamic>>{};
   static final _path =
       Platform.environment['WIRESPOT_STORE_PATH'] ?? '.wirespot/store.json';
   static bool _loaded = false;
@@ -33,6 +34,7 @@ class BackendStore {
       _readMaps(root['backups'], _backups);
       _readMaps(root['entitlements'], _entitlements);
       _readMaps(root['accounts'], _accounts);
+      _readMaps(root['sessions'], _sessions);
       if (root['backupTimes'] is Map) {
         for (final e in (root['backupTimes'] as Map).entries) {
           final value = DateTime.tryParse(e.value.toString());
@@ -144,6 +146,39 @@ class BackendStore {
     persist();
   }
 
+  /// Creates a short-lived bearer session for a successful login or pairing
+  /// flow. The session is stored with its organization and role so production
+  /// pairing remains authenticated after the request that created it.
+  static String createSession(
+    String organizationId, {
+    String role = 'operator',
+    Duration lifetime = const Duration(hours: 24),
+  }) {
+    _ensureLoaded();
+    final token =
+        'ws_session_${DateTime.now().microsecondsSinceEpoch}_${organizationId.hashCode.abs()}';
+    _sessions[token] = {
+      'organizationId': organizationId,
+      'role': role.toLowerCase(),
+      'expiresAt': DateTime.now().toUtc().add(lifetime).toIso8601String(),
+    };
+    persist();
+    return token;
+  }
+
+  static Map<String, dynamic>? sessionFor(String token) {
+    _ensureLoaded();
+    final session = _sessions[token];
+    if (session == null) return null;
+    final expiry = DateTime.tryParse(session['expiresAt']?.toString() ?? '');
+    if (expiry == null || !expiry.isAfter(DateTime.now().toUtc())) {
+      _sessions.remove(token);
+      persist();
+      return null;
+    }
+    return Map<String, dynamic>.from(session);
+  }
+
   static int incrementTelemetry(String orgId) {
     _ensureLoaded();
     final count = (_telemetryEvents[orgId] ?? 0) + 1;
@@ -215,6 +250,7 @@ class BackendStore {
         'telemetryEvents': _telemetryEvents,
         'entitlements': _entitlements,
         'accounts': _accounts,
+        'sessions': _sessions,
         'commands': _commands,
       }));
       if (file.existsSync()) file.deleteSync();

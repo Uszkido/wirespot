@@ -30,8 +30,6 @@ Future<Response> onRequest(RequestContext context) async {
       );
     }
 
-    final token =
-        'ws_jwt_${DateTime.now().millisecondsSinceEpoch}_${email.hashCode.abs()}';
     final account = BackendStore.accountFor(email);
     final orgId = account?['organizationId']?.toString() ??
         requestedOrganizationId?.trim() ??
@@ -49,7 +47,10 @@ Future<Response> onRequest(RequestContext context) async {
           'role': account?['role'] ?? 'owner',
           'lastLogin': DateTime.now().toIso8601String(),
         },
-        'accessToken': token,
+        'accessToken': BackendStore.createSession(
+          orgId,
+          role: account?['role']?.toString() ?? 'owner',
+        ),
         'expiresIn': 86400,
       },
     );

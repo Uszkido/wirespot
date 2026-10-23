@@ -19,8 +19,7 @@ Future<Response> onRequest(RequestContext context) async {
       );
     }
 
-    final token =
-        'ws_session_${DateTime.now().millisecondsSinceEpoch}_${pairingKey.replaceAll('-', '_')}';
+    final token = BackendStore.createSession(organization);
 
     return Response.json(
       body: {
