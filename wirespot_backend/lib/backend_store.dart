@@ -83,6 +83,39 @@ class BackendStore {
     return _routers.putIfAbsent(orgId, () => <Map<String, dynamic>>[]);
   }
 
+  /// Merge router inventory from a device without deleting routers that were
+  /// created by another device in the same workspace. A full replacement is
+  /// available to explicit administrative restore flows.
+  static int mergeRouters(
+    String orgId,
+    Iterable<Map<String, dynamic>> incoming, {
+    bool replace = false,
+  }) {
+    final stored = routersFor(orgId);
+    if (replace) stored.clear();
+    var merged = 0;
+    for (final router in incoming) {
+      final key = _routerKey(router);
+      if (key == null) continue;
+      final index = stored.indexWhere((item) => _routerKey(item) == key);
+      if (index >= 0) {
+        stored[index] = router;
+      } else {
+        stored.add(router);
+      }
+      merged++;
+    }
+    persist();
+    return merged;
+  }
+
+  static String? _routerKey(Map<String, dynamic> router) {
+    final value =
+        router['id'] ?? router['routerId'] ?? router['ip'] ?? router['host'];
+    if (value is! String || value.trim().isEmpty) return null;
+    return value.trim().toLowerCase();
+  }
+
   static Map<String, dynamic>? latestBackupFor(String orgId) {
     _ensureLoaded();
     return _backups[orgId];

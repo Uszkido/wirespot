@@ -34,14 +34,15 @@ Future<Response> onRequest(RequestContext context) async {
           .map((router) => Map<String, dynamic>.from(router))
           .where(_isValidRouter)
           .toList();
-      BackendStore.routersFor(orgId)
-        ..clear()
-        ..addAll(incoming);
-      BackendStore.persist();
+      final syncedCount = BackendStore.mergeRouters(
+        orgId,
+        incoming,
+        replace: payload['replace'] == true,
+      );
       return Response.json(
         body: {
           'status': 'success',
-          'syncedCount': incoming.length,
+          'syncedCount': syncedCount,
           'timestamp': DateTime.now().toUtc().toIso8601String(),
         },
       );

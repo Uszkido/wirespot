@@ -36,4 +36,30 @@ void main() {
     expect(BackendStore.commandFor('org-a', 'cmd-a'), isNotNull);
     expect(BackendStore.commandFor('org-b', 'cmd-a'), isNull);
   });
+
+  test('router inventory merges devices without erasing another device', () {
+    BackendStore.mergeRouters('org-merge', [
+      {
+        'id': 'phone-router',
+        'name': 'Phone router',
+        'vendor': 'mikrotik',
+        'ip': '192.0.2.10',
+        'port': 8728,
+      },
+    ]);
+    BackendStore.mergeRouters('org-merge', [
+      {
+        'id': 'desktop-router',
+        'name': 'Desktop router',
+        'vendor': 'mikrotik',
+        'ip': '192.0.2.11',
+        'port': 8728,
+      },
+    ]);
+
+    expect(
+      BackendStore.routersFor('org-merge').map((router) => router['id']),
+      containsAll(<String>['phone-router', 'desktop-router']),
+    );
+  });
 }
