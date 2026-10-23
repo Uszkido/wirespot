@@ -24,7 +24,7 @@ routers.
 
 | Item | Status |
 | --- | --- |
-| Current version | `0.1.27+31` |
+| Current version | `1.0.3+34` |
 | Android debug APK | Builds successfully |
 | Windows desktop | Windows runner added; CI produces a portable `windows-x64` artifact |
 | Linux desktop | Linux runner added; CI produces a portable `linux-x64` bundle |
@@ -33,7 +33,7 @@ routers.
 | Tests | 82 passing |
 | Multi-Vendor Connectors | MikroTik hotspot/voucher connector plus authenticated connection/discovery foundations for Ruijie, OpenWrt, Omada, UniFi, and Generic |
 | Web Dashboard | Static dashboard with account, router, voucher, report, and cloud-sync views (`web_app/`) |
-| Latest APK output | `outputs\WireSpot-0.1.27+31-brand-collaboration-debug.apk` |
+| Latest APK output | `build\app\outputs\flutter-apk\app-debug.apk` (debug) |
 | Latest pushed commit | See GitHub `main` |
 
 ## What WireSpot does
@@ -178,7 +178,7 @@ build\app\outputs\flutter-apk\app-debug.apk
 Current packaged debug APK:
 
 ```text
-outputs\WireSpot-0.1.27+31-brand-collaboration-debug.apk
+build\app\outputs\flutter-apk\app-debug.apk
 ```
 
 Windows release output:

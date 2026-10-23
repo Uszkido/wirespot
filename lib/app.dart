@@ -102,6 +102,9 @@ class _WireSpotAppState extends ConsumerState<WireSpotApp>
       AppThemePreference.dark => ThemeMode.dark,
       AppThemePreference.ocean => ThemeMode.light,
       AppThemePreference.glass => ThemeMode.light,
+      AppThemePreference.colorful => ThemeMode.light,
+      AppThemePreference.hacker => ThemeMode.dark,
+      AppThemePreference.playful => ThemeMode.light,
       AppThemePreference.system || null => ThemeMode.system,
     };
   }
@@ -110,6 +113,9 @@ class _WireSpotAppState extends ConsumerState<WireSpotApp>
     return switch (preference) {
       AppThemePreference.ocean => AppTheme.ocean(),
       AppThemePreference.glass => AppTheme.glass(),
+      AppThemePreference.colorful => AppTheme.colorful(),
+      AppThemePreference.hacker => AppTheme.hacker(),
+      AppThemePreference.playful => AppTheme.playful(),
       _ => AppTheme.light(),
     };
   }

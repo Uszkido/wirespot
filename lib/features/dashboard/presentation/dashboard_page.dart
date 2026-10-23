@@ -143,6 +143,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     title: Text('Setup walkthrough'),
                   ),
                 ),
+                const PopupMenuItem(
+                  value: AppRoutes.about,
+                  child: ListTile(
+                    leading: Icon(Icons.info_outline),
+                    title: Text('About WireSpot'),
+                  ),
+                ),
                 PopupMenuItem(
                   value: AppRoutes.routers,
                   child: ListTile(

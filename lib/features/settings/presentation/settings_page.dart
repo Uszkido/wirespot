@@ -1389,6 +1389,18 @@ class _PreferencesCard extends ConsumerWidget {
                   value: AppThemePreference.glass,
                   child: Text('Liquid glass'),
                 ),
+                DropdownMenuItem(
+                  value: AppThemePreference.colorful,
+                  child: Text('Colorful'),
+                ),
+                DropdownMenuItem(
+                  value: AppThemePreference.hacker,
+                  child: Text('Hacker'),
+                ),
+                DropdownMenuItem(
+                  value: AppThemePreference.playful,
+                  child: Text('Playful'),
+                ),
               ],
               onChanged: (value) {
                 if (value != null) {

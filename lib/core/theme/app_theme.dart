@@ -46,6 +46,38 @@ class AppTheme {
     );
   }
 
+  static ThemeData colorful() {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFFE85D9E),
+      brightness: Brightness.light,
+    );
+    return _base(colorScheme, cardRadius: 18);
+  }
+
+  static ThemeData hacker() {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF42E66A),
+      brightness: Brightness.dark,
+      surface: const Color(0xFF08120D),
+    );
+    return _base(
+      colorScheme,
+      cardColor: const Color(0xFF102017),
+      cardRadius: 12,
+      cardBorder: BorderSide(
+        color: const Color(0xFF42E66A).withValues(alpha: 0.35),
+      ),
+    );
+  }
+
+  static ThemeData playful() {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFFFF9F43),
+      brightness: Brightness.light,
+    );
+    return _base(colorScheme, cardRadius: 22);
+  }
+
   static ThemeData _base(
     ColorScheme colorScheme, {
     Color? cardColor,
