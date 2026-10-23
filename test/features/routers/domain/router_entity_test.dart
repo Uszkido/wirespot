@@ -61,6 +61,17 @@ void main() {
     expect(router.supportsHotspotVouchers, isFalse);
   });
 
+  test('OpenWrt exposes guarded system control capability', () {
+    expect(
+      RouterVendor.openWrt.supports(RouterCapability.systemControl),
+      isTrue,
+    );
+    expect(
+      RouterVendor.openWrt.supports(RouterCapability.voucherProvisioning),
+      isFalse,
+    );
+  });
+
   test('local LAN mode never requires a VPN for API diagnostics', () {
     const router = RouterEntity(
       id: 'router-local',

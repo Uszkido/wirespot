@@ -1,6 +1,7 @@
 enum RouterCapability {
   connectionTest(label: 'Connection test'),
   dashboardSnapshot(label: 'Dashboard snapshot'),
+  systemControl(label: 'System control'),
   hotspotUsers(label: 'Hotspot users'),
   hotspotSetupPresets(label: 'Hotspot setup presets'),
   voucherProvisioning(label: 'Voucher provisioning'),
@@ -76,6 +77,7 @@ enum RouterVendor {
     activeCapabilities: {
       RouterCapability.connectionTest,
       RouterCapability.dashboardSnapshot,
+      RouterCapability.systemControl,
     },
   ),
   tpLinkOmada(
