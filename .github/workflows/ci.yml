@@ -128,12 +128,25 @@ jobs:
             if response=$(curl --silent --show-error --fail http://127.0.0.1:8080/health); then
               echo "$response"
               echo "$response" | grep -q '"productionReady":true'
-              exit 0
+              break
             fi
             sleep 1
           done
-          cat "$RUNNER_TEMP/wirespot/backend.log"
-          exit 1
+          if [ -z "${response:-}" ]; then
+            cat "$RUNNER_TEMP/wirespot/backend.log"
+            exit 1
+          fi
+          curl --silent --show-error --fail \
+            -X POST http://127.0.0.1:8080/api/v1/auth/register \
+            -H 'content-type: application/json' \
+            -d '{"email":"ci@wirespot.local","password":"ci-password-123","organizationName":"CI Workspace"}'
+          WIRESPOT_API_URL=http://127.0.0.1:8080 \
+          WIRESPOT_REQUIRE_PRODUCTION=true \
+          WIRESPOT_SMOKE_EMAIL=ci@wirespot.local \
+          WIRESPOT_SMOKE_PASSWORD=ci-password-123 \
+          WIRESPOT_SMOKE_ROUTER_JSON='{"id":"ci-router","name":"CI Router","vendor":"mikrotik","ip":"192.0.2.1","port":8728}' \
+          WIRESPOT_SMOKE_TELEMETRY_JSON='{"routerId":"ci-router","cpuLoad":12,"freeMemoryMb":128,"totalMemoryMb":512,"uptimeSeconds":60,"activeHotspotUsersCount":2}' \
+          node ../web_app/smoke-test.mjs
 
   windows:
     name: Build Windows desktop app
