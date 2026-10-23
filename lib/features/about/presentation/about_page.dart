@@ -74,6 +74,18 @@ class AboutPage extends StatelessWidget {
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colors.primaryContainer.withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: ListTile(
+                      leading: const Icon(Icons.handshake_outlined),
+                      title: const Text('Collaboration partner'),
+                      subtitle: Text(AppBranding.collaboratorName),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   _InfoRow(
                     icon: Icons.email_outlined,
                     label: 'Support email',
