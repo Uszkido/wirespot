@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     sessions: [],
     vouchers: [],
     telemetry: [],
+    printers: [],
+    routerGroups: [],
+    wireGuardConfigs: [],
     cloudQueue: [],
     events: []
   };
@@ -37,6 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
     userProfiles: [],
     sessions: [],
     vouchers: [],
+    printers: [],
+    routerGroups: [],
+    wireGuardConfigs: [],
     cloudQueue: [],
     events: []
   };
@@ -86,6 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (Array.isArray(backup.userProfiles)) state.userProfiles = backup.userProfiles;
     if (Array.isArray(backup.sessions)) state.sessions = backup.sessions;
     if (Array.isArray(backup.telemetry)) state.telemetry = backup.telemetry;
+    if (Array.isArray(backup.printers)) state.printers = backup.printers;
+    if (Array.isArray(backup.routerGroups)) state.routerGroups = backup.routerGroups;
+    if (Array.isArray(backup.wireGuardConfigs)) state.wireGuardConfigs = backup.wireGuardConfigs;
     if (Array.isArray(backup.hotspotProfiles)) {
       state.userProfiles = backup.hotspotProfiles.map(profile => ({
         ...profile,
@@ -127,7 +136,10 @@ document.addEventListener('DOMContentLoaded', () => {
     userProfiles: state.userProfiles,
     sessions: state.sessions,
     vouchers: state.vouchers,
-    telemetry: state.telemetry
+    telemetry: state.telemetry,
+    printers: state.printers,
+    routerGroups: state.routerGroups,
+    wireGuardConfigs: state.wireGuardConfigs
   });
 
   const mergeCloudBackups = (local, remote) => {
