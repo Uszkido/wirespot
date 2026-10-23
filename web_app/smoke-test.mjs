@@ -23,6 +23,17 @@ if (healthBody.status !== 'ok') {
   throw new Error(`API health did not report status=ok: ${JSON.stringify(healthBody)}`);
 }
 
+if (process.env.WIRESPOT_REQUIRE_PRODUCTION === 'true' &&
+    healthBody.productionReady !== true) {
+  const gaps = Array.isArray(healthBody.productionConfigurationGaps)
+    ? healthBody.productionConfigurationGaps.join(', ')
+    : 'unknown configuration gaps';
+  throw new Error(
+    `API is not production-ready. Configure: ${gaps}. ` +
+    `Reported mode: ${healthBody.authenticationMode ?? 'unknown'}.`,
+  );
+}
+
 const corsProbe = await fetch(`${apiUrl.replace(/\/$/, '')}/health`, {
   headers: { Origin: new URL(dashboardUrl).origin },
 });

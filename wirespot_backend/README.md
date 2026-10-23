@@ -39,6 +39,10 @@ variables. Set them in the service dashboard, not in Git: `WIRESPOT_ENV` to
 `WIRESPOT_STORE_PATH` on durable storage. Leave the environment unset while
 running a development pilot so the development login flow remains available.
 
+For a release gate, run the dashboard smoke test with
+`WIRESPOT_REQUIRE_PRODUCTION=true`. It will fail rather than silently accepting
+the development-token mode or a missing durable-store configuration.
+
 The service is configured with `/health` for health checks and CORS for both
 Firebase hosting sites. Render's free web services sleep after inactivity, so
 the first request after idle may take longer. The free tier is suitable for
