@@ -174,6 +174,9 @@ class OmadaConnectionService implements RouterConnector {
 
   @override
   Future<RouterOsRouterSnapshot> getSnapshot(RouterEntity router) async {
+    if (!await testConnection(router)) {
+      throw StateError('Omada controller is unreachable.');
+    }
     return RouterOsRouterSnapshot(
       identity: router.identity ?? 'Omada-OC200-Controller',
       resource: const RouterOsSystemResource(

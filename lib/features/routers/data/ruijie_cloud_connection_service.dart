@@ -224,6 +224,9 @@ class RuijieCloudConnectionService implements RouterConnector {
 
   @override
   Future<RouterOsRouterSnapshot> getSnapshot(RouterEntity router) async {
+    if (!await testConnection(router)) {
+      throw StateError('Ruijie Cloud controller is unreachable.');
+    }
     return RouterOsRouterSnapshot(
       identity: router.identity ?? router.name,
       resource: const RouterOsSystemResource(
