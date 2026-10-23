@@ -5,12 +5,18 @@ import '../../../core/storage/voucher_secret_store.dart';
 import '../domain/entities/hotspot_profile_entity.dart';
 import '../domain/entities/voucher_entity.dart';
 import '../domain/repositories/voucher_repository.dart';
+import '../../cloud/domain/services/cloud_backup_service.dart';
 
 class VoucherLocalRepository implements VoucherRepository {
-  const VoucherLocalRepository(this._database, this._secretStore);
+  const VoucherLocalRepository(
+    this._database,
+    this._secretStore, {
+    CloudBackupService? cloudBackupService,
+  }) : _cloudBackupService = cloudBackupService;
 
   final AppDatabase _database;
   final VoucherSecretStore _secretStore;
+  final CloudBackupService? _cloudBackupService;
 
   @override
   Future<void> saveVoucher(VoucherEntity voucher) async {
@@ -35,10 +41,11 @@ class VoucherLocalRepository implements VoucherRepository {
 
     if (voucher.password != null) {
       await _secretStore.writePassword(voucher.id, voucher.password!);
-      return;
+    } else {
+      await _secretStore.deletePassword(voucher.id);
     }
 
-    await _secretStore.deletePassword(voucher.id);
+    await _publishWorkspace();
   }
 
   @override
@@ -80,12 +87,13 @@ class VoucherLocalRepository implements VoucherRepository {
     for (final id in ids) {
       await _secretStore.deletePassword(id);
     }
+    await _publishWorkspace();
   }
 
   @override
-  Future<void> saveProfile(HotspotProfileEntity profile) {
+  Future<void> saveProfile(HotspotProfileEntity profile) async {
     final now = DateTime.now();
-    return _database
+    await _database
         .into(_database.hotspotProfiles)
         .insertOnConflictUpdate(
           HotspotProfilesCompanion.insert(
@@ -99,6 +107,7 @@ class VoucherLocalRepository implements VoucherRepository {
             updatedAt: Value(now),
           ),
         );
+    await _publishWorkspace();
   }
 
   @override
@@ -128,6 +137,14 @@ class VoucherLocalRepository implements VoucherRepository {
       soldAt: record.soldAt,
       note: record.note,
     );
+  }
+
+  Future<void> _publishWorkspace() async {
+    try {
+      await _cloudBackupService?.uploadCloudBackup();
+    } catch (_) {
+      // Voucher persistence must remain available while cloud sync is offline.
+    }
   }
 }
 

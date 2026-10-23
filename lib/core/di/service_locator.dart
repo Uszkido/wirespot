@@ -223,7 +223,11 @@ Future<void> configureDependencies() async {
       ),
     )
     ..registerLazySingleton<VoucherRepository>(
-      () => VoucherLocalRepository(sl<AppDatabase>(), sl<VoucherSecretStore>()),
+      () => VoucherLocalRepository(
+        sl<AppDatabase>(),
+        sl<VoucherSecretStore>(),
+        cloudBackupService: sl<CloudBackupService>(),
+      ),
     )
     ..registerLazySingleton<VoucherCodeGenerator>(VoucherCodeGenerator.new)
     ..registerLazySingleton<VoucherEncodingSettingsService>(
