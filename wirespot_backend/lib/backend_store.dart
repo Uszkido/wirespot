@@ -154,7 +154,8 @@ class BackendStore {
 
   static Map<String, String> passwordRecord(String password) {
     final random = Random.secure();
-    final salt = base64Url.encode(List<int>.generate(16, (_) => random.nextInt(256)));
+    final salt =
+        base64Url.encode(List<int>.generate(16, (_) => random.nextInt(256)));
     return {
       'passwordSalt': salt,
       'passwordHash': _passwordDigest(password, salt),
@@ -176,6 +177,13 @@ class BackendStore {
   static String _passwordDigest(String password, String salt) =>
       sha256.convert(utf8.encode('$salt:$password')).toString();
 
+  static String _randomTokenBytes(int length) {
+    final random = Random.secure();
+    return base64Url.encode(
+      List<int>.generate(length, (_) => random.nextInt(256)),
+    );
+  }
+
   /// Creates a short-lived bearer session for a successful login or pairing
   /// flow. The session is stored with its organization and role so production
   /// pairing remains authenticated after the request that created it.
@@ -185,8 +193,9 @@ class BackendStore {
     Duration lifetime = const Duration(hours: 24),
   }) {
     _ensureLoaded();
-    final token =
-        'ws_session_${DateTime.now().microsecondsSinceEpoch}_${organizationId.hashCode.abs()}';
+    // Bearer credentials must not be derived from timestamps or organization
+    // IDs. They may be copied between devices and must remain unguessable.
+    final token = 'ws_session_${_randomTokenBytes(32)}';
     _sessions[token] = {
       'organizationId': organizationId,
       'role': role.toLowerCase(),
@@ -285,8 +294,7 @@ class BackendStore {
 
   static String createPairingCode(String orgId) {
     _ensureLoaded();
-    final code =
-        'WS-${DateTime.now().microsecondsSinceEpoch.toString().substring(7)}-SYNC';
+    final code = 'WS-${_randomTokenBytes(9).toUpperCase()}-SYNC';
     _pairingCodes[code] = {
       'organizationId': orgId,
       'expiresAt': DateTime.now()

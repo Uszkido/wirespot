@@ -21,8 +21,12 @@ void main() {
     expect(BackendStore.routersFor('org-a').map((r) => r['id']), ['router-a']);
     expect(BackendStore.routersFor('org-b').map((r) => r['id']), ['router-b']);
 
-    BackendStore.saveBackup('org-a', {'routers': ['router-a']});
-    expect(BackendStore.latestBackupFor('org-a'), {'routers': ['router-a']});
+    BackendStore.saveBackup('org-a', {
+      'routers': ['router-a']
+    });
+    expect(BackendStore.latestBackupFor('org-a'), {
+      'routers': ['router-a']
+    });
     expect(BackendStore.latestBackupFor('org-b'), isNull);
   });
 
@@ -83,6 +87,20 @@ void main() {
     expect(BackendStore.sessionFor(expired), isNull);
   });
 
+  test('session and pairing credentials are random and scoped', () {
+    final firstSession = BackendStore.createSession('org-token-test');
+    final secondSession = BackendStore.createSession('org-token-test');
+    expect(firstSession, isNot(secondSession));
+    expect(firstSession, startsWith('ws_session_'));
+    expect(firstSession, isNot(contains('org-token-test')));
+
+    final firstCode = BackendStore.createPairingCode('org-token-test');
+    final secondCode = BackendStore.createPairingCode('org-token-test');
+    expect(firstCode, isNot(secondCode));
+    expect(firstCode, startsWith('WS-'));
+    expect(firstCode, endsWith('-SYNC'));
+  });
+
   test('telemetry frames are retained and isolated by organization', () {
     BackendStore.saveTelemetry('org-telemetry-a', [
       {
@@ -101,7 +119,8 @@ void main() {
         'router-a');
     expect(BackendStore.telemetryFor('org-telemetry-b').single['routerId'],
         'router-b');
-    expect(BackendStore.telemetryFor('org-telemetry-a', limit: 0), hasLength(1));
+    expect(
+        BackendStore.telemetryFor('org-telemetry-a', limit: 0), hasLength(1));
   });
 
   test('pairing codes are one-time and organization-scoped', () {
