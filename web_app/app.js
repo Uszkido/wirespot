@@ -470,6 +470,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const renderVouchers = (filter = '') => {
     const tbody = document.getElementById('vouchers-table-body');
     if (!tbody) return;
+    const total = state.vouchers.length;
+    const unused = state.vouchers.filter(v => String(v.status || '').toLowerCase() === 'unused').length;
+    const active = state.vouchers.filter(v => String(v.status || '').toLowerCase() === 'active').length;
+    const expired = state.vouchers.filter(v => String(v.status || '').toLowerCase() === 'expired').length;
+    const setCount = (id, value) => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = String(value);
+    };
+    setCount('total-vouchers-count', total);
+    setCount('unused-vouchers-count', unused);
+    setCount('active-vouchers-count', active);
+    setCount('expired-vouchers-count', expired);
     const filtered = state.vouchers.filter(v => v.code.toLowerCase().includes(filter.toLowerCase()));
     tbody.innerHTML = filtered.length ? filtered.map(v => `
       <tr>
