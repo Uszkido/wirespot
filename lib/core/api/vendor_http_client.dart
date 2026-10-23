@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import '../../features/routers/domain/entities/router_entity.dart';
 
@@ -17,6 +18,8 @@ class VendorHttpClient {
     Map<String, dynamic>? queryParameters,
     dynamic data,
     String? token,
+    String? username,
+    String? password,
   }) async {
     final scheme = router.useSsl ? 'https' : 'http';
     final baseUrl = '$scheme://${router.host}:${router.apiPort}';
@@ -37,6 +40,10 @@ class VendorHttpClient {
       } else if (router.vendor == RouterVendor.tpLinkOmada) {
         requestHeaders['Csrf-Token'] = token;
       }
+    }
+    if (username != null && username.isNotEmpty && password != null) {
+      requestHeaders['Authorization'] =
+          'Basic ${base64Encode(utf8.encode('$username:$password'))}';
     }
 
     try {

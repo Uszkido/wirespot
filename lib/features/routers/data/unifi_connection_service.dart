@@ -1,16 +1,21 @@
 import '../../../core/api/routeros_api_response.dart';
 import '../../../core/api/routeros_models.dart';
 import '../../../core/api/vendor_http_client.dart';
+import '../../../core/storage/router_credential_store.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/services/router_connector.dart';
 import 'vendor_mutation_support.dart';
 
 /// Active Ubiquiti UniFi Controller REST API connector.
 class UniFiConnectionService implements RouterConnector {
-  UniFiConnectionService({VendorHttpClient? httpClient})
-    : _http = httpClient ?? VendorHttpClient();
+  UniFiConnectionService({
+    VendorHttpClient? httpClient,
+    RouterCredentialStore? credentialStore,
+  }) : _http = httpClient ?? VendorHttpClient(),
+       _credentialStore = credentialStore;
 
   final VendorHttpClient _http;
+  final RouterCredentialStore? _credentialStore;
   final Map<String, List<Map<String, String>>> _unifiUsersStore = {};
 
   @override
@@ -19,10 +24,13 @@ class UniFiConnectionService implements RouterConnector {
   @override
   Future<bool> testConnection(RouterEntity router) async {
     try {
+      final credentials = await _credentialStore?.read(router.id);
       final result = await _http.sendRequest(
         router: router,
         path: '/api/self/sites',
         method: 'GET',
+        username: credentials?.username ?? router.username,
+        password: credentials?.password,
       );
       return result['status'] != 'error';
     } catch (_) {

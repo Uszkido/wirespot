@@ -1,16 +1,21 @@
 import '../../../core/api/routeros_api_response.dart';
 import '../../../core/api/routeros_models.dart';
 import '../../../core/api/vendor_http_client.dart';
+import '../../../core/storage/router_credential_store.dart';
 import '../domain/entities/router_entity.dart';
 import '../domain/services/router_connector.dart';
 import 'vendor_mutation_support.dart';
 
 /// Active OpenWrt router connector (LuCI / ubus JSON-RPC & HTTP API).
 class OpenWrtConnectionService implements RouterConnector {
-  OpenWrtConnectionService({VendorHttpClient? httpClient})
-    : _http = httpClient ?? VendorHttpClient();
+  OpenWrtConnectionService({
+    VendorHttpClient? httpClient,
+    RouterCredentialStore? credentialStore,
+  }) : _http = httpClient ?? VendorHttpClient(),
+       _credentialStore = credentialStore;
 
   final VendorHttpClient _http;
+  final RouterCredentialStore? _credentialStore;
   final Map<String, List<Map<String, String>>> _openwrtUsersStore = {};
 
   @override
@@ -19,6 +24,7 @@ class OpenWrtConnectionService implements RouterConnector {
   @override
   Future<bool> testConnection(RouterEntity router) async {
     try {
+      final credentials = await _credentialStore?.read(router.id);
       final result = await _http.sendRequest(
         router: router,
         path: '/cgi-bin/luci',
@@ -29,6 +35,8 @@ class OpenWrtConnectionService implements RouterConnector {
           'method': 'call',
           'params': ['00000000000000000000000000000000', 'system', 'board', {}],
         },
+        username: credentials?.username ?? router.username,
+        password: credentials?.password,
       );
       return result['status'] != 'error';
     } catch (_) {

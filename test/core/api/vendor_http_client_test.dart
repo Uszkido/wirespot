@@ -7,6 +7,7 @@ import 'package:wirespot/features/routers/domain/entities/router_entity.dart';
 class _StubAdapter implements HttpClientAdapter {
   _StubAdapter({this.responseBody = '{"status":"success"}'});
   final String responseBody;
+  RequestOptions? lastRequest;
 
   @override
   Future<ResponseBody> fetch(
@@ -14,6 +15,7 @@ class _StubAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    lastRequest = options;
     return ResponseBody.fromString(
       responseBody,
       200,
@@ -100,5 +102,32 @@ void main() {
         expect(response['jsonrpc'], equals('2.0'));
       },
     );
+
+    test('sendRequest applies saved basic credentials when supplied', () async {
+      final dio = Dio();
+      final adapter = _StubAdapter();
+      dio.httpClientAdapter = adapter;
+      final client = VendorHttpClient(dio: dio);
+
+      await client.sendRequest(
+        router: const RouterEntity(
+          id: 'r-basic',
+          name: 'OpenWrt',
+          host: '192.0.2.10',
+          username: 'root',
+          vendor: RouterVendor.openWrt,
+          apiPort: 80,
+          useSsl: false,
+        ),
+        path: '/cgi-bin/luci',
+        username: 'root',
+        password: 'secret',
+      );
+
+      expect(
+        adapter.lastRequest?.headers['Authorization'],
+        'Basic cm9vdDpzZWNyZXQ=',
+      );
+    });
   });
 }

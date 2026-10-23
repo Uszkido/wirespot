@@ -189,10 +189,18 @@ Future<void> configureDependencies() async {
       ),
     )
     ..registerLazySingleton<OpenWrtConnectionService>(
-      OpenWrtConnectionService.new,
+      () => OpenWrtConnectionService(
+        credentialStore: sl<RouterCredentialStore>(),
+      ),
     )
-    ..registerLazySingleton<OmadaConnectionService>(OmadaConnectionService.new)
-    ..registerLazySingleton<UniFiConnectionService>(UniFiConnectionService.new)
+    ..registerLazySingleton<OmadaConnectionService>(
+      () =>
+          OmadaConnectionService(credentialStore: sl<RouterCredentialStore>()),
+    )
+    ..registerLazySingleton<UniFiConnectionService>(
+      () =>
+          UniFiConnectionService(credentialStore: sl<RouterCredentialStore>()),
+    )
     ..registerLazySingleton<GenericRouterConnectionService>(
       GenericRouterConnectionService.new,
     )
