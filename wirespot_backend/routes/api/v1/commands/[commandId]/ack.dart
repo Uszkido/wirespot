@@ -27,7 +27,14 @@ Future<Response> onRequest(RequestContext context, String commandId) async {
         body: {'error': 'Command status is required.'},
       );
     }
-    command['status'] = payload['status'];
+    final status = (payload['status'] as String).trim().toLowerCase();
+    if (!{'running', 'completed', 'failed', 'cancelled'}.contains(status)) {
+      return Response.json(
+        statusCode: 400,
+        body: {'error': 'Unsupported command status.'},
+      );
+    }
+    command['status'] = status;
     command['executedAt'] =
         payload['executedAt'] ?? DateTime.now().toUtc().toIso8601String();
     if (payload['resultPayload'] is Map)
