@@ -107,9 +107,16 @@ void main() {
           throwsA(isA<RouterOsApiException>()),
         );
 
-        final snapshot = await service.getSnapshot(router);
-        expect(snapshot.identity, isNotEmpty);
-        expect(snapshot.resource.uptime, isNotEmpty);
+        if (vendor == RouterVendor.mikrotik) {
+          final snapshot = await service.getSnapshot(router);
+          expect(snapshot.identity, isNotEmpty);
+          expect(snapshot.resource.uptime, isNotEmpty);
+        } else {
+          expect(
+            () => service.getSnapshot(router),
+            throwsA(isA<RouterOsApiException>()),
+          );
+        }
       }
     },
   );

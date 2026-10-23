@@ -199,36 +199,6 @@ class OpenWrtConnectionService implements RouterConnector {
     if (!await testConnection(router)) {
       throw StateError('OpenWrt router is unreachable.');
     }
-    return RouterOsRouterSnapshot(
-      identity: router.identity ?? 'OpenWrt-Gateway',
-      resource: const RouterOsSystemResource(
-        uptime: '8d14h30m',
-        version: 'OpenWrt 23.05.2',
-        boardName: 'Generic x86/64 / GL.iNet',
-        cpuLoad: 8,
-        freeMemory: 512000000,
-        totalMemory: 1024000000,
-      ),
-      interfaces: const [
-        RouterOsInterface(
-          name: 'eth0',
-          type: 'ether',
-          running: true,
-          disabled: false,
-          macAddress: 'DC:9F:DB:12:34:56',
-          rxByte: 31457280,
-          txByte: 83886080,
-        ),
-        RouterOsInterface(
-          name: 'wlan0',
-          type: 'wlan',
-          running: true,
-          disabled: false,
-          macAddress: 'DC:9F:DB:12:34:57',
-          rxByte: 52428800,
-          txByte: 104857600,
-        ),
-      ],
-    );
+    throw unsupportedVendorSnapshot(router);
   }
 }

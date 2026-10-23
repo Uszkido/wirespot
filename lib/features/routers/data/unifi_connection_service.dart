@@ -185,27 +185,6 @@ class UniFiConnectionService implements RouterConnector {
     if (!await testConnection(router)) {
       throw StateError('UniFi controller is unreachable.');
     }
-    return RouterOsRouterSnapshot(
-      identity: router.identity ?? 'UniFi-CloudKey-Gen2',
-      resource: const RouterOsSystemResource(
-        uptime: '30d12h00m',
-        version: 'UniFi Network v8.1.113',
-        boardName: 'Ubiquiti UniFi CloudKey Gen2 Plus',
-        cpuLoad: 18,
-        freeMemory: 1610612736,
-        totalMemory: 3221225472,
-      ),
-      interfaces: const [
-        RouterOsInterface(
-          name: 'eth0 (GbE)',
-          type: 'ether',
-          running: true,
-          disabled: false,
-          macAddress: 'B4:FBE:11:22:33',
-          rxByte: 209715200,
-          txByte: 419430400,
-        ),
-      ],
-    );
+    throw unsupportedVendorSnapshot(router);
   }
 }

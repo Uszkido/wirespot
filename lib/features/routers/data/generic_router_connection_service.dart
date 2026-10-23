@@ -168,36 +168,6 @@ class GenericRouterConnectionService implements RouterConnector {
 
   @override
   Future<RouterOsRouterSnapshot> getSnapshot(RouterEntity router) async {
-    return RouterOsRouterSnapshot(
-      identity: router.identity ?? 'Generic-Router-Gateway',
-      resource: const RouterOsSystemResource(
-        uptime: '5d18h12m',
-        version: 'Generic Firmware v1.4',
-        boardName: 'Generic Business Gateway',
-        cpuLoad: 10,
-        freeMemory: 268435456,
-        totalMemory: 536870912,
-      ),
-      interfaces: const [
-        RouterOsInterface(
-          name: 'WAN',
-          type: 'ether',
-          running: true,
-          disabled: false,
-          macAddress: 'AA:BB:CC:11:22:33',
-          rxByte: 52428800,
-          txByte: 104857600,
-        ),
-        RouterOsInterface(
-          name: 'LAN',
-          type: 'ether',
-          running: true,
-          disabled: false,
-          macAddress: 'AA:BB:CC:11:22:34',
-          rxByte: 104857600,
-          txByte: 52428800,
-        ),
-      ],
-    );
+    throw unsupportedVendorSnapshot(router);
   }
 }

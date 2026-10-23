@@ -185,27 +185,6 @@ class OmadaConnectionService implements RouterConnector {
     if (!await testConnection(router)) {
       throw StateError('Omada controller is unreachable.');
     }
-    return RouterOsRouterSnapshot(
-      identity: router.identity ?? 'Omada-OC200-Controller',
-      resource: const RouterOsSystemResource(
-        uptime: '19d02h10m',
-        version: 'Omada Controller v5.12.9',
-        boardName: 'TP-Link OC200 Hardware Controller',
-        cpuLoad: 15,
-        freeMemory: 1073741824,
-        totalMemory: 2147483648,
-      ),
-      interfaces: const [
-        RouterOsInterface(
-          name: 'ETH1 (PoE IN)',
-          type: 'ether',
-          running: true,
-          disabled: false,
-          macAddress: '74:05:A5:11:22:33',
-          rxByte: 104857600,
-          txByte: 209715200,
-        ),
-      ],
-    );
+    throw unsupportedVendorSnapshot(router);
   }
 }

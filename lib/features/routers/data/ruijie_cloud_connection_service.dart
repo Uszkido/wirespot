@@ -227,37 +227,7 @@ class RuijieCloudConnectionService implements RouterConnector {
     if (!await testConnection(router)) {
       throw StateError('Ruijie Cloud controller is unreachable.');
     }
-    return RouterOsRouterSnapshot(
-      identity: router.identity ?? router.name,
-      resource: const RouterOsSystemResource(
-        uptime: '14d06h20m',
-        version: 'RuijieOS 2.28',
-        boardName: 'Reyee RG-EG105G-P',
-        cpuLoad: 12,
-        freeMemory: 268435456,
-        totalMemory: 536870912,
-      ),
-      interfaces: const [
-        RouterOsInterface(
-          name: 'WAN1',
-          type: 'ether',
-          running: true,
-          disabled: false,
-          macAddress: '00:D0:F8:88:1A:01',
-          rxByte: 10485760,
-          txByte: 52428800,
-        ),
-        RouterOsInterface(
-          name: 'LAN1',
-          type: 'ether',
-          running: true,
-          disabled: false,
-          macAddress: '00:D0:F8:88:1A:02',
-          rxByte: 52428800,
-          txByte: 10485760,
-        ),
-      ],
-    );
+    throw unsupportedVendorSnapshot(router);
   }
 
   Future<String> _accessTokenFor(RouterEntity router) async {

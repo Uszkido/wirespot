@@ -54,7 +54,6 @@ enum RouterVendor {
     ],
     activeCapabilities: {
       RouterCapability.connectionTest,
-      RouterCapability.dashboardSnapshot,
       RouterCapability.cloudController,
     },
   ),
@@ -73,10 +72,7 @@ enum RouterVendor {
       'Prepare captive portal package details (NoDogSplash or CoovaChilli).',
       'Use a secure operator credential for ubus API access.',
     ],
-    activeCapabilities: {
-      RouterCapability.connectionTest,
-      RouterCapability.dashboardSnapshot,
-    },
+    activeCapabilities: {RouterCapability.connectionTest},
   ),
   tpLinkOmada(
     label: 'TP-Link Omada',
@@ -94,7 +90,6 @@ enum RouterVendor {
     ],
     activeCapabilities: {
       RouterCapability.connectionTest,
-      RouterCapability.dashboardSnapshot,
       RouterCapability.cloudController,
     },
   ),
@@ -114,7 +109,6 @@ enum RouterVendor {
     ],
     activeCapabilities: {
       RouterCapability.connectionTest,
-      RouterCapability.dashboardSnapshot,
       RouterCapability.cloudController,
     },
   ),
@@ -133,10 +127,7 @@ enum RouterVendor {
       'Use a private management network or VPN where possible.',
       'Configure API endpoint and authentication credentials.',
     ],
-    activeCapabilities: {
-      RouterCapability.connectionTest,
-      RouterCapability.dashboardSnapshot,
-    },
+    activeCapabilities: {RouterCapability.connectionTest},
   );
 
   const RouterVendor({
