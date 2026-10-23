@@ -81,3 +81,7 @@ command queue and show a queued state until the mobile agent acknowledges them.
 - **Netlify**: `netlify deploy --dir=web_app`
 - **GitHub Pages**: Deploy contents of `web_app/` to `gh-pages` branch.
 - **Nginx / Apache / Caddy**: Copy contents of `web_app/` to standard webroot directory (e.g. `/var/www/html`).
+
+After publishing, run `node web_app/smoke-test.mjs` from the repository root to
+verify that the hosted dashboard and API health endpoint are reachable. The
+Firebase deployment workflow runs the same check after every deployment.

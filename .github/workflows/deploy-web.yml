@@ -29,3 +29,6 @@ jobs:
         run: firebase deploy --only hosting:main,hosting:wirespot --project wirespot-app
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Validate hosted dashboard and API
+        run: node web_app/smoke-test.mjs
