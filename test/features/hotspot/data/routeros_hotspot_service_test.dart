@@ -111,6 +111,35 @@ void main() {
       containsPair('use-radius', 'yes'),
     );
   });
+
+  test(
+    'rejects hotspot setup for vendors without a hotspot connector',
+    () async {
+      final service = RouterOsHotspotService(
+        _RecordingConnectionService(
+          profileRecords: const [],
+          serverRecords: const [],
+        ),
+      );
+      const router = RouterEntity(
+        id: 'router-openwrt',
+        name: 'OpenWrt gateway',
+        host: '192.0.2.1',
+        username: 'operator',
+        vendor: RouterVendor.openWrt,
+        apiPort: 80,
+        useSsl: false,
+      );
+      const input = HotspotSetupInput(
+        serverName: 'guest-hotspot',
+        interfaceName: 'br-lan',
+        serverProfileName: 'guest-profile',
+        addressPool: 'guest-pool',
+      );
+
+      await expectLater(service.setupHotspot(router, input), throwsStateError);
+    },
+  );
 }
 
 class _RecordingConnectionService implements RouterConnectionService {
