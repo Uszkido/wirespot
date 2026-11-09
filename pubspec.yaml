@@ -23,7 +23,7 @@ dependencies:
   # sqlite3 2.x needs the package that actually bundles libsqlite3.so.
   # 0.6.x is intentionally a no-op for sqlite3 3.x and causes Android
   # installs to fail at runtime when NativeDatabase is opened.
-  sqlite3_flutter_libs: ^0.5.42
+  sqlite3_flutter_libs: ^0.6.0+eol
   path: ^1.9.1
   path_provider: ^2.1.0
   flutter_secure_storage: ^11.2.0
