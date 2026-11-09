@@ -40,7 +40,7 @@ dependencies:
   share_plus: ^13.3.1
   file_picker: ^13.1.0
   csv: ^8.0.0
-  flutter_local_notifications: ^22.3.1
+  flutter_local_notifications: ^22.3.3
 
 dev_dependencies:
   flutter_test:
