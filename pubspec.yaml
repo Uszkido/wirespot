@@ -38,7 +38,7 @@ dependencies:
   pdf: ^3.12.0
   excel: ^4.0.6
   share_plus: ^13.3.1
-  file_picker: ^13.1.0
+  file_picker: ^13.3.3
   csv: ^8.0.0
   flutter_local_notifications: ^22.3.3
 
