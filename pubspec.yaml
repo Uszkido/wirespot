@@ -16,10 +16,10 @@ dependencies:
   go_router: ^18.0.2
   get_it: ^9.3.0
   dio: ^5.11.1
-  drift: ^2.31.0
+  drift: ^2.35.4
   # sqlite3 3.x pulls hooks/record_use versions newer than Flutter's pinned
   # flutter_test meta package. Drift works with the 2.x API used by WireSpot.
-  sqlite3: ^2.9.4
+  sqlite3: ^3.5.2
   # sqlite3 2.x needs the package that actually bundles libsqlite3.so.
   # 0.6.x is intentionally a no-op for sqlite3 3.x and causes Android
   # installs to fail at runtime when NativeDatabase is opened.
@@ -46,8 +46,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  build_runner: ^2.15.1
-  drift_dev: 2.31.0
+  build_runner: ^2.17.1
+  drift_dev: 2.35.3
   mocktail: ^1.0.4
 
 flutter:
